@@ -71,15 +71,75 @@ canvas{max-height:280px}
 @media(max-width:720px){.grid2{grid-template-columns:1fr}}
 .footer{color:var(--muted);font-size:11.5px;text-align:center;padding:20px}
 .rolechip{display:inline-block;background:var(--greenSoft);color:var(--green);border-radius:20px;padding:2px 10px;font-size:11.5px;font-weight:700;margin-left:4px}
+/* ===== home launcher ===== */
+.home{max-width:540px;margin:0 auto;min-height:100vh;background:#fff}
+.hbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px}
+.hbar .logo{height:34px;display:block}
+.pwr{width:42px;height:42px;border-radius:50%;background:var(--greenSoft);display:flex;align-items:center;justify-content:center;color:var(--green);cursor:pointer;border:0}
+.hero{margin:4px 16px 0;background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border-radius:18px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 10px 24px rgba(47,165,143,.24)}
+.hero .k{font-size:10.5px;opacity:.9;letter-spacing:1.5px}
+.hero h2{margin:5px 0 3px;font-size:19px}
+.hero .hl2{display:flex;gap:12px;align-items:center;margin-top:8px;font-size:13px;font-weight:700}
+.hero .hl2 i{width:1px;height:12px;background:rgba(255,255,255,.55);display:inline-block}
+.hero .cross{position:absolute;right:-8px;top:-12px;opacity:.16}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px 10px;padding:24px 18px 8px}
+.mtile{background:transparent;border:0;padding:0;text-align:center;cursor:pointer}
+.mtile:active .mc{transform:scale(.93)}
+.mtile .mc{width:66px;height:66px;margin:0 auto 9px;border-radius:18px;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 7px 16px rgba(60,80,120,.18);transition:transform .08s}
+.mtile span{font-size:12.5px;font-weight:700;display:block;color:var(--ink)}
+.i-green .mc{background:linear-gradient(160deg,#5cc06a,#2fa07d)}
+.i-red .mc{background:linear-gradient(160deg,#ff5f5f,#e02f2f)}
+.i-teal .mc{background:linear-gradient(160deg,#3cbcb0,#2a8fb2)}
+.i-yellow .mc{background:linear-gradient(160deg,#ffe24d,#ffca00);color:#3a1f10}
+.i-indigo .mc{background:linear-gradient(160deg,#9092dc,#5b54c9)}
+.i-blue .mc{background:linear-gradient(160deg,#5aa2ea,#3f78d4)}
+.visitor{text-align:center;color:var(--muted);font-size:12.5px;margin:16px 0 0;padding-bottom:24px}
+.visitor b{color:var(--ink)}
+.gate{z-index:60}
+.gatecard{position:relative}
+.gatecard .gx{position:absolute;right:16px;top:14px;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
 </style>
 </head>
 <body>
 
-<!-- ================= LOGIN GATE ================= -->
-<div id="loginGate" class="gate">
+<!-- ================= HOME LAUNCHER ================= -->
+<div id="home" class="home">
+  <div class="hbar">
+    <img class="logo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회"/>
+    <button class="pwr" onclick="openLogin()" title="로그인">
+      <svg width="30" height="30" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <clipPath id="loginClip"><circle cx="24" cy="24" r="18.5"/></clipPath>
+        <circle cx="24" cy="24" r="20"/><circle cx="24" cy="19.5" r="6.6"/>
+        <path d="M10.5 41a13.5 13.5 0 0 1 27 0" clip-path="url(#loginClip)"/>
+      </svg>
+    </button>
+  </div>
+  <div class="hero">
+    <svg class="cross" width="86" height="86" viewBox="0 0 24 24" fill="#fff"><path d="M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"/></svg>
+    <div class="k">ONLINE SYSTEM</div>
+    <h2>전교인 온라인 시스템</h2>
+    <div class="hl2"><span>바로가기</span><i></i><span>피드백</span><i></i><span>구역보고</span></div>
+  </div>
+  <div class="mgrid">
+    <div class="mtile i-green" onclick="openL('https://igloria.org/')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg></div><span>홈페이지</span></div>
+    <div class="mtile i-red" onclick="openL('https://www.youtube.com/@JGLORIA7590')"><div class="mc"><svg width="36" height="36" viewBox="0 0 24 24"><rect x="2" y="6.2" width="20" height="11.6" rx="4.4" fill="#fff"/><path d="M10 9l5.4 3-5.4 3z" fill="#ec3a35"/></svg></div><span>유튜브</span></div>
+    <div class="mtile" onclick="openL('https://www.instagram.com/igloria_official')"><div class="mc" style="background:linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5.2"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg></div><span>인스타그램</span></div>
+    <div class="mtile i-yellow" onclick="openL('https://open.kakao.com/o/gzZSQVpc')"><div class="mc"><svg width="31" height="31" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.2C6.7 3.2 2.4 6.6 2.4 10.8c0 2.7 1.8 5.1 4.5 6.4-.2.73-.72 2.66-.82 3.07-.13.5.18.5.38.36.16-.1 2.53-1.72 3.56-2.42.63.09 1.28.14 1.98.14 5.3 0 9.6-3.4 9.6-7.62S17.3 3.2 12 3.2z"/></svg></div><span>전교인 공지</span></div>
+    <div class="mtile i-teal" onclick="openL('https://mas3.ohjic.com/member/home/igloria1')"><div class="mc"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"/></svg></div><span>오직</span></div>
+    <div class="mtile i-green" onclick="openL('https://mas3.ohjic.com/pages/donation/donation_list/igloria1')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v12H4z"/><path d="M4 10h16M8 15h4"/></svg></div><span>헌금 확인</span></div>
+    <div class="mtile i-indigo" onclick="goIntake()"><div class="mc"><span style="font-size:28px;font-weight:800;color:#fff">Q</span></div><span>피드백</span></div>
+    <div class="mtile i-green" onclick="goMyreq()"><div class="mc"><span style="font-size:28px;font-weight:800;color:#fff">A</span></div><span>피드백 확인</span></div>
+    <div class="mtile i-blue" onclick="goReport()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.2a2.55 2.55 0 013.6 3.6L7.6 19.4 2.5 21l1.6-5.1z"/><path d="M14.8 4.9l3.6 3.6"/></svg></div><span>구역보고</span></div>
+  </div>
+  <div class="visitor">👥 방문자 · Today <b>1</b> · Total <b>1</b></div>
+</div>
+
+<!-- ================= LOGIN GATE (overlay) ================= -->
+<div id="loginGate" class="gate" style="display:none">
   <div class="gatecard" style="max-width:400px">
+    <span class="gx" onclick="closeLogin()">✕</span>
     <img class="glogo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회"/>
-    <h1>사역 운영 앱</h1>
+    <h1>사역 운영 앱 로그인</h1>
     <div class="gsub">테스트베드 · 이름과 비밀번호로 로그인하세요. (기본 비밀번호 <b>1234</b>)</div>
     <label style="display:block;font-size:13px;font-weight:600;margin:10px 0 5px">이름</label>
     <input type="text" id="lgName" placeholder="예: 허미영" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px"/>
@@ -93,9 +153,10 @@ canvas{max-height:280px}
 <!-- ================= APP ================= -->
 <div id="app" style="display:none">
 <header>
-  <img class="logo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회"/>
+  <img class="logo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회" style="cursor:pointer" onclick="goHome()"/>
   <div><h1>사역 운영 앱</h1><div class="sub"><span id="roleLabel"></span></div></div>
-  <button class="btn sec sm" style="margin-left:auto" onclick="logout()">로그아웃</button>
+  <button class="btn sec sm" style="margin-left:auto" onclick="goHome()">🏠 홈</button>
+  <button class="btn sec sm" onclick="logout()">로그아웃</button>
   <nav id="nav"></nav>
 </header>
 <main>
@@ -326,30 +387,55 @@ function loginByName(){
   else enterApp('admin',{who:nm});
 }
 
+// ---------- home / login flow ----------
+function openLogin(){document.getElementById('loginGate').style.display='flex';const el=document.getElementById('lgName');if(el){el.value='';el.focus();}const p=document.getElementById('lgPw2');if(p)p.value='';}
+function closeLogin(){document.getElementById('loginGate').style.display='none';}
+function openL(u){window.open(u,'_blank','noopener,noreferrer');}
+function goHome(){document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='none';document.getElementById('home').style.display='block';window.scrollTo(0,0);}
+function openApp(view){
+  if(!current) current={role:'guest'};
+  document.getElementById('home').style.display='none';
+  document.getElementById('loginGate').style.display='none';
+  document.getElementById('app').style.display='block';
+  setRoleLabel(); buildNav(view); loadAll(); window.scrollTo(0,0);
+}
+function goIntake(){openApp('intake');}
+function goMyreq(){openApp('myreq');}
+function goReport(){
+  if(current && (current.role==='leader'||current.role==='admin')) openApp('report');
+  else { alert('구역보고는 구역장·관리자 로그인 후 이용할 수 있습니다.'); openLogin(); }
+}
+
 // ---------- role & nav ----------
 const ROLE_NAV={
+ guest:[['intake','피드백·요청 접수'],['myreq','내 접수 조회']],
  member:[['intake','피드백·요청 접수'],['myreq','내 접수 조회']],
  leader:[['report','구역보고'],['intake','피드백·요청 접수'],['myreq','내 접수 조회']],
  chair:[['manage','피드백 접수 처리'],['intake','피드백·요청 접수']],
  staff:[['manage','피드백 접수 처리'],['intake','피드백·요청 접수']],
  admin:[['intake','피드백·요청 접수'],['report','구역보고'],['manage','접수 처리'],['dash','대시보드']]
 };
-const ROLE_LABEL={member:'일반 교인',leader:'구역장',chair:'위원장',staff:'부장',admin:'관리자(교역자·담임목사)'};
-function enterApp(role,scope){
-  current=Object.assign({role},scope||{});
-  document.getElementById('loginGate').style.display='none';
-  document.getElementById('app').style.display='block';
-  let who='<b>'+ROLE_LABEL[role]+'</b>';
+const ROLE_LABEL={guest:'교인',member:'일반 교인',leader:'구역장',chair:'위원장',staff:'부장',admin:'관리자(교역자·담임목사)'};
+function setRoleLabel(){
+  const role=current.role;
+  let who='<b>'+(ROLE_LABEL[role]||'교인')+'</b>';
   if(role==='leader') who+=' <span class="rolechip">'+current.district+' · '+(current.who||DISTRICTS[current.district][0])+'</span>';
   if(role==='chair') who+=' <span class="rolechip">'+catName(current.category)+' · '+CATEGORIES[current.category].위원장+'</span>';
   if(role==='staff') who+=' <span class="rolechip">'+catName(current.category)+' 부장</span>';
   if(role==='admin'&&current.who) who+=' <span class="rolechip">'+current.who+'</span>';
   document.getElementById('roleLabel').innerHTML=who;
+}
+function enterApp(role,scope){
+  current=Object.assign({role},scope||{});
+  document.getElementById('home').style.display='none';
+  document.getElementById('loginGate').style.display='none';
+  document.getElementById('app').style.display='block';
+  setRoleLabel();
   buildNav();
   loadAll();
+  window.scrollTo(0,0);
 }
-function logout(){current=null;document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='flex';
-  ['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});}
+function logout(){current=null;['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
 function showView(v){
   currentView=v;
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
@@ -359,12 +445,14 @@ function showView(v){
   if(v==='myreq') renderMyReq();
   if(v==='dash') renderDash();
 }
-function buildNav(){
+function buildNav(view){
   const nav=document.getElementById('nav');
-  nav.innerHTML=ROLE_NAV[current.role].map((it,i)=>`<button data-v="${it[0]}" class="${i===0?'active':''}">${it[1]}</button>`).join('');
+  const items=ROLE_NAV[current.role]||ROLE_NAV.guest;
+  const first=view||items[0][0];
+  nav.innerHTML=items.map(it=>`<button data-v="${it[0]}" class="${it[0]===first?'active':''}">${it[1]}</button>`).join('');
   nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{
     nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');showView(b.dataset.v);});
-  showView(ROLE_NAV[current.role][0][0]);
+  showView(first);
 }
 
 // ---------- intake ----------
@@ -602,7 +690,11 @@ function resetAll(){if(confirm('모든 데이터를 지우고 초기화할까요
 
 // ---------- boot ----------
 seedDemo(false);
-initGate(); initIntake();
+initIntake();
+/* 첫 화면 = 홈 런처 */
+document.getElementById('home').style.display='block';
+document.getElementById('app').style.display='none';
+document.getElementById('loginGate').style.display='none';
 </script>
 </body>
 </html>

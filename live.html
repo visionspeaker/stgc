@@ -266,6 +266,30 @@ function saveR(){localStorage.setItem(RKEY,JSON.stringify(reports))}
 function saveS(){localStorage.setItem(SKEY,JSON.stringify(subs))}
 function catName(c){return c.split(' (')[0];}
 
+// ---------- backend (구글시트 + Apps Script) ----------
+const API='https://script.google.com/macros/s/AKfycbw4UQZr7x7Yx0c3DPWrCt8ya3XpYV26iwUlV2TIiYnb5E8-g9aHtEksCGnmzDGWdFX1/exec';
+const USE_BACKEND=/script\.google\.com/.test(API);
+let currentView='';
+function rerender(){ if(current&&currentView) showView(currentView); }
+async function loadAll(){
+  if(!USE_BACKEND) return;
+  try{
+    const r=await fetch(API+'?action=all',{method:'GET'});
+    const d=await r.json();
+    if(d&&d.ok){ reports=Array.isArray(d.reports)?d.reports:[]; subs=Array.isArray(d.subs)?d.subs:[]; saveR(); saveS(); rerender(); }
+  }catch(e){ console.warn('백엔드 불러오기 실패(로컬 데이터 사용):',e); }
+}
+async function pushReport(rec){
+  if(!USE_BACKEND) return;
+  try{ await fetch(API,{method:'POST',body:JSON.stringify({action:'saveReport',record:rec})}); loadAll(); }
+  catch(e){ console.warn('구역보고 저장 실패:',e); }
+}
+async function pushSub(rec){
+  if(!USE_BACKEND) return;
+  try{ await fetch(API,{method:'POST',body:JSON.stringify({action:'saveSub',record:rec})}); loadAll(); }
+  catch(e){ console.warn('접수 저장 실패:',e); }
+}
+
 // ---------- utils ----------
 function lastSundays(n){const out=[];let d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());for(let i=0;i<n;i++){const x=new Date(d);x.setDate(d.getDate()-7*i);out.push(x.toISOString().slice(0,10));}return out;}
 function pick(arr,k){const c=[...arr];const o=[];while(o.length<k&&c.length){o.push(c.splice(Math.floor(Math.random()*c.length),1)[0]);}return o;}
@@ -327,10 +351,12 @@ function enterApp(role,scope){
   if(role==='admin'&&current.who) who+=' <span class="rolechip">'+current.who+'</span>';
   document.getElementById('roleLabel').innerHTML=who;
   buildNav();
+  loadAll();
 }
 function logout(){current=null;document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='flex';
   ['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});}
 function showView(v){
+  currentView=v;
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.getElementById(v).classList.add('active');
   if(v==='report') showReport();
@@ -363,7 +389,8 @@ function submitIntake(){
   const rec=mkSub(document.getElementById('inType').value,cat,title,document.getElementById('inBody').value,
     anon?'익명':(document.getElementById('inName').value||'익명'),anon?'':document.getElementById('inContact').value,'접수',0);
   rec.ts=new Date().toISOString(); rec.pin=pin;
-  subs.unshift(rec); saveS();
+  rec.id='s'+new Date().getTime()+Math.floor(Math.random()*1000);
+  subs.unshift(rec); saveS(); pushSub(rec);
   document.getElementById('intakeOk').innerHTML='<div class="ok-box">✅ 접수되었습니다.<br>담당 <b>'+r.위원장+'</b>'+(r.교역자!=='—'?' / '+r.교역자:'')+
     ' 에게 알림(카카오·메일)이 발송됩니다. <span class="muted">(실제 배포 시 자동 발송)</span><br>처리 상황은 ‘내 접수 조회’에서 <b>비밀번호</b>로 확인하세요.</div>';
   ['inTitle','inBody','inName','inContact','inPin'].forEach(id=>document.getElementById(id).value='');
@@ -467,6 +494,7 @@ function submitReport(){
       bible:document.getElementById('cellBible').value,
       pray:document.getElementById('cellPray').value,note:document.getElementById('cellNote').value}};
   reports=reports.filter(r=>!(r.district===rec.district&&r.date===rec.date)); reports.push(rec); saveR();
+  pushReport(rec);
   renderReportStatus();
   document.getElementById('reportOk').innerHTML='<div class="ok-box">✅ 보고서가 제출되었습니다. 관리자 대시보드에 즉시 반영됩니다.<br>'+
     '주일예배 출석 <b>'+present.length+'</b>명 · 구역예배 <b>'+rec.cellPresent.length+'</b>명 · 결석 '+absent.length+'명</div>';
@@ -502,8 +530,8 @@ function renderSubs(){
       <div style="margin-top:5px"><input type="text" class="sm" placeholder="회신/반려 사유" value="${s.reply||''}" onchange="setReply(${idx},this.value)" style="font-size:12px"/></div></td></tr>`;
   }).join('')|| '<tr><td colspan=8 class="muted">해당 조건의 접수가 없습니다.</td></tr>';
 }
-function setStatus(i,v){subs[i].status=v;saveS();renderSubs();}
-function setReply(i,v){subs[i].reply=v;saveS();}
+function setStatus(i,v){subs[i].status=v;saveS();pushSub(subs[i]);renderSubs();}
+function setReply(i,v){subs[i].reply=v;saveS();pushSub(subs[i]);}
 
 // ---------- 대시보드 ----------
 let charts={};

@@ -183,6 +183,9 @@ textarea.f-in{min-height:66px;resize:vertical}
 .sc-l{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:10px 0 6px}
 .sc-l:first-child{margin-top:0}
 .subcard textarea.f-in{min-height:56px}
+.sc-save{display:flex;align-items:center;gap:10px;margin-top:8px}
+.sc-ok{font-size:13px;font-weight:700;color:var(--ok);opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s}
+.sc-ok.show{opacity:1;transform:none}
 .subcard select.f-in{height:46px}
 .sc-photo{margin-top:10px}
 .sc-photo img{max-width:190px;max-height:190px;border-radius:11px;border:1px solid var(--line);display:block}
@@ -431,7 +434,7 @@ const DIST_SORTED = sortDist(DIST_NAMES);
 const CATEGORIES = {
  "예배 (예배·방송·찬양)": {위원장:"소세영 장로", 교역자:"양요승 부목사"},
  "교육 (유치·유초등·중고등·청년)": {위원장:"김낙훈 장로", 교역자:"강유석 전도사"},
- "봉사 (환경미화·시설)": {위원장:"권보상 장로", 교역자:"—"},
+ "봉사 (환경미화·시설·카페·주방)": {위원장:"권보상 장로", 교역자:"—"},
  "차량 (차량·주차)": {위원장:"홍춘섭 장로", 교역자:"—"},
  "행정 (재정·행정·미디어·경조)": {위원장:"이수철 장로", 교역자:"—"},
  "선교 (새가족·바나바·전도·선교회)": {위원장:"엄주철 장로", 교역자:"—"},
@@ -807,13 +810,15 @@ function renderSubs(){
         <label class="sc-l">상태 변경</label>
         <select class="f-in" onchange="setStatus(${idx},this.value)">${['접수','처리중','보류','완료','반려'].map(o=>`<option ${o===s.status?'selected':''}>${o}</option>`).join('')}</select>
         <label class="sc-l">회신 / 반려 사유</label>
-        <textarea class="f-in" placeholder="처리 결과나 반려 사유를 적어 회신하세요" onchange="setReply(${idx},this.value)">${s.reply||''}</textarea>
+        <textarea class="f-in" id="rp${idx}" placeholder="처리 결과나 반려 사유를 적어 회신하세요">${s.reply||''}</textarea>
+        <div class="sc-save"><button class="btn sm" onclick="saveReply(${idx})">회신 저장</button><span class="sc-ok" id="rpok${idx}"></span></div>
       </div>
     </div>`;
   }).join('') || '<div class="mini" style="margin-top:12px">해당 조건의 접수가 없습니다.</div>';
 }
 function setStatus(i,v){subs[i].status=v;saveS();pushSub(subs[i]);renderSubs();}
 function setReply(i,v){subs[i].reply=v;saveS();pushSub(subs[i]);}
+function saveReply(i){const ta=document.getElementById('rp'+i);const v=ta?ta.value:'';subs[i].reply=v;saveS();pushSub(subs[i]);const ok=document.getElementById('rpok'+i);if(ok){ok.textContent='✔ 저장되었습니다';ok.classList.add('show');setTimeout(()=>{ok.classList.remove('show');},2500);}}
 
 // ---------- 대시보드 ----------
 let charts={};

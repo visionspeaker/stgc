@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>송탄영광교회 사역 운영 앱 (시제품)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--blue:#1f4e79;--blue2:#2e74b5;--bg:#f4f6f9;--card:#fff;--line:#e2e8f0;--muted:#64748b;--ok:#16a34a;--warn:#d97706;--red:#dc2626}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-system,sans-serif;background:var(--bg);color:#1e293b}
+/* login gate */
+.gate{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#1f4e79,#2e74b5)}
+.gatecard{background:#fff;border-radius:16px;padding:26px;max-width:920px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.gatecard h1{margin:0;font-size:20px;color:var(--blue)}
+.gatecard .gsub{color:var(--muted);font-size:13px;margin:6px 0 18px}
+.rolebox{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.rolecard{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.rolecard h3{margin:0;font-size:15px;color:var(--blue)}
+.rolecard p{margin:0 0 4px;font-size:12px;color:var(--muted);min-height:32px}
+.rolecard select,.rolecard input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit}
+.rolecard .btn{margin-top:auto}
+/* app */
+header{background:var(--blue);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+header h1{font-size:16px;margin:0;font-weight:700}
+header .sub{font-size:12px;opacity:.85}
+nav{display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-top:4px}
+nav button{background:rgba(255,255,255,.12);color:#fff;border:0;padding:8px 13px;border-radius:8px;font-size:13.5px;cursor:pointer;font-weight:600}
+nav button.active{background:#fff;color:var(--blue)}
+main{max-width:1080px;margin:0 auto;padding:18px}
+.view{display:none}.view.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card h2{margin:0 0 4px;font-size:16px;color:var(--blue)}
+.card p.desc{margin:0 0 14px;color:var(--muted);font-size:13px}
+label{display:block;font-size:13px;font-weight:600;margin:12px 0 5px}
+input[type=text],input[type=password],input[type=date],input[type=time],select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit;background:#fff}
+textarea{min-height:70px;resize:vertical}
+.btn{background:var(--blue);color:#fff;border:0;padding:11px 20px;border-radius:9px;font-size:14.5px;font-weight:700;cursor:pointer}
+.btn:hover{background:#173a5c}
+.btn.sec{background:#eef2f7;color:var(--blue)}
+.btn.sm{padding:6px 12px;font-size:12.5px;border-radius:7px}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row>div{flex:1;min-width:180px}
+.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:7px;margin-top:6px}
+.chip{display:flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:13.5px;cursor:pointer;user-select:none}
+.chip input{margin:0}.chip.on{background:#e8f2fd;border-color:var(--blue2)}
+.absent-item{display:flex;gap:8px;align-items:center;margin:6px 0}
+.absent-item .nm{min-width:64px;font-weight:600;font-size:13.5px}
+.absent-item select{width:auto;min-width:104px}.absent-item input{flex:1}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:linear-gradient(135deg,#fff,#f7fafd);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat .n{font-size:26px;font-weight:800;color:var(--blue)}.stat .l{font-size:12.5px;color:var(--muted);margin-top:2px}
+.stat.warn .n{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left}
+th{background:#f1f5f9;font-size:12.5px}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700}
+.b-접수{background:#e0edfb;color:#1d4ed8}.b-처리중{background:#fef3c7;color:#b45309}.b-보류{background:#f3e8ff;color:#7c3aed}.b-완료{background:#dcfce7;color:#15803d}.b-반려{background:#fee2e2;color:#b91c1c}
+tr.over td{background:#fff6f6}
+.tag{display:inline-block;font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:6px;margin-left:6px;vertical-align:middle}
+.tag-req{background:#e0edfb;color:#1d4ed8}.tag-opt{background:#f1f5f9;color:#64748b}
+.sumstrip{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.sumbox{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12.5px}
+.sumbox b{font-size:16px;color:var(--blue);display:block}
+.sumbox.warn b{color:var(--red)}
+.care{background:#fff5f5;border:1px solid #fecaca;border-radius:9px;padding:9px 11px;margin:5px 0;font-size:13px}
+.care b{color:#b91c1c}
+.pill{display:inline-block;background:#eef2f7;color:var(--blue);border-radius:20px;padding:3px 10px;font-size:12px;margin:2px 4px 2px 0}
+.notice{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:9px;padding:10px 12px;font-size:12.5px;margin-bottom:12px}
+.ok-box{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:9px;padding:12px;font-size:13.5px;margin-top:12px}
+.muted{color:var(--muted);font-size:12.5px}
+.hl{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:8px;padding:8px 10px;font-size:13px;margin:4px 0}
+.tabbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tabbar button{background:#eef2f7;border:0;padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer;font-weight:600;color:var(--blue)}
+.tabbar button.active{background:var(--blue);color:#fff}
+canvas{max-height:280px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:720px){.grid2{grid-template-columns:1fr}}
+.footer{color:var(--muted);font-size:11.5px;text-align:center;padding:20px}
+.rolechip{display:inline-block;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 10px;font-size:11.5px;margin-left:4px}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN GATE ================= -->
+<div id="loginGate" class="gate">
+  <div class="gatecard" style="max-width:420px">
+    <h1>송탄영광교회 · 사역 운영 앱</h1>
+    <div class="gsub">테스트베드 · 이름과 비밀번호로 로그인하세요. (기본 비밀번호 <b>1234</b>)</div>
+    <label style="display:block;font-size:13px;font-weight:600;margin:10px 0 5px">이름</label>
+    <input type="text" id="lgName" placeholder="예: 허미영" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px"/>
+    <label style="display:block;font-size:13px;font-weight:600;margin:12px 0 5px">비밀번호</label>
+    <input type="password" id="lgPw2" placeholder="비밀번호" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px" onkeydown="if(event.key==='Enter')loginByName()"/>
+    <div style="margin-top:16px"><button class="btn" style="width:100%" onclick="loginByName()">로그인</button></div>
+    <div class="muted" style="margin-top:14px;line-height:1.6">· 구역장: 최병윤 · 허미영 · 송영선 (본인 구역 보고)<br>· 관리자: 박인성 · 강유석 · 양선영 · 김세원 · 양요승 (전체 + 대시보드)</div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" style="display:none">
+<header>
+  <div><h1>송탄영광교회 · 사역 운영 앱</h1><div class="sub">시제품 · <span id="roleLabel"></span></div></div>
+  <button class="btn sec sm" style="margin-left:auto" onclick="logout()">로그아웃</button>
+  <nav id="nav"></nav>
+</header>
+<main>
+
+<!-- 교인 접수 -->
+<section id="intake" class="view">
+  <div class="card" style="max-width:640px;margin:0 auto">
+    <h2>교인 피드백 · 요청 · 신청 접수</h2>
+    <p class="desc">교인 누구나 접수할 수 있습니다. 접수 내용은 담당 위원회·교역자에게 자동 전달됩니다.</p>
+    <div class="row">
+      <div><label>유형</label><select id="inType"><option>피드백</option><option>건의</option><option>요청</option><option>신청</option></select></div>
+      <div><label>분류(담당 배정)</label><select id="inCat"></select></div>
+    </div>
+    <label>제목</label><input type="text" id="inTitle" placeholder="한 줄 요약"/>
+    <label>내용</label><textarea id="inBody" placeholder="자세한 내용을 적어주세요"></textarea>
+    <div class="row">
+      <div><label>이름 (선택)</label><input type="text" id="inName" placeholder="익명 가능"/></div>
+      <div><label>연락처 (선택)</label><input type="text" id="inContact" placeholder="회신 원하시면 입력"/></div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-weight:500"><input type="checkbox" id="inAnon" style="width:auto"/> 익명으로 접수 (이름·연락처 숨김)</label>
+    <div class="muted" style="margin-top:5px;line-height:1.5">※ 익명으로 제출하면 접수는 가능하지만 <b>개별 회신을 받을 수 없습니다.</b> 담당자가 내용을 확인하는 것으로 접수가 마무리(완료 처리)될 수 있으니, 답변이 필요하시면 이름·연락처를 남겨 주세요.</div>
+    <label>조회용 비밀번호 (숫자 4자리) <span style="color:var(--red)">*</span></label>
+    <input type="password" id="inPin" maxlength="4" inputmode="numeric" placeholder="예: 전화번호 뒷자리 4자리"/>
+    <div class="muted">접수 후 ‘내 접수 조회’에서 이 비밀번호로 본인 글을 확인합니다.</div>
+    <div id="routePreview" class="muted" style="margin-top:8px"></div>
+    <div style="margin-top:16px"><button class="btn" onclick="submitIntake()">접수하기</button></div>
+    <div id="intakeOk"></div>
+  </div>
+</section>
+
+<!-- 내 접수 조회 -->
+<section id="myreq" class="view">
+  <div class="card">
+    <h2>내 접수 조회</h2>
+    <p class="desc">접수 목록은 제목만 표시됩니다. 접수 시 본인이 정한 4자리 비밀번호를 입력해야 내용과 처리 상태를 볼 수 있습니다.</p>
+    <div class="notice">데모 접수글 비밀번호는 <b>1234</b> 입니다.</div>
+    <div id="myReqList"></div>
+  </div>
+</section>
+
+<!-- 구역보고 -->
+<section id="report" class="view">
+  <div id="adminPick" class="card" style="display:none">
+    <label>구역 선택 (관리자)</label>
+    <select id="adminDistSel" onchange="adminDistChange()"></select>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <h2 style="margin:0">구역 주간 보고서</h2>
+      <span class="pill" id="rfWho"></span>
+    </div>
+    <div class="notice" style="margin-top:10px"><b>필수</b>는 ③주일 출석·⑤결석 사유 입니다. ④구역예배·⑥나눔·성경읽기는 <b>선택(자율)</b>입니다. 담임목사님은 출석·결석 사유를 최우선으로 봅니다.</div>
+    <div class="row" style="margin-top:6px">
+      <div><label>① 작성시간</label><input type="text" id="rfTime" readonly/></div>
+      <div><label>② 구역명</label><input type="text" id="rfDist" readonly/></div>
+      <div><label>주일(보고 대상일)</label><input type="date" id="rfDate" onchange="renderReportStatus()"/></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>이번 주 구역 제출 현황 <span class="muted" style="font-weight:400;font-size:12px">— 다른 구역도 함께 표시됩니다</span></h2>
+    <div id="reportStatus"></div>
+  </div>
+  <div class="card">
+    <h2>③ 주일예배 출석부 <span class="tag tag-req">필수</span></h2>
+    <p class="desc">참석한 성도를 눌러 체크하세요. <span id="sunCount" class="pill"></span></p>
+    <div id="sunRoster" class="roster"></div>
+  </div>
+  <div class="card">
+    <h2>④ 구역예배 출석부 <span class="tag tag-opt">선택</span></h2>
+    <p class="desc">구역예배 참석자를 체크하세요. <span id="cellCount" class="pill"></span></p>
+    <div id="cellRoster" class="roster"></div>
+  </div>
+  <div class="card">
+    <h2>⑤ 주일예배 결석자 명단 및 사유 <span class="tag tag-req">필수</span></h2>
+    <p class="desc">③에서 체크되지 않은 성도가 자동 표시됩니다. 사유는 드롭다운으로 선택하고, 필요 시 특이사항만 적으세요.</p>
+    <div id="absentList"></div>
+  </div>
+  <div class="card">
+    <h2>⑥ 구역예배 현황 · 나눔 <span class="tag tag-opt">선택·자율</span></h2>
+    <div class="row">
+      <div><label>모임 여부</label><select id="cellHeld"><option value="진행">진행함</option><option value="미진행">미진행</option></select></div>
+      <div><label>일시</label><input type="text" id="cellWhen" placeholder="예: 목 저녁 8시"/></div>
+      <div><label>장소</label><input type="text" id="cellWhere" placeholder="예: 구역장 가정"/></div>
+    </div>
+    <label>나눔 주제</label><input type="text" id="cellTopic" placeholder="예: 요한복음 3장 나눔"/>
+    <label>성경읽기 (자율 · 장수/범위)</label><input type="text" id="cellBible" placeholder="예: 창세기 1~10장, 구역 평균 8장"/>
+    <label>기도 제목</label><textarea id="cellPray" placeholder="구역 기도제목"></textarea>
+    <label>특이사항 / 심방 필요 <span class="muted">(질병·장기결석·연락두절 등은 목양 우선사항으로 자동 표시)</span></label><textarea id="cellNote" placeholder="심방 요청, 애로사항 등"></textarea>
+    <div style="margin-top:16px"><button class="btn" onclick="submitReport()">보고서 제출</button></div>
+    <div id="reportOk"></div>
+  </div>
+</section>
+
+<!-- 접수 처리 -->
+<section id="manage" class="view">
+  <div class="card">
+    <h2>피드백 접수 처리 <span id="mgScope" class="muted" style="font-weight:400"></span></h2>
+    <p class="desc">접수된 사안을 담당자가 처리 상태로 관리합니다. 매뉴얼 기준: 접수 확인 48시간 · 완료 회신 3일. <b>처리 불가 시 ‘반려’ + 사유</b>를 남겨 회신합니다.</p>
+    <div class="sumstrip" id="mgSummary"></div>
+    <div class="tabbar" id="mgFilter">
+      <button data-f="전체" class="active">전체</button>
+      <button data-f="접수">접수</button>
+      <button data-f="처리중">처리중</button>
+      <button data-f="보류">보류</button>
+      <button data-f="완료">완료</button>
+      <button data-f="반려">반려</button>
+    </div>
+    <div style="overflow-x:auto"><table id="subTable"><thead>
+      <tr><th>접수일</th><th>유형</th><th>분류/담당</th><th>제목</th><th>내용</th><th>접수자</th><th>상태</th><th>변경</th></tr>
+    </thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<!-- 대시보드 -->
+<section id="dash" class="view">
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <h2 style="margin:0">구역보고 대시보드</h2>
+      <label style="margin:0;font-weight:600">주일 선택</label>
+      <select id="weekSel" style="width:auto" onchange="renderDash()"></select>
+      <button class="btn sec sm" style="margin-left:auto" onclick="seedDemo(true)">데모 데이터 재생성</button>
+      <button class="btn sec sm" onclick="resetAll()">전체 초기화</button>
+    </div>
+  </div>
+  <div class="card"><div class="cards" id="statCards"></div></div>
+  <div class="grid2">
+    <div class="card"><h2>구역별 출석</h2><canvas id="barChart"></canvas></div>
+    <div class="card"><h2>주차별 출석 추이</h2><canvas id="lineChart"></canvas></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h2>구역예배 진행률</h2><canvas id="cellChart"></canvas></div>
+    <div class="card"><h2>접수 현황(상태별)</h2><canvas id="subChart"></canvas></div>
+  </div>
+  <div class="card" style="border-color:#fecaca"><h2 style="color:#b91c1c">🔴 목양 우선사항</h2><p class="desc">특이사항·결석 사유에서 질병·장기결석·연락두절·수술·입원 키워드를 자동 선별</p><div id="careBoard"></div></div>
+  <div class="card"><h2>결석자 관리 · 개근자 (선택한 주일 / 최근 3주)</h2><div id="absentBoard"></div></div>
+  <div class="card"><h2>미보고 구역</h2><div id="missingBoard"></div></div>
+</section>
+
+<div class="footer">송탄영광교회 사역 운영 앱 시제품 · 데이터는 이 브라우저에만 저장됩니다(localStorage) · 실제 배포 시 서버·권한 인증 연동</div>
+</main>
+</div>
+
+<script>
+const DISTRICTS = JSON.parse('{"1구역": ["이세진", "김은미", "김건우", "노선녀", "김재혁", "김지혜", "박우근", "김영인", "박일서", "정서인", "이지성", "임옥란", "이호성", "진다울", "인용교", "김혜란"], "2구역": ["이수철", "양선자", "홍윤기", "최영미", "한예솔", "남기혁", "정은화", "박덕민", "오세은", "이강천", "홍한나", "이영복", "함준식", "이미희"], "3구역": ["권보상", "허미영", "김중원", "유미경", "김성진", "장선정", "배용훈", "이미연", "이진완", "김하나", "임광진", "김보라", "홍민의", "박슬기"], "4구역": ["최병윤", "손차진", "김용태", "김은숙", "김대식", "장원아", "박천희", "김미영2", "소성민", "홍세라", "엄정렬", "성경아", "이종민", "김지나", "김민성", "송정민"], "5구역": ["엄주철", "이광연", "장홍주", "권희정", "김병규", "김종수", "김왕곤", "강애순", "윤도순", "이운희"], "6구역": ["임영진", "최미경", "김효종", "이준옥", "공재정", "안미숙", "김춘권", "홍성애", "이승우", "김진자", "임용진", "홍정은", "허진혁", "강희경"], "7구역": ["송준성", "박서희", "서광석", "나선인", "김동욱", "이경미", "정득진", "정영숙", "최영규", "홍지영", "홍관일", "고문희", "김관호", "현인생", "이용섭", "허숙경"], "8구역": ["임재환", "이정애", "김학규", "신경화", "박정호", "조계동", "한태교", "우유경", "김종찬"], "9구역": ["김진환", "노수연", "양대석", "황정심", "박혜영", "양봉현", "서은주", "이명기", "이재강", "조성령", "채수진", "신기선", "최란숙"], "10구역": ["강창오", "유소희", "홍춘섭", "우영숙", "오상기", "고선영", "이건실", "채은경", "이창수", "한재혁", "이성희"], "11구역": ["윤선희", "정정수", "고진수", "김순양", "박지숙", "신미연", "양희경", "오명님", "유경렬", "이미화", "진주아", "채수희"], "12구역": ["윤선미", "조형하", "곽미순", "김경미", "김나연", "김미선", "김여경", "김은정", "김진아2", "박명애", "성한솔", "장선주", "황지혜"], "13구역": ["정순희", "노윤정", "김선희", "김세나", "김연옥", "김유진", "김윤례", "김이레", "김현옥", "양경희", "이연복", "한주희"], "14구역": ["최정희", "강명이", "김선영", "김선옥", "김정희", "송금옥", "이영순", "이은경", "정영아", "천남순", "허자숙"], "15구역": ["노은숙", "박수진", "김정수", "이민순", "이현숙", "전미란", "허승연", "현인란"], "16구역": ["김연화", "최영경", "강순애", "구지숙", "김미영3", "김양원", "박정숙", "백미영", "서정원", "최복임", "최선경"], "17구역": ["황현진", "김재봉", "김정화", "김현숙", "김현정", "박남순", "손은숙", "유은숙", "윤정숙", "원춘실", "임부희", "장미경", "하정미"], "18구역": ["송영선", "서미하", "김미영1", "박다영", "양민숙", "이미애", "이애란", "인해남", "최은경", "홍선경", "안영렬", "최태윤"], "19구역": ["김명혜", "최신숙", "권정숙", "김연숙", "김영란2", "김이나", "신진자", "심은경", "양숙희", "이윤아"], "20구역": ["강영주", "전혜원", "고한옥", "김경희", "김영기", "김은영", "박은정", "신주희", "이미라", "최명숙", "허경미"], "21구역": ["류근분", "최가자", "김금녀", "김상귀", "신둘이", "양예석", "장평순", "홍정자"], "22구역": ["김길임", "임옥실", "김영란1", "김종숙", "김형숙", "윤영순", "이숙자", "정시안", "홍영자"], "23구역": ["허성옥", "서정석", "강대윤", "고강인", "김성은", "김종선", "김종진", "김형운", "마현근", "문기갑", "손현철", "안세영", "이재찬", "임태빈", "홍춘원", "유병구"], "24구역": ["김낙훈", "김태진", "김덕배", "김용재", "박규성", "박희영", "손정훈", "심경식", "전현수", "조문래", "조중호", "조현태", "지영시", "이진규", "차지홍", "최병민", "최승만", "현형기"], "25구역": ["소세영", "황근하", "강창용", "김기현", "김동운", "김용철", "김은호", "김주환", "김하정", "박상래", "박종선", "이남경", "이한승", "장종규", "최태운", "황남하"], "샬롬 구역": ["김순이", "배재충", "이양순", "서하진", "김수영"]}');
+const DIST_NAMES = Object.keys(DISTRICTS);
+const CATEGORIES = {
+ "예배 (예배·방송·찬양)": {위원장:"소세영 장로", 교역자:"양요승 부목사"},
+ "교육 (유치·유초등·중고등·청년)": {위원장:"김낙훈 장로", 교역자:"강유석 전도사"},
+ "봉사 (환경미화·시설)": {위원장:"권보상 장로", 교역자:"—"},
+ "차량 (차량·주차)": {위원장:"홍춘섭 장로", 교역자:"—"},
+ "행정 (재정·행정·미디어·경조)": {위원장:"이수철 장로", 교역자:"—"},
+ "선교 (새가족·바나바·전도·선교회)": {위원장:"엄주철 장로", 교역자:"—"},
+ "경조사 요청 (주례·심방·축사 등)": {위원장:"경조부(이진규) 1차 정리", 교역자:"담임목사"},
+ "잘 모르겠음": {위원장:"서기(홍춘섭) 분류", 교역자:"—"}
+};
+// 위원장이 담당하는 6개 위원회(경조사·잘모르겠음 제외)
+const COMMITTEES = Object.keys(CATEGORIES).slice(0,6);
+const RKEY='sgc_reports_v6', SKEY='sgc_subs_v6';
+let reports = JSON.parse(localStorage.getItem(RKEY)||'null');
+let subs = JSON.parse(localStorage.getItem(SKEY)||'null');
+let current=null;     // {role, district?, category?}
+let reportDist=null;  // 구역보고 대상 구역
+function saveR(){localStorage.setItem(RKEY,JSON.stringify(reports))}
+function saveS(){localStorage.setItem(SKEY,JSON.stringify(subs))}
+function catName(c){return c.split(' (')[0];}
+
+// ---------- utils ----------
+function lastSundays(n){const out=[];let d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());for(let i=0;i<n;i++){const x=new Date(d);x.setDate(d.getDate()-7*i);out.push(x.toISOString().slice(0,10));}return out;}
+function pick(arr,k){const c=[...arr];const o=[];while(o.length<k&&c.length){o.push(c.splice(Math.floor(Math.random()*c.length),1)[0]);}return o;}
+function fmtDT(iso){const d=new Date(iso);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+
+// ---------- seed ----------
+function seedDemo(force){
+  // 테스트베드: 데모 데이터 없이 빈 상태로 시작 (실제 입력만 쌓임)
+  if(force){reports=[];subs=[];}
+  if(!reports) reports=[];
+  if(!subs) subs=[];
+  saveR(); saveS();
+}
+function mkSub(type,cat,title,body,name,contact,status,daysAgo){
+  const d=new Date();d.setDate(d.getDate()+daysAgo);
+  return {ts:d.toISOString(),type,category:cat,title,body,name,contact,status,
+    assignee:CATEGORIES[cat].위원장+(CATEGORIES[cat].교역자!=='—'?' / '+CATEGORIES[cat].교역자:'')};
+}
+
+// ---------- login (테스트베드 계정) ----------
+const ACCOUNTS={
+ '최병윤':{pw:'1234',role:'leader',district:'4구역'},
+ '허미영':{pw:'1234',role:'leader',district:'3구역'},
+ '송영선':{pw:'1234',role:'leader',district:'18구역'},
+ '박인성':{pw:'1234',role:'admin'},
+ '강유석':{pw:'1234',role:'admin'},
+ '양선영':{pw:'1234',role:'admin'},
+ '김세원':{pw:'1234',role:'admin'},
+ '양요승':{pw:'1234',role:'admin'}
+};
+function initGate(){const el=document.getElementById('lgName');if(el)el.focus();}
+function loginByName(){
+  const nm=(document.getElementById('lgName').value||'').trim();
+  const pw=(document.getElementById('lgPw2').value||'').trim();
+  const a=ACCOUNTS[nm];
+  if(!a){alert('등록되지 않은 이름입니다.\n구역장: 최병윤·허미영·송영선\n관리자: 박인성·강유석·양선영·김세원·양요승');return;}
+  if(pw!==a.pw){alert('비밀번호가 올바르지 않습니다. (기본 1234)');return;}
+  if(a.role==='leader') enterApp('leader',{district:a.district,who:nm});
+  else enterApp('admin',{who:nm});
+}
+
+// ---------- role & nav ----------
+const ROLE_NAV={
+ member:[['intake','피드백·요청 접수'],['myreq','내 접수 조회']],
+ leader:[['report','구역보고'],['intake','피드백·요청 접수'],['myreq','내 접수 조회']],
+ chair:[['manage','피드백 접수 처리'],['intake','피드백·요청 접수']],
+ staff:[['manage','피드백 접수 처리'],['intake','피드백·요청 접수']],
+ admin:[['intake','피드백·요청 접수'],['report','구역보고'],['manage','접수 처리'],['dash','대시보드']]
+};
+const ROLE_LABEL={member:'일반 교인',leader:'구역장',chair:'위원장',staff:'부장',admin:'관리자(교역자·담임목사)'};
+function enterApp(role,scope){
+  current=Object.assign({role},scope||{});
+  document.getElementById('loginGate').style.display='none';
+  document.getElementById('app').style.display='block';
+  let who='<b>'+ROLE_LABEL[role]+'</b>';
+  if(role==='leader') who+=' <span class="rolechip">'+current.district+' · '+(current.who||DISTRICTS[current.district][0])+'</span>';
+  if(role==='chair') who+=' <span class="rolechip">'+catName(current.category)+' · '+CATEGORIES[current.category].위원장+'</span>';
+  if(role==='staff') who+=' <span class="rolechip">'+catName(current.category)+' 부장</span>';
+  if(role==='admin'&&current.who) who+=' <span class="rolechip">'+current.who+'</span>';
+  document.getElementById('roleLabel').innerHTML=who;
+  buildNav();
+}
+function logout(){current=null;document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='flex';
+  ['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});}
+function showView(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.getElementById(v).classList.add('active');
+  if(v==='report') showReport();
+  if(v==='manage') renderSubs();
+  if(v==='myreq') renderMyReq();
+  if(v==='dash') renderDash();
+}
+function buildNav(){
+  const nav=document.getElementById('nav');
+  nav.innerHTML=ROLE_NAV[current.role].map((it,i)=>`<button data-v="${it[0]}" class="${i===0?'active':''}">${it[1]}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');showView(b.dataset.v);});
+  showView(ROLE_NAV[current.role][0][0]);
+}
+
+// ---------- intake ----------
+function initIntake(){
+  document.getElementById('inCat').innerHTML=Object.keys(CATEGORIES).map(c=>`<option>${c}</option>`).join('');
+  const upd=()=>{const c=document.getElementById('inCat').value;const r=CATEGORIES[c];
+    document.getElementById('routePreview').innerHTML='➡ 자동 배정: <b>'+r.위원장+'</b>'+(r.교역자!=='—'?' · '+r.교역자:'')+' 에게 알림 발송';};
+  document.getElementById('inCat').onchange=upd; upd();
+}
+function submitIntake(){
+  const cat=document.getElementById('inCat').value; const anon=document.getElementById('inAnon').checked;
+  const title=document.getElementById('inTitle').value.trim();
+  if(!title){alert('제목을 입력해주세요.');return;}
+  const pin=document.getElementById('inPin').value.trim();
+  if(!/^\d{4}$/.test(pin)){alert('조회용 비밀번호 4자리(숫자)를 입력해주세요.');return;}
+  const r=CATEGORIES[cat];
+  const rec=mkSub(document.getElementById('inType').value,cat,title,document.getElementById('inBody').value,
+    anon?'익명':(document.getElementById('inName').value||'익명'),anon?'':document.getElementById('inContact').value,'접수',0);
+  rec.ts=new Date().toISOString(); rec.pin=pin;
+  subs.unshift(rec); saveS();
+  document.getElementById('intakeOk').innerHTML='<div class="ok-box">✅ 접수되었습니다.<br>담당 <b>'+r.위원장+'</b>'+(r.교역자!=='—'?' / '+r.교역자:'')+
+    ' 에게 알림(카카오·메일)이 발송됩니다. <span class="muted">(실제 배포 시 자동 발송)</span><br>처리 상황은 ‘내 접수 조회’에서 <b>비밀번호</b>로 확인하세요.</div>';
+  ['inTitle','inBody','inName','inContact','inPin'].forEach(id=>document.getElementById(id).value='');
+}
+
+// ---------- 내 접수 조회 ----------
+function renderMyReq(){
+  const box=document.getElementById('myReqList');
+  const list=[...subs].sort((a,b)=>b.ts.localeCompare(a.ts));
+  if(!list.length){box.innerHTML='<div class="muted">접수된 내용이 없습니다.</div>';return;}
+  box.innerHTML=list.map(s=>{const idx=subs.indexOf(s);
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:13px;margin-bottom:10px">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${s.title}</b>
+        <span class="badge b-${s.status}">${s.status}</span>
+        <span class="muted" style="margin-left:auto">${fmtDT(s.ts)}</span></div>
+      <div class="muted" style="margin:5px 0">${s.type} · ${catName(s.category)}</div>
+      <div id="lk${idx}"><div style="display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap">
+        <input type="password" maxlength="4" inputmode="numeric" id="pin${idx}" placeholder="비밀번호 4자리" style="max-width:150px" onkeydown="if(event.key==='Enter')openMine(${idx})"/>
+        <button class="btn sm" onclick="openMine(${idx})">내용 보기</button>
+        <span class="muted">본인이 접수 시 설정한 비밀번호</span></div></div>
+    </div>`;}).join('');
+}
+function openMine(idx){
+  const s=subs[idx]; const pin=(document.getElementById('pin'+idx).value||'').trim();
+  if(pin!==s.pin){alert('비밀번호가 일치하지 않습니다.');return;}
+  let statusLine;
+  if(s.status==='반려'){
+    statusLine=`<div><span class="badge b-반려">반려</span> <span class="muted">처리 불가</span></div>`;
+  }else{
+    const steps=['접수','처리중','완료'];
+    const cur=s.status==='완료'?2:(s.status==='처리중'||s.status==='보류')?1:0;
+    const bar=steps.map((st,i)=>`<span class="pill" style="${i<=cur?'background:var(--blue);color:#fff':'background:#eef2f7;color:#94a3b8'}">${st}</span>`).join(' <span style="color:#cbd5e1">›</span> ');
+    const hold=s.status==='보류'?' <span class="muted">(보류: 추가 확인 중)</span>':'';
+    statusLine=`<div style="font-size:12px">${bar}${hold}</div>`;
+  }
+  const reply = s.reply?`<div class="care" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534"><b>담당자 회신</b> — ${s.reply}</div>`:'';
+  document.getElementById('lk'+idx).innerHTML=
+    (s.body?`<div style="font-size:13.5px;margin:2px 0 6px">${s.body}</div>`:'')+
+    `<div class="muted" style="margin-bottom:6px">담당: ${s.assignee}${s.contact?' · 회신 연락처 '+s.contact:''}</div>`+
+    statusLine+reply;
+}
+
+// ---------- 구역보고 ----------
+const ABSENT_REASONS=['개인사정','건강','여행','직장','확인안됨','장기결석','기타'];
+function showReport(){
+  const isAdmin=current.role==='admin';
+  document.getElementById('adminPick').style.display=isAdmin?'block':'none';
+  if(isAdmin){
+    const sel=document.getElementById('adminDistSel');
+    if(!sel.options.length) sel.innerHTML=DIST_NAMES.map(d=>`<option>${d}</option>`).join('');
+    reportDist=sel.value||sel.options[0].value;
+  } else { reportDist=current.district; }
+  document.getElementById('rfWho').textContent=reportDist+' · 구역장 '+((current&&current.role==='leader'&&current.who)?current.who:DISTRICTS[reportDist][0]);
+  document.getElementById('rfDist').value=reportDist;
+  document.getElementById('rfTime').value=fmtDT(new Date().toISOString());
+  document.getElementById('rfDate').value=lastSundays(1)[0];
+  buildRoster(); renderReportStatus();
+  document.getElementById('reportOk').innerHTML='';
+}
+function renderReportStatus(){
+  const box=document.getElementById('reportStatus'); if(!box) return;
+  const date=document.getElementById('rfDate').value;
+  const done=new Set(reports.filter(r=>r.date===date).map(r=>r.district));
+  const pills=DIST_NAMES.map(d=>{
+    const ok=done.has(d); const me=d===reportDist;
+    const bg=ok?'background:#dcfce7;color:#15803d':'background:#fef2f2;color:#991b1b';
+    return `<span class="pill" style="${bg}${me?';outline:2px solid var(--blue2)':''}">${ok?'✔':'·'} ${d}</span>`;}).join(' ');
+  box.innerHTML=`<div class="muted" style="margin-bottom:6px">${date} 기준 · 제출 <b>${done.size}</b> / ${DIST_NAMES.length} 구역 (미제출은 붉게)</div>${pills}`;
+}
+function adminDistChange(){reportDist=document.getElementById('adminDistSel').value;
+  document.getElementById('rfWho').textContent=reportDist+' · 구역장 '+((current&&current.role==='leader'&&current.who)?current.who:DISTRICTS[reportDist][0]);
+  document.getElementById('rfDist').value=reportDist;buildRoster();renderReportStatus();}
+function buildRoster(){
+  const roster=DISTRICTS[reportDist];
+  const mk=(box,cls)=>{document.getElementById(box).innerHTML=roster.map(n=>
+    `<label class="chip"><input type="checkbox" data-n="${n}" class="${cls}" onchange="onCheck(this)"/> ${n}</label>`).join('');};
+  mk('sunRoster','sun'); mk('cellRoster','cell'); updCounts(); buildAbsent();
+}
+function onCheck(el){el.closest('.chip').classList.toggle('on',el.checked);updCounts();if(el.classList.contains('sun'))buildAbsent();}
+function getChecked(cls){return [...document.querySelectorAll('input.'+cls+':checked')].map(x=>x.dataset.n);}
+function updCounts(){const roster=DISTRICTS[reportDist];
+  document.getElementById('sunCount').textContent='출석 '+getChecked('sun').length+' / '+roster.length;
+  document.getElementById('cellCount').textContent='출석 '+getChecked('cell').length+' / '+roster.length;}
+function buildAbsent(){
+  const present=getChecked('sun'); const roster=DISTRICTS[reportDist];
+  const absent=roster.filter(n=>!present.includes(n));
+  const opts=ABSENT_REASONS.map(r=>`<option value="${r}">${r}</option>`).join('');
+  document.getElementById('absentList').innerHTML = absent.length? absent.map(n=>
+    `<div class="absent-item"><span class="nm">${n}</span><select data-abs="${n}" class="absReason">${opts}</select>`+
+    `<input type="text" data-absnote="${n}" placeholder="특이사항(선택)"/></div>`).join('')
+    : '<div class="muted">전원 출석 또는 아직 출석 체크 전입니다.</div>';
+}
+function submitReport(){
+  const present=getChecked('sun');
+  const absent=[...document.querySelectorAll('select[data-abs]')].map(s=>{const nm=s.dataset.abs;
+    const note=(document.querySelector('input[data-absnote="'+nm+'"]')||{}).value||'';return {name:nm,reason:s.value,note:note};});
+  const rec={ts:new Date().toISOString(),date:document.getElementById('rfDate').value,district:reportDist,
+    sundayPresent:present,cellPresent:getChecked('cell'),sundayAbsent:absent,
+    cell:{held:document.getElementById('cellHeld').value,when:document.getElementById('cellWhen').value,
+      where:document.getElementById('cellWhere').value,topic:document.getElementById('cellTopic').value,
+      bible:document.getElementById('cellBible').value,
+      pray:document.getElementById('cellPray').value,note:document.getElementById('cellNote').value}};
+  reports=reports.filter(r=>!(r.district===rec.district&&r.date===rec.date)); reports.push(rec); saveR();
+  renderReportStatus();
+  document.getElementById('reportOk').innerHTML='<div class="ok-box">✅ 보고서가 제출되었습니다. 관리자 대시보드에 즉시 반영됩니다.<br>'+
+    '주일예배 출석 <b>'+present.length+'</b>명 · 구역예배 <b>'+rec.cellPresent.length+'</b>명 · 결석 '+absent.length+'명</div>';
+}
+
+// ---------- 접수 처리 ----------
+let mgF='전체';
+document.querySelectorAll('#mgFilter button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#mgFilter button').forEach(x=>x.classList.remove('active'));b.classList.add('active');mgF=b.dataset.f;renderSubs();});
+function hoursSince(iso){return (Date.now()-new Date(iso).getTime())/3600000;}
+function isOverdue(s){return s.status==='접수' && hoursSince(s.ts)>48;}
+function renderSubs(){
+  const tb=document.querySelector('#subTable tbody');
+  const scope=document.getElementById('mgScope');
+  const scoped=(current.role==='chair'||current.role==='staff');
+  let base = scoped ? subs.filter(s=>s.category===current.category) : subs;
+  scope.textContent = scoped ? '· 담당: '+catName(current.category)+' ('+base.length+'건)' : '· 전체 위원회';
+  // 부담 관리 요약
+  const open=base.filter(s=>s.status==='접수'||s.status==='처리중'||s.status==='보류').length;
+  const overdue=base.filter(isOverdue).length;
+  const done=base.filter(s=>s.status==='완료'||s.status==='반려').length;
+  document.getElementById('mgSummary').innerHTML=
+    `<div class="sumbox"><b>${open}</b>미처리(접수·처리중·보류)</div>`+
+    `<div class="sumbox ${overdue?'warn':''}"><b>${overdue}</b>접수 48시간 초과 미확인</div>`+
+    `<div class="sumbox"><b>${done}</b>완료·반려</div>`;
+  const list=base.filter(s=>mgF==='전체'||s.status===mgF);
+  tb.innerHTML=list.map(s=>{const idx=subs.indexOf(s);
+    return `<tr class="${isOverdue(s)?'over':''}"><td>${fmtDT(s.ts)}${isOverdue(s)?'<br><span class="badge b-반려">지연</span>':''}</td><td>${s.type}</td><td>${catName(s.category)}<br><span class="muted">${s.assignee}</span></td>
+    <td>${s.title}</td><td class="muted">${s.body||'-'}</td><td>${s.name}${s.contact?'<br><span class="muted">'+s.contact+'</span>':''}</td>
+    <td><span class="badge b-${s.status}">${s.status}</span></td>
+    <td><select class="sm" onchange="setStatus(${idx},this.value)">
+      ${['접수','처리중','보류','완료','반려'].map(o=>`<option ${o===s.status?'selected':''}>${o}</option>`).join('')}</select>
+      <div style="margin-top:5px"><input type="text" class="sm" placeholder="회신/반려 사유" value="${s.reply||''}" onchange="setReply(${idx},this.value)" style="font-size:12px"/></div></td></tr>`;
+  }).join('')|| '<tr><td colspan=8 class="muted">해당 조건의 접수가 없습니다.</td></tr>';
+}
+function setStatus(i,v){subs[i].status=v;saveS();renderSubs();}
+function setReply(i,v){subs[i].reply=v;saveS();}
+
+// ---------- 대시보드 ----------
+let charts={};
+function initWeekSel(){const weeks=[...new Set(reports.map(r=>r.date))].sort().reverse();
+  document.getElementById('weekSel').innerHTML=weeks.map(w=>`<option>${w}</option>`).join('');}
+function renderDash(){
+  initWeekSel();
+  const wk=document.getElementById('weekSel').value;
+  const wkReports=reports.filter(r=>r.date===wk);
+  const reported=new Set(wkReports.map(r=>r.district));
+  const sunTot=wkReports.reduce((a,r)=>a+r.sundayPresent.length,0);
+  const cellTot=wkReports.reduce((a,r)=>a+r.cellPresent.length,0);
+  const missing=DIST_NAMES.filter(d=>!reported.has(d));
+  document.getElementById('statCards').innerHTML=
+    stat(sunTot,'주일예배 총 출석')+stat(cellTot,'구역예배 총 출석')+
+    stat(reported.size+' / '+DIST_NAMES.length,'보고 완료 구역')+stat(missing.length,'미보고 구역',true);
+  const labels=wkReports.map(r=>r.district);
+  drawChart('barChart','bar',{labels,datasets:[
+    {label:'주일예배',data:wkReports.map(r=>r.sundayPresent.length),backgroundColor:'#2e74b5'},
+    {label:'구역예배',data:wkReports.map(r=>r.cellPresent.length),backgroundColor:'#93c5fd'}]},{scales:{x:{ticks:{font:{size:10}}}}});
+  const weeks=[...new Set(reports.map(r=>r.date))].sort();
+  const trend=weeks.map(w=>reports.filter(r=>r.date===w).reduce((a,r)=>a+r.sundayPresent.length,0));
+  drawChart('lineChart','line',{labels:weeks,datasets:[{label:'주일예배 총출석',data:trend,borderColor:'#1f4e79',backgroundColor:'#1f4e7922',fill:true,tension:.3}]},{});
+  const held=wkReports.filter(r=>r.cell.held==='진행').length;
+  drawChart('cellChart','doughnut',{labels:['진행','미진행/미보고'],datasets:[{data:[held,DIST_NAMES.length-held],backgroundColor:['#16a34a','#e2e8f0']}]},{});
+  const st=['접수','처리중','보류','완료'].map(s=>subs.filter(x=>x.status===s).length);
+  drawChart('subChart','bar',{labels:['접수','처리중','보류','완료'],datasets:[{label:'건수',data:st,backgroundColor:['#3b82f6','#f59e0b','#a855f7','#22c55e']}]},{plugins:{legend:{display:false}}});
+  const allAbsent=[];wkReports.forEach(r=>r.sundayAbsent.forEach(a=>allAbsent.push({d:r.district,...a})));
+  const byReason={};allAbsent.forEach(a=>{(byReason[a.reason]=byReason[a.reason]||[]).push(a.d+' '+a.name)});
+  document.getElementById('careBoard').innerHTML=careHtml(wkReports);
+  document.getElementById('absentBoard').innerHTML = (allAbsent.length?
+    Object.entries(byReason).map(([r,arr])=>`<div style="margin:6px 0"><b>${r}</b> (${arr.length}) : <span class="muted">${arr.join(', ')}</span></div>`).join('')+longAbsentHtml()
+    : '<div class="muted">결석 데이터가 없습니다.</div>') + perfectHtml();
+  document.getElementById('missingBoard').innerHTML = missing.length?
+    missing.map(m=>`<span class="pill" style="background:#fef2f2;color:#991b1b">${m}</span>`).join(' ')
+    : '<div class="ok-box">🎉 모든 구역이 보고를 완료했습니다.</div>';
+}
+function longAbsentHtml(){
+  const weeks=[...new Set(reports.map(r=>r.date))].sort().slice(-3);const cnt={};
+  reports.filter(r=>weeks.includes(r.date)).forEach(r=>r.sundayAbsent.forEach(a=>{const k=r.district+' '+a.name;cnt[k]=(cnt[k]||0)+1;}));
+  const chronic=Object.entries(cnt).filter(([k,v])=>v>=3).map(([k])=>k);
+  return chronic.length?`<div class="hl">⚠ 최근 3주 연속 결석(심방 대상 후보): ${chronic.join(', ')}</div>`:'';
+}
+// 목양 우선사항: 장기결석 사유 + 특이사항/결석메모의 돌봄 키워드
+const CARE_KW=['수술','입원','병원','연락','건강','암','장기결석','소천','상','골절'];
+function careHtml(wkReports){
+  const items=[];
+  wkReports.forEach(r=>{
+    r.sundayAbsent.forEach(a=>{
+      if(a.reason==='장기결석') items.push(`<b>${a.name}</b>(${r.district}) — 장기결석`);
+      else if(a.note && CARE_KW.some(k=>a.note.includes(k))) items.push(`<b>${a.name}</b>(${r.district}) — ${a.note}`);
+    });
+    const cn=r.cell&&r.cell.note; if(cn && CARE_KW.some(k=>cn.includes(k))) items.push(`${r.district} — ${cn}`);
+  });
+  if(!items.length) return '<div class="muted">이번 주 목양 우선 대상이 없습니다.</div>';
+  return items.map(t=>`<div class="care">${t}</div>`).join('');
+}
+// 개근자: 최근 3주 모두 보고된 구역에서 매주 출석한 성도
+function perfectHtml(){
+  const weeks=[...new Set(reports.map(r=>r.date))].sort().slice(-3);
+  if(weeks.length<2) return '';
+  const byDist={};
+  weeks.forEach(w=>reports.filter(r=>r.date===w).forEach(r=>{(byDist[r.district]=byDist[r.district]||[]).push(new Set(r.sundayPresent));}));
+  const perfect=[];
+  Object.entries(byDist).forEach(([d,sets])=>{ if(sets.length<weeks.length) return;
+    const first=[...sets[0]]; first.forEach(n=>{ if(sets.every(s=>s.has(n))) perfect.push(d+' '+n); });});
+  return perfect.length?`<div class="ok-box" style="margin-top:8px">🌟 최근 ${weeks.length}주 개근자(격려 대상): ${perfect.join(', ')}</div>`:'';
+}
+function stat(n,l,warn){return `<div class="stat${warn?' warn':''}"><div class="n">${n}</div><div class="l">${l}</div></div>`;}
+function drawChart(id,type,data,opts){if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(document.getElementById(id),{type,data,options:Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}}},opts)});}
+function resetAll(){if(confirm('모든 데이터를 지우고 초기화할까요?')){localStorage.removeItem(RKEY);localStorage.removeItem(SKEY);reports=null;subs=null;seedDemo(true);renderDash();alert('초기화되었습니다.');}}
+
+// ---------- boot ----------
+seedDemo(false);
+initGate(); initIntake();
+</script>
+</body>
+</html>

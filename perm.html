@@ -78,9 +78,9 @@ td.l,th.l{text-align:left}
       <tr>
         <th class="l">계정</th>
         <th class="l hidecol">소속·범위</th>
+        <th>구역보고</th>
         <th>피드백<br>열람</th>
         <th>피드백<br>처리</th>
-        <th>구역보고</th>
         <th>대시보드</th>
         <th class="l">로그인 시 메뉴</th>
       </tr>
@@ -140,9 +140,9 @@ function render(){
     return `<tr>
       <td class="l"><div class="who">${a.name.replace('2','')}<small><span class="rolechip r-${a.role}">${a.sub}</span></small></div></td>
       <td class="l hidecol">${a.scope}</td>
+      <td>${sw(i,'report',a.perm.report,lk('report'))}</td>
       <td>${sw(i,'fbView',a.perm.fbView,lk('fbView'))}</td>
       <td>${sw(i,'fbProc',a.perm.fbProc,lk('fbProc'))}</td>
-      <td>${sw(i,'report',a.perm.report,lk('report'))}</td>
       <td>${sw(i,'dash',a.perm.dash,lk('dash'))}</td>
       <td class="l"><div class="menuchips">${chipsHtml(a)}</div></td>
     </tr>`;

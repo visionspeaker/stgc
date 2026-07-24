@@ -9,7 +9,7 @@
 :root{--green:#3aa66e;--green2:#57b45f;--teal:#2fa58f;--blue:#3f8ed4;--blue2:#2e74b5;--blueSoft:#e8f1fb;--greenSoft:#e9f6ee;--lavSoft:#eef0fb;--bg:#f5f7fb;--card:#fff;--line:#e9edf3;--muted:#6b7686;--ink:#26313f;--ok:#16a34a;--warn:#d97706;--red:#dc2626}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
-.gate{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#e9f5ee,#e6f0fb)}
+.gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(20,28,45,.45)}
 .gatecard{background:#fff;border-radius:22px;padding:28px;max-width:920px;width:100%;box-shadow:0 24px 60px rgba(60,80,120,.18)}
 .gatecard .glogo{height:40px;display:block;margin:0 auto 14px}
 .gatecard h1{margin:0;font-size:20px;color:var(--green);text-align:center}
@@ -202,7 +202,7 @@ textarea.f-in{min-height:66px;resize:vertical}
   <div class="gatecard" style="max-width:400px">
     <span class="gx" onclick="closeLogin()">✕</span>
     <img class="glogo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회"/>
-    <h1>사역 운영 앱 로그인</h1>
+    <h1>온라인 시스템 로그인</h1>
     <div class="gsub">테스트베드 · 이름과 비밀번호로 로그인하세요. (기본 비밀번호 <b>1234</b>)</div>
     <label style="display:block;font-size:13px;font-weight:600;margin:10px 0 5px">이름</label>
     <input type="text" id="lgName" placeholder="예: 허미영" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px"/>
@@ -217,9 +217,9 @@ textarea.f-in{min-height:66px;resize:vertical}
 <div id="app" style="display:none">
 <header>
   <img class="logo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회" style="cursor:pointer" onclick="goHome()"/>
-  <div><h1>사역 운영 앱</h1><div class="sub"><span id="roleLabel"></span></div></div>
+  <div><h1>온라인 시스템</h1><div class="sub"><span id="roleLabel"></span></div></div>
   <button class="btn sec sm" style="margin-left:auto" onclick="goHome()">🏠 홈</button>
-  <button class="btn sec sm" onclick="logout()">로그아웃</button>
+  <button class="btn sec sm" id="logoutBtn" onclick="logout()">로그아웃</button>
   <nav id="nav"></nav>
 </header>
 <main>
@@ -352,7 +352,7 @@ textarea.f-in{min-height:66px;resize:vertical}
   <div class="card"><h2>미보고 구역</h2><div id="missingBoard"></div></div>
 </section>
 
-<div class="footer">송탄영광교회 사역 운영 앱 · 테스트베드 · 입력 내용은 공용 서버(구글 시트)에 저장되어 모든 기기·관리자 대시보드에 반영됩니다</div>
+<div class="footer">송탄영광교회 · 전교인 온라인 시스템 · 테스트베드 · 입력 내용은 공용 서버(구글 시트)에 저장되어 모든 기기·관리자 대시보드에 반영됩니다</div>
 </main>
 </div>
 
@@ -466,12 +466,12 @@ function goReport(){
 
 // ---------- role & nav ----------
 const ROLE_NAV={
- guest:[['intake','피드백·요청 접수'],['myreq','내 접수 조회']],
- member:[['intake','피드백·요청 접수'],['myreq','내 접수 조회']],
- leader:[['report','구역보고'],['intake','피드백·요청 접수'],['myreq','내 접수 조회']],
- chair:[['manage','피드백 접수 처리'],['intake','피드백·요청 접수']],
- staff:[['manage','피드백 접수 처리'],['intake','피드백·요청 접수']],
- admin:[['intake','피드백·요청 접수'],['report','구역보고'],['manage','접수 처리'],['dash','대시보드']]
+ guest:[],
+ member:[],
+ leader:[['report','구역보고']],
+ chair:[['manage','피드백 접수 처리']],
+ staff:[['manage','피드백 접수 처리']],
+ admin:[['report','구역보고'],['manage','접수 처리'],['dash','대시보드']]
 };
 const ROLE_LABEL={guest:'교인',member:'일반 교인',leader:'구역장',chair:'위원장',staff:'부장',admin:'관리자(교역자·담임목사)'};
 function setRoleLabel(){
@@ -482,6 +482,7 @@ function setRoleLabel(){
   if(role==='staff') who+=' <span class="rolechip">'+catName(current.category)+' 부장</span>';
   if(role==='admin'&&current.who) who+=' <span class="rolechip">'+current.who+'</span>';
   document.getElementById('roleLabel').innerHTML=who;
+  const lb=document.getElementById('logoutBtn'); if(lb) lb.style.display=(role==='guest'||role==='member')?'none':'';
 }
 function enterApp(role,scope){
   current=Object.assign({role},scope||{});
@@ -505,11 +506,14 @@ function showView(v){
 }
 function buildNav(view){
   const nav=document.getElementById('nav');
-  const items=ROLE_NAV[current.role]||ROLE_NAV.guest;
-  const first=view||items[0][0];
-  nav.innerHTML=items.map(it=>`<button data-v="${it[0]}" class="${it[0]===first?'active':''}">${it[1]}</button>`).join('');
-  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{
-    nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');showView(b.dataset.v);});
+  const items=ROLE_NAV[current.role]||[];
+  const first=view||(items[0]&&items[0][0])||'intake';
+  if(!items.length){ nav.innerHTML=''; nav.style.display='none'; }
+  else { nav.style.display='flex';
+    nav.innerHTML=items.map(it=>`<button data-v="${it[0]}" class="${it[0]===first?'active':''}">${it[1]}</button>`).join('');
+    nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+      nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');showView(b.dataset.v);});
+  }
   showView(first);
 }
 

@@ -162,6 +162,20 @@ textarea.f-in{min-height:66px;resize:vertical}
 .step{padding:3px 11px;border-radius:20px;background:#eef2f7;color:#94a3b8;font-weight:700}
 .step.on{background:var(--green);color:#fff}
 .reply{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:9px;padding:9px 11px;font-size:12.5px;margin-top:9px;line-height:1.5}
+/* ===== 접수 처리 카드 ===== */
+.subcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(60,80,120,.05)}
+.subcard.over{border-color:#fecaca;background:#fff8f8}
+.sc-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.sc-date{margin-left:auto;color:var(--muted);font-size:12px}
+.sc-title{font-size:17px;font-weight:800;color:var(--ink);line-height:1.35}
+.sc-meta{color:var(--muted);font-size:12.5px;margin:6px 0 9px;line-height:1.5}
+.sc-body{background:#f7f9fc;border:1px solid var(--line);border-radius:11px;padding:11px 13px;font-size:14.5px;line-height:1.55;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+.sc-who{font-size:13.5px;color:var(--ink);margin:10px 0 0}
+.sc-ctl{border-top:1px dashed var(--line);margin-top:12px;padding-top:12px}
+.sc-l{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:10px 0 6px}
+.sc-l:first-child{margin-top:0}
+.subcard textarea.f-in{min-height:56px}
+.subcard select.f-in{height:46px}
 </style>
 </head>
 <body>
@@ -323,9 +337,7 @@ textarea.f-in{min-height:66px;resize:vertical}
       <button data-f="완료">완료</button>
       <button data-f="반려">반려</button>
     </div>
-    <div style="overflow-x:auto"><table id="subTable"><thead>
-      <tr><th>접수일</th><th>유형</th><th>분류/담당</th><th>제목</th><th>내용</th><th>접수자</th><th>상태</th><th>변경</th></tr>
-    </thead><tbody></tbody></table></div>
+    <div id="subList"></div>
   </div>
 </section>
 
@@ -684,12 +696,11 @@ document.querySelectorAll('#mgFilter button').forEach(b=>b.onclick=()=>{
 function hoursSince(iso){return (Date.now()-new Date(iso).getTime())/3600000;}
 function isOverdue(s){return s.status==='접수' && hoursSince(s.ts)>48;}
 function renderSubs(){
-  const tb=document.querySelector('#subTable tbody');
+  const box=document.getElementById('subList');
   const scope=document.getElementById('mgScope');
   const scoped=(current.role==='chair'||current.role==='staff');
   let base = scoped ? subs.filter(s=>s.category===current.category) : subs;
   scope.textContent = scoped ? '· 담당: '+catName(current.category)+' ('+base.length+'건)' : '· 전체 위원회';
-  // 부담 관리 요약
   const open=base.filter(s=>s.status==='접수'||s.status==='처리중'||s.status==='보류').length;
   const overdue=base.filter(isOverdue).length;
   const done=base.filter(s=>s.status==='완료'||s.status==='반려').length;
@@ -698,14 +709,21 @@ function renderSubs(){
     `<div class="sumbox ${overdue?'warn':''}"><b>${overdue}</b>접수 48시간 초과 미확인</div>`+
     `<div class="sumbox"><b>${done}</b>완료·반려</div>`;
   const list=base.filter(s=>mgF==='전체'||s.status===mgF);
-  tb.innerHTML=list.map(s=>{const idx=subs.indexOf(s);
-    return `<tr class="${isOverdue(s)?'over':''}"><td>${fmtDT(s.ts)}${isOverdue(s)?'<br><span class="badge b-반려">지연</span>':''}</td><td>${s.type}</td><td>${catName(s.category)}<br><span class="muted">${s.assignee}</span></td>
-    <td>${s.title}</td><td class="muted">${s.body||'-'}</td><td>${s.name}${s.contact?'<br><span class="muted">'+s.contact+'</span>':''}</td>
-    <td><span class="badge b-${s.status}">${s.status}</span></td>
-    <td><select class="sm" onchange="setStatus(${idx},this.value)">
-      ${['접수','처리중','보류','완료','반려'].map(o=>`<option ${o===s.status?'selected':''}>${o}</option>`).join('')}</select>
-      <div style="margin-top:5px"><input type="text" class="sm" placeholder="회신/반려 사유" value="${s.reply||''}" onchange="setReply(${idx},this.value)" style="font-size:12px"/></div></td></tr>`;
-  }).join('')|| '<tr><td colspan=8 class="muted">해당 조건의 접수가 없습니다.</td></tr>';
+  box.innerHTML=list.map(s=>{const idx=subs.indexOf(s);const od=isOverdue(s);
+    return `<div class="subcard ${od?'over':''}">
+      <div class="sc-top"><span class="fbadge s-${s.status}">${s.status}</span>${od?'<span class="fbadge s-보류">48시간 초과</span>':''}<span class="sc-date">${fmtDT(s.ts)}</span></div>
+      <div class="sc-title">${s.title}</div>
+      <div class="sc-meta">${s.type} · ${catName(s.category)} · 담당 <b>${s.assignee}</b></div>
+      <div class="sc-body">${s.body||'(내용 없음)'}</div>
+      <div class="sc-who">접수자 <b>${s.name}</b>${s.contact?' · '+s.contact:''}</div>
+      <div class="sc-ctl">
+        <label class="sc-l">상태 변경</label>
+        <select class="f-in" onchange="setStatus(${idx},this.value)">${['접수','처리중','보류','완료','반려'].map(o=>`<option ${o===s.status?'selected':''}>${o}</option>`).join('')}</select>
+        <label class="sc-l">회신 / 반려 사유</label>
+        <textarea class="f-in" placeholder="처리 결과나 반려 사유를 적어 회신하세요" onchange="setReply(${idx},this.value)">${s.reply||''}</textarea>
+      </div>
+    </div>`;
+  }).join('') || '<div class="mini" style="margin-top:12px">해당 조건의 접수가 없습니다.</div>';
 }
 function setStatus(i,v){subs[i].status=v;saveS();pushSub(subs[i]);renderSubs();}
 function setReply(i,v){subs[i].reply=v;saveS();pushSub(subs[i]);}

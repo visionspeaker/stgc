@@ -184,7 +184,7 @@ textarea.f-in{min-height:66px;resize:vertical}
 <div id="home" class="home">
   <div class="hbar">
     <img class="logo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회"/>
-    <button class="pwr" onclick="openLogin()" title="로그인">
+    <button class="pwr" onclick="pwrTap()" title="로그인">
       <svg width="30" height="30" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         <clipPath id="loginClip"><circle cx="24" cy="24" r="18.5"/></clipPath>
         <circle cx="24" cy="24" r="20"/><circle cx="24" cy="19.5" r="6.6"/>
@@ -390,6 +390,11 @@ const RKEY='sgc_reports_v6', SKEY='sgc_subs_v6';
 let reports = JSON.parse(localStorage.getItem(RKEY)||'null');
 let subs = JSON.parse(localStorage.getItem(SKEY)||'null');
 let current=null;     // {role, district?, category?}
+const SESS_KEY='sgc_session_v1';
+function saveSession(){ try{ if(current&&current.role&&current.role!=='guest') localStorage.setItem(SESS_KEY,JSON.stringify(current)); }catch(e){} }
+function clearSession(){ try{ localStorage.removeItem(SESS_KEY); }catch(e){} }
+function loadSession(){ try{ const s=JSON.parse(localStorage.getItem(SESS_KEY)||'null'); if(s&&s.role&&s.role!=='guest') return s; }catch(e){} return null; }
+function pwrTap(){ if(current&&current.role!=='guest') openApp(); else openLogin(); }
 let reportDist=null;  // 구역보고 대상 구역
 function saveR(){localStorage.setItem(RKEY,JSON.stringify(reports))}
 function saveS(){localStorage.setItem(SKEY,JSON.stringify(subs))}
@@ -501,6 +506,7 @@ function setRoleLabel(){
 }
 function enterApp(role,scope){
   current=Object.assign({role},scope||{});
+  saveSession();
   document.getElementById('home').style.display='none';
   document.getElementById('loginGate').style.display='none';
   document.getElementById('app').style.display='block';
@@ -509,7 +515,7 @@ function enterApp(role,scope){
   loadAll();
   window.scrollTo(0,0);
 }
-function logout(){current=null;['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
+function logout(){current=null;clearSession();['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
 function showView(v){
   currentView=v;
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
@@ -805,6 +811,8 @@ function resetAll(){if(confirm('모든 데이터를 지우고 초기화할까요
 // ---------- boot ----------
 seedDemo(false);
 initIntake();
+/* 로그인 유지: 저장된 세션 복원 (로그아웃 전까지 유지) */
+const _sess=loadSession(); if(_sess) current=_sess;
 /* 첫 화면 = 홈 런처 */
 document.getElementById('home').style.display='block';
 document.getElementById('app').style.display='none';

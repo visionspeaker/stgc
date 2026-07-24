@@ -6,85 +6,80 @@
 <title>송탄영광교회 사역 운영 앱 (시제품)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{--blue:#1f4e79;--blue2:#2e74b5;--bg:#f4f6f9;--card:#fff;--line:#e2e8f0;--muted:#64748b;--ok:#16a34a;--warn:#d97706;--red:#dc2626}
-*{box-sizing:border-box}
-body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-system,sans-serif;background:var(--bg);color:#1e293b}
-/* login gate */
-.gate{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#1f4e79,#2e74b5)}
-.gatecard{background:#fff;border-radius:16px;padding:26px;max-width:920px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.25)}
-.gatecard h1{margin:0;font-size:20px;color:var(--blue)}
-.gatecard .gsub{color:var(--muted);font-size:13px;margin:6px 0 18px}
-.rolebox{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
-.rolecard{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px}
-.rolecard h3{margin:0;font-size:15px;color:var(--blue)}
-.rolecard p{margin:0 0 4px;font-size:12px;color:var(--muted);min-height:32px}
-.rolecard select,.rolecard input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:inherit}
-.rolecard .btn{margin-top:auto}
-/* app */
-header{background:var(--blue);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.12)}
-header h1{font-size:16px;margin:0;font-weight:700}
-header .sub{font-size:12px;opacity:.85}
-nav{display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-top:4px}
-nav button{background:rgba(255,255,255,.12);color:#fff;border:0;padding:8px 13px;border-radius:8px;font-size:13.5px;cursor:pointer;font-weight:600}
-nav button.active{background:#fff;color:var(--blue)}
+:root{--green:#3aa66e;--green2:#57b45f;--teal:#2fa58f;--blue:#3f8ed4;--blue2:#2e74b5;--blueSoft:#e8f1fb;--greenSoft:#e9f6ee;--lavSoft:#eef0fb;--bg:#f5f7fb;--card:#fff;--line:#e9edf3;--muted:#6b7686;--ink:#26313f;--ok:#16a34a;--warn:#d97706;--red:#dc2626}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
+.gate{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,#e9f5ee,#e6f0fb)}
+.gatecard{background:#fff;border-radius:22px;padding:28px;max-width:920px;width:100%;box-shadow:0 24px 60px rgba(60,80,120,.18)}
+.gatecard .glogo{height:40px;display:block;margin:0 auto 14px}
+.gatecard h1{margin:0;font-size:20px;color:var(--green);text-align:center}
+.gatecard .gsub{color:var(--muted);font-size:13px;margin:6px 0 18px;text-align:center}
+header{background:#fff;color:var(--ink);padding:11px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:10;box-shadow:0 1px 0 var(--line),0 4px 14px rgba(60,80,120,.06)}
+header .logo{height:30px;display:block}
+header h1{font-size:15.5px;margin:0;font-weight:800;letter-spacing:-.3px;background:linear-gradient(90deg,#6fbf46,#2fa58f);-webkit-background-clip:text;background-clip:text;color:transparent}
+header .sub{font-size:11.5px;color:var(--muted)}
+nav{display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-top:6px}
+nav button{background:#f1f4f9;color:var(--ink);border:0;padding:8px 15px;border-radius:22px;font-size:13.5px;cursor:pointer;font-weight:700}
+nav button.active{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;box-shadow:0 4px 12px rgba(47,165,143,.25)}
 main{max-width:1080px;margin:0 auto;padding:18px}
 .view{display:none}.view.active{display:block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.card h2{margin:0 0 4px;font-size:16px;color:var(--blue)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(60,80,120,.05)}
+.card h2{margin:0 0 4px;font-size:16px;color:var(--green)}
 .card p.desc{margin:0 0 14px;color:var(--muted);font-size:13px}
-label{display:block;font-size:13px;font-weight:600;margin:12px 0 5px}
-input[type=text],input[type=password],input[type=date],input[type=time],select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit;background:#fff}
+label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:12px 0 5px}
+input[type=text],input[type=password],input[type=date],input[type=time],select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;color:var(--ink)}
 textarea{min-height:70px;resize:vertical}
-.btn{background:var(--blue);color:#fff;border:0;padding:11px 20px;border-radius:9px;font-size:14.5px;font-weight:700;cursor:pointer}
-.btn:hover{background:#173a5c}
-.btn.sec{background:#eef2f7;color:var(--blue)}
-.btn.sm{padding:6px 12px;font-size:12.5px;border-radius:7px}
+.btn{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;padding:12px 22px;border-radius:13px;font-size:14.5px;font-weight:800;cursor:pointer}
+.btn:hover{filter:brightness(.97)}
+.btn.sec{background:#eef2f7;color:var(--green)}
+.btn.sm{padding:7px 13px;font-size:12.5px;border-radius:10px}
 .row{display:flex;gap:12px;flex-wrap:wrap}.row>div{flex:1;min-width:180px}
 .roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:7px;margin-top:6px}
-.chip{display:flex;align-items:center;gap:6px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:13.5px;cursor:pointer;user-select:none}
-.chip input{margin:0}.chip.on{background:#e8f2fd;border-color:var(--blue2)}
+.chip{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13.5px;cursor:pointer;user-select:none}
+.chip input{margin:0}.chip.on{background:var(--greenSoft);border-color:var(--green);color:var(--green);font-weight:700}
 .absent-item{display:flex;gap:8px;align-items:center;margin:6px 0}
-.absent-item .nm{min-width:64px;font-weight:600;font-size:13.5px}
+.absent-item .nm{min-width:64px;font-weight:700;font-size:13.5px}
 .absent-item select{width:auto;min-width:104px}.absent-item input{flex:1}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-.stat{background:linear-gradient(135deg,#fff,#f7fafd);border:1px solid var(--line);border-radius:12px;padding:14px}
-.stat .n{font-size:26px;font-weight:800;color:var(--blue)}.stat .l{font-size:12.5px;color:var(--muted);margin-top:2px}
-.stat.warn .n{color:var(--warn)}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+.stat .n{font-size:26px;font-weight:800;color:var(--green)}.stat .l{font-size:12.5px;color:var(--muted);margin-top:2px}
+.stat.warn .n{color:var(--red)}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left}
-th{background:#f1f5f9;font-size:12.5px}
-.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700}
-.b-접수{background:#e0edfb;color:#1d4ed8}.b-처리중{background:#fef3c7;color:#b45309}.b-보류{background:#f3e8ff;color:#7c3aed}.b-완료{background:#dcfce7;color:#15803d}.b-반려{background:#fee2e2;color:#b91c1c}
+th,td{border-bottom:1px solid var(--line);padding:9px 6px;text-align:left}
+th{background:#f6f8fb;font-size:12.5px;color:var(--muted)}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:800}
+.b-접수{background:#e0edfb;color:#1d4ed8}.b-처리중{background:#fef3c7;color:#b45309}.b-보류{background:#fee2e2;color:#b91c1c}.b-완료{background:#dcfce7;color:#15803d}.b-반려{background:#f3e8ff;color:#7c3aed}
 tr.over td{background:#fff6f6}
 .tag{display:inline-block;font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:6px;margin-left:6px;vertical-align:middle}
-.tag-req{background:#e0edfb;color:#1d4ed8}.tag-opt{background:#f1f5f9;color:#64748b}
+.tag-req{background:#e0edfb;color:#1d4ed8}.tag-opt{background:#eef1f6;color:#7a8595}
 .sumstrip{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-.sumbox{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12.5px}
-.sumbox b{font-size:16px;color:var(--blue);display:block}
+.sumbox{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:12.5px}
+.sumbox b{font-size:16px;color:var(--green);display:block}
 .sumbox.warn b{color:var(--red)}
-.care{background:#fff5f5;border:1px solid #fecaca;border-radius:9px;padding:9px 11px;margin:5px 0;font-size:13px}
+.care{background:#fff5f5;border:1px solid #fecaca;border-radius:10px;padding:9px 11px;margin:5px 0;font-size:13px}
 .care b{color:#b91c1c}
-.pill{display:inline-block;background:#eef2f7;color:var(--blue);border-radius:20px;padding:3px 10px;font-size:12px;margin:2px 4px 2px 0}
-.notice{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:9px;padding:10px 12px;font-size:12.5px;margin-bottom:12px}
-.ok-box{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:9px;padding:12px;font-size:13.5px;margin-top:12px}
+.pill{display:inline-block;background:var(--greenSoft);color:var(--green);border-radius:20px;padding:3px 11px;font-size:12px;font-weight:700;margin:2px 4px 2px 0}
+.notice{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.55;margin-bottom:12px}
+.ok-box{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:10px;padding:12px;font-size:13.5px;margin-top:12px}
 .muted{color:var(--muted);font-size:12.5px}
 .hl{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:8px;padding:8px 10px;font-size:13px;margin:4px 0}
 .tabbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.tabbar button{background:#eef2f7;border:0;padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer;font-weight:600;color:var(--blue)}
-.tabbar button.active{background:var(--blue);color:#fff}
+.tabbar button{background:#eef2f7;border:0;padding:8px 15px;border-radius:20px;font-size:13px;cursor:pointer;font-weight:700;color:var(--green)}
+.tabbar button.active{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff}
 canvas{max-height:280px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:720px){.grid2{grid-template-columns:1fr}}
 .footer{color:var(--muted);font-size:11.5px;text-align:center;padding:20px}
-.rolechip{display:inline-block;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 10px;font-size:11.5px;margin-left:4px}
+.rolechip{display:inline-block;background:var(--greenSoft);color:var(--green);border-radius:20px;padding:2px 10px;font-size:11.5px;font-weight:700;margin-left:4px}
 </style>
 </head>
 <body>
 
 <!-- ================= LOGIN GATE ================= -->
 <div id="loginGate" class="gate">
-  <div class="gatecard" style="max-width:420px">
-    <h1>송탄영광교회 · 사역 운영 앱</h1>
+  <div class="gatecard" style="max-width:400px">
+    <img class="glogo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회"/>
+    <h1>사역 운영 앱</h1>
     <div class="gsub">테스트베드 · 이름과 비밀번호로 로그인하세요. (기본 비밀번호 <b>1234</b>)</div>
     <label style="display:block;font-size:13px;font-weight:600;margin:10px 0 5px">이름</label>
     <input type="text" id="lgName" placeholder="예: 허미영" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px"/>
@@ -98,7 +93,8 @@ canvas{max-height:280px}
 <!-- ================= APP ================= -->
 <div id="app" style="display:none">
 <header>
-  <div><h1>송탄영광교회 · 사역 운영 앱</h1><div class="sub">시제품 · <span id="roleLabel"></span></div></div>
+  <img class="logo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회"/>
+  <div><h1>사역 운영 앱</h1><div class="sub"><span id="roleLabel"></span></div></div>
   <button class="btn sec sm" style="margin-left:auto" onclick="logout()">로그아웃</button>
   <nav id="nav"></nav>
 </header>

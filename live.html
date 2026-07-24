@@ -220,8 +220,7 @@ canvas{max-height:280px}
       <h2 style="margin:0">구역보고 대시보드</h2>
       <label style="margin:0;font-weight:600">주일 선택</label>
       <select id="weekSel" style="width:auto" onchange="renderDash()"></select>
-      <button class="btn sec sm" style="margin-left:auto" onclick="seedDemo(true)">데모 데이터 재생성</button>
-      <button class="btn sec sm" onclick="resetAll()">전체 초기화</button>
+      <button class="btn sec sm" style="margin-left:auto" onclick="loadAll()">↻ 새로고침</button>
     </div>
   </div>
   <div class="card"><div class="cards" id="statCards"></div></div>
@@ -238,7 +237,7 @@ canvas{max-height:280px}
   <div class="card"><h2>미보고 구역</h2><div id="missingBoard"></div></div>
 </section>
 
-<div class="footer">송탄영광교회 사역 운영 앱 시제품 · 데이터는 이 브라우저에만 저장됩니다(localStorage) · 실제 배포 시 서버·권한 인증 연동</div>
+<div class="footer">송탄영광교회 사역 운영 앱 · 테스트베드 · 입력 내용은 공용 서버(구글 시트)에 저장되어 모든 기기·관리자 대시보드에 반영됩니다</div>
 </main>
 </div>
 

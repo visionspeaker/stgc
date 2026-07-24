@@ -139,6 +139,7 @@ body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-syste
 .cnt{display:flex;flex-direction:column;align-items:center;gap:4px}
 .cnt .cl{font-size:10.5px;color:var(--muted);font-weight:700}
 .cbtn{width:54px;height:42px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:16px;font-weight:800;color:var(--ink);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.cpick{width:64px;height:42px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:15px;font-weight:800;color:var(--ink);text-align:center;padding:0 4px;cursor:pointer}
 .cbtn.pos{background:var(--greenSoft);border-color:var(--green);color:var(--green)}
 .fbadge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:800}
 .s-접수{background:#e0edfb;color:#1d4ed8}.s-처리중{background:#fef3c7;color:#b45309}.s-완료{background:#dcfce7;color:#15803d}.s-보류{background:#fee2e2;color:#b91c1c}
@@ -281,15 +282,15 @@ body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-syste
         <input class="f-in" placeholder="한 줄 요약"/>
         <div class="f-label">내용</div>
         <textarea class="f-in" style="min-height:64px" placeholder="자세한 내용을 적어주세요"></textarea>
-        <div class="f-label">이름 (선택)</div>
-        <input class="f-in" placeholder="익명 가능"/>
-        <div class="f-label">연락처 (선택)</div>
-        <input class="f-in" placeholder="전화번호 또는 메일 주소"/>
-        <div class="f-toggle"><input type="checkbox"/> 익명으로 접수 (이름·연락처 숨김)</div>
-        <div class="f-note">익명 제출 시 접수는 되지만 <b>개별 회신을 받을 수 없습니다.</b> 답변이 필요하시면 반드시 이름·연락처를 남겨 주세요.</div>
+        <div class="f-label">이름 <span class="req" id="reqName">*</span></div>
+        <input class="f-in" id="fbName" placeholder="이름"/>
+        <div class="f-label">연락처 <span class="req" id="reqContact">*</span></div>
+        <input class="f-in" id="fbContact" placeholder="전화번호 또는 메일 주소"/>
+        <div class="f-toggle"><input type="checkbox" id="fbAnon" onchange="fbAnonToggle()"/> 익명으로 접수 (이름·연락처 숨김)</div>
+        <div class="f-note">평소 이름·연락처는 <b>필수</b>입니다. 익명으로 접수하면 필수가 해제되지만 <b>개별 회신을 받을 수 없습니다.</b></div>
         <div class="f-label">조회용 비밀번호 (숫자 4자리) <span class="req">*</span></div>
         <input class="f-in" type="password" maxlength="4" placeholder="예: 전화번호 뒷자리"/>
-        <button class="f-primary" onclick="toast('접수 시안 — 실제 저장은 스프레드시트 연동 시')">접수하기</button>
+        <button class="f-primary" onclick="fbSubmit()">접수하기</button>
       </div>
     </div></div>
     <div class="cap">📝 <b>교인 피드백</b> — 유형·분류 선택 시 담당자가 자동 배정되고, 익명 안내·조회용 비밀번호까지 앱 스타일로. 접수 내용은 (연동 시) 스프레드시트에 누적.</div>
@@ -385,17 +386,32 @@ function openLogin(){document.getElementById('loginSheet').classList.add('on');}
 function closeLogin(){document.getElementById('loginSheet').classList.remove('on');}
 let tmr;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tmr);tmr=setTimeout(()=>t.classList.remove('show'),1900);}
 function openL(u){window.open(u,'_blank','noopener,noreferrer');}
+function fbAnonToggle(){
+  const a=document.getElementById('fbAnon').checked;
+  ['fbName','fbContact'].forEach(id=>{const el=document.getElementById(id);el.disabled=a;if(a)el.value='';el.style.opacity=a?'.45':'1';});
+  document.getElementById('reqName').style.display=a?'none':'inline';
+  document.getElementById('reqContact').style.display=a?'none':'inline';
+}
+function fbSubmit(){
+  if(!document.getElementById('fbAnon').checked){
+    const n=document.getElementById('fbName').value.trim(), c=document.getElementById('fbContact').value.trim();
+    if(!n||!c){toast('이름과 연락처는 필수입니다. (익명 원하시면 ‘익명으로 접수’ 체크)');return;}
+  }
+  toast('접수 시안 — 실제 저장은 스프레드시트 연동 시');
+}
 
 /* ===== 구역보고 인터랙티브 ===== */
 const R3=['허미영','권보상','김중원','유미경','김성진','장선정','배용훈','이미연','이진완','김하나','임광진','김보라'];
 const TG=['1부','2부','오후','수요','금요','구역'];
-const CT=[['새벽',7],['성경',30],['QT(가정)',7]];
+const CT=[['새벽',7],['성경',100],['QT(가정)',7]];
 const REASONS3=['선택','개인사정','건강','여행','직장','확인안됨','장기결석','기타'];
 const A3={}; R3.forEach(n=>A3[n]={t:{},c:{'새벽':0,'성경':0,'QT(가정)':0}});
-const MONTHS3=[{y:2026,m:5},{y:2026,m:6},{y:2026,m:7}];
-let selWeek='2026-07-12', openMonth=7, lastAbsKey='';
+function lastSundayISO(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function buildMonths(){const out=[];const base=new Date();base.setDate(1);for(let i=2;i>=0;i--){const x=new Date(base);x.setMonth(base.getMonth()-i);out.push({y:x.getFullYear(),m:x.getMonth()+1});}return out;}
+const MONTHS3=buildMonths();
+let selWeek=lastSundayISO(), openMonth=parseInt(lastSundayISO().slice(5,7),10), lastAbsKey='';
 function sundaysOf(y,m){const out=[];const d=new Date(y,m-1,1);while(d.getMonth()===m-1){if(d.getDay()===0)out.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));d.setDate(d.getDate()+1);}return out;}
-function isDone(d){return d<'2026-07-12';}
+function isDone(d){return d<selWeek;}
 function fmtK(d){const p=d.split('-');return p[0]+'. '+p[1]+'. '+p[2]+' (주일)';}
 function toggleDate(){const p=document.getElementById('datePanel');const open=p.style.display==='none';p.style.display=open?'block':'none';document.getElementById('dateBtn').classList.toggle('open',open);}
 function renderDatePick(){
@@ -412,23 +428,16 @@ function initReport3(){
   const box=document.getElementById('roster3');
   box.innerHTML=R3.map(n=>{
     const tg=TG.map(t=>`<button class="tgl" data-n="${n}" data-t="${t}">${t}</button>`).join('');
-    const ct=CT.map(([k,mx])=>`<div class="cnt"><span class="cl">${k}</span><button class="cbtn" data-n="${n}" data-k="${k}" data-max="${mx}">0</button></div>`).join('');
+    const ct=CT.map(([k,mx])=>`<div class="cnt"><span class="cl">${k}</span><select class="cpick" data-n="${n}" data-k="${k}">${Array.from({length:mx+1},(_,i)=>`<option>${i}</option>`).join('')}</select></div>`).join('');
     return `<div class="prow" data-n="${n}"><div class="phead"><span class="pn">${n}</span><span class="psum">미체크</span><span class="pcar">▾</span></div>
-      <div class="pdetail"><div class="tgls">${tg}</div><div class="cnts">${ct}</div>
-      <div class="mini" style="margin-top:8px">숫자(새벽·성경·QT): 탭하면 +1, 길게 누르면 0으로 초기화</div></div></div>`;
+      <div class="pdetail"><div class="tgls">${tg}</div><div class="cnts">${ct}</div></div></div>`;
   }).join('');
   box.querySelectorAll('.phead').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
   box.querySelectorAll('.tgl').forEach(b=>b.onclick=()=>{
     const n=b.dataset.n,t=b.dataset.t; A3[n].t[t]=!A3[n].t[t]; b.classList.toggle('on',A3[n].t[t]);
     updSummary(n); if(t==='1부'||t==='2부'){recompAbsent3();} updSun();
   });
-  box.querySelectorAll('.cbtn').forEach(b=>{
-    const n=b.dataset.n,k=b.dataset.k,mx=+b.dataset.max; let timer,held;
-    b.addEventListener('pointerdown',()=>{held=false;timer=setTimeout(()=>{held=true;A3[n].c[k]=0;paintCnt(b,0);updSummary(n);},430);});
-    b.addEventListener('pointerup',()=>{clearTimeout(timer);if(!held){A3[n].c[k]=Math.min(A3[n].c[k]+1,mx);paintCnt(b,A3[n].c[k]);updSummary(n);}});
-    b.addEventListener('pointerleave',()=>clearTimeout(timer));
-    b.addEventListener('contextmenu',e=>e.preventDefault());
-  });
+  box.querySelectorAll('.cpick').forEach(s=>s.onchange=()=>{const n=s.dataset.n,k=s.dataset.k;A3[n].c[k]=parseInt(s.value)||0;updSummary(n);});
   recompAbsent3(); updSun();
 }
 function paintCnt(b,v){b.textContent=v;b.classList.toggle('pos',v>0);}

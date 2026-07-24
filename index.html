@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>송탄영광교회 · 전교인 온라인 시스템</title>
+<style>
+:root{--green:#3aa66e;--teal:#2fa58f;--bg:#f4f6fb;--card:#fff;--line:#e7ebf2;--muted:#6b7686;--ink:#26313f}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}
+.box{max-width:460px;width:100%}
+.head{text-align:center;margin-bottom:22px}
+.head img{height:44px}
+.head h1{font-size:19px;color:var(--green);margin:14px 0 4px}
+.head p{color:var(--muted);font-size:13px;margin:0}
+.card{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;text-decoration:none;color:inherit;box-shadow:0 1px 3px rgba(60,80,120,.05);transition:transform .08s}
+.card:active{transform:scale(.98)}
+.ic{width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto}
+.ic.a{background:linear-gradient(135deg,#57b45f,#2fa58f)}
+.ic.b{background:linear-gradient(135deg,#5aa2ea,#3f78d4)}
+.card b{font-size:16px}
+.card small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.card .arw{margin-left:auto;color:#cfd6df;font-size:20px}
+.foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:18px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="head">
+    <img src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회"/>
+    <h1>전교인 온라인 시스템</h1>
+    <p>시안(prototype) · 스마트폰·PC에서 확인용</p>
+  </div>
+  <a class="card" href="app.html">
+    <div class="ic a"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
+    <div><b>앱 디자인 샘플</b><small>홈 · 피드백 · 피드백 확인 · 구역보고</small></div>
+    <span class="arw">›</span>
+  </a>
+  <a class="card" href="dashboard.html">
+    <div class="ic b"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 13h6V4H4zM14 20h6v-9h-6zM14 8h6V4h-6zM4 20h6v-4H4z"/></svg></div>
+    <div><b>관리자 대시보드 시안</b><small>출석·목양·피드백 현황 (PC 권장)</small></div>
+    <span class="arw">›</span>
+  </a>
+  <div class="foot">디자인·기능 시안입니다. 실제 데이터 저장(구역보고·피드백)은 구글 스프레드시트 연동 시 반영됩니다.</div>
+</div>
+</body>
+</html>

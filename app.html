@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>송탄영광교회 앱 · 디자인 샘플</title>
+<style>
+:root{
+  --green:#3aa66e;--green2:#57b45f;--teal:#2fa58f;--blue:#3f8ed4;
+  --lav:#8f90c4;--lav2:#a7a6da;--lavSoft:#eef0fb;--greenSoft:#e9f6ee;--blueSoft:#e8f1fb;
+  --bg:#f5f7fb;--card:#fff;--line:#e9edf3;--muted:#6b7686;--ink:#26313f;--red:#dc2626;
+}
+:root[data-theme="white"]{--appbar:#ffffff;--appInk:#26313f;--appSub:#8a94a3;--barShadow:0 1px 0 var(--line)}
+:root[data-theme="green"]{--appbar:linear-gradient(135deg,#57b45f,#2fa58f);--appInk:#fff;--appSub:rgba(255,255,255,.85);--barShadow:0 6px 16px rgba(47,165,143,.22)}
+:root[data-theme="lav"]{--appbar:linear-gradient(135deg,#9092c8,#aeacdf);--appInk:#fff;--appSub:rgba(255,255,255,.9);--barShadow:0 6px 16px rgba(143,144,196,.25)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:1240px;margin:0 auto;padding:26px 18px 60px}
+.head{text-align:center;margin-bottom:14px}
+.head h1{margin:0;font-size:22px;color:var(--green)}
+.head p{margin:6px 0 0;color:var(--muted);font-size:13px}
+.themes{display:flex;gap:8px;justify-content:center;margin:16px 0 26px;flex-wrap:wrap}
+.themes button{border:1px solid var(--line);background:#fff;border-radius:22px;padding:8px 15px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.themes button .dot{width:14px;height:14px;border-radius:50%}
+.themes button.active{border-color:var(--green);box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 22%,transparent)}
+.stage{display:flex;gap:34px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.col{display:flex;flex-direction:column;align-items:center}
+
+.phone{width:340px;flex:0 0 auto;border-radius:44px;background:#dfe4ec;padding:12px;box-shadow:0 30px 70px rgba(60,80,120,.22)}
+.screen{background:var(--bg);border-radius:34px;overflow:hidden;height:720px;overflow-y:auto;position:relative}
+.screen::-webkit-scrollbar{width:0}
+.stat{display:flex;justify-content:space-between;align-items:center;padding:10px 20px 4px;font-size:13px;font-weight:700;color:var(--appInk);background:var(--appbar)}
+.appbar{background:var(--appbar);color:var(--appInk);padding:6px 18px 16px;box-shadow:var(--barShadow)}
+.appbar .top{display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .word{font-size:18px;font-weight:800;letter-spacing:-.4px;background:linear-gradient(90deg,#6fbf46,#2fa58f);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-theme="green"] .brand .word,:root[data-theme="lav"] .brand .word{background:none;-webkit-text-fill-color:#fff;color:#fff}
+.brand .sub{display:block;font-size:9.5px;color:var(--appSub);font-weight:600;letter-spacing:1px;margin-bottom:1px}
+.logobox{display:inline-flex;align-items:center}
+:root[data-theme="green"] .logobox,:root[data-theme="lav"] .logobox{background:#fff;border-radius:11px;padding:5px 10px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.herolinks{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:13px;font-weight:700}
+.herolinks span{cursor:default;display:inline-flex;align-items:center;gap:4px}
+.herolinks i{width:1px;height:12px;background:rgba(255,255,255,.55);display:inline-block}
+.fbbox{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:22px;cursor:pointer;box-shadow:0 1px 3px rgba(60,80,120,.05)}
+.fbbox .fi{width:44px;height:44px;border-radius:13px;background:var(--lavSoft);color:var(--lav);display:flex;align-items:center;justify-content:center}
+.fbbox b{font-size:14.5px}.fbbox small{display:block;color:var(--muted);font-size:11px;margin-top:1px}
+.fbbox .arrow{margin-left:auto;color:#cfd6df;font-size:18px}
+.visitor{text-align:center;color:var(--muted);font-size:12.5px;margin:16px 0 8px}
+.visitor b{color:var(--ink)}
+.appbar .ico{margin-left:auto;display:flex;gap:12px;align-items:center}
+.pwr{width:40px;height:40px;border-radius:50%;background:color-mix(in srgb,var(--green) 10%,#fff);display:flex;align-items:center;justify-content:center;color:var(--green);cursor:pointer;border:0}
+:root[data-theme="green"] .pwr,:root[data-theme="lav"] .pwr{background:rgba(255,255,255,.18);color:#fff}
+.hero{margin:14px 16px 0;background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border-radius:18px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 10px 24px rgba(47,165,143,.24)}
+.hero .k{font-size:10.5px;opacity:.9;letter-spacing:1.5px}
+.hero h2{margin:5px 0 3px;font-size:18px}
+.hero p{margin:0;font-size:12px;opacity:.92}
+.hero .cross{position:absolute;right:-8px;top:-10px;opacity:.16}
+.body{padding:16px 16px 20px}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px 10px;margin-top:4px}
+.mtile{background:transparent;border:0;box-shadow:none;padding:0;text-align:center;cursor:pointer}
+.mtile:active .mc{transform:scale(.93)}
+.mtile .mc{width:62px;height:62px;margin:0 auto 9px;border-radius:17px;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 7px 16px rgba(60,80,120,.18);transition:transform .08s}
+.mtile span{font-size:12.5px;font-weight:700;display:block;line-height:1.2;color:var(--ink)}
+.i-green .mc{background:linear-gradient(160deg,#5cc06a,#2fa07d)}
+.i-red .mc{background:linear-gradient(160deg,#ff5f5f,#e02f2f)}
+.i-teal .mc{background:linear-gradient(160deg,#3cbcb0,#2a8fb2)}
+.i-yellow .mc{background:linear-gradient(160deg,#ffe24d,#ffca00);color:#3a1f10}
+.i-indigo .mc{background:linear-gradient(160deg,#9092dc,#5b54c9)}
+.i-blue .mc{background:linear-gradient(160deg,#5aa2ea,#3f78d4)}
+.i-rose .mc{background:linear-gradient(160deg,#ff92b4,#f0577f)}
+.i-violet .mc{background:linear-gradient(160deg,#b98be0,#8a54c9)}
+.tabbar{position:sticky;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 6px 12px}
+.tabbar.tab2 .tab{flex:1}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--muted);font-weight:700}
+.tab.on{color:var(--green)}
+.tab .ti{width:22px;height:22px}
+.cap{max-width:340px;color:var(--muted);font-size:12.5px;line-height:1.65;margin-top:14px;text-align:left}
+.cap b{color:var(--ink)}
+
+/* login bottom-sheet */
+.lsheetwrap{position:absolute;inset:0;background:rgba(20,28,45,.42);display:none;align-items:flex-end;z-index:8}
+.lsheetwrap.on{display:flex}
+.lsheet{background:#fff;width:100%;border-radius:22px 22px 0 0;padding:20px 18px 24px;animation:up .2s ease}
+@keyframes up{from{transform:translateY(30px)}to{transform:translateY(0)}}
+.lsheet h3{margin:0 0 2px;font-size:17px;color:var(--ink);display:flex;align-items:center;gap:8px}
+.lsheet .x{margin-left:auto;color:var(--muted);cursor:pointer;font-size:20px}
+.lsheet .sub{color:var(--muted);font-size:12px;margin:0 0 14px}
+
+/* form mockup */
+.screenhead{padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);background:var(--appbar);color:var(--appInk)}
+.screenhead .bk{width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:var(--appInk)}
+.screenhead b{font-size:15.5px}
+.f-label{font-size:12px;font-weight:700;color:var(--muted);margin:14px 2px 6px}
+.f-label .req{color:var(--red)}
+.f-in,.lsheet .f-in{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:13.5px;background:#fff;color:var(--ink)}
+.f-chiprow{display:flex;gap:6px;flex-wrap:wrap}
+.f-chip{border:1px solid var(--line);border-radius:20px;padding:7px 13px;font-size:12.5px;background:#fff;color:var(--muted);cursor:pointer}
+.f-chip.on{background:var(--greenSoft);border-color:var(--green);color:var(--green);font-weight:700}
+.f-primary{width:100%;margin-top:16px;background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer}
+.f-note{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:9px 11px;font-size:11.5px;line-height:1.55;margin-top:8px}
+.f-toggle{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:600;color:var(--ink)}
+.f-toggle input{width:auto}
+.tag{display:inline-block;font-size:10px;font-weight:800;padding:1px 7px;border-radius:6px;margin-left:6px;vertical-align:middle}
+.tag-req{background:#e0edfb;color:#1d4ed8}.tag-opt{background:#eef1f6;color:#7a8595}
+.namechips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.nchip{border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:12.5px;background:#fff;color:var(--muted);cursor:pointer}
+.nchip.on{background:var(--greenSoft);border-color:var(--green);color:var(--green);font-weight:700}
+.absrow{display:flex;gap:8px;align-items:center;margin-top:8px}
+.absrow .nm{min-width:52px;font-weight:700;font-size:13px}
+.absrow .f-in{width:auto}
+.absnote{flex:1;min-width:64px}
+.weekchips{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px}
+.wchip{border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:12px;cursor:pointer;background:#fff;color:var(--muted);font-weight:600}
+.wchip.done{background:var(--greenSoft);border-color:var(--green);color:var(--green)}
+.wchip.sel{outline:2px solid var(--blue);outline-offset:1px}
+.datebtn{width:100%;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px 14px;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer;margin-top:4px}
+.datebtn .pcar{color:#b9c2cf;font-size:11px;transition:.15s}
+.datebtn.open .pcar{transform:rotate(180deg)}
+.datepanel{border:1px solid var(--line);border-radius:12px;margin-top:7px;padding:10px;background:#fff}
+.monthrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.mbtn{border:1px solid var(--line);border-radius:20px;padding:6px 14px;font-size:12.5px;font-weight:700;background:#fff;color:var(--muted);cursor:pointer}
+.mbtn.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.sundayrow{display:flex;align-items:center;gap:8px;padding:10px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600}
+.sundayrow.sel{background:var(--blueSoft);color:var(--blue)}
+.sundayrow .st{margin-left:auto;font-size:11px;font-weight:700}
+.sundayrow .st.done{color:var(--green)}.sundayrow .st.no{color:var(--red)}
+.prow{border:1px solid var(--line);border-radius:12px;margin-top:8px;overflow:hidden}
+.phead{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;background:#fff}
+.phead .pn{font-weight:700;font-size:13.5px}
+.phead .psum{margin-left:auto;font-size:10.5px;color:var(--muted);text-align:right;max-width:150px}
+.phead .pcar{color:#b9c2cf;font-size:11px;transition:.15s}
+.prow.open .pcar{transform:rotate(180deg)}
+.pdetail{display:none;padding:11px 12px 13px;border-top:1px solid var(--line);background:#fafbfd}
+.prow.open .pdetail{display:block}
+.tgls{display:flex;flex-wrap:wrap;gap:6px}
+.tgl{border:1px solid var(--line);border-radius:8px;padding:6px 11px;font-size:12px;background:#fff;color:var(--muted);cursor:pointer;font-weight:600}
+.tgl.on{background:var(--blueSoft);border-color:var(--blue);color:var(--blue)}
+.cnts{display:flex;gap:10px;margin-top:11px;flex-wrap:wrap}
+.cnt{display:flex;flex-direction:column;align-items:center;gap:4px}
+.cnt .cl{font-size:10.5px;color:var(--muted);font-weight:700}
+.cbtn{width:54px;height:42px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:16px;font-weight:800;color:var(--ink);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.cbtn.pos{background:var(--greenSoft);border-color:var(--green);color:var(--green)}
+.fbadge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:800}
+.s-접수{background:#e0edfb;color:#1d4ed8}.s-처리중{background:#fef3c7;color:#b45309}.s-완료{background:#dcfce7;color:#15803d}.s-보류{background:#fee2e2;color:#b91c1c}
+.fitem{border:1px solid var(--line);border-radius:14px;padding:13px;margin-top:10px;background:#fff}
+.fitem .ftop{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fitem .ftitle{font-weight:800;font-size:14px}
+.fitem .fmeta{color:var(--muted);font-size:11.5px;margin:4px 0}
+.pinrow{display:flex;gap:8px;align-items:center;margin-top:6px}
+.pinrow input{max-width:130px}
+.btnsm{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;border-radius:10px;padding:9px 14px;font-size:12.5px;font-weight:800;cursor:pointer;white-space:nowrap}
+.steps{display:flex;align-items:center;gap:6px;font-size:11px;margin-top:9px;flex-wrap:wrap}
+.step{padding:3px 10px;border-radius:20px;background:#eef2f7;color:#94a3b8;font-weight:700}
+.step.on{background:var(--blue);color:#fff}
+.reply{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:9px;padding:9px 11px;font-size:12.5px;margin-top:9px;line-height:1.5}
+.fbfilter{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px}
+.fbfilter button{border:0;background:#eef2f7;color:var(--blue);border-radius:20px;padding:7px 13px;font-size:12.5px;font-weight:700;cursor:pointer}
+.fbfilter button.on{background:var(--blue);color:#fff}
+.sect{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 14px 16px;margin:12px 16px 0}
+.sect h4{margin:0 0 2px;font-size:14px;color:var(--ink)}
+.sect .d{color:var(--muted);font-size:11.5px;margin:0 0 8px}
+.mini{font-size:11px;color:var(--muted);margin-top:5px}
+
+.pcwrap{flex:1;min-width:420px;max-width:560px}
+.browser{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 18px 44px rgba(60,80,120,.12)}
+.bbar{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f3f5f9;border-bottom:1px solid var(--line)}
+.bbar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.bbar .u{margin-left:10px;background:#fff;border:1px solid var(--line);border-radius:20px;font-size:11.5px;color:var(--muted);padding:4px 12px;flex:1}
+.pc{padding:16px;background:var(--bg)}
+.pc .pchead{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border-radius:12px;padding:12px 16px;font-weight:800;font-size:14px}
+.pc .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+.pc .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+.pc .kpi .n{font-size:20px;font-weight:800;color:var(--green)}
+.pc .kpi .l{font-size:10.5px;color:var(--muted);margin-top:2px}
+.pc .charts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pc .chart{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;height:120px}
+.pc .chart .t{font-size:11px;font-weight:700;color:var(--green);margin-bottom:8px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:70px}
+.bars span{flex:1;background:var(--teal);border-radius:4px 4px 0 0;opacity:.85}
+.spark{height:70px;position:relative}.spark svg{position:absolute;inset:0;width:100%;height:100%}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#26313f;color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:900px){.pcwrap{min-width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <h1>송탄영광교회 앱 · 디자인 샘플</h1>
+    <p>홈(로그인 버튼) · 교인 피드백 · 구역보고 화면 시안 + PC 대시보드 미리보기 · 팔레트 3종</p>
+  </div>
+  <div class="themes">
+    <button data-t="white" class="active"><span class="dot" style="background:#fff;border:1px solid #ccc"></span>화이트 헤더</button>
+    <button data-t="green"><span class="dot" style="background:#3aa66e"></span>그린 헤더</button>
+    <button data-t="lav"><span class="dot" style="background:#8f90c4"></span>라벤더 헤더</button>
+  </div>
+
+  <div class="stage">
+
+    <!-- ===== 홈 ===== -->
+    <div class="col">
+    <div class="phone"><div class="screen">
+      <div class="stat"><span>9:41</span><span>▁▂▃ 📶 🔋</span></div>
+      <div class="appbar">
+        <div class="top">
+          <div class="brand">
+            <span class="logobox"><img src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회" style="height:34px;display:block"/></span>
+          </div>
+          <div class="ico">
+            <div class="pwr" onclick="openLogin()" title="로그인">
+              <svg width="30" height="30" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <clipPath id="loginClip"><circle cx="24" cy="24" r="18.5"/></clipPath>
+                <circle cx="24" cy="24" r="20"/>
+                <circle cx="24" cy="19.5" r="6.6"/>
+                <path d="M10.5 41a13.5 13.5 0 0 1 27 0" clip-path="url(#loginClip)"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero">
+        <svg class="cross" width="86" height="86" viewBox="0 0 24 24" fill="#fff"><path d="M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"/></svg>
+        <div class="k">ONLINE SYSTEM</div>
+        <h2>전교인 온라인 시스템</h2>
+        <div class="herolinks">
+          <span>바로가기</span><i></i>
+          <span>피드백</span><i></i>
+          <span>구역보고</span>
+        </div>
+      </div>
+      <div class="body">
+        <div class="mgrid">
+          <div class="mtile i-green" onclick="toast('홈페이지(igloria.org)')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg></div><span>홈페이지</span></div>
+          <div class="mtile i-red" onclick="toast('유튜브')"><div class="mc"><svg width="36" height="36" viewBox="0 0 24 24"><rect x="2" y="6.2" width="20" height="11.6" rx="4.4" fill="#fff"/><path d="M10 9l5.4 3-5.4 3z" fill="#ec3a35"/></svg></div><span>유튜브</span></div>
+          <div class="mtile i-violet" onclick="toast('주보')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6c-2-1.5-5-1.5-7 0v12c2-1.5 5-1.5 7 0 2-1.5 5-1.5 7 0V6c-2-1.5-5-1.5-7 0z"/><path d="M12 6v12"/></svg></div><span>주보</span></div>
+          <div class="mtile i-yellow" onclick="toast('전교인 공지 (카카오 채널)')"><div class="mc"><svg width="31" height="31" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.2C6.7 3.2 2.4 6.6 2.4 10.8c0 2.7 1.8 5.1 4.5 6.4-.2.73-.72 2.66-.82 3.07-.13.5.18.5.38.36.16-.1 2.53-1.72 3.56-2.42.63.09 1.28.14 1.98.14 5.3 0 9.6-3.4 9.6-7.62S17.3 3.2 12 3.2z"/></svg></div><span>전교인 공지</span></div>
+          <div class="mtile i-teal" onclick="toast('오직 (교적·출석)')"><div class="mc"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"/></svg></div><span>오직</span></div>
+          <div class="mtile i-green" onclick="toast('헌금 확인 — 오직')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v12H4z"/><path d="M4 10h16M8 15h4"/></svg></div><span>헌금 확인</span></div>
+          <div class="mtile i-indigo" onclick="toast('피드백 (교인 피드백 접수 · 가운데 화면)')"><div class="mc"><span style="font-size:28px;font-weight:800;line-height:1;color:#fff">Q</span></div><span>피드백</span></div>
+          <div class="mtile i-green" onclick="toast('피드백 확인 (접수 조회 · 처리 현황)')"><div class="mc"><span style="font-size:28px;font-weight:800;line-height:1;color:#fff">A</span></div><span>피드백 확인</span></div>
+          <div class="mtile i-blue" onclick="toast('구역보고 (맨 오른쪽 화면)')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.2a2.55 2.55 0 013.6 3.6L7.6 19.4 2.5 21l1.6-5.1z"/><path d="M14.8 4.9l3.6 3.6"/></svg></div><span>구역보고</span></div>
+        </div>
+        <div class="visitor">👥 방문자 · Today <b>1</b> · Total <b>1</b></div>
+      </div>
+      <!-- 로그인 바텀시트 -->
+      <div class="lsheetwrap" id="loginSheet">
+        <div class="lsheet">
+          <h3>🔒 로그인 <span class="x" onclick="closeLogin()">✕</span></h3>
+          <p class="sub">아이디(이름)와 비밀번호로 로그인합니다.</p>
+          <div class="f-label">아이디 (이름)</div>
+          <input class="f-in" placeholder="예: 홍길동"/>
+          <div class="f-label">비밀번호</div>
+          <input class="f-in" type="password" placeholder="비밀번호"/>
+          <button class="f-primary" onclick="toast('로그인 기능은 추후 구현됩니다')">로그인</button>
+          <div class="f-note">로그인하면 <b>구역장·위원장·관리자 구분 없이</b> 계정 권한에 맞는 메뉴가 자동으로 표시됩니다. (실제 로그인 연결은 추후 반영)</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="cap">📱 <b>홈</b> — 우상단 <b>전원 모양 로그인 버튼</b>을 누르면 로그인 시트가 열립니다. 일반 교인은 로그인 없이 이용, 로그인하면 역할에 맞는 메뉴·화면이 자동 노출.</div>
+    </div>
+
+    <!-- ===== 교인 피드백 ===== -->
+    <div class="col">
+    <div class="phone"><div class="screen">
+      <div class="stat"><span>9:41</span><span>▁▂▃ 📶 🔋</span></div>
+      <div class="screenhead"><div class="bk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></div><b>피드백</b></div>
+      <div class="body" style="padding-top:8px">
+        <div class="f-label">분류 (담당 자동 배정)</div>
+        <select class="f-in">
+          <option selected>선택</option>
+          <option>예배 (예배·방송·찬양)</option>
+          <option>교육 (유치부·유초등부·중고등부·청년부)</option>
+          <option>봉사 (환경·시설·카페·주방·접대)</option>
+          <option>차량 (차량·주차)</option>
+          <option>행정 (재정·행정·미디어)</option>
+          <option>선교 (새가족·바나바·전도·선교회·중보기도·목요전도)</option>
+          <option>경조사</option>
+          <option>기타</option>
+        </select>
+        <div class="f-label">제목</div>
+        <input class="f-in" placeholder="한 줄 요약"/>
+        <div class="f-label">내용</div>
+        <textarea class="f-in" style="min-height:64px" placeholder="자세한 내용을 적어주세요"></textarea>
+        <div class="f-label">이름 (선택)</div>
+        <input class="f-in" placeholder="익명 가능"/>
+        <div class="f-label">연락처 (선택)</div>
+        <input class="f-in" placeholder="전화번호 또는 메일 주소"/>
+        <div class="f-toggle"><input type="checkbox"/> 익명으로 접수 (이름·연락처 숨김)</div>
+        <div class="f-note">익명 제출 시 접수는 되지만 <b>개별 회신을 받을 수 없습니다.</b> 답변이 필요하시면 반드시 이름·연락처를 남겨 주세요.</div>
+        <div class="f-label">조회용 비밀번호 (숫자 4자리) <span class="req">*</span></div>
+        <input class="f-in" type="password" maxlength="4" placeholder="예: 전화번호 뒷자리"/>
+        <button class="f-primary" onclick="toast('접수 시안 — 실제 저장은 스프레드시트 연동 시')">접수하기</button>
+      </div>
+    </div></div>
+    <div class="cap">📝 <b>교인 피드백</b> — 유형·분류 선택 시 담당자가 자동 배정되고, 익명 안내·조회용 비밀번호까지 앱 스타일로. 접수 내용은 (연동 시) 스프레드시트에 누적.</div>
+    </div>
+
+    <!-- ===== 구역보고 ===== -->
+    <div class="col">
+    <div class="phone"><div class="screen">
+      <div class="stat"><span>9:41</span><span>▁▂▃ 📶 🔋</span></div>
+      <div class="screenhead"><div class="bk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></div><b>구역보고</b><span style="margin-left:auto;font-size:11.5px;color:var(--appSub)">3구역 · 허미영</span></div>
+      <div class="body" style="padding:8px 0 20px">
+        <div class="sect">
+          <div class="f-label" style="margin-top:0">보고 대상일 (주일)</div>
+          <button class="datebtn" id="dateBtn" onclick="toggleDate()"><span id="dateSel"></span><span class="pcar">▾</span></button>
+          <div class="datepanel" id="datePanel" style="display:none">
+            <div class="monthrow" id="monthRow"></div>
+            <div id="sundayList"></div>
+          </div>
+          <div class="mini" id="weekNote" style="margin-top:8px"></div>
+        </div>
+        <div class="sect">
+          <h4>예배 출석부</h4>
+          <div class="d">이름을 누르면 세부 출석 항목이 펼쳐집니다 · 주일출석 <b id="sunCnt">0</b>명</div>
+          <div id="roster3"></div>
+        </div>
+        <div class="sect">
+          <h4>결석자 <span class="tag tag-req">주일(1·2부) 미출석</span></h4>
+          <div class="d">주일예배 1·2부 모두 미출석자가 자동 표시됩니다 · 항목 선택 옆 세부내용 입력</div>
+          <div id="absentList3"></div>
+        </div>
+        <div class="sect">
+          <h4>특이사항 보고</h4>
+          <div class="d">구역 전체 특이사항·심방 요청 등을 자유롭게 작성</div>
+          <textarea class="f-in" style="min-height:66px" placeholder="예: OO 성도 입원 심방 요청, 새가족 정착 상황 등"></textarea>
+        </div>
+        <div style="padding:0 16px"><button class="f-primary" onclick="toast('제출 시안 — 실제 저장은 스프레드시트 연동 시')">보고서 제출</button></div>
+      </div>
+    </div></div>
+    <div class="cap">🗂️ <b>구역보고</b> — 로그인한 구역장 본인 구역만. 출석은 요람 명단 이름 체크, 결석 사유 드롭다운, 필수/선택 구분. 제출 내용은 (연동 시) 스프레드시트로 취합·대시보드화.</div>
+    </div>
+
+    <!-- ===== 피드백 확인 ===== -->
+    <div class="col">
+    <div class="phone"><div class="screen">
+      <div class="stat"><span>9:41</span><span>▁▂▃ 📶 🔋</span></div>
+      <div class="screenhead"><div class="bk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></div><b>피드백 확인</b></div>
+      <div class="body" style="padding:12px 16px 20px">
+        <div class="f-note">접수 시 정한 <b>4자리 비밀번호</b>로 본인 글의 내용·처리 상태를 확인합니다. (데모 <b>1234</b>)</div>
+        <div class="fbfilter" id="fbFilter">
+          <button data-s="전체" class="on">전체</button>
+          <button data-s="접수">접수</button>
+          <button data-s="처리중">처리중</button>
+          <button data-s="완료">완료</button>
+          <button data-s="보류">보류</button>
+        </div>
+        <div id="fbList"></div>
+      </div>
+    </div></div>
+    <div class="cap">📥 <b>피드백 확인</b> — 목록은 제목만, 비밀번호를 넣으면 내용·처리 단계(접수→처리중→완료)·담당자 회신까지 확인. 관리자·위원장은 별도 화면에서 비번 없이 전체 열람·처리.</div>
+    </div>
+
+    <!-- PC dashboard -->
+    <div class="pcwrap">
+      <div class="browser">
+        <div class="bbar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="u">igloria.org/admin/대시보드</span></div>
+        <div class="pc">
+          <div class="pchead">📊 관리자 대시보드 (PC 와이드)</div>
+          <div class="kpis">
+            <div class="kpi"><div class="n">358</div><div class="l">재적</div></div>
+            <div class="kpi"><div class="n">127·35.5%</div><div class="l">주일 출석</div></div>
+            <div class="kpi"><div class="n">122</div><div class="l">구역 출석</div></div>
+            <div class="kpi"><div class="n">4건</div><div class="l">처리중 접수</div></div>
+          </div>
+          <div class="charts">
+            <div class="chart"><div class="t">구역별 출석</div><div class="bars"><span style="height:60%"></span><span style="height:85%"></span><span style="height:50%"></span><span style="height:72%"></span><span style="height:40%"></span><span style="height:90%"></span><span style="height:66%"></span></div></div>
+            <div class="chart"><div class="t">주차별 추이</div><div class="spark"><svg viewBox="0 0 100 60" preserveAspectRatio="none"><polyline points="0,42 16,30 32,34 48,20 64,26 80,14 100,22" fill="none" stroke="#2fa58f" stroke-width="2.5"/></svg></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="cap" style="max-width:none">🖥️ <b>PC 접속 시</b> — 같은 서비스라도 화면 크기에 따라 대시보드가 와이드 레이아웃으로 펼쳐집니다(반응형).</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+document.documentElement.dataset.theme='white';
+document.querySelectorAll('.themes button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.themes button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');document.documentElement.dataset.theme=b.dataset.t;});
+function openLogin(){document.getElementById('loginSheet').classList.add('on');}
+function closeLogin(){document.getElementById('loginSheet').classList.remove('on');}
+let tmr;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tmr);tmr=setTimeout(()=>t.classList.remove('show'),1900);}
+
+/* ===== 구역보고 인터랙티브 ===== */
+const R3=['허미영','권보상','김중원','유미경','김성진','장선정','배용훈','이미연','이진완','김하나','임광진','김보라'];
+const TG=['1부','2부','오후','수요','금요','구역'];
+const CT=[['새벽',7],['성경',30],['QT(가정)',7]];
+const REASONS3=['선택','개인사정','건강','여행','직장','확인안됨','장기결석','기타'];
+const A3={}; R3.forEach(n=>A3[n]={t:{},c:{'새벽':0,'성경':0,'QT(가정)':0}});
+const MONTHS3=[{y:2026,m:5},{y:2026,m:6},{y:2026,m:7}];
+let selWeek='2026-07-12', openMonth=7, lastAbsKey='';
+function sundaysOf(y,m){const out=[];const d=new Date(y,m-1,1);while(d.getMonth()===m-1){if(d.getDay()===0)out.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));d.setDate(d.getDate()+1);}return out;}
+function isDone(d){return d<'2026-07-12';}
+function fmtK(d){const p=d.split('-');return p[0]+'. '+p[1]+'. '+p[2]+' (주일)';}
+function toggleDate(){const p=document.getElementById('datePanel');const open=p.style.display==='none';p.style.display=open?'block':'none';document.getElementById('dateBtn').classList.toggle('open',open);}
+function renderDatePick(){
+  document.getElementById('dateSel').textContent=fmtK(selWeek);
+  document.getElementById('monthRow').innerHTML=MONTHS3.map(mm=>`<button class="mbtn ${mm.m===openMonth?'on':''}" data-m="${mm.m}">${mm.m}월</button>`).join('');
+  document.querySelectorAll('#monthRow .mbtn').forEach(b=>b.onclick=()=>{openMonth=+b.dataset.m;renderDatePick();});
+  const mm=MONTHS3.find(x=>x.m===openMonth);
+  document.getElementById('sundayList').innerHTML=sundaysOf(mm.y,openMonth).map(d=>{const done=isDone(d);
+    return `<div class="sundayrow ${d===selWeek?'sel':''}" data-d="${d}">${d.slice(5).replace('-','.')} 주일<span class="st ${done?'done':'no'}">${done?'✔ 작성완료':'미입력'}</span></div>`;}).join('');
+  document.querySelectorAll('#sundayList .sundayrow').forEach(r=>r.onclick=()=>{selWeek=r.dataset.d;toggleDate();renderDatePick();updWeekNote();});
+}
+function initReport3(){
+  renderDatePick(); updWeekNote();
+  const box=document.getElementById('roster3');
+  box.innerHTML=R3.map(n=>{
+    const tg=TG.map(t=>`<button class="tgl" data-n="${n}" data-t="${t}">${t}</button>`).join('');
+    const ct=CT.map(([k,mx])=>`<div class="cnt"><span class="cl">${k}</span><button class="cbtn" data-n="${n}" data-k="${k}" data-max="${mx}">0</button></div>`).join('');
+    return `<div class="prow" data-n="${n}"><div class="phead"><span class="pn">${n}</span><span class="psum">미체크</span><span class="pcar">▾</span></div>
+      <div class="pdetail"><div class="tgls">${tg}</div><div class="cnts">${ct}</div>
+      <div class="mini" style="margin-top:8px">숫자(새벽·성경·QT): 탭하면 +1, 길게 누르면 0으로 초기화</div></div></div>`;
+  }).join('');
+  box.querySelectorAll('.phead').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
+  box.querySelectorAll('.tgl').forEach(b=>b.onclick=()=>{
+    const n=b.dataset.n,t=b.dataset.t; A3[n].t[t]=!A3[n].t[t]; b.classList.toggle('on',A3[n].t[t]);
+    updSummary(n); if(t==='1부'||t==='2부'){recompAbsent3();} updSun();
+  });
+  box.querySelectorAll('.cbtn').forEach(b=>{
+    const n=b.dataset.n,k=b.dataset.k,mx=+b.dataset.max; let timer,held;
+    b.addEventListener('pointerdown',()=>{held=false;timer=setTimeout(()=>{held=true;A3[n].c[k]=0;paintCnt(b,0);updSummary(n);},430);});
+    b.addEventListener('pointerup',()=>{clearTimeout(timer);if(!held){A3[n].c[k]=Math.min(A3[n].c[k]+1,mx);paintCnt(b,A3[n].c[k]);updSummary(n);}});
+    b.addEventListener('pointerleave',()=>clearTimeout(timer));
+    b.addEventListener('contextmenu',e=>e.preventDefault());
+  });
+  recompAbsent3(); updSun();
+}
+function paintCnt(b,v){b.textContent=v;b.classList.toggle('pos',v>0);}
+function updSummary(n){
+  const parts=TG.filter(t=>A3[n].t[t]);
+  const cs=Object.entries(A3[n].c).filter(([k,v])=>v>0).map(([k,v])=>k.replace('(가정)','')+v);
+  const el=document.querySelector('.prow[data-n="'+n+'"] .psum');
+  if(el) el.textContent=[...parts,...cs].join(' · ')||'미체크';
+}
+function updWeekNote(){document.getElementById('weekNote').innerHTML=fmtK(selWeek)+' · '+(isDone(selWeek)?'<b style="color:var(--green)">작성 완료</b> — 기존 내역 불러옴':'<b style="color:var(--red)">미입력</b> — 새로 작성');}
+function updSun(){const c=R3.filter(n=>A3[n].t['1부']||A3[n].t['2부']).length;const el=document.getElementById('sunCnt');if(el)el.textContent=c;}
+function recompAbsent3(){
+  const ab=R3.filter(n=>!(A3[n].t['1부']||A3[n].t['2부']));
+  const key=ab.join(',');
+  if(key===lastAbsKey && document.getElementById('absentList3').innerHTML) return; // 입력값 보존
+  lastAbsKey=key;
+  document.getElementById('absentList3').innerHTML = ab.length? ab.map(n=>
+    `<div class="absrow"><span class="nm">${n}</span>`+
+    `<select class="f-in">${REASONS3.map(r=>`<option>${r}</option>`).join('')}</select>`+
+    `<input class="f-in absnote" placeholder="세부내용"/></div>`).join('')
+    : '<div class="mini">주일(1·2부) 전원 출석입니다.</div>';
+}
+initReport3();
+
+/* ===== 피드백 확인 ===== */
+const FB=[
+ {t:'주일 2부 음향이 큽니다',c:'예배',ty:'요청',d:'2026-07-16',s:'접수',pin:'1234',body:'앞자리 음향 볼륨을 조금 낮춰 주시면 좋겠습니다.',reply:''},
+ {t:'자녀 결혼식 주례 요청',c:'경조사',ty:'신청',d:'2026-07-14',s:'처리중',pin:'1234',body:'9월 예정입니다. 순서·일정 상의 원합니다.',reply:''},
+ {t:'중고등부 수련회 장소 건의',c:'교육',ty:'건의',d:'2026-07-17',s:'접수',pin:'1234',body:'접근성 좋은 장소를 제안드립니다.',reply:''},
+ {t:'1층 화장실 손잡이 고장',c:'봉사',ty:'피드백',d:'2026-07-12',s:'완료',pin:'1234',body:'안전 문제로 빠른 수리 부탁드립니다.',reply:'수리 완료했습니다. 알려주셔서 감사합니다.'},
+ {t:'새벽예배 차량 지원 요청',c:'차량',ty:'요청',d:'2026-07-13',s:'보류',pin:'1234',body:'거동이 불편하여 새벽예배 차량을 부탁드립니다.',reply:'새벽 시간 운행 인력이 없어 어렵습니다. 인근 성도 카풀을 연결해 드리겠습니다.'}
+];
+let fbF='전체';
+function fbItemHtml(f,i){return `<div class="fitem">
+    <div class="ftop"><span class="ftitle">${f.t}</span><span class="fbadge s-${f.s}">${f.s}</span><span class="fmeta" style="margin-left:auto">${f.d.slice(5)}</span></div>
+    <div class="fmeta">${f.ty} · ${f.c}</div>
+    <div id="fb${i}"><div class="pinrow"><input class="f-in" type="password" maxlength="4" inputmode="numeric" placeholder="비밀번호 4자리" id="fbpin${i}"/><button class="btnsm" data-i="${i}">내용 보기</button></div></div>
+  </div>`;}
+function renderFBList(){
+  const box=document.getElementById('fbList'); if(!box) return;
+  box.innerHTML=FB.map((f,i)=>(fbF==='전체'||f.s===fbF)?fbItemHtml(f,i):'').join('') || '<div class="mini" style="margin-top:10px">해당 상태의 접수가 없습니다.</div>';
+  box.querySelectorAll('.btnsm').forEach(b=>b.onclick=()=>openFB(+b.dataset.i));
+}
+function initFB(){
+  const bar=document.getElementById('fbFilter'); if(!bar) return;
+  bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    bar.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');fbF=b.dataset.s;renderFBList();});
+  renderFBList();
+}
+function openFB(i){
+  const f=FB[i]; const pin=(document.getElementById('fbpin'+i).value||'').trim();
+  if(pin!==f.pin){toast('비밀번호가 일치하지 않습니다 (데모 1234)');return;}
+  let bar;
+  if(f.s==='보류'){bar='<div class="steps"><span class="fbadge s-보류">보류</span> <span class="fmeta">처리 불가</span></div>';}
+  else{const steps=['접수','처리중','완료'];const cur=f.s==='완료'?2:(f.s==='처리중'?1:0);
+    bar='<div class="steps">'+steps.map((s,k)=>`<span class="step ${k<=cur?'on':''}">${s}</span>`).join('<span style="color:#cbd5e1">›</span>')+'</div>';}
+  const reply=f.reply?`<div class="reply"><b>담당자 회신</b> — ${f.reply}</div>`:'';
+  document.getElementById('fb'+i).innerHTML=`<div class="fmeta" style="margin-top:6px;color:var(--ink)">${f.body}</div>${bar}${reply}`;
+}
+initFB();
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>송탄영광교회 · 관리자 대시보드 시안</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--green:#3aa66e;--green2:#57b45f;--teal:#2fa58f;--blue:#3f8ed4;--lav:#8f90c4;
+--greenSoft:#e9f6ee;--blueSoft:#e8f1fb;--lavSoft:#eef0fb;--bg:#f4f6fb;--card:#fff;--line:#e7ebf2;--muted:#6b7686;--ink:#26313f;--red:#dc2626;--amber:#d97706}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+.top .logo{display:flex;align-items:center;gap:10px}
+.top .logo .mk{width:34px;height:34px;border-radius:9px;overflow:hidden;display:flex}
+.top .logo b{font-size:16px;color:var(--green)}
+.top .logo span{font-size:12px;color:var(--muted);margin-left:2px}
+.top .sp{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--muted)}
+.top select{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;background:#fff}
+.top .role{background:var(--greenSoft);color:var(--green);border-radius:20px;padding:5px 12px;font-weight:700}
+.wrap{max-width:1240px;margin:0 auto;padding:18px}
+.sect-t{font-size:13px;font-weight:800;color:var(--muted);margin:22px 4px 10px;letter-spacing:.3px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px}
+.kpi .n{font-size:24px;font-weight:800;color:var(--green)}
+.kpi .l{font-size:12px;color:var(--muted);margin-top:3px}
+.kpi .s{font-size:11px;color:var(--muted);margin-top:5px}
+.kpi.warn .n{color:var(--red)}.kpi.amber .n{color:var(--amber)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:2fr 1fr}
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h3{margin:0 0 3px;font-size:15px;color:var(--ink)}
+.card .d{font-size:11.5px;color:var(--muted);margin:0 0 12px}
+canvas{max-height:250px}
+.mini3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mstat{background:linear-gradient(135deg,#fff,#f6faf7);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.mstat .n{font-size:20px;font-weight:800;color:var(--teal)}
+.mstat .l{font-size:11px;color:var(--muted);margin-top:2px}
+.care{background:#fff5f5;border:1px solid #fecaca;border-radius:9px;padding:9px 11px;margin:6px 0;font-size:12.5px}
+.care b{color:#b91c1c}
+.pill{display:inline-block;border-radius:20px;padding:3px 11px;font-size:12px;font-weight:700;margin:2px 4px 2px 0}
+.pill.miss{background:#fef2f2;color:#991b1b}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left}
+th{background:#f4f6fb;font-size:11.5px;color:var(--muted)}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:800}
+.b-접수{background:#e0edfb;color:#1d4ed8}.b-처리중{background:#fef3c7;color:#b45309}.b-완료{background:#dcfce7;color:#15803d}.b-보류{background:#f3e8ff;color:#7c3aed}
+.foot{color:var(--muted);font-size:11.5px;text-align:center;padding:22px}
+.note{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:9px;padding:9px 12px;font-size:11.5px;line-height:1.6;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="logo"><span class="mk"><img src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회" style="height:32px"/></span><span>· 관리자 대시보드</span></div>
+  <div class="sp">
+    <span>보고 대상일</span>
+    <select><option>2026-07-12 (주일)</option><option>2026-07-05 (주일)</option><option>2026-06-28 (주일)</option></select>
+    <span class="role">관리자 · 담임목사</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="kpis">
+    <div class="kpi"><div class="n">358</div><div class="l">재적</div><div class="s">교인 명단 기준</div></div>
+    <div class="kpi"><div class="n">133 <span style="font-size:14px">·37.0%</span></div><div class="l">주일예배 출석(1·2부)</div><div class="s">전주 대비 −16</div></div>
+    <div class="kpi warn"><div class="n">17</div><div class="l">결석</div><div class="s">주일 1·2부 미출석</div></div>
+    <div class="kpi amber"><div class="n">3 <span style="font-size:14px">/26</span></div><div class="l">미보고 구역</div><div class="s">보고 완료 23구역</div></div>
+    <div class="kpi"><div class="n">4</div><div class="l">처리중 피드백</div><div class="s">접수 2 · 처리중 1 · 보류 1</div></div>
+  </div>
+
+  <div class="sect-t">출석 현황</div>
+  <div class="grid g2">
+    <div class="card"><h3>예배별 참석</h3><p class="d">1·2부·오후·수요·금요·새벽 참석 인원 (선택 주일)</p><canvas id="svc"></canvas></div>
+    <div class="card"><h3>주차별 주일출석 추이</h3><p class="d">최근 5주 주일예배(1·2부) 출석</p><canvas id="trend"></canvas></div>
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h3>구역별 출석</h3><p class="d">구역보고 기준 주일출석 (제출 구역)</p><canvas id="byGroup"></canvas></div>
+    <div class="card"><h3>결석 사유 분포</h3><p class="d">결석자 드롭다운 사유 집계</p><canvas id="reason"></canvas></div>
+  </div>
+
+  <div class="sect-t">신앙활동 · 목양</div>
+  <div class="grid g2">
+    <div class="card">
+      <h3>신앙활동 요약 (자율 항목)</h3><p class="d">구역보고 카운터 합계 — 새벽·성경·QT(가정예배)</p>
+      <div class="mini3">
+        <div class="mstat"><div class="n">93</div><div class="l">새벽예배 참석(명)</div></div>
+        <div class="mstat"><div class="n">2,584</div><div class="l">성경읽기(장)</div></div>
+        <div class="mstat"><div class="n">456</div><div class="l">QT·가정예배(회)</div></div>
+      </div>
+      <div class="note">자율 항목이라 참여 구역만 집계됩니다. 목사님 최우선 지표는 출석·결석이며, 이 항목은 참고용입니다.</div>
+    </div>
+    <div class="card">
+      <h3 style="color:#b91c1c">🔴 목양 우선사항</h3><p class="d">결석 사유·특이사항에서 질병·장기결석·연락두절·수술 자동 선별</p>
+      <div class="care"><b>김종찬</b> (부부 8구역) — 어지럼으로 장기 결석</div>
+      <div class="care"><b>신기선</b> (부부 9구역) — 전화·문자 연락 두절</div>
+      <div class="care"><b>최란숙</b> (부부 9구역) — 온라인예배, 당분간 못 나옴</div>
+      <div class="care"><b>한재혁</b> (부부 10구역) — 8/2 대장 용종 제거 수술 예정</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h3>미보고 구역 <span style="font-weight:400;color:var(--muted);font-size:12px">— 선택 주일 기준</span></h3>
+    <div style="margin-top:8px"><span class="pill miss">21구역</span><span class="pill miss">22구역</span><span class="pill miss">23구역</span></div>
+    <div class="d" style="margin-top:8px">개근자(최근 3주): <b style="color:var(--green)">허미영·권보상·유미경 외 6명</b></div>
+  </div>
+
+  <div class="sect-t">피드백 접수 처리</div>
+  <div class="grid g3">
+    <div class="card">
+      <h3>최근 접수 현황</h3><p class="d">분류별 담당자에게 자동 배정 · 상태 관리</p>
+      <table><thead><tr><th>제목</th><th>분류</th><th>담당</th><th>상태</th><th>접수일</th></tr></thead><tbody>
+        <tr><td>주일 2부 음향이 큽니다</td><td>예배</td><td>소세영 장로</td><td><span class="badge b-접수">접수</span></td><td>07-16</td></tr>
+        <tr><td>자녀 결혼식 주례 요청</td><td>경조사</td><td>담임목사</td><td><span class="badge b-처리중">처리중</span></td><td>07-14</td></tr>
+        <tr><td>중고등부 수련회 장소 건의</td><td>교육</td><td>김낙훈 장로</td><td><span class="badge b-접수">접수</span></td><td>07-17</td></tr>
+        <tr><td>1층 화장실 손잡이 고장</td><td>봉사</td><td>권보상 장로</td><td><span class="badge b-완료">완료</span></td><td>07-12</td></tr>
+        <tr><td>새벽예배 차량 지원 요청</td><td>차량</td><td>홍춘섭 장로</td><td><span class="badge b-보류">보류</span></td><td>07-13</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card"><h3>상태별 건수</h3><p class="d">접수·처리중·완료·보류</p><canvas id="fbstat"></canvas>
+      <div class="note">매뉴얼 기준: 접수 확인 48시간 · 완료 회신 3일. 기한 초과 건은 붉게 표시됩니다.</div>
+    </div>
+  </div>
+
+  <div class="foot">송탄영광교회 관리자 대시보드 · 시안(디자인 목업) · 실제 데이터는 구역보고·피드백 스프레드시트와 연동 시 자동 반영</div>
+</div>
+
+<script>
+const GRID={plugins:{legend:{labels:{font:{size:11}}}},responsive:true,maintainAspectRatio:false};
+function mk(id,type,data,opts){new Chart(document.getElementById(id),{type,data,options:Object.assign({},GRID,opts||{})});}
+mk('svc','bar',{labels:['1부','2부','오후','수요','금요','새벽'],datasets:[{label:'참석(명)',data:[39,100,92,36,48,93],backgroundColor:'#2fa58f'}]},{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});
+mk('trend','line',{labels:['06-14','06-21','06-28','07-05','07-12'],datasets:[{label:'주일출석',data:[155,150,142,139,133],borderColor:'#3aa66e',backgroundColor:'#3aa66e22',fill:true,tension:.3}]},{scales:{y:{beginAtZero:true}}});
+mk('byGroup','bar',{labels:['3구역','4구역','5구역','6구역','7구역','8구역','9구역','10구역'],datasets:[{label:'주일출석',data:[12,14,5,11,11,9,9,6],backgroundColor:'#3f8ed4'}]},{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});
+mk('reason','doughnut',{labels:['개인사정','건강','여행','직장','확인안됨','장기결석'],datasets:[{data:[5,3,4,2,2,1],backgroundColor:['#57b45f','#3f8ed4','#f2b366','#8f90c4','#94a3b8','#e06666']}]},{});
+mk('fbstat','bar',{labels:['접수','처리중','완료','보류'],datasets:[{label:'건수',data:[2,1,1,1],backgroundColor:['#3f8ed4','#d97706','#16a34a','#8a54c9']}]},{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
+</script>
+</body>
+</html>

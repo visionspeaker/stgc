@@ -127,7 +127,8 @@ textarea.f-in{min-height:66px;resize:vertical}
 .sundayrow{display:flex;align-items:center;gap:8px;padding:10px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:600}
 .sundayrow.sel{background:var(--greenSoft);color:var(--green)}
 .sundayrow .st{margin-left:auto;font-size:11.5px;font-weight:700}
-.sundayrow .st.done{color:var(--green)}.sundayrow .st.no{color:var(--red)}
+.sundayrow .st.done{color:var(--green)}.sundayrow .st.no{color:var(--red)}.sundayrow .st.future{color:#94a3b8}
+.sundayrow.dim{opacity:.5;cursor:default}
 .prow{border:1px solid var(--line);border-radius:12px;margin-top:9px;overflow:hidden}
 .phead{display:flex;align-items:center;gap:8px;padding:12px 13px;cursor:pointer;background:#fff}
 .phead .pn{font-weight:700;font-size:14px}
@@ -480,7 +481,9 @@ async function pushSub(rec){
 }
 
 // ---------- utils ----------
-function lastSundays(n){const out=[];let d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());for(let i=0;i<n;i++){const x=new Date(d);x.setDate(d.getDate()-7*i);out.push(x.toISOString().slice(0,10));}return out;}
+function localISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function lastSundays(n){const out=[];let d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());for(let i=0;i<n;i++){const x=new Date(d);x.setDate(d.getDate()-7*i);out.push(localISO(x));}return out;}
+function curSunday(){return lastSundays(1)[0];}
 function pick(arr,k){const c=[...arr];const o=[];while(o.length<k&&c.length){o.push(c.splice(Math.floor(Math.random()*c.length),1)[0]);}return o;}
 function fmtDT(iso){const d=new Date(iso);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
 
@@ -698,9 +701,12 @@ function renderDatePick(){
   document.getElementById('monthRow').innerHTML=REP_MONTHS.map(mm=>`<button class="mbtn ${mm.m===openMonth?'on':''}" data-m="${mm.m}">${mm.m}월</button>`).join('');
   document.querySelectorAll('#monthRow .mbtn').forEach(b=>b.onclick=()=>{openMonth=+b.dataset.m;renderDatePick();});
   const mm=REP_MONTHS.find(x=>x.m===openMonth)||REP_MONTHS[REP_MONTHS.length-1];
-  document.getElementById('sundayList').innerHTML=sundaysOf(mm.y,openMonth).map(d=>{const done=repDone(d);
-    return `<div class="sundayrow ${d===selWeek?'sel':''}" data-d="${d}">${d.slice(5).replace('-','.')} 주일<span class="st ${done?'done':'no'}">${done?'✔ 작성완료':'미입력'}</span></div>`;}).join('');
-  document.querySelectorAll('#sundayList .sundayrow').forEach(r=>r.onclick=()=>{selWeek=r.dataset.d;toggleDate();loadReportInto();renderDatePick();buildRosterCards();renderReportStatus();});
+  const cur=curSunday();
+  document.getElementById('sundayList').innerHTML=sundaysOf(mm.y,openMonth).map(d=>{const done=repDone(d);const future=d>cur;
+    let st,cls; if(done){st='✔ 작성완료';cls='done';} else if(future){st='예정';cls='future';} else {st='미입력';cls='no';}
+    const lock=future&&!done;
+    return `<div class="sundayrow ${d===selWeek?'sel':''} ${lock?'dim':''}" ${lock?'':'data-d="'+d+'"'}>${d.slice(5).replace('-','.')} 주일<span class="st ${cls}">${st}</span></div>`;}).join('');
+  document.querySelectorAll('#sundayList .sundayrow[data-d]').forEach(r=>r.onclick=()=>{selWeek=r.dataset.d;toggleDate();loadReportInto();renderDatePick();buildRosterCards();renderReportStatus();});
   updWeekNote();
 }
 function updWeekNote(){document.getElementById('weekNote').innerHTML=fmtSun(selWeek)+' · '+(repDone(selWeek)?'<b style="color:var(--green)">작성 완료</b> — 기존 내역 불러옴':'<b style="color:var(--red)">미입력</b> — 새로 작성');}

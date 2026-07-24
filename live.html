@@ -98,6 +98,69 @@ canvas{max-height:280px}
 .gate{z-index:60}
 .gatecard{position:relative}
 .gatecard .gx{position:absolute;right:16px;top:14px;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
+/* ===== app-style form components (match design sample) ===== */
+.applike{max-width:560px;margin:0 auto}
+.screenhead{display:flex;align-items:center;gap:8px;margin:2px 2px 12px}
+.screenhead b{font-size:17px;color:var(--ink)}
+.screenhead .who{margin-left:auto;font-size:12px;color:var(--muted)}
+.sect{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px 15px 17px;margin-bottom:14px;box-shadow:0 1px 3px rgba(60,80,120,.05)}
+.sect h4{margin:0 0 2px;font-size:15px;color:var(--ink)}
+.sect .d{color:var(--muted);font-size:12px;margin:0 0 9px;line-height:1.5}
+.f-label{font-size:12.5px;font-weight:700;color:var(--muted);margin:12px 2px 6px}
+.f-label:first-child{margin-top:0}
+.f-label .req{color:var(--red)}
+.f-in{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:14px;background:#fff;color:var(--ink);font-family:inherit}
+textarea.f-in{min-height:66px;resize:vertical}
+.f-primary{width:100%;margin-top:16px;background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer}
+.f-note{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.55;margin-top:9px}
+.f-toggle{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:600;color:var(--ink)}
+.f-toggle input{width:auto}
+.mini{font-size:12px;color:var(--muted);margin-top:6px}
+.datebtn{width:100%;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:12px;background:#fff;padding:13px 14px;font-size:15px;font-weight:800;color:var(--ink);cursor:pointer}
+.datebtn .pcar{color:#b9c2cf;font-size:11px;transition:.15s}
+.datebtn.open .pcar{transform:rotate(180deg)}
+.datepanel{border:1px solid var(--line);border-radius:12px;margin-top:8px;padding:10px;background:#fff}
+.monthrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.mbtn{border:1px solid var(--line);border-radius:20px;padding:6px 14px;font-size:12.5px;font-weight:700;background:#fff;color:var(--muted);cursor:pointer}
+.mbtn.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.sundayrow{display:flex;align-items:center;gap:8px;padding:10px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:600}
+.sundayrow.sel{background:var(--greenSoft);color:var(--green)}
+.sundayrow .st{margin-left:auto;font-size:11.5px;font-weight:700}
+.sundayrow .st.done{color:var(--green)}.sundayrow .st.no{color:var(--red)}
+.prow{border:1px solid var(--line);border-radius:12px;margin-top:9px;overflow:hidden}
+.phead{display:flex;align-items:center;gap:8px;padding:12px 13px;cursor:pointer;background:#fff}
+.phead .pn{font-weight:700;font-size:14px}
+.phead .psum{margin-left:auto;font-size:11px;color:var(--muted);text-align:right;max-width:170px}
+.phead .pcar{color:#b9c2cf;font-size:11px;transition:.15s}
+.prow.open .pcar{transform:rotate(180deg)}
+.pdetail{display:none;padding:12px 13px 14px;border-top:1px solid var(--line);background:#fafbfd}
+.prow.open .pdetail{display:block}
+.tgls{display:flex;flex-wrap:wrap;gap:6px}
+.tgl{border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:12.5px;background:#fff;color:var(--muted);cursor:pointer;font-weight:600}
+.tgl.on{background:var(--greenSoft);border-color:var(--green);color:var(--green)}
+.cnts{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+.cnt{display:flex;flex-direction:column;align-items:center;gap:4px}
+.cnt .cl{font-size:11px;color:var(--muted);font-weight:700}
+.cpick{width:70px;height:42px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:15px;font-weight:800;color:var(--ink);text-align:center;cursor:pointer}
+.absrow{display:flex;gap:8px;align-items:center;margin-top:8px}
+.absrow .nm{min-width:56px;font-weight:700;font-size:13.5px}
+.absrow select.f-in{width:auto;min-width:110px}
+.fbfilter{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 6px}
+.fbfilter button{border:0;background:#eef2f7;color:var(--green);border-radius:20px;padding:8px 15px;font-size:13px;font-weight:700;cursor:pointer}
+.fbfilter button.on{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff}
+.fitem{border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:11px;background:#fff}
+.fitem .ftop{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fitem .ftitle{font-weight:800;font-size:14.5px}
+.fitem .fmeta{color:var(--muted);font-size:12px;margin:4px 0}
+.fbadge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:800}
+.s-접수{background:#e0edfb;color:#1d4ed8}.s-처리중{background:#fef3c7;color:#b45309}.s-완료{background:#dcfce7;color:#15803d}.s-보류{background:#fee2e2;color:#b91c1c}.s-반려{background:#f3e8ff;color:#7c3aed}
+.pinrow{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.pinrow .f-in{max-width:150px}
+.btnsm{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;border-radius:10px;padding:10px 15px;font-size:12.5px;font-weight:800;cursor:pointer;white-space:nowrap}
+.steps{display:flex;align-items:center;gap:6px;font-size:11.5px;margin-top:10px;flex-wrap:wrap}
+.step{padding:3px 11px;border-radius:20px;background:#eef2f7;color:#94a3b8;font-weight:700}
+.step.on{background:var(--green);color:#fff}
+.reply{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:9px;padding:9px 11px;font-size:12.5px;margin-top:9px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -163,90 +226,85 @@ canvas{max-height:280px}
 
 <!-- 교인 접수 -->
 <section id="intake" class="view">
-  <div class="card" style="max-width:640px;margin:0 auto">
-    <h2>교인 피드백 · 요청 · 신청 접수</h2>
-    <p class="desc">교인 누구나 접수할 수 있습니다. 접수 내용은 담당 위원회·교역자에게 자동 전달됩니다.</p>
-    <div class="row">
-      <div><label>유형</label><select id="inType"><option>피드백</option><option>건의</option><option>요청</option><option>신청</option></select></div>
-      <div><label>분류(담당 배정)</label><select id="inCat"></select></div>
+  <div class="applike">
+    <div class="screenhead"><b>피드백</b></div>
+    <div class="sect">
+      <div class="f-label">분류 (담당 자동 배정)</div>
+      <select class="f-in" id="inCat"></select>
+      <div class="mini" id="routePreview"></div>
+      <div class="f-label">제목</div>
+      <input class="f-in" id="inTitle" placeholder="한 줄 요약"/>
+      <div class="f-label">내용</div>
+      <textarea class="f-in" id="inBody" placeholder="자세한 내용을 적어주세요"></textarea>
+      <div class="f-label">이름 <span class="req" id="reqName">*</span></div>
+      <input class="f-in" id="inName" placeholder="이름"/>
+      <div class="f-label">연락처 <span class="req" id="reqContact">*</span></div>
+      <input class="f-in" id="inContact" placeholder="전화번호 또는 메일 주소"/>
+      <div class="f-toggle"><input type="checkbox" id="inAnon" onchange="fbAnonToggle()"/> 익명으로 접수 (이름·연락처 숨김)</div>
+      <div class="f-note">평소 이름·연락처는 <b>필수</b>입니다. 익명으로 접수하면 필수가 해제되지만 <b>개별 회신을 받을 수 없습니다.</b></div>
+      <div class="f-label">조회용 비밀번호 (숫자 4자리) <span class="req">*</span></div>
+      <input class="f-in" id="inPin" type="password" maxlength="4" inputmode="numeric" placeholder="예: 전화번호 뒷자리"/>
+      <button class="f-primary" onclick="submitIntake()">접수하기</button>
+      <div id="intakeOk"></div>
     </div>
-    <label>제목</label><input type="text" id="inTitle" placeholder="한 줄 요약"/>
-    <label>내용</label><textarea id="inBody" placeholder="자세한 내용을 적어주세요"></textarea>
-    <div class="row">
-      <div><label>이름 (선택)</label><input type="text" id="inName" placeholder="익명 가능"/></div>
-      <div><label>연락처 (선택)</label><input type="text" id="inContact" placeholder="회신 원하시면 입력"/></div>
-    </div>
-    <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-weight:500"><input type="checkbox" id="inAnon" style="width:auto"/> 익명으로 접수 (이름·연락처 숨김)</label>
-    <div class="muted" style="margin-top:5px;line-height:1.5">※ 익명으로 제출하면 접수는 가능하지만 <b>개별 회신을 받을 수 없습니다.</b> 담당자가 내용을 확인하는 것으로 접수가 마무리(완료 처리)될 수 있으니, 답변이 필요하시면 이름·연락처를 남겨 주세요.</div>
-    <label>조회용 비밀번호 (숫자 4자리) <span style="color:var(--red)">*</span></label>
-    <input type="password" id="inPin" maxlength="4" inputmode="numeric" placeholder="예: 전화번호 뒷자리 4자리"/>
-    <div class="muted">접수 후 ‘내 접수 조회’에서 이 비밀번호로 본인 글을 확인합니다.</div>
-    <div id="routePreview" class="muted" style="margin-top:8px"></div>
-    <div style="margin-top:16px"><button class="btn" onclick="submitIntake()">접수하기</button></div>
-    <div id="intakeOk"></div>
   </div>
 </section>
 
 <!-- 내 접수 조회 -->
 <section id="myreq" class="view">
-  <div class="card">
-    <h2>내 접수 조회</h2>
-    <p class="desc">접수 목록은 제목만 표시됩니다. 접수 시 본인이 정한 4자리 비밀번호를 입력해야 내용과 처리 상태를 볼 수 있습니다.</p>
-    <div class="notice">데모 접수글 비밀번호는 <b>1234</b> 입니다.</div>
-    <div id="myReqList"></div>
+  <div class="applike">
+    <div class="screenhead"><b>피드백 확인</b></div>
+    <div class="sect">
+      <div class="f-note">접수 시 정한 <b>4자리 비밀번호</b>로 본인 글의 내용·처리 상태를 확인합니다.</div>
+      <div class="fbfilter" id="fbFilter">
+        <button data-s="전체" class="on">전체</button>
+        <button data-s="접수">접수</button>
+        <button data-s="처리중">처리중</button>
+        <button data-s="완료">완료</button>
+        <button data-s="보류">보류</button>
+      </div>
+      <div id="myReqList"></div>
+    </div>
   </div>
 </section>
 
 <!-- 구역보고 -->
 <section id="report" class="view">
-  <div id="adminPick" class="card" style="display:none">
-    <label>구역 선택 (관리자)</label>
-    <select id="adminDistSel" onchange="adminDistChange()"></select>
-  </div>
-  <div class="card">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <h2 style="margin:0">구역 주간 보고서</h2>
-      <span class="pill" id="rfWho"></span>
+  <div class="applike">
+    <div class="screenhead"><b>구역보고</b><span class="who" id="rfWho"></span></div>
+    <div id="adminPick" class="sect" style="display:none">
+      <div class="f-label" style="margin-top:0">구역 선택 (관리자)</div>
+      <select class="f-in" id="adminDistSel" onchange="adminDistChange()"></select>
     </div>
-    <div class="notice" style="margin-top:10px"><b>필수</b>는 ③주일 출석·⑤결석 사유 입니다. ④구역예배·⑥나눔·성경읽기는 <b>선택(자율)</b>입니다. 담임목사님은 출석·결석 사유를 최우선으로 봅니다.</div>
-    <div class="row" style="margin-top:6px">
-      <div><label>① 작성시간</label><input type="text" id="rfTime" readonly/></div>
-      <div><label>② 구역명</label><input type="text" id="rfDist" readonly/></div>
-      <div><label>주일(보고 대상일)</label><input type="date" id="rfDate" onchange="renderReportStatus()"/></div>
+    <div class="sect">
+      <div class="f-label" style="margin-top:0">보고 대상일 (주일)</div>
+      <button class="datebtn" id="dateBtn" onclick="toggleDate()"><span id="dateSel"></span><span class="pcar">▾</span></button>
+      <div class="datepanel" id="datePanel" style="display:none"><div class="monthrow" id="monthRow"></div><div id="sundayList"></div></div>
+      <div class="mini" id="weekNote"></div>
+      <input type="hidden" id="rfDate"/>
     </div>
-  </div>
-  <div class="card">
-    <h2>이번 주 구역 제출 현황 <span class="muted" style="font-weight:400;font-size:12px">— 다른 구역도 함께 표시됩니다</span></h2>
-    <div id="reportStatus"></div>
-  </div>
-  <div class="card">
-    <h2>③ 주일예배 출석부 <span class="tag tag-req">필수</span></h2>
-    <p class="desc">참석한 성도를 눌러 체크하세요. <span id="sunCount" class="pill"></span></p>
-    <div id="sunRoster" class="roster"></div>
-  </div>
-  <div class="card">
-    <h2>④ 구역예배 출석부 <span class="tag tag-opt">선택</span></h2>
-    <p class="desc">구역예배 참석자를 체크하세요. <span id="cellCount" class="pill"></span></p>
-    <div id="cellRoster" class="roster"></div>
-  </div>
-  <div class="card">
-    <h2>⑤ 주일예배 결석자 명단 및 사유 <span class="tag tag-req">필수</span></h2>
-    <p class="desc">③에서 체크되지 않은 성도가 자동 표시됩니다. 사유는 드롭다운으로 선택하고, 필요 시 특이사항만 적으세요.</p>
-    <div id="absentList"></div>
-  </div>
-  <div class="card">
-    <h2>⑥ 구역예배 현황 · 나눔 <span class="tag tag-opt">선택·자율</span></h2>
-    <div class="row">
-      <div><label>모임 여부</label><select id="cellHeld"><option value="진행">진행함</option><option value="미진행">미진행</option></select></div>
-      <div><label>일시</label><input type="text" id="cellWhen" placeholder="예: 목 저녁 8시"/></div>
-      <div><label>장소</label><input type="text" id="cellWhere" placeholder="예: 구역장 가정"/></div>
+    <div class="sect">
+      <h4>예배 출석부</h4>
+      <div class="d">이름을 누르면 세부 출석 항목이 펼쳐집니다 · 주일출석 <b id="sunCnt">0</b>명</div>
+      <div id="roster"></div>
     </div>
-    <label>나눔 주제</label><input type="text" id="cellTopic" placeholder="예: 요한복음 3장 나눔"/>
-    <label>성경읽기 (자율 · 장수/범위)</label><input type="text" id="cellBible" placeholder="예: 창세기 1~10장, 구역 평균 8장"/>
-    <label>기도 제목</label><textarea id="cellPray" placeholder="구역 기도제목"></textarea>
-    <label>특이사항 / 심방 필요 <span class="muted">(질병·장기결석·연락두절 등은 목양 우선사항으로 자동 표시)</span></label><textarea id="cellNote" placeholder="심방 요청, 애로사항 등"></textarea>
-    <div style="margin-top:16px"><button class="btn" onclick="submitReport()">보고서 제출</button></div>
+    <div class="sect">
+      <h4>결석자 <span class="tag tag-req">주일(1·2부) 미출석</span></h4>
+      <div class="d">주일예배 1·2부 모두 미출석자가 자동 표시됩니다 · 사유 선택 + 세부내용</div>
+      <div id="absentList"></div>
+    </div>
+    <div class="sect">
+      <h4>특이사항 보고</h4>
+      <div class="d">구역 전체 특이사항·심방 요청 등 (질병·장기결석·연락두절 등은 목양 우선사항으로 자동 표시)</div>
+      <textarea class="f-in" id="cellNote" placeholder="예: OO 성도 입원 심방 요청, 새가족 정착 상황 등"></textarea>
+    </div>
+    <button class="f-primary" onclick="submitReport()">보고서 제출</button>
     <div id="reportOk"></div>
+    <div class="sect" style="margin-top:14px">
+      <h4>이번 주 구역 제출 현황</h4>
+      <div class="d">다른 구역도 함께 표시됩니다</div>
+      <div id="reportStatus"></div>
+    </div>
   </div>
 </section>
 
@@ -455,132 +513,163 @@ function buildNav(view){
   showView(first);
 }
 
-// ---------- intake ----------
+// ---------- intake (피드백 접수) ----------
 function initIntake(){
-  document.getElementById('inCat').innerHTML=Object.keys(CATEGORIES).map(c=>`<option>${c}</option>`).join('');
-  const upd=()=>{const c=document.getElementById('inCat').value;const r=CATEGORIES[c];
-    document.getElementById('routePreview').innerHTML='➡ 자동 배정: <b>'+r.위원장+'</b>'+(r.교역자!=='—'?' · '+r.교역자:'')+' 에게 알림 발송';};
-  document.getElementById('inCat').onchange=upd; upd();
+  const sel=document.getElementById('inCat');
+  sel.innerHTML='<option value="">선택</option>'+Object.keys(CATEGORIES).map(c=>`<option>${c}</option>`).join('');
+  const upd=()=>{const c=sel.value;const r=CATEGORIES[c];
+    document.getElementById('routePreview').innerHTML=r?('➡ 담당 자동 배정: <b>'+r.위원장+'</b>'+(r.교역자!=='—'?' · '+r.교역자:'')):'';};
+  sel.onchange=upd; upd();
+}
+function fbAnonToggle(){
+  const a=document.getElementById('inAnon').checked;
+  ['inName','inContact'].forEach(id=>{const el=document.getElementById(id);el.disabled=a;if(a)el.value='';el.style.opacity=a?'.45':'1';});
+  const rn=document.getElementById('reqName'),rc=document.getElementById('reqContact');
+  if(rn)rn.style.display=a?'none':'inline'; if(rc)rc.style.display=a?'none':'inline';
 }
 function submitIntake(){
-  const cat=document.getElementById('inCat').value; const anon=document.getElementById('inAnon').checked;
+  const cat=document.getElementById('inCat').value;
+  if(!cat){alert('분류를 선택해주세요.');return;}
+  const anon=document.getElementById('inAnon').checked;
   const title=document.getElementById('inTitle').value.trim();
   if(!title){alert('제목을 입력해주세요.');return;}
+  const name=document.getElementById('inName').value.trim();
+  const contact=document.getElementById('inContact').value.trim();
+  if(!anon && (!name||!contact)){alert('이름과 연락처는 필수입니다. (익명 원하시면 ‘익명으로 접수’ 체크)');return;}
   const pin=document.getElementById('inPin').value.trim();
   if(!/^\d{4}$/.test(pin)){alert('조회용 비밀번호 4자리(숫자)를 입력해주세요.');return;}
   const r=CATEGORIES[cat];
-  const rec=mkSub(document.getElementById('inType').value,cat,title,document.getElementById('inBody').value,
-    anon?'익명':(document.getElementById('inName').value||'익명'),anon?'':document.getElementById('inContact').value,'접수',0);
-  rec.ts=new Date().toISOString(); rec.pin=pin;
-  rec.id='s'+new Date().getTime()+Math.floor(Math.random()*1000);
+  const rec={ts:new Date().toISOString(),type:'피드백',category:cat,title:title,body:document.getElementById('inBody').value,
+    name:anon?'익명':name,contact:anon?'':contact,status:'접수',pin:pin,
+    assignee:r.위원장+(r.교역자!=='—'?' / '+r.교역자:''),
+    id:'s'+new Date().getTime()+Math.floor(Math.random()*1000)};
   subs.unshift(rec); saveS(); pushSub(rec);
-  document.getElementById('intakeOk').innerHTML='<div class="ok-box">✅ 접수되었습니다.<br>담당 <b>'+r.위원장+'</b>'+(r.교역자!=='—'?' / '+r.교역자:'')+
-    ' 에게 알림(카카오·메일)이 발송됩니다. <span class="muted">(실제 배포 시 자동 발송)</span><br>처리 상황은 ‘내 접수 조회’에서 <b>비밀번호</b>로 확인하세요.</div>';
+  document.getElementById('intakeOk').innerHTML='<div class="ok-box">✅ 접수되었습니다. 담당 <b>'+r.위원장+'</b>'+(r.교역자!=='—'?' / '+r.교역자:'')+' 에게 전달됩니다.<br>처리 상황은 ‘피드백 확인’에서 비밀번호로 조회하세요.</div>';
   ['inTitle','inBody','inName','inContact','inPin'].forEach(id=>document.getElementById(id).value='');
 }
 
-// ---------- 내 접수 조회 ----------
+// ---------- 피드백 확인 (myreq) ----------
+let myF='전체';
 function renderMyReq(){
+  const bar=document.getElementById('fbFilter');
+  if(bar && !bar.dataset.b){bar.dataset.b='1';bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{bar.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');myF=b.dataset.s;renderMyReq();});}
   const box=document.getElementById('myReqList');
-  const list=[...subs].sort((a,b)=>b.ts.localeCompare(a.ts));
-  if(!list.length){box.innerHTML='<div class="muted">접수된 내용이 없습니다.</div>';return;}
+  const list=[...subs].filter(s=>myF==='전체'||s.status===myF).sort((a,b)=>b.ts.localeCompare(a.ts));
+  if(!list.length){box.innerHTML='<div class="mini" style="margin-top:12px">해당 상태의 접수가 없습니다.</div>';return;}
   box.innerHTML=list.map(s=>{const idx=subs.indexOf(s);
-    return `<div style="border:1px solid var(--line);border-radius:10px;padding:13px;margin-bottom:10px">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${s.title}</b>
-        <span class="badge b-${s.status}">${s.status}</span>
-        <span class="muted" style="margin-left:auto">${fmtDT(s.ts)}</span></div>
-      <div class="muted" style="margin:5px 0">${s.type} · ${catName(s.category)}</div>
-      <div id="lk${idx}"><div style="display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap">
-        <input type="password" maxlength="4" inputmode="numeric" id="pin${idx}" placeholder="비밀번호 4자리" style="max-width:150px" onkeydown="if(event.key==='Enter')openMine(${idx})"/>
-        <button class="btn sm" onclick="openMine(${idx})">내용 보기</button>
-        <span class="muted">본인이 접수 시 설정한 비밀번호</span></div></div>
+    return `<div class="fitem">
+      <div class="ftop"><span class="ftitle">${s.title}</span><span class="fbadge s-${s.status}">${s.status}</span><span class="fmeta" style="margin-left:auto">${s.ts.slice(5,10)}</span></div>
+      <div class="fmeta">${s.type} · ${catName(s.category)}</div>
+      <div id="lk${idx}"><div class="pinrow"><input class="f-in" type="password" maxlength="4" inputmode="numeric" id="pin${idx}" placeholder="비밀번호 4자리" onkeydown="if(event.key==='Enter')openMine(${idx})"/><button class="btnsm" onclick="openMine(${idx})">내용 보기</button></div></div>
     </div>`;}).join('');
 }
 function openMine(idx){
   const s=subs[idx]; const pin=(document.getElementById('pin'+idx).value||'').trim();
   if(pin!==s.pin){alert('비밀번호가 일치하지 않습니다.');return;}
-  let statusLine;
-  if(s.status==='반려'){
-    statusLine=`<div><span class="badge b-반려">반려</span> <span class="muted">처리 불가</span></div>`;
-  }else{
-    const steps=['접수','처리중','완료'];
-    const cur=s.status==='완료'?2:(s.status==='처리중'||s.status==='보류')?1:0;
-    const bar=steps.map((st,i)=>`<span class="pill" style="${i<=cur?'background:var(--blue);color:#fff':'background:#eef2f7;color:#94a3b8'}">${st}</span>`).join(' <span style="color:#cbd5e1">›</span> ');
-    const hold=s.status==='보류'?' <span class="muted">(보류: 추가 확인 중)</span>':'';
-    statusLine=`<div style="font-size:12px">${bar}${hold}</div>`;
-  }
-  const reply = s.reply?`<div class="care" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534"><b>담당자 회신</b> — ${s.reply}</div>`:'';
-  document.getElementById('lk'+idx).innerHTML=
-    (s.body?`<div style="font-size:13.5px;margin:2px 0 6px">${s.body}</div>`:'')+
-    `<div class="muted" style="margin-bottom:6px">담당: ${s.assignee}${s.contact?' · 회신 연락처 '+s.contact:''}</div>`+
-    statusLine+reply;
+  let bar;
+  if(s.status==='반려'){bar='<div class="steps"><span class="fbadge s-반려">반려</span> <span class="fmeta">처리 불가</span></div>';}
+  else{const steps=['접수','처리중','완료'];const cur=s.status==='완료'?2:(s.status==='처리중'||s.status==='보류')?1:0;
+    bar='<div class="steps">'+steps.map((st,k)=>`<span class="step ${k<=cur?'on':''}">${st}</span>`).join('<span style="color:#cbd5e1">›</span>')+(s.status==='보류'?' <span class="fmeta">(보류)</span>':'')+'</div>';}
+  const reply=s.reply?`<div class="reply"><b>담당자 회신</b> — ${s.reply}</div>`:'';
+  document.getElementById('lk'+idx).innerHTML=(s.body?`<div class="fmeta" style="color:var(--ink);margin-top:4px">${s.body}</div>`:'')+`<div class="fmeta">담당: ${s.assignee}${s.contact&&s.contact!=='익명'?' · 회신 '+s.contact:''}</div>`+bar+reply;
 }
 
-// ---------- 구역보고 ----------
-const ABSENT_REASONS=['개인사정','건강','여행','직장','확인안됨','장기결석','기타'];
+// ---------- 구역보고 (예배 출석부: 이름별 접이식) ----------
+const TG=['1부','2부','오후','수요','금요','구역'];
+const CT=[['새벽',7],['성경',100],['QT(가정)',7]];
+const ABSENT_REASONS=['선택','개인사정','건강','여행','직장','확인안됨','장기결석','기타'];
+let ATT={}, reportRoster=[], selWeek='', openMonth=0, absNotes={}, absReason={};
+function buildMonths(){const out=[];const base=new Date();base.setDate(1);for(let i=2;i>=0;i--){const x=new Date(base);x.setMonth(base.getMonth()-i);out.push({y:x.getFullYear(),m:x.getMonth()+1});}return out;}
+const REP_MONTHS=buildMonths();
+function sundaysOf(y,m){const out=[];const d=new Date(y,m-1,1);while(d.getMonth()===m-1){if(d.getDay()===0)out.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));d.setDate(d.getDate()+1);}return out;}
+function fmtSun(d){const p=d.split('-');return p[0]+'. '+p[1]+'. '+p[2]+' (주일)';}
+function repDone(d){return reports.some(r=>r.district===reportDist && r.date===d);}
 function showReport(){
   const isAdmin=current.role==='admin';
   document.getElementById('adminPick').style.display=isAdmin?'block':'none';
-  if(isAdmin){
-    const sel=document.getElementById('adminDistSel');
-    if(!sel.options.length) sel.innerHTML=DIST_NAMES.map(d=>`<option>${d}</option>`).join('');
-    reportDist=sel.value||sel.options[0].value;
-  } else { reportDist=current.district; }
-  document.getElementById('rfWho').textContent=reportDist+' · 구역장 '+((current&&current.role==='leader'&&current.who)?current.who:DISTRICTS[reportDist][0]);
-  document.getElementById('rfDist').value=reportDist;
-  document.getElementById('rfTime').value=fmtDT(new Date().toISOString());
-  document.getElementById('rfDate').value=lastSundays(1)[0];
-  buildRoster(); renderReportStatus();
+  if(isAdmin){const sel=document.getElementById('adminDistSel');if(!sel.options.length) sel.innerHTML=DIST_NAMES.map(d=>`<option>${d}</option>`).join('');reportDist=sel.value||sel.options[0].value;}
+  else reportDist=current.district;
+  document.getElementById('rfWho').textContent=reportDist+' · '+((current&&current.role==='leader'&&current.who)?current.who:'구역장');
+  selWeek=lastSundays(1)[0]; openMonth=parseInt(selWeek.slice(5,7),10);
+  loadReportInto(); renderDatePick(); buildRosterCards(); renderReportStatus();
   document.getElementById('reportOk').innerHTML='';
+}
+function loadReportInto(){
+  reportRoster=DISTRICTS[reportDist]||[];
+  ATT={}; absNotes={}; absReason={};
+  reportRoster.forEach(n=>ATT[n]={t:{},c:{'새벽':0,'성경':0,'QT(가정)':0}});
+  const prev=reports.find(r=>r.district===reportDist && r.date===selWeek);
+  if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0,'성경':0,'QT(가정)':0},prev.detail[n].c)}; }); }
+  if(prev && prev.sundayAbsent){ prev.sundayAbsent.forEach(a=>{absReason[a.name]=a.reason;absNotes[a.name]=a.note||'';}); }
+  const cn=document.getElementById('cellNote'); if(cn) cn.value=(prev&&prev.cell&&prev.cell.note)||'';
+}
+function adminDistChange(){reportDist=document.getElementById('adminDistSel').value;
+  document.getElementById('rfWho').textContent=reportDist+' · 구역장';
+  loadReportInto(); renderDatePick(); buildRosterCards(); renderReportStatus();}
+function toggleDate(){const p=document.getElementById('datePanel');const open=p.style.display==='none';p.style.display=open?'block':'none';document.getElementById('dateBtn').classList.toggle('open',open);}
+function renderDatePick(){
+  document.getElementById('dateSel').textContent=fmtSun(selWeek);
+  document.getElementById('rfDate').value=selWeek;
+  document.getElementById('monthRow').innerHTML=REP_MONTHS.map(mm=>`<button class="mbtn ${mm.m===openMonth?'on':''}" data-m="${mm.m}">${mm.m}월</button>`).join('');
+  document.querySelectorAll('#monthRow .mbtn').forEach(b=>b.onclick=()=>{openMonth=+b.dataset.m;renderDatePick();});
+  const mm=REP_MONTHS.find(x=>x.m===openMonth)||REP_MONTHS[REP_MONTHS.length-1];
+  document.getElementById('sundayList').innerHTML=sundaysOf(mm.y,openMonth).map(d=>{const done=repDone(d);
+    return `<div class="sundayrow ${d===selWeek?'sel':''}" data-d="${d}">${d.slice(5).replace('-','.')} 주일<span class="st ${done?'done':'no'}">${done?'✔ 작성완료':'미입력'}</span></div>`;}).join('');
+  document.querySelectorAll('#sundayList .sundayrow').forEach(r=>r.onclick=()=>{selWeek=r.dataset.d;toggleDate();loadReportInto();renderDatePick();buildRosterCards();renderReportStatus();});
+  updWeekNote();
+}
+function updWeekNote(){document.getElementById('weekNote').innerHTML=fmtSun(selWeek)+' · '+(repDone(selWeek)?'<b style="color:var(--green)">작성 완료</b> — 기존 내역 불러옴':'<b style="color:var(--red)">미입력</b> — 새로 작성');}
+function sunCount(){return reportRoster.filter(n=>ATT[n].t['1부']||ATT[n].t['2부']).length;}
+function buildRosterCards(){
+  const box=document.getElementById('roster');
+  box.innerHTML=reportRoster.map(n=>{
+    const tg=TG.map(t=>`<button class="tgl ${ATT[n].t[t]?'on':''}" data-n="${n}" data-t="${t}">${t}</button>`).join('');
+    const ct=CT.map(([k,mx])=>`<div class="cnt"><span class="cl">${k}</span><select class="cpick" data-n="${n}" data-k="${k}">${Array.from({length:mx+1},(_,i)=>`<option ${ATT[n].c[k]===i?'selected':''}>${i}</option>`).join('')}</select></div>`).join('');
+    return `<div class="prow" data-n="${n}"><div class="phead"><span class="pn">${n}</span><span class="psum">미체크</span><span class="pcar">▾</span></div><div class="pdetail"><div class="tgls">${tg}</div><div class="cnts">${ct}</div></div></div>`;
+  }).join('');
+  box.querySelectorAll('.phead').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
+  box.querySelectorAll('.tgl').forEach(b=>b.onclick=()=>{const n=b.dataset.n,t=b.dataset.t;ATT[n].t[t]=!ATT[n].t[t];b.classList.toggle('on',ATT[n].t[t]);updPsum(n);document.getElementById('sunCnt').textContent=sunCount();if(t==='1부'||t==='2부')buildAbsent();});
+  box.querySelectorAll('.cpick').forEach(s=>s.onchange=()=>{const n=s.dataset.n,k=s.dataset.k;ATT[n].c[k]=parseInt(s.value)||0;updPsum(n);});
+  reportRoster.forEach(updPsum);
+  document.getElementById('sunCnt').textContent=sunCount();
+  buildAbsent();
+}
+function updPsum(n){
+  const parts=TG.filter(t=>ATT[n].t[t]);
+  const cs=Object.entries(ATT[n].c).filter(([k,v])=>v>0).map(([k,v])=>k.replace('(가정)','')+v);
+  const el=document.querySelector('.prow[data-n="'+n+'"] .psum');
+  if(el) el.textContent=[...parts,...cs].join(' · ')||'미체크';
+}
+function buildAbsent(){
+  const ab=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부']));
+  const box=document.getElementById('absentList');
+  box.innerHTML= ab.length? ab.map(n=>{
+    const opts=ABSENT_REASONS.map(r=>`<option ${absReason[n]===r?'selected':''}>${r}</option>`).join('');
+    return `<div class="absrow"><span class="nm">${n}</span><select class="f-in absR" data-n="${n}">${opts}</select><input class="f-in absN" data-n="${n}" placeholder="세부내용" value="${(absNotes[n]||'').replace(/"/g,'&quot;')}"/></div>`;
+  }).join('') : '<div class="mini">주일(1·2부) 전원 출석입니다.</div>';
+  box.querySelectorAll('.absR').forEach(s=>s.onchange=()=>absReason[s.dataset.n]=s.value);
+  box.querySelectorAll('.absN').forEach(i=>i.oninput=()=>absNotes[i.dataset.n]=i.value);
 }
 function renderReportStatus(){
   const box=document.getElementById('reportStatus'); if(!box) return;
-  const date=document.getElementById('rfDate').value;
+  const date=selWeek;
   const done=new Set(reports.filter(r=>r.date===date).map(r=>r.district));
-  const pills=DIST_NAMES.map(d=>{
-    const ok=done.has(d); const me=d===reportDist;
-    const bg=ok?'background:#dcfce7;color:#15803d':'background:#fef2f2;color:#991b1b';
-    return `<span class="pill" style="${bg}${me?';outline:2px solid var(--blue2)':''}">${ok?'✔':'·'} ${d}</span>`;}).join(' ');
-  box.innerHTML=`<div class="muted" style="margin-bottom:6px">${date} 기준 · 제출 <b>${done.size}</b> / ${DIST_NAMES.length} 구역 (미제출은 붉게)</div>${pills}`;
-}
-function adminDistChange(){reportDist=document.getElementById('adminDistSel').value;
-  document.getElementById('rfWho').textContent=reportDist+' · 구역장 '+((current&&current.role==='leader'&&current.who)?current.who:DISTRICTS[reportDist][0]);
-  document.getElementById('rfDist').value=reportDist;buildRoster();renderReportStatus();}
-function buildRoster(){
-  const roster=DISTRICTS[reportDist];
-  const mk=(box,cls)=>{document.getElementById(box).innerHTML=roster.map(n=>
-    `<label class="chip"><input type="checkbox" data-n="${n}" class="${cls}" onchange="onCheck(this)"/> ${n}</label>`).join('');};
-  mk('sunRoster','sun'); mk('cellRoster','cell'); updCounts(); buildAbsent();
-}
-function onCheck(el){el.closest('.chip').classList.toggle('on',el.checked);updCounts();if(el.classList.contains('sun'))buildAbsent();}
-function getChecked(cls){return [...document.querySelectorAll('input.'+cls+':checked')].map(x=>x.dataset.n);}
-function updCounts(){const roster=DISTRICTS[reportDist];
-  document.getElementById('sunCount').textContent='출석 '+getChecked('sun').length+' / '+roster.length;
-  document.getElementById('cellCount').textContent='출석 '+getChecked('cell').length+' / '+roster.length;}
-function buildAbsent(){
-  const present=getChecked('sun'); const roster=DISTRICTS[reportDist];
-  const absent=roster.filter(n=>!present.includes(n));
-  const opts=ABSENT_REASONS.map(r=>`<option value="${r}">${r}</option>`).join('');
-  document.getElementById('absentList').innerHTML = absent.length? absent.map(n=>
-    `<div class="absent-item"><span class="nm">${n}</span><select data-abs="${n}" class="absReason">${opts}</select>`+
-    `<input type="text" data-absnote="${n}" placeholder="특이사항(선택)"/></div>`).join('')
-    : '<div class="muted">전원 출석 또는 아직 출석 체크 전입니다.</div>';
+  const pills=DIST_NAMES.map(d=>{const ok=done.has(d);const me=d===reportDist;const bg=ok?'background:#dcfce7;color:#15803d':'background:#fef2f2;color:#991b1b';
+    return `<span class="pill" style="${bg}${me?';outline:2px solid var(--teal)':''}">${ok?'✔':'·'} ${d}</span>`;}).join(' ');
+  box.innerHTML=`<div class="mini" style="margin-bottom:6px">${date} 기준 · 제출 <b>${done.size}</b> / ${DIST_NAMES.length} 구역</div>${pills}`;
 }
 function submitReport(){
-  const present=getChecked('sun');
-  const absent=[...document.querySelectorAll('select[data-abs]')].map(s=>{const nm=s.dataset.abs;
-    const note=(document.querySelector('input[data-absnote="'+nm+'"]')||{}).value||'';return {name:nm,reason:s.value,note:note};});
-  const rec={ts:new Date().toISOString(),date:document.getElementById('rfDate').value,district:reportDist,
-    sundayPresent:present,cellPresent:getChecked('cell'),sundayAbsent:absent,
-    cell:{held:document.getElementById('cellHeld').value,when:document.getElementById('cellWhen').value,
-      where:document.getElementById('cellWhere').value,topic:document.getElementById('cellTopic').value,
-      bible:document.getElementById('cellBible').value,
-      pray:document.getElementById('cellPray').value,note:document.getElementById('cellNote').value}};
-  reports=reports.filter(r=>!(r.district===rec.district&&r.date===rec.date)); reports.push(rec); saveR();
-  pushReport(rec);
-  renderReportStatus();
-  document.getElementById('reportOk').innerHTML='<div class="ok-box">✅ 보고서가 제출되었습니다. 관리자 대시보드에 즉시 반영됩니다.<br>'+
-    '주일예배 출석 <b>'+present.length+'</b>명 · 구역예배 <b>'+rec.cellPresent.length+'</b>명 · 결석 '+absent.length+'명</div>';
+  const sundayPresent=reportRoster.filter(n=>ATT[n].t['1부']||ATT[n].t['2부']);
+  const cellPresent=reportRoster.filter(n=>ATT[n].t['구역']);
+  const absent=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부'])).map(n=>({name:n,reason:(absReason[n]&&absReason[n]!=='선택')?absReason[n]:'확인안됨',note:absNotes[n]||''}));
+  const note=document.getElementById('cellNote').value;
+  const detail={}; reportRoster.forEach(n=>detail[n]={t:ATT[n].t,c:ATT[n].c});
+  const rec={ts:new Date().toISOString(),date:selWeek,district:reportDist,
+    sundayPresent:sundayPresent,cellPresent:cellPresent,sundayAbsent:absent,detail:detail,
+    cell:{held:cellPresent.length?'진행':'미진행',note:note}};
+  reports=reports.filter(r=>!(r.district===rec.district&&r.date===rec.date)); reports.push(rec); saveR(); pushReport(rec);
+  renderDatePick(); renderReportStatus();
+  document.getElementById('reportOk').innerHTML='<div class="ok-box">✅ 보고서가 제출되었습니다. 관리자 대시보드에 즉시 반영됩니다.<br>주일예배 <b>'+sundayPresent.length+'</b>명 · 구역예배 <b>'+cellPresent.length+'</b>명 · 결석 '+absent.length+'명</div>';
 }
 
 // ---------- 접수 처리 ----------

@@ -34,11 +34,18 @@ td.l,th.l{text-align:left}
 .sw span{position:absolute;inset:0;background:#cfd6df;border-radius:20px;cursor:pointer;transition:.15s}
 .sw span::before{content:"";position:absolute;left:2px;top:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
 .sw input:checked+span{background:var(--green)}
+.sw.c-fbView input:checked+span{background:#eab308}
+.sw.c-fbProc input:checked+span{background:#ea8a1e}
+.sw.c-report input:checked+span{background:#16a34a}
+.sw.c-dash input:checked+span{background:#dc2626}
 .sw input:checked+span::before{transform:translateX(18px)}
-.sw.lock span{background:var(--green);opacity:.5;cursor:not-allowed}
+.sw.lock span{opacity:.55;cursor:not-allowed}
 .menuchips{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-start}
 .mc{display:inline-block;background:#f1f5f9;color:var(--ink);border-radius:6px;padding:2px 7px;font-size:10.5px;font-weight:600}
-.mc.hi{background:var(--greenSoft);color:var(--green)}
+.mc-report{background:#dcfce7;color:#15803d}
+.mc-fbView{background:#fef9c3;color:#a16207}
+.mc-fbProc{background:#ffedd5;color:#c2410c}
+.mc-dash{background:#fee2e2;color:#b91c1c}
 .save{display:flex;gap:10px;align-items:center;margin-top:14px}
 .btn{background:var(--green);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:800;cursor:pointer}
 .btn.sec{background:#eef2f7;color:var(--blue)}
@@ -114,32 +121,35 @@ const ACCOUNTS=[
 const DEFAULT=JSON.parse(JSON.stringify(ACCOUNTS.map(a=>a.perm)));
 let filt='전체';
 function menusOf(a){
-  const m=['피드백 접수','내 접수 조회'];
-  if(a.perm.report) m.push('구역보고');
-  if(a.perm.fbView||a.perm.fbProc) m.push(a.perm.fbProc?'피드백 처리':'피드백 열람');
-  if(a.perm.dash) m.push('대시보드');
+  const m=[{t:'피드백 접수',c:''},{t:'내 접수 조회',c:''}];
+  if(a.perm.report) m.push({t:'구역보고',c:'mc-report'});
+  if(a.perm.fbView) m.push({t:'피드백 열람',c:'mc-fbView'});
+  if(a.perm.fbProc) m.push({t:'피드백 처리',c:'mc-fbProc'});
+  if(a.perm.dash) m.push({t:'대시보드',c:'mc-dash'});
   return m;
 }
+function chipsHtml(a){return menusOf(a).map(x=>`<span class="mc ${x.c}">${x.t}</span>`).join('');}
 function sw(i,cap,on,lock){
-  return `<label class="sw ${lock?'lock':''}"><input type="checkbox" ${on?'checked':''} ${lock?'disabled':''} data-i="${i}" data-c="${cap}"><span></span></label>`;
+  return `<label class="sw c-${cap} ${lock?'lock':''}"><input type="checkbox" ${on?'checked':''} ${lock?'disabled':''} data-i="${i}" data-c="${cap}"><span></span></label>`;
 }
 function render(){
   const tb=document.querySelector('#permTable tbody');
   tb.innerHTML=ACCOUNTS.map((a,i)=>{
     if(filt!=='전체'&&a.role!==filt) return '';
-    const chips=menusOf(a).map(x=>`<span class="mc ${['구역보고','피드백 처리','피드백 열람','대시보드'].includes(x)?'hi':''}">${x}</span>`).join('');
+    const lk=cap=>a.lock||(a.role==='구역장'&&cap==='report'); // 구역장 구역보고 자동 고정
     return `<tr>
       <td class="l"><div class="who">${a.name.replace('2','')}<small><span class="rolechip r-${a.role}">${a.sub}</span></small></div></td>
       <td class="l hidecol">${a.scope}</td>
-      <td>${sw(i,'fbView',a.perm.fbView,a.lock)}</td>
-      <td>${sw(i,'fbProc',a.perm.fbProc,a.lock)}</td>
-      <td>${sw(i,'report',a.perm.report,a.lock)}</td>
-      <td>${sw(i,'dash',a.perm.dash,a.lock)}</td>
-      <td class="l"><div class="menuchips">${chips}</div></td>
+      <td>${sw(i,'fbView',a.perm.fbView,lk('fbView'))}</td>
+      <td>${sw(i,'fbProc',a.perm.fbProc,lk('fbProc'))}</td>
+      <td>${sw(i,'report',a.perm.report,lk('report'))}</td>
+      <td>${sw(i,'dash',a.perm.dash,lk('dash'))}</td>
+      <td class="l"><div class="menuchips">${chipsHtml(a)}</div></td>
     </tr>`;
   }).join('')|| '<tr><td colspan="7" style="color:var(--muted)">해당 역할의 계정이 없습니다.</td></tr>';
   tb.querySelectorAll('input[type=checkbox]').forEach(c=>c.onchange=()=>{
-    ACCOUNTS[+c.dataset.i].perm[c.dataset.c]=c.checked?1:0; render();
+    const i=+c.dataset.i; ACCOUNTS[i].perm[c.dataset.c]=c.checked?1:0;
+    c.closest('tr').querySelector('.menuchips').innerHTML=chipsHtml(ACCOUNTS[i]);
   });
 }
 document.querySelectorAll('#filter button').forEach(b=>b.onclick=()=>{

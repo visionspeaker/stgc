@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>송탄영광교회 · 관리자 권한 관리 시안</title>
+<style>
+:root{--green:#3aa66e;--green2:#57b45f;--teal:#2fa58f;--blue:#3f8ed4;--lav:#8f90c4;
+--greenSoft:#e9f6ee;--blueSoft:#e8f1fb;--lavSoft:#eef0fb;--bg:#f4f6fb;--card:#fff;--line:#e7ebf2;--muted:#6b7686;--ink:#26313f;--red:#dc2626;--amber:#d97706}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+.top img{height:30px}
+.top .t{font-size:13px;color:var(--muted)}
+.top .role{margin-left:auto;background:var(--greenSoft);color:var(--green);border-radius:20px;padding:5px 12px;font-weight:700;font-size:12.5px}
+.wrap{max-width:1160px;margin:0 auto;padding:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.card h2{margin:0 0 4px;font-size:16px;color:var(--blue)}
+.card p.desc{margin:0 0 12px;color:var(--muted);font-size:12.5px}
+.note{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:9px;padding:9px 12px;font-size:12px;line-height:1.6}
+.tabbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tabbar button{background:#eef2f7;border:0;padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer;font-weight:700;color:var(--blue)}
+.tabbar button.on{background:var(--blue);color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:center;vertical-align:middle}
+th{background:#f4f6fb;font-size:11.5px;color:var(--muted);position:sticky;top:56px}
+td.l,th.l{text-align:left}
+.who{font-weight:700}
+.who small{display:block;color:var(--muted);font-weight:400;font-size:11px;margin-top:1px}
+.rolechip{display:inline-block;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700}
+.r-구역장{background:#e8f2fd;color:#1d4ed8}.r-위원장{background:#eef0fb;color:#5b54c9}.r-부장{background:#e6f5f1;color:#2a8fb2}.r-관리자{background:#e9f6ee;color:#15803d}
+.sw{position:relative;display:inline-block;width:42px;height:24px}
+.sw input{display:none}
+.sw span{position:absolute;inset:0;background:#cfd6df;border-radius:20px;cursor:pointer;transition:.15s}
+.sw span::before{content:"";position:absolute;left:2px;top:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw input:checked+span{background:var(--green)}
+.sw input:checked+span::before{transform:translateX(18px)}
+.sw.lock span{background:var(--green);opacity:.5;cursor:not-allowed}
+.menuchips{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-start}
+.mc{display:inline-block;background:#f1f5f9;color:var(--ink);border-radius:6px;padding:2px 7px;font-size:10.5px;font-weight:600}
+.mc.hi{background:var(--greenSoft);color:var(--green)}
+.save{display:flex;gap:10px;align-items:center;margin-top:14px}
+.btn{background:var(--green);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:800;cursor:pointer}
+.btn.sec{background:#eef2f7;color:var(--blue)}
+.legend{font-size:11.5px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#26313f;color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:820px){th{position:static}.hidecol{display:none}}
+.foot{color:var(--muted);font-size:11.5px;text-align:center;padding:20px}
+</style>
+</head>
+<body>
+<div class="top">
+  <img src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회"/>
+  <span class="t">· 관리자 · 권한 관리</span>
+  <span class="role">관리자 · 담임목사</span>
+</div>
+<div class="wrap">
+
+  <div class="card">
+    <h2>계정별 열람 · 처리 권한</h2>
+    <p class="desc">계정마다 기능 권한을 켜고 끕니다. 예: 구역장 <b>허미영</b>에게 ‘피드백 열람’을 켜면 그 계정으로 로그인 시 피드백 조회가 열립니다. 오른쪽 ‘로그인 시 메뉴’에 즉시 반영됩니다.</p>
+    <div class="tabbar" id="filter">
+      <button data-f="전체" class="on">전체</button>
+      <button data-f="구역장">구역장</button>
+      <button data-f="위원장">위원장</button>
+      <button data-f="부장">부장</button>
+      <button data-f="관리자">관리자</button>
+    </div>
+    <div style="overflow-x:auto"><table id="permTable"><thead>
+      <tr>
+        <th class="l">계정</th>
+        <th class="l hidecol">소속·범위</th>
+        <th>피드백<br>열람</th>
+        <th>피드백<br>처리</th>
+        <th>구역보고</th>
+        <th>대시보드</th>
+        <th class="l">로그인 시 메뉴</th>
+      </tr>
+    </thead><tbody></tbody></table></div>
+    <div class="save">
+      <button class="btn" onclick="toast('권한이 저장되었습니다 (시안 — 실제 저장은 서버 연동 시)')">권한 저장</button>
+      <button class="btn sec" onclick="resetPerm()">기본값으로 초기화</button>
+      <span class="legend">· 담임목사·관리자는 전체 권한 고정</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>참고</h2>
+    <div class="note">
+      화면에서 메뉴를 켜고 끄는 것만으로는 완전한 보안이 아닙니다. 피드백은 개인정보이므로, 실제 배포 시 <b>서버(Apps Script 등)가 “그 계정이 볼 수 있는 데이터만 응답”</b>하도록 서버 단에서 권한을 검증해야 안전합니다. 이 화면은 그 권한값을 관리자가 지정하는 UI 시안입니다.
+    </div>
+  </div>
+
+  <div class="foot">송탄영광교회 관리자 · 권한 관리 시안(디자인 목업) · 실제 권한 저장·검증은 백엔드 연동 시</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+const CAPS=['fbView','fbProc','report','dash'];
+const ACCOUNTS=[
+ {name:'박인성',role:'관리자',sub:'담임목사',scope:'전체',perm:{fbView:1,fbProc:1,report:1,dash:1},lock:true},
+ {name:'강유석',role:'관리자',sub:'교역자',scope:'전체',perm:{fbView:1,fbProc:1,report:1,dash:1},lock:true},
+ {name:'소세영',role:'위원장',sub:'예배위원장',scope:'예배위원회',perm:{fbView:1,fbProc:1,report:0,dash:0}},
+ {name:'김낙훈',role:'위원장',sub:'교육위원장',scope:'교육위원회',perm:{fbView:1,fbProc:1,report:0,dash:0}},
+ {name:'엄주철',role:'위원장',sub:'선교위원장',scope:'선교위원회',perm:{fbView:1,fbProc:1,report:0,dash:0}},
+ {name:'조현태',role:'부장',sub:'교육부장',scope:'교육위원회',perm:{fbView:1,fbProc:1,report:0,dash:0}},
+ {name:'임재환',role:'부장',sub:'예배부장',scope:'예배위원회',perm:{fbView:1,fbProc:1,report:0,dash:0}},
+ {name:'허미영',role:'구역장',sub:'3구역 구역장',scope:'3구역',perm:{fbView:0,fbProc:0,report:1,dash:0}},
+ {name:'이수철',role:'구역장',sub:'2구역 구역장',scope:'2구역',perm:{fbView:0,fbProc:0,report:1,dash:0}},
+ {name:'윤선희',role:'구역장',sub:'11구역 구역장',scope:'11구역',perm:{fbView:0,fbProc:0,report:1,dash:0}},
+ {name:'김낙훈2',role:'구역장',sub:'24구역 구역장',scope:'24구역',perm:{fbView:0,fbProc:0,report:1,dash:0}}
+];
+const DEFAULT=JSON.parse(JSON.stringify(ACCOUNTS.map(a=>a.perm)));
+let filt='전체';
+function menusOf(a){
+  const m=['피드백 접수','내 접수 조회'];
+  if(a.perm.report) m.push('구역보고');
+  if(a.perm.fbView||a.perm.fbProc) m.push(a.perm.fbProc?'피드백 처리':'피드백 열람');
+  if(a.perm.dash) m.push('대시보드');
+  return m;
+}
+function sw(i,cap,on,lock){
+  return `<label class="sw ${lock?'lock':''}"><input type="checkbox" ${on?'checked':''} ${lock?'disabled':''} data-i="${i}" data-c="${cap}"><span></span></label>`;
+}
+function render(){
+  const tb=document.querySelector('#permTable tbody');
+  tb.innerHTML=ACCOUNTS.map((a,i)=>{
+    if(filt!=='전체'&&a.role!==filt) return '';
+    const chips=menusOf(a).map(x=>`<span class="mc ${['구역보고','피드백 처리','피드백 열람','대시보드'].includes(x)?'hi':''}">${x}</span>`).join('');
+    return `<tr>
+      <td class="l"><div class="who">${a.name.replace('2','')}<small><span class="rolechip r-${a.role}">${a.sub}</span></small></div></td>
+      <td class="l hidecol">${a.scope}</td>
+      <td>${sw(i,'fbView',a.perm.fbView,a.lock)}</td>
+      <td>${sw(i,'fbProc',a.perm.fbProc,a.lock)}</td>
+      <td>${sw(i,'report',a.perm.report,a.lock)}</td>
+      <td>${sw(i,'dash',a.perm.dash,a.lock)}</td>
+      <td class="l"><div class="menuchips">${chips}</div></td>
+    </tr>`;
+  }).join('')|| '<tr><td colspan="7" style="color:var(--muted)">해당 역할의 계정이 없습니다.</td></tr>';
+  tb.querySelectorAll('input[type=checkbox]').forEach(c=>c.onchange=()=>{
+    ACCOUNTS[+c.dataset.i].perm[c.dataset.c]=c.checked?1:0; render();
+  });
+}
+document.querySelectorAll('#filter button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#filter button').forEach(x=>x.classList.remove('on'));b.classList.add('on');filt=b.dataset.f;render();});
+function resetPerm(){ACCOUNTS.forEach((a,i)=>a.perm=JSON.parse(JSON.stringify(DEFAULT[i])));render();toast('기본값으로 초기화되었습니다');}
+let tmr;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tmr);tmr=setTimeout(()=>t.classList.remove('show'),1900);}
+render();
+</script>
+</body>
+</html>

@@ -176,6 +176,15 @@ textarea.f-in{min-height:66px;resize:vertical}
 .sc-l:first-child{margin-top:0}
 .subcard textarea.f-in{min-height:56px}
 .subcard select.f-in{height:46px}
+.sc-photo{margin-top:10px}
+.sc-photo img{max-width:190px;max-height:190px;border-radius:11px;border:1px solid var(--line);display:block}
+/* ===== 사진 첨부 ===== */
+.photo-btn{border:1.5px dashed #a8d8c8;background:#f2faf6;border-radius:13px;padding:20px 14px;display:flex;align-items:center;justify-content:center;gap:9px;color:#2f8f78;font-weight:700;font-size:15px;cursor:pointer}
+.photo-btn2{border:1.5px dashed #a8d8c8;background:#f2faf6;border-radius:12px;padding:13px;display:flex;align-items:center;justify-content:center;gap:8px;color:#2f8f78;font-weight:700;font-size:14px;cursor:pointer}
+.photo-row{display:flex;gap:12px;align-items:stretch}
+.photo-thumb{position:relative;width:92px;height:92px;flex:0 0 auto;border-radius:12px;overflow:hidden;background:#eef2f7;border:1px solid var(--line)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-x{position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#4a5568;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;border:2px solid #fff;line-height:1}
 </style>
 </head>
 <body>
@@ -209,7 +218,7 @@ textarea.f-in{min-height:66px;resize:vertical}
     <div class="mtile i-green" onclick="goMyreq()"><div class="mc"><span style="font-size:28px;font-weight:800;color:#fff">A</span></div><span>피드백 확인</span></div>
     <div class="mtile i-blue" onclick="goReport()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.2a2.55 2.55 0 013.6 3.6L7.6 19.4 2.5 21l1.6-5.1z"/><path d="M14.8 4.9l3.6 3.6"/></svg></div><span>구역보고</span></div>
   </div>
-  <div class="visitor">👥 방문자 · Today <b>1</b> · Total <b>1</b></div>
+  <div class="visitor">👥 방문자 · Today <b id="visToday">·</b> · Total <b id="visTotal">·</b></div>
 </div>
 
 <!-- ================= LOGIN GATE (overlay) ================= -->
@@ -234,9 +243,26 @@ textarea.f-in{min-height:66px;resize:vertical}
   <img class="logo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회" style="cursor:pointer" onclick="goHome()"/>
   <div><h1>온라인 시스템</h1><div class="sub"><span id="roleLabel"></span></div></div>
   <button class="btn sec sm" style="margin-left:auto" onclick="goHome()">🏠 홈</button>
+  <button class="btn sec sm" id="pwBtn" onclick="openPwChange()" style="display:none">🔑 비밀번호 변경</button>
   <button class="btn sec sm" id="logoutBtn" onclick="logout()">로그아웃</button>
   <nav id="nav"></nav>
 </header>
+
+<!-- 비밀번호 변경 모달 -->
+<div id="pwGate" class="gate" style="display:none">
+  <div class="gatecard" style="max-width:360px">
+    <span class="gx" onclick="closePwChange()">✕</span>
+    <h1>비밀번호 변경</h1>
+    <div class="gsub" id="pwWho"></div>
+    <div class="f-label">현재 비밀번호</div>
+    <input class="f-in" id="pwCur" type="password" placeholder="현재 비밀번호"/>
+    <div class="f-label">새 비밀번호 (4자 이상)</div>
+    <input class="f-in" id="pwNew" type="password" placeholder="새 비밀번호"/>
+    <div class="f-label">새 비밀번호 확인</div>
+    <input class="f-in" id="pwNew2" type="password" placeholder="한 번 더 입력"/>
+    <button class="f-primary" onclick="submitPwChange()">변경 저장</button>
+  </div>
+</div>
 <main>
 
 <!-- 교인 접수 -->
@@ -259,6 +285,21 @@ textarea.f-in{min-height:66px;resize:vertical}
       <div class="f-note">평소 이름·연락처는 <b>필수</b>입니다. 익명으로 접수하면 필수가 해제되지만 <b>개별 회신을 받을 수 없습니다.</b></div>
       <div class="f-label">조회용 비밀번호 (숫자 4자리) <span class="req">*</span></div>
       <input class="f-in" id="inPin" type="password" maxlength="4" inputmode="numeric" placeholder="예: 전화번호 뒷자리"/>
+      <div class="f-label">사진 첨부 <span style="color:#6b7686;font-weight:400">(선택)</span></div>
+      <input type="file" id="inPhoto" accept="image/*" style="display:none" onchange="onPhotoPick(this)"/>
+      <div id="photoEmpty">
+        <div class="photo-btn" onclick="document.getElementById('inPhoto').click()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h3l1.5-2h7L17 7h3v12H4z"/><circle cx="12" cy="13" r="3.2"/></svg> 사진 촬영 / 선택</div>
+        <div class="mini">누르면 촬영 또는 사진 보관함에서 고를 수 있어요</div>
+      </div>
+      <div id="photoFilled" style="display:none">
+        <div class="photo-row">
+          <div class="photo-thumb"><img id="photoThumb" alt="첨부 미리보기"/><span class="photo-x" onclick="clearPhoto()">✕</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+            <div class="photo-btn2" onclick="document.getElementById('inPhoto').click()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 5v5h-5"/></svg> 다시 선택</div>
+            <div class="mini">사진 1장 첨부됨 · 전송 시 자동 용량 축소</div>
+          </div>
+        </div>
+      </div>
       <button class="f-primary" onclick="submitIntake()">접수하기</button>
       <div id="intakeOk"></div>
     </div>
@@ -401,18 +442,32 @@ function saveS(){localStorage.setItem(SKEY,JSON.stringify(subs))}
 function catName(c){return c.split(' (')[0];}
 
 // ---------- backend (구글시트 + Apps Script) ----------
-const API='https://script.google.com/macros/s/AKfycbw4UQZr7x7Yx0c3DPWrCt8ya3XpYV26iwUlV2TIiYnb5E8-g9aHtEksCGnmzDGWdFX1/exec';
+const API='https://script.google.com/macros/s/AKfycbw_-RjtpsIXGSDt9IoemgcUAjb80u_H96QFrShqFwZRqCZj3BZYSzKZkW7wBZqOBYur3w/exec';
 const USE_BACKEND=/script\.google\.com/.test(API);
 let currentView='';
+let PW_OVERRIDE={};   // 백엔드 저장 비밀번호 (name -> pw)
 function rerender(){ if(current&&currentView) showView(currentView); }
+function setVisitors(v){ if(!v) return; const t=document.getElementById('visToday'),o=document.getElementById('visTotal'); if(t)t.textContent=(v.today!=null?v.today:'·'); if(o)o.textContent=(v.total!=null?v.total:'·'); }
 async function loadAll(){
   if(!USE_BACKEND) return;
   try{
     const r=await fetch(API+'?action=all',{method:'GET'});
     const d=await r.json();
-    if(d&&d.ok){ reports=Array.isArray(d.reports)?d.reports:[]; subs=Array.isArray(d.subs)?d.subs:[]; saveR(); saveS(); rerender(); }
+    if(d&&d.ok){ reports=Array.isArray(d.reports)?d.reports:[]; subs=Array.isArray(d.subs)?d.subs:[]; PW_OVERRIDE=(d.accounts&&typeof d.accounts==='object')?d.accounts:{}; setVisitors(d.visitors); saveR(); saveS(); rerender(); }
   }catch(e){ console.warn('백엔드 불러오기 실패(로컬 데이터 사용):',e); }
 }
+function countVisit(){ if(!USE_BACKEND) return; try{ if(sessionStorage.getItem('sgc_hit')) return; sessionStorage.setItem('sgc_hit','1'); fetch(API,{method:'POST',body:JSON.stringify({action:'hit'})}).then(r=>r.json()).then(v=>setVisitors(v)).catch(()=>{}); }catch(e){} }
+/* ---- 사진 첨부 ---- */
+let attachedPhoto=null;
+function onPhotoPick(input){ const f=input.files&&input.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=e=>compressImage(e.target.result,640,0.5,url=>{ attachedPhoto=url; document.getElementById('photoThumb').src=url; document.getElementById('photoEmpty').style.display='none'; document.getElementById('photoFilled').style.display='block'; }); rd.readAsDataURL(f); }
+async function loadPhoto(id){ const box=document.getElementById('ph_'+id); if(!box) return; box.innerHTML='<span class="mini">불러오는 중…</span>'; try{ const r=await fetch(API+'?action=photo&id='+encodeURIComponent(id)); const d=await r.json(); if(d&&d.photo){ box.innerHTML='<a href="'+d.photo+'" target="_blank" rel="noopener"><img src="'+d.photo+'" alt="첨부 사진"/></a>'; } else { box.innerHTML='<span class="mini">사진을 불러오지 못했습니다.</span>'; } }catch(e){ box.innerHTML='<span class="mini">사진 로드 오류</span>'; } }
+function compressImage(dataUrl,maxDim,q,cb){ const img=new Image(); img.onload=()=>{ let w=img.width,h=img.height; if(w>maxDim||h>maxDim){ if(w>=h){h=Math.round(h*maxDim/w);w=maxDim;}else{w=Math.round(w*maxDim/h);h=maxDim;} } const c=document.createElement('canvas'); c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); try{ cb(c.toDataURL('image/jpeg',q)); }catch(e){ cb(dataUrl); } }; img.onerror=()=>cb(dataUrl); img.src=dataUrl; }
+function clearPhoto(){ attachedPhoto=null; const i=document.getElementById('inPhoto'); if(i)i.value=''; document.getElementById('photoFilled').style.display='none'; document.getElementById('photoEmpty').style.display='block'; }
+/* ---- 비밀번호 변경 ---- */
+function acctPw(nm){ if(PW_OVERRIDE[nm]!==undefined && PW_OVERRIDE[nm]!=='') return String(PW_OVERRIDE[nm]); return ACCOUNTS[nm]?ACCOUNTS[nm].pw:'1234'; }
+function openPwChange(){ if(!current||current.role==='guest'||!current.who){alert('로그인 후 이용하세요.');return;} document.getElementById('pwWho').textContent=current.who+' 님의 로그인 비밀번호를 변경합니다.'; ['pwCur','pwNew','pwNew2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); document.getElementById('pwGate').style.display='flex'; }
+function closePwChange(){ document.getElementById('pwGate').style.display='none'; }
+function submitPwChange(){ const nm=current.who; const cur=(document.getElementById('pwCur').value||'').trim(); const n1=(document.getElementById('pwNew').value||'').trim(); const n2=(document.getElementById('pwNew2').value||'').trim(); if(cur!==acctPw(nm)){alert('현재 비밀번호가 올바르지 않습니다.');return;} if(n1.length<4){alert('새 비밀번호는 4자 이상으로 정해주세요.');return;} if(n1!==n2){alert('새 비밀번호가 서로 다릅니다.');return;} PW_OVERRIDE[nm]=n1; if(USE_BACKEND){ fetch(API,{method:'POST',body:JSON.stringify({action:'setPw',name:nm,pw:n1})}).catch(()=>{}); } closePwChange(); alert('비밀번호가 변경되었습니다. 다음 로그인부터 새 비밀번호를 사용하세요.'); }
 async function pushReport(rec){
   if(!USE_BACKEND) return;
   try{ await fetch(API,{method:'POST',body:JSON.stringify({action:'saveReport',record:rec})}); loadAll(); }
@@ -460,7 +515,7 @@ function loginByName(){
   const pw=(document.getElementById('lgPw2').value||'').trim();
   const a=ACCOUNTS[nm];
   if(!a){alert('등록되지 않은 이름입니다.\n구역장: 최병윤·허미영·송영선\n관리자: 박인성·강유석·양선영·김세원·양요승');return;}
-  if(pw!==a.pw){alert('비밀번호가 올바르지 않습니다. (기본 1234)');return;}
+  if(pw!==acctPw(nm)){alert('비밀번호가 올바르지 않습니다.');return;}
   if(a.role==='leader') enterApp('leader',{district:a.district,who:nm});
   else enterApp('admin',{who:nm});
 }
@@ -502,7 +557,9 @@ function setRoleLabel(){
   if(role==='staff') who+=' <span class="rolechip">'+catName(current.category)+' 부장</span>';
   if(role==='admin'&&current.who) who+=' <span class="rolechip">'+current.who+'</span>';
   document.getElementById('roleLabel').innerHTML=who;
-  const lb=document.getElementById('logoutBtn'); if(lb) lb.style.display=(role==='guest'||role==='member')?'none':'';
+  const hide=(role==='guest'||role==='member'||!current.who);
+  const lb=document.getElementById('logoutBtn'); if(lb) lb.style.display=hide?'none':'';
+  const pb=document.getElementById('pwBtn'); if(pb) pb.style.display=hide?'none':'';
 }
 function enterApp(role,scope){
   current=Object.assign({role},scope||{});
@@ -568,9 +625,12 @@ function submitIntake(){
     name:anon?'익명':name,contact:anon?'':contact,status:'접수',pin:pin,
     assignee:r.위원장+(r.교역자!=='—'?' / '+r.교역자:''),
     id:'s'+new Date().getTime()+Math.floor(Math.random()*1000)};
+  if(attachedPhoto) rec.photo=attachedPhoto;
   subs.unshift(rec); saveS(); pushSub(rec);
-  document.getElementById('intakeOk').innerHTML='<div class="ok-box">✅ 접수되었습니다. 담당 <b>'+r.위원장+'</b>'+(r.교역자!=='—'?' / '+r.교역자:'')+' 에게 전달됩니다.<br>처리 상황은 ‘피드백 확인’에서 비밀번호로 조회하세요.</div>';
+  const withPhoto=!!attachedPhoto;
+  document.getElementById('intakeOk').innerHTML='<div class="ok-box">✅ 접수되었습니다. 담당 <b>'+r.위원장+'</b>'+(r.교역자!=='—'?' / '+r.교역자:'')+' 에게 전달됩니다.'+(withPhoto?'<br>사진은 자동 압축되어 함께 전송됩니다.':'')+'<br>처리 상황은 ‘피드백 확인’에서 비밀번호로 조회하세요.</div>';
   ['inTitle','inBody','inName','inContact','inPin'].forEach(id=>document.getElementById(id).value='');
+  clearPhoto();
 }
 
 // ---------- 피드백 확인 (myreq) ----------
@@ -723,6 +783,7 @@ function renderSubs(){
       <div class="sc-title">${s.title}</div>
       <div class="sc-meta">${s.type} · ${catName(s.category)} · 담당 <b>${s.assignee}</b></div>
       <div class="sc-body">${s.body||'(내용 없음)'}</div>
+      ${s.hasPhoto?`<div class="sc-photo" id="ph_${s.id}"><button class="btnsm" onclick="loadPhoto('${s.id}')">📷 첨부 사진 보기</button></div>`:''}
       <div class="sc-who">접수자 <b>${s.name}</b>${s.contact?' · '+s.contact:''}</div>
       <div class="sc-ctl">
         <label class="sc-l">상태 변경</label>
@@ -817,6 +878,8 @@ const _sess=loadSession(); if(_sess) current=_sess;
 document.getElementById('home').style.display='block';
 document.getElementById('app').style.display='none';
 document.getElementById('loginGate').style.display='none';
+/* 백엔드에서 비밀번호·데이터·방문자수 로드 + 방문 카운트 */
+loadAll(); countVisit();
 </script>
 </body>
 </html>

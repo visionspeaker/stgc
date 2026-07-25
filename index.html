@@ -72,6 +72,38 @@ canvas{max-height:280px}
 @media(max-width:720px){.grid2{grid-template-columns:1fr}}
 .footer{color:var(--muted);font-size:11.5px;text-align:center;padding:20px}
 .rolechip{display:inline-block;background:var(--greenSoft);color:var(--green);border-radius:20px;padding:2px 10px;font-size:11.5px;font-weight:700;margin-left:4px}
+/* ===== 관리자 대시보드 (재구성) ===== */
+.dashhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:14px}
+.dashhead h2{margin:0;font-size:16px;color:var(--green)}
+.dashhead label{margin:0;font-weight:700;color:var(--muted)}
+.dashhead select{width:auto}
+.dashhead .btn{margin-left:auto}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:4px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px}
+.kpi .n{font-size:23px;font-weight:800;color:var(--green)}
+.kpi .n small{font-size:13px;font-weight:700;color:var(--muted)}
+.kpi .l{font-size:12px;color:var(--muted);margin-top:3px}
+.kpi .s{font-size:11px;color:var(--muted);margin-top:5px}
+.kpi.warn .n{color:var(--red)}.kpi.amber .n{color:var(--warn)}
+.sect-t{font-size:13px;font-weight:800;color:var(--muted);margin:20px 4px 10px;letter-spacing:.3px}
+.dgrid{display:grid;gap:14px;margin-bottom:2px}
+.dgrid.g2{grid-template-columns:1fr 1fr}
+.dgrid.g3{grid-template-columns:2fr 1fr}
+.dcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.dcard h3{margin:0 0 3px;font-size:15px;color:var(--ink)}
+.dcard h3 small{font-weight:400;color:var(--muted);font-size:12px}
+.dcard .dd{font-size:11.5px;color:var(--muted);margin:0 0 12px}
+.dcard canvas{max-height:250px}
+.dcard.care-card{border-color:#fecaca}
+.mini3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mstat{background:linear-gradient(135deg,#fff,#f6faf7);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.mstat .n{font-size:20px;font-weight:800;color:var(--teal)}
+.mstat .l{font-size:11px;color:var(--muted);margin-top:2px}
+.dnote{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:9px;padding:9px 12px;font-size:11.5px;line-height:1.6;margin-top:10px}
+.dtable{width:100%;border-collapse:collapse;font-size:12.5px}
+.dtable th,.dtable td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left}
+.dtable th{background:#f6f8fb;font-size:11.5px;color:var(--muted)}
+@media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.dgrid.g2,.dgrid.g3{grid-template-columns:1fr}}
 /* ===== home launcher ===== */
 .home{max-width:540px;margin:0 auto;min-height:100vh;background:#fff}
 .hbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px}
@@ -399,26 +431,45 @@ textarea.f-in{min-height:66px;resize:vertical}
 
 <!-- 대시보드 -->
 <section id="dash" class="view">
-  <div class="card">
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <h2 style="margin:0">구역보고 대시보드</h2>
-      <label style="margin:0;font-weight:600">주일 선택</label>
-      <select id="weekSel" style="width:auto" onchange="renderDash()"></select>
-      <button class="btn sec sm" style="margin-left:auto" onclick="loadAll()">↻ 새로고침</button>
-    </div>
+  <div class="dashhead">
+    <h2>관리자 대시보드</h2>
+    <label>보고 대상일</label>
+    <select id="weekSel" onchange="renderDash()"></select>
+    <button class="btn sec sm" onclick="loadAll()">↻ 새로고침</button>
   </div>
-  <div class="card"><div class="cards" id="statCards"></div></div>
-  <div class="grid2">
-    <div class="card"><h2>구역별 출석</h2><canvas id="barChart"></canvas></div>
-    <div class="card"><h2>주차별 출석 추이</h2><canvas id="lineChart"></canvas></div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="sect-t">출석 현황</div>
+  <div class="dgrid g2">
+    <div class="dcard"><h3>예배별 참석</h3><p class="dd">1·2부·오후·수요·금요·새벽 참석 인원 (선택 주일)</p><canvas id="svcChart"></canvas></div>
+    <div class="dcard"><h3>주차별 주일출석 추이</h3><p class="dd">주일예배(1·2부) 총출석 · 최근 주차</p><canvas id="lineChart"></canvas></div>
   </div>
-  <div class="grid2">
-    <div class="card"><h2>구역예배 진행률</h2><canvas id="cellChart"></canvas></div>
-    <div class="card"><h2>접수 현황(상태별)</h2><canvas id="subChart"></canvas></div>
+  <div class="dgrid g2">
+    <div class="dcard"><h3>구역별 출석</h3><p class="dd">구역보고 기준 주일·구역 출석 (제출 구역)</p><canvas id="barChart"></canvas></div>
+    <div class="dcard"><h3>결석 사유 분포</h3><p class="dd">결석자 드롭다운 사유 집계</p><canvas id="reasonChart"></canvas></div>
   </div>
-  <div class="card" style="border-color:#fecaca"><h2 style="color:#b91c1c">🔴 목양 우선사항</h2><p class="desc">특이사항·결석 사유에서 질병·장기결석·연락두절·수술·입원 키워드를 자동 선별</p><div id="careBoard"></div></div>
-  <div class="card"><h2>결석자 관리 · 개근자 (선택한 주일 / 최근 3주)</h2><div id="absentBoard"></div></div>
-  <div class="card"><h2>이번 주 구역 제출 현황</h2><div id="missingBoard"></div></div>
+
+  <div class="sect-t">신앙활동 · 목양</div>
+  <div class="dgrid g2">
+    <div class="dcard"><h3>신앙활동 요약 <small>— 자율 항목</small></h3><p class="dd">구역보고 카운터 합계 — 새벽·성경·QT(가정예배)</p><div class="mini3" id="faithMini"></div><div class="dnote">자율 항목이라 참여 구역만 집계됩니다. 최우선 지표는 출석·결석이며, 이 항목은 참고용입니다.</div></div>
+    <div class="dcard care-card"><h3 style="color:#b91c1c">🔴 목양 우선사항</h3><p class="dd">결석 사유·특이사항에서 질병·장기결석·연락두절·수술·입원 자동 선별</p><div id="careBoard"></div></div>
+  </div>
+
+  <div class="sect-t">구역예배 · 결석 관리</div>
+  <div class="dgrid g3">
+    <div class="dcard"><h3>결석자 관리 · 개근자</h3><p class="dd">선택 주일 결석 사유별 / 최근 3주 개근자</p><div id="absentBoard"></div></div>
+    <div class="dcard"><h3>구역예배 진행률</h3><p class="dd">제출 구역 중 예배 진행</p><canvas id="cellChart"></canvas></div>
+  </div>
+
+  <div class="sect-t">피드백 접수 처리</div>
+  <div class="dgrid g3">
+    <div class="dcard"><h3>최근 접수 현황</h3><p class="dd">분류별 담당자에게 자동 배정 · 상태 관리</p><div id="subTable"></div></div>
+    <div class="dcard"><h3>상태별 건수</h3><p class="dd">접수·처리중·완료·보류·반려</p><canvas id="subChart"></canvas><div class="dnote">매뉴얼 기준: 접수 확인 48시간 · 완료 회신 3일.</div></div>
+  </div>
+
+  <div class="sect-t">이번 주 구역 제출 현황</div>
+  <div class="dcard"><div id="missingBoard"></div></div>
 </section>
 
 <div class="footer">송탄영광교회 · 전교인 온라인 시스템 · 테스트베드 · 입력 내용은 공용 서버(구글 시트)에 저장되어 모든 기기·관리자 대시보드에 반영됩니다</div>
@@ -827,34 +878,71 @@ function saveReply(i){const ta=document.getElementById('rp'+i);const v=ta?ta.val
 let charts={};
 function initWeekSel(){const weeks=[...new Set(reports.map(r=>r.date))].sort().reverse();
   document.getElementById('weekSel').innerHTML=weeks.map(w=>`<option>${w}</option>`).join('');}
+function kpi(n,l,s,cls){return `<div class="kpi${cls?' '+cls:''}"><div class="n">${n}</div><div class="l">${l}</div><div class="s">${s||'&nbsp;'}</div></div>`;}
+function mstat(n,l){return `<div class="mstat"><div class="n">${n}</div><div class="l">${l}</div></div>`;}
+function tSum(wkReports,key){return wkReports.reduce((a,r)=>a+Object.values(r.detail||{}).filter(p=>p.t&&p.t[key]).length,0);}
+function cSum(wkReports,key){return wkReports.reduce((a,r)=>a+Object.values(r.detail||{}).reduce((b,p)=>b+((p.c&&p.c[key])||0),0),0);}
 function renderDash(){
   initWeekSel();
   const wk=document.getElementById('weekSel').value;
   const wkReports=reports.filter(r=>r.date===wk);
   const reported=new Set(wkReports.map(r=>r.district));
   const sunTot=wkReports.reduce((a,r)=>a+r.sundayPresent.length,0);
-  const cellTot=wkReports.reduce((a,r)=>a+r.cellPresent.length,0);
+  const absTot=wkReports.reduce((a,r)=>a+r.sundayAbsent.length,0);
   const missing=DIST_NAMES.filter(d=>!reported.has(d));
-  document.getElementById('statCards').innerHTML=
-    stat(sunTot,'주일예배 총 출석')+stat(cellTot,'구역예배 총 출석')+
-    stat(reported.size+' / '+DIST_NAMES.length,'보고 완료 구역')+stat(missing.length,'미보고 구역',true);
+  const total=DIST_NAMES.reduce((a,d)=>a+((DISTRICTS[d]&&DISTRICTS[d].length)||0),0);
+  const rate=total?(sunTot/total*100).toFixed(1):'0.0';
+  const weeks=[...new Set(reports.map(r=>r.date))].sort();
+  const wi=weeks.indexOf(wk);
+  const prevSun=wi>0?reports.filter(r=>r.date===weeks[wi-1]).reduce((a,r)=>a+r.sundayPresent.length,0):null;
+  const diff=prevSun==null?'':(sunTot-prevSun>=0?'+':'−')+Math.abs(sunTot-prevSun);
+  const fbBy=s=>subs.filter(x=>x.status===s).length;
+  const fbOpen=fbBy('접수')+fbBy('처리중')+fbBy('보류');
+  document.getElementById('kpis').innerHTML=
+    kpi(total,'재적','교인 명단(구역) 합계')+
+    kpi(sunTot+' <small>·'+rate+'%</small>','주일예배 출석(1·2부)', prevSun==null?'':'전주 대비 '+diff)+
+    kpi(absTot,'결석','주일 1·2부 미출석','warn')+
+    kpi(missing.length+' <small>/'+DIST_NAMES.length+'</small>','미보고 구역','보고 완료 '+reported.size+'구역','amber')+
+    kpi(fbOpen,'처리중 피드백','접수 '+fbBy('접수')+' · 처리중 '+fbBy('처리중')+' · 보류 '+fbBy('보류'));
+  // 예배별 참석
+  drawChart('svcChart','bar',{labels:['1부','2부','오후','수요','금요','새벽'],datasets:[{label:'참석(명)',
+    data:[tSum(wkReports,'1부'),tSum(wkReports,'2부'),tSum(wkReports,'오후'),tSum(wkReports,'수요'),tSum(wkReports,'금요'),cSum(wkReports,'새벽')],
+    backgroundColor:'#2fa58f'}]},{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});
+  // 주차별 추이
+  const trend=weeks.map(w=>reports.filter(r=>r.date===w).reduce((a,r)=>a+r.sundayPresent.length,0));
+  drawChart('lineChart','line',{labels:weeks,datasets:[{label:'주일예배 총출석',data:trend,borderColor:'#3aa66e',backgroundColor:'#3aa66e22',fill:true,tension:.3}]},{scales:{y:{beginAtZero:true}}});
+  // 구역별 출석
   const labels=wkReports.map(r=>r.district);
   drawChart('barChart','bar',{labels,datasets:[
-    {label:'주일예배',data:wkReports.map(r=>r.sundayPresent.length),backgroundColor:'#2e74b5'},
-    {label:'구역예배',data:wkReports.map(r=>r.cellPresent.length),backgroundColor:'#93c5fd'}]},{scales:{x:{ticks:{font:{size:10}}}}});
-  const weeks=[...new Set(reports.map(r=>r.date))].sort();
-  const trend=weeks.map(w=>reports.filter(r=>r.date===w).reduce((a,r)=>a+r.sundayPresent.length,0));
-  drawChart('lineChart','line',{labels:weeks,datasets:[{label:'주일예배 총출석',data:trend,borderColor:'#1f4e79',backgroundColor:'#1f4e7922',fill:true,tension:.3}]},{});
-  const held=wkReports.filter(r=>r.cell.held==='진행').length;
-  drawChart('cellChart','doughnut',{labels:['진행','미진행/미보고'],datasets:[{data:[held,DIST_NAMES.length-held],backgroundColor:['#16a34a','#e2e8f0']}]},{});
-  const st=['접수','처리중','보류','완료'].map(s=>subs.filter(x=>x.status===s).length);
-  drawChart('subChart','bar',{labels:['접수','처리중','보류','완료'],datasets:[{label:'건수',data:st,backgroundColor:['#3b82f6','#f59e0b','#a855f7','#22c55e']}]},{plugins:{legend:{display:false}}});
+    {label:'주일예배',data:wkReports.map(r=>r.sundayPresent.length),backgroundColor:'#3f8ed4'},
+    {label:'구역예배',data:wkReports.map(r=>r.cellPresent.length),backgroundColor:'#93c5fd'}]},{scales:{x:{ticks:{font:{size:10}}},y:{beginAtZero:true}}});
+  // 결석 사유 분포
   const allAbsent=[];wkReports.forEach(r=>r.sundayAbsent.forEach(a=>allAbsent.push({d:r.district,...a})));
   const byReason={};allAbsent.forEach(a=>{(byReason[a.reason]=byReason[a.reason]||[]).push(a.d+' '+a.name)});
+  const rLabels=Object.keys(byReason);
+  drawChart('reasonChart','doughnut',{labels:rLabels.length?rLabels:['결석 없음'],datasets:[{data:rLabels.length?rLabels.map(k=>byReason[k].length):[1],backgroundColor:['#57b45f','#3f8ed4','#f2b366','#8f90c4','#94a3b8','#e06666','#f59e0b','#a855f7']}]},{});
+  // 신앙활동 요약
+  document.getElementById('faithMini').innerHTML=
+    mstat(cSum(wkReports,'새벽'),'새벽예배 참석(명)')+mstat(cSum(wkReports,'성경').toLocaleString(),'성경읽기(장)')+mstat(cSum(wkReports,'QT(가정)'),'QT·가정예배(회)');
+  // 목양 우선사항
   document.getElementById('careBoard').innerHTML=careHtml(wkReports);
+  // 결석자 관리·개근자
   document.getElementById('absentBoard').innerHTML = (allAbsent.length?
-    Object.entries(byReason).map(([r,arr])=>`<div style="margin:6px 0"><b>${r}</b> (${arr.length}) : <span class="muted">${arr.join(', ')}</span></div>`).join('')+longAbsentHtml()
+    Object.entries(byReason).map(([r,arr])=>`<div style="margin:6px 0;font-size:12.5px"><b>${r}</b> (${arr.length}) : <span class="muted">${arr.join(', ')}</span></div>`).join('')+longAbsentHtml()
     : '<div class="muted">결석 데이터가 없습니다.</div>') + perfectHtml();
+  // 구역예배 진행률
+  const held=wkReports.filter(r=>r.cell.held==='진행').length;
+  drawChart('cellChart','doughnut',{labels:['진행','미진행/미보고'],datasets:[{data:[held,DIST_NAMES.length-held],backgroundColor:['#16a34a','#e2e8f0']}]},{});
+  // 최근 접수 표
+  const recent=[...subs].sort((a,b)=>String(b.ts||'').localeCompare(String(a.ts||''))).slice(0,8);
+  document.getElementById('subTable').innerHTML = recent.length?
+    '<table class="dtable"><thead><tr><th>제목</th><th>분류</th><th>담당</th><th>상태</th><th>접수일</th></tr></thead><tbody>'+
+    recent.map(s=>`<tr><td>${s.title||'(제목없음)'}</td><td>${catName(s.category||'')}</td><td>${s.assignee||'-'}</td><td><span class="badge b-${s.status}">${s.status}</span></td><td>${String(s.ts||'').slice(5,10)}</td></tr>`).join('')+
+    '</tbody></table>' : '<div class="muted">접수된 피드백이 없습니다.</div>';
+  // 상태별 건수
+  const stKeys=['접수','처리중','완료','보류','반려'];
+  drawChart('subChart','bar',{labels:stKeys,datasets:[{label:'건수',data:stKeys.map(fbBy),backgroundColor:['#3b82f6','#f59e0b','#22c55e','#a855f7','#e06666']}]},{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
+  // 이번 주 구역 제출 현황
   document.getElementById('missingBoard').innerHTML = submissionBoardHtml(wk, reported, null)
     + (missing.length ? '' : '<div class="ok-box" style="margin-top:10px">🎉 모든 구역이 보고를 완료했습니다.</div>');
 }

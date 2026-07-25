@@ -418,7 +418,7 @@ textarea.f-in{min-height:66px;resize:vertical}
   </div>
   <div class="card" style="border-color:#fecaca"><h2 style="color:#b91c1c">🔴 목양 우선사항</h2><p class="desc">특이사항·결석 사유에서 질병·장기결석·연락두절·수술·입원 키워드를 자동 선별</p><div id="careBoard"></div></div>
   <div class="card"><h2>결석자 관리 · 개근자 (선택한 주일 / 최근 3주)</h2><div id="absentBoard"></div></div>
-  <div class="card"><h2>미보고 구역</h2><div id="missingBoard"></div></div>
+  <div class="card"><h2>이번 주 구역 제출 현황</h2><div id="missingBoard"></div></div>
 </section>
 
 <div class="footer">송탄영광교회 · 전교인 온라인 시스템 · 테스트베드 · 입력 내용은 공용 서버(구글 시트)에 저장되어 모든 기기·관리자 대시보드에 반영됩니다</div>
@@ -757,13 +757,15 @@ function buildAbsent(){
   box.querySelectorAll('.absR').forEach(s=>s.onchange=()=>absReason[s.dataset.n]=s.value);
   box.querySelectorAll('.absN').forEach(i=>i.oninput=()=>absNotes[i.dataset.n]=i.value);
 }
+function submissionBoardHtml(dateLabel, doneSet, myDist){
+  const pills=DIST_SORTED.map(d=>{const ok=doneSet.has(d);const me=myDist&&d===myDist;const bg=ok?'background:#dcfce7;color:#15803d':'background:#fef2f2;color:#991b1b';
+    return `<span class="pill" style="${bg}${me?';outline:2px solid var(--teal)':''}">${ok?'✔ ':''}${d}</span>`;}).join(' ');
+  return `<div class="mini" style="margin-bottom:6px">${dateLabel} 기준 · 제출 <b>${doneSet.size}</b> / ${DIST_NAMES.length} 구역</div>${pills}`;
+}
 function renderReportStatus(){
   const box=document.getElementById('reportStatus'); if(!box) return;
-  const date=selWeek;
-  const done=new Set(reports.filter(r=>r.date===date).map(r=>r.district));
-  const pills=DIST_SORTED.map(d=>{const ok=done.has(d);const me=d===reportDist;const bg=ok?'background:#dcfce7;color:#15803d':'background:#fef2f2;color:#991b1b';
-    return `<span class="pill" style="${bg}${me?';outline:2px solid var(--teal)':''}">${ok?'✔ ':''}${d}</span>`;}).join(' ');
-  box.innerHTML=`<div class="mini" style="margin-bottom:6px">${date} 기준 · 제출 <b>${done.size}</b> / ${DIST_NAMES.length} 구역</div>${pills}`;
+  const done=new Set(reports.filter(r=>r.date===selWeek).map(r=>r.district));
+  box.innerHTML=submissionBoardHtml(selWeek, done, reportDist);
 }
 function submitReport(){
   const sundayPresent=reportRoster.filter(n=>ATT[n].t['1부']||ATT[n].t['2부']);
@@ -853,9 +855,8 @@ function renderDash(){
   document.getElementById('absentBoard').innerHTML = (allAbsent.length?
     Object.entries(byReason).map(([r,arr])=>`<div style="margin:6px 0"><b>${r}</b> (${arr.length}) : <span class="muted">${arr.join(', ')}</span></div>`).join('')+longAbsentHtml()
     : '<div class="muted">결석 데이터가 없습니다.</div>') + perfectHtml();
-  document.getElementById('missingBoard').innerHTML = missing.length?
-    sortDist(missing).map(m=>`<span class="pill" style="background:#fef2f2;color:#991b1b">${m}</span>`).join(' ')
-    : '<div class="ok-box">🎉 모든 구역이 보고를 완료했습니다.</div>';
+  document.getElementById('missingBoard').innerHTML = submissionBoardHtml(wk, reported, null)
+    + (missing.length ? '' : '<div class="ok-box" style="margin-top:10px">🎉 모든 구역이 보고를 완료했습니다.</div>');
 }
 function longAbsentHtml(){
   const weeks=[...new Set(reports.map(r=>r.date))].sort().slice(-3);const cnt={};

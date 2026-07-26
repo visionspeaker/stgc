@@ -1147,9 +1147,12 @@ function openReportDetail(dist,date){
   const roster=DISTRICTS[dist]||[];
   const svc=TG.map(t=>`<span class="rmchip${t==='월삭'?' v':''}">${t} ${svcCount(r,t)}</span>`).join('');
   const faith=`<span class="rmchip n">새벽 ${cntSum(r,'새벽')}명</span><span class="rmchip n">성경 ${cntSum(r,'성경')}장</span><span class="rmchip n">QT ${cntSum(r,'QT(가정)')}회</span>`;
-  const rows=roster.map(n=>{const line=personLine(r,n);const pr=((r.detail||{})[n]||{}).p||'';
-    return `<div class="rmrow"><span class="nm">${esc(n)}</span><span class="dt ${line?'':'none'}">${esc(line||'미체크')}</span></div>`
-      + (pr?`<div class="rmpray">🙏 ${esc(pr)}</div>`:'');}).join('');
+  /* 미체크(아무 항목도 없음)는 아래 결석자에만 표시 → 목록에서 제외 */
+  const shown=roster.filter(n=>personLine(r,n)||(((r.detail||{})[n]||{}).p||''));
+  const rows=shown.length?shown.map(n=>{const line=personLine(r,n);const pr=((r.detail||{})[n]||{}).p||'';
+    return `<div class="rmrow"><span class="nm">${esc(n)}</span><span class="dt ${line?'':'none'}">${esc(line||'-')}</span></div>`
+      + (pr?`<div class="rmpray">🙏 ${esc(pr)}</div>`:'');}).join('')
+    : '<div class="rmrow"><span class="dt none">체크된 인원이 없습니다.</span></div>';
   const abs=(r.sundayAbsent||[]).length
     ? (r.sundayAbsent||[]).map(a=>`<div class="rmabs"><b>${esc(a.name)}</b> · ${esc(a.reason||'확인안됨')}${a.note?' — '+esc(a.note):''}</div>`).join('')
     : '<div class="muted" style="font-size:12.5px">결석자가 없습니다.</div>';
@@ -1162,7 +1165,7 @@ function openReportDetail(dist,date){
      </div>
      <div class="rmsec">예배별 참석</div><div class="rmchips">${svc}</div>
      <div class="rmsec">신앙활동</div><div class="rmchips">${faith}</div>
-     <div class="rmsec">개인별 출석 (${roster.length}명)</div><div class="rmlist">${rows}</div>
+     <div class="rmsec">개인별 출석 (체크 ${shown.length}명 / 전체 ${roster.length}명)</div><div class="rmlist">${rows}</div>
      <div class="rmsec">결석자</div>${abs}
      <div class="rmsec">특이사항</div>${note}`;
   document.getElementById('repModal').style.display='flex';
@@ -1195,8 +1198,10 @@ function reportPageHtml(r){
   const dist=r.district, roster=DISTRICTS[dist]||[];
   const svc=TG.map(t=>`<th>${t}</th>`).join('')+'<th>새벽</th><th>성경</th><th>QT</th>';
   const svcv=TG.map(t=>`<td>${svcCount(r,t)}</td>`).join('')+`<td>${cntSum(r,'새벽')}</td><td>${cntSum(r,'성경')}</td><td>${cntSum(r,'QT(가정)')}</td>`;
-  const rows=roster.map(n=>{const pr=((r.detail||{})[n]||{}).p||'';
-    return `<tr><td style="width:80px">${esc(n)}</td><td>${esc(personLine(r,n)||'미체크')}${pr?'<br><span style="color:#333">🙏 '+esc(pr)+'</span>':''}</td></tr>`;}).join('');
+  const shown=roster.filter(n=>personLine(r,n)||(((r.detail||{})[n]||{}).p||''));
+  const rows=shown.map(n=>{const pr=((r.detail||{})[n]||{}).p||'';
+    return `<tr><td style="width:80px">${esc(n)}</td><td>${esc(personLine(r,n)||'-')}${pr?'<br><span style="color:#333">🙏 '+esc(pr)+'</span>':''}</td></tr>`;}).join('')
+    || '<tr><td colspan="2">체크된 인원이 없습니다.</td></tr>';
   const abs=(r.sundayAbsent||[]).length
     ? (r.sundayAbsent||[]).map(a=>`<div class="prline">· <b>${esc(a.name)}</b> — ${esc(a.reason||'확인안됨')}${a.note?' : '+esc(a.note):''}</div>`).join('')
     : '<div class="prline">없음</div>';
@@ -1205,7 +1210,7 @@ function reportPageHtml(r){
     <div class="prmeta">${esc(r.date)} 주일 · 구역장 ${esc(ACCOUNTS_BY_DIST[dist]||'-')} · 주일출석 ${(r.sundayPresent||[]).length}명 · 구역예배 ${(r.cellPresent||[]).length}명 · 결석 ${(r.sundayAbsent||[]).length}명</div>
     <h3>예배별 참석 · 신앙활동</h3>
     <table><tr>${svc}</tr><tr>${svcv}</tr></table>
-    <h3>개인별 출석 (${roster.length}명)</h3>
+    <h3>개인별 출석 (체크 ${shown.length}명 / 전체 ${roster.length}명)</h3>
     <table>${rows}</table>
     <h3>결석자</h3>${abs}
     <h3>특이사항</h3><div class="prbox">${esc((r.cell&&r.cell.note)||'없음')}</div>

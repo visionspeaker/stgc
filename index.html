@@ -772,7 +772,8 @@ function goCulture(){openApp('culture');}
 function goIntake(){openApp('intake');}
 function goMyreq(){openApp('myreq');}
 function goReport(){
-  if(current && (current.role==='leader'||current.role==='elder'||current.role==='admin')) openApp('report');
+  if(current && current.role==='admin') openApp('dash');   /* 관리자는 대시보드부터 */
+  else if(current && (current.role==='leader'||current.role==='elder')) openApp('report');
   else { alert('구역보고는 구역장·관리자 로그인 후 이용할 수 있습니다.'); openLogin(); }
 }
 

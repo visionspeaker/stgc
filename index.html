@@ -473,6 +473,8 @@ textarea.f-in{min-height:66px;resize:vertical}
       <div class="mini" id="weekNote"></div>
       <input type="hidden" id="rfDate"/>
     </div>
+    <div id="pickNotice" class="f-note" style="display:none">위에서 <b>구역을 선택</b>하면 해당 구역의 출석부가 나타납니다.</div>
+    <div id="reportBody">
     <div class="sect">
       <h4>예배 출석부</h4>
       <div class="d">이름을 누르면 세부 출석 항목이 펼쳐집니다 · 주일출석 <b id="sunCnt">0</b>명</div>
@@ -493,6 +495,7 @@ textarea.f-in{min-height:66px;resize:vertical}
     <div class="sect" style="margin-top:14px">
       <h4>이번 주 구역 제출 현황</h4>
       <div id="reportStatus"></div>
+    </div>
     </div>
   </div>
 </section>
@@ -912,15 +915,31 @@ const REP_MONTHS=buildMonths();
 function sundaysOf(y,m){const out=[];const d=new Date(y,m-1,1);while(d.getMonth()===m-1){if(d.getDay()===0)out.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));d.setDate(d.getDate()+1);}return out;}
 function fmtSun(d){const p=d.split('-');return p[0]+'. '+p[1]+'. '+p[2]+' (주일)';}
 function repDone(d){return reports.some(r=>r.district===reportDist && r.date===d);}
+/* 관리자: 구역을 고르기 전에는 출석부를 감춤 */
+function setReportBody(on){
+  const b=document.getElementById('reportBody'), n=document.getElementById('pickNotice');
+  if(b) b.style.display=on?'block':'none';
+  if(n) n.style.display=on?'none':'block';
+}
 function showReport(){
   const isAdmin=current.role==='admin';
   document.getElementById('adminPick').style.display=isAdmin?'block':'none';
-  if(isAdmin){const sel=document.getElementById('adminDistSel');if(!sel.options.length) sel.innerHTML=DIST_NAMES.map(d=>`<option>${d}</option>`).join('');reportDist=sel.value||sel.options[0].value;}
-  else reportDist=current.district;
-  document.getElementById('rfWho').textContent=reportDist+' · '+((current&&(current.role==='leader'||current.role==='elder')&&current.who)?current.who:'구역장');
   selWeek=lastSundays(1)[0]; openMonth=parseInt(selWeek.slice(5,7),10);
-  loadReportInto(); renderDatePick(); buildRosterCards(); renderReportStatus();
   document.getElementById('reportOk').innerHTML='';
+  if(isAdmin){
+    const sel=document.getElementById('adminDistSel');
+    sel.innerHTML='<option value="">구역을 선택하세요</option>'+DIST_SORTED.map(d=>`<option>${d}</option>`).join('');
+    sel.value='';
+    reportDist=null;
+    document.getElementById('rfWho').textContent='구역 미선택';
+    setReportBody(false);
+    renderDatePick();
+    return;
+  }
+  setReportBody(true);
+  reportDist=current.district;
+  document.getElementById('rfWho').textContent=reportDist+' · '+((current&&(current.role==='leader'||current.role==='elder')&&current.who)?current.who:'구역장');
+  loadReportInto(); renderDatePick(); buildRosterCards(); renderReportStatus();
 }
 function loadReportInto(){
   reportRoster=DISTRICTS[reportDist]||[];
@@ -931,8 +950,13 @@ function loadReportInto(){
   if(prev && prev.sundayAbsent){ prev.sundayAbsent.forEach(a=>{absReason[a.name]=a.reason;absNotes[a.name]=a.note||'';}); }
   const cn=document.getElementById('cellNote'); if(cn) cn.value=(prev&&prev.cell&&prev.cell.note)||'';
 }
-function adminDistChange(){reportDist=document.getElementById('adminDistSel').value;
+function adminDistChange(){
+  const v=document.getElementById('adminDistSel').value;
+  if(!v){ reportDist=null; document.getElementById('rfWho').textContent='구역 미선택'; setReportBody(false); return; }
+  reportDist=v;
   document.getElementById('rfWho').textContent=reportDist+' · 구역장';
+  setReportBody(true);
+  document.getElementById('reportOk').innerHTML='';
   loadReportInto(); renderDatePick(); buildRosterCards(); renderReportStatus();}
 function toggleDate(){const p=document.getElementById('datePanel');const open=p.style.display==='none';p.style.display=open?'block':'none';document.getElementById('dateBtn').classList.toggle('open',open);}
 function renderDatePick(){
@@ -998,6 +1022,7 @@ function renderReportStatus(){
   box.innerHTML=submissionBoardHtml(selWeek, done, reportDist);
 }
 function submitReport(){
+  if(!reportDist){ alert('구역을 먼저 선택하세요.'); return; }
   const sundayPresent=reportRoster.filter(n=>ATT[n].t['1부']||ATT[n].t['2부']);
   const cellPresent=reportRoster.filter(n=>ATT[n].t['구역']);
   const absent=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부'])).map(n=>({name:n,reason:(absReason[n]&&absReason[n]!=='선택')?absReason[n]:'확인안됨',note:absNotes[n]||''}));

@@ -153,6 +153,7 @@ canvas{max-height:280px}
 .rmrow .nm{width:62px;font-weight:700;flex:none}
 .rmrow .dt{color:var(--muted)}
 .rmrow .dt.none{color:#b6bec9}
+.rmpray{padding:4px 10px 8px 80px;font-size:12px;color:#5b54c9;background:#fbfbfe;border-bottom:1px solid #eef1f6}
 .rmabs{background:#fff5f5;border:1px solid #fecaca;border-radius:9px;padding:8px 10px;font-size:12.5px;margin-bottom:6px}
 .rmabs b{color:#b91c1c}
 .rmnote{background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:12.5px;line-height:1.6}
@@ -253,6 +254,10 @@ textarea.f-in{min-height:66px;resize:vertical}
 .cnt{display:flex;flex-direction:column;align-items:center;gap:4px}
 .cnt .cl{font-size:11px;color:var(--muted);font-weight:700}
 .cpick{width:72px;height:44px;border:1px solid var(--inline);border-radius:10px;background:#fff;font-size:16px;font-weight:800;color:var(--ink);text-align:center;cursor:pointer}
+.pray{margin-top:12px}
+.pray .pl{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px}
+.pray .pl span{font-weight:400;color:#98a2b3}
+.ppick{width:100%;height:44px;border:1px solid var(--inline);border-radius:10px;background:#fff;padding:0 11px;font-size:15px;color:var(--ink);font-family:inherit}
 .absrow{display:flex;gap:8px;align-items:center;margin-top:8px}
 .absrow .nm{min-width:56px;font-weight:700;font-size:13.5px}
 .absrow select.f-in{width:auto;min-width:110px}
@@ -919,9 +924,9 @@ function showReport(){
 function loadReportInto(){
   reportRoster=DISTRICTS[reportDist]||[];
   ATT={}; absNotes={}; absReason={};
-  reportRoster.forEach(n=>ATT[n]={t:{},c:{'새벽':0,'성경':0,'QT(가정)':0}});
+  reportRoster.forEach(n=>ATT[n]={t:{},c:{'새벽':0,'성경':0,'QT(가정)':0},p:''});
   const prev=reports.find(r=>r.district===reportDist && r.date===selWeek);
-  if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0,'성경':0,'QT(가정)':0},prev.detail[n].c)}; }); }
+  if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0,'성경':0,'QT(가정)':0},prev.detail[n].c),p:prev.detail[n].p||''}; }); }
   if(prev && prev.sundayAbsent){ prev.sundayAbsent.forEach(a=>{absReason[a.name]=a.reason;absNotes[a.name]=a.note||'';}); }
   const cn=document.getElementById('cellNote'); if(cn) cn.value=(prev&&prev.cell&&prev.cell.note)||'';
 }
@@ -951,11 +956,14 @@ function buildRosterCards(){
     const tg=TG.map(t=>{const lock=(t==='월삭')&&!isFirstSunday(selWeek);
       return `<button class="tgl ${ATT[n].t[t]?'on':''} ${lock?'lock':''}" data-n="${n}" data-t="${t}" ${lock?'data-lock="1" title="월삭은 매월 첫째 주일에만 입력합니다"':''}>${t}</button>`;}).join('');
     const ct=CT.map(([k,mx])=>`<div class="cnt"><span class="cl">${k}</span><select class="cpick" data-n="${n}" data-k="${k}">${Array.from({length:mx+1},(_,i)=>`<option ${ATT[n].c[k]===i?'selected':''}>${i}</option>`).join('')}</select></div>`).join('');
-    return `<div class="prow" data-n="${n}"><div class="phead"><span class="pn">${n}</span><span class="psum">미체크</span><span class="pcar">▾</span></div><div class="pdetail"><div class="tgls">${tg}</div><div class="cnts">${ct}</div></div></div>`;
+    const pv=(ATT[n].p||'').replace(/"/g,'&quot;');
+    const pray=`<div class="pray"><label class="pl">기도제목 <span>· 선택 입력</span></label><input class="ppick" type="text" data-n="${n}" placeholder="세부내용" value="${pv}"/></div>`;
+    return `<div class="prow" data-n="${n}"><div class="phead"><span class="pn">${n}</span><span class="psum">미체크</span><span class="pcar">▾</span></div><div class="pdetail"><div class="tgls">${tg}</div><div class="cnts">${ct}</div>${pray}</div></div>`;
   }).join('');
   box.querySelectorAll('.phead').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
   box.querySelectorAll('.tgl').forEach(b=>b.onclick=()=>{if(b.dataset.lock) return;const n=b.dataset.n,t=b.dataset.t;ATT[n].t[t]=!ATT[n].t[t];b.classList.toggle('on',ATT[n].t[t]);updPsum(n);document.getElementById('sunCnt').textContent=sunCount();if(t==='1부'||t==='2부')buildAbsent();});
   box.querySelectorAll('.cpick').forEach(s=>s.onchange=()=>{const n=s.dataset.n,k=s.dataset.k;ATT[n].c[k]=parseInt(s.value)||0;updPsum(n);});
+  box.querySelectorAll('.ppick').forEach(i=>{const h=()=>{ATT[i.dataset.n].p=i.value;updPsum(i.dataset.n);};i.oninput=h;i.onchange=h;});
   reportRoster.forEach(updPsum);
   document.getElementById('sunCnt').textContent=sunCount();
   buildAbsent();
@@ -964,7 +972,8 @@ function updPsum(n){
   const parts=TG.filter(t=>ATT[n].t[t]);
   const cs=Object.entries(ATT[n].c).filter(([k,v])=>v>0).map(([k,v])=>k.replace('(가정)','')+v);
   const el=document.querySelector('.prow[data-n="'+n+'"] .psum');
-  if(el) el.textContent=[...parts,...cs].join(' · ')||'미체크';
+  const pr=(ATT[n].p||'').trim()?['기도제목 ✎']:[];
+  if(el) el.textContent=[...parts,...cs,...pr].join(' · ')||'미체크';
 }
 function buildAbsent(){
   const ab=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부']));
@@ -992,7 +1001,7 @@ function submitReport(){
   const cellPresent=reportRoster.filter(n=>ATT[n].t['구역']);
   const absent=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부'])).map(n=>({name:n,reason:(absReason[n]&&absReason[n]!=='선택')?absReason[n]:'확인안됨',note:absNotes[n]||''}));
   const note=document.getElementById('cellNote').value;
-  const detail={}; reportRoster.forEach(n=>detail[n]={t:ATT[n].t,c:ATT[n].c});
+  const detail={}; reportRoster.forEach(n=>detail[n]={t:ATT[n].t,c:ATT[n].c,p:(ATT[n].p||'').trim()});
   const rec={ts:new Date().toISOString(),date:selWeek,district:reportDist,
     sundayPresent:sundayPresent,cellPresent:cellPresent,sundayAbsent:absent,detail:detail,
     cell:{held:cellPresent.length?'진행':'미진행',note:note}};
@@ -1137,8 +1146,9 @@ function openReportDetail(dist,date){
   const roster=DISTRICTS[dist]||[];
   const svc=TG.map(t=>`<span class="rmchip${t==='월삭'?' v':''}">${t} ${svcCount(r,t)}</span>`).join('');
   const faith=`<span class="rmchip n">새벽 ${cntSum(r,'새벽')}명</span><span class="rmchip n">성경 ${cntSum(r,'성경')}장</span><span class="rmchip n">QT ${cntSum(r,'QT(가정)')}회</span>`;
-  const rows=roster.map(n=>{const line=personLine(r,n);
-    return `<div class="rmrow"><span class="nm">${esc(n)}</span><span class="dt ${line?'':'none'}">${esc(line||'미체크')}</span></div>`;}).join('');
+  const rows=roster.map(n=>{const line=personLine(r,n);const pr=((r.detail||{})[n]||{}).p||'';
+    return `<div class="rmrow"><span class="nm">${esc(n)}</span><span class="dt ${line?'':'none'}">${esc(line||'미체크')}</span></div>`
+      + (pr?`<div class="rmpray">🙏 ${esc(pr)}</div>`:'');}).join('');
   const abs=(r.sundayAbsent||[]).length
     ? (r.sundayAbsent||[]).map(a=>`<div class="rmabs"><b>${esc(a.name)}</b> · ${esc(a.reason||'확인안됨')}${a.note?' — '+esc(a.note):''}</div>`).join('')
     : '<div class="muted" style="font-size:12.5px">결석자가 없습니다.</div>';
@@ -1184,7 +1194,8 @@ function reportPageHtml(r){
   const dist=r.district, roster=DISTRICTS[dist]||[];
   const svc=TG.map(t=>`<th>${t}</th>`).join('')+'<th>새벽</th><th>성경</th><th>QT</th>';
   const svcv=TG.map(t=>`<td>${svcCount(r,t)}</td>`).join('')+`<td>${cntSum(r,'새벽')}</td><td>${cntSum(r,'성경')}</td><td>${cntSum(r,'QT(가정)')}</td>`;
-  const rows=roster.map(n=>`<tr><td style="width:80px">${esc(n)}</td><td>${esc(personLine(r,n)||'미체크')}</td></tr>`).join('');
+  const rows=roster.map(n=>{const pr=((r.detail||{})[n]||{}).p||'';
+    return `<tr><td style="width:80px">${esc(n)}</td><td>${esc(personLine(r,n)||'미체크')}${pr?'<br><span style="color:#333">🙏 '+esc(pr)+'</span>':''}</td></tr>`;}).join('');
   const abs=(r.sundayAbsent||[]).length
     ? (r.sundayAbsent||[]).map(a=>`<div class="prline">· <b>${esc(a.name)}</b> — ${esc(a.reason||'확인안됨')}${a.note?' : '+esc(a.note):''}</div>`).join('')
     : '<div class="prline">없음</div>';

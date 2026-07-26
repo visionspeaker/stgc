@@ -15,7 +15,7 @@
 <meta name="theme-color" content="#2fa58f"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{--green:#3aa66e;--green2:#57b45f;--teal:#2fa58f;--blue:#3f8ed4;--blue2:#2e74b5;--blueSoft:#e8f1fb;--greenSoft:#e9f6ee;--lavSoft:#eef0fb;--bg:#f5f7fb;--card:#fff;--line:#e9edf3;--muted:#6b7686;--ink:#26313f;--ok:#16a34a;--warn:#d97706;--red:#dc2626}
+:root{--green:#3aa66e;--green2:#57b45f;--teal:#2fa58f;--blue:#3f8ed4;--blue2:#2e74b5;--blueSoft:#e8f1fb;--greenSoft:#e9f6ee;--lavSoft:#eef0fb;--bg:#f5f7fb;--card:#fff;--line:#dde4ee;--inline:#b9c6d8;--muted:#6b7686;--ink:#26313f;--ok:#16a34a;--warn:#d97706;--red:#dc2626}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{overflow-x:hidden}
 body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden;max-width:100%}
@@ -37,7 +37,8 @@ main{max-width:1080px;margin:0 auto;padding:18px}
 .card h2{margin:0 0 4px;font-size:16px;color:var(--green)}
 .card p.desc{margin:0 0 14px;color:var(--muted);font-size:13px}
 label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:12px 0 5px}
-input[type=text],input[type=password],input[type=date],input[type=time],select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+input[type=text],input[type=password],input[type=date],input[type=time],select,textarea{width:100%;padding:11px 12px;border:1px solid var(--inline);border-radius:12px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(47,165,143,.14)}
 textarea{min-height:70px;resize:vertical}
 .btn{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;padding:12px 22px;border-radius:13px;font-size:14.5px;font-weight:800;cursor:pointer}
 .btn:hover{filter:brightness(.97)}
@@ -135,13 +136,8 @@ canvas{max-height:280px}
 .i-yellow .mc{background:linear-gradient(160deg,#ffe24d,#ffca00);color:#3a1f10}
 .i-indigo .mc{background:linear-gradient(160deg,#9092dc,#5b54c9)}
 .i-blue .mc{background:linear-gradient(160deg,#5aa2ea,#3f78d4)}
-.newsbtn{display:flex;align-items:center;gap:13px;margin:20px 18px 0;padding:15px 18px;border-radius:16px;background:linear-gradient(135deg,#5aa2ea,#2e74b5);color:#fff;cursor:pointer;box-shadow:0 8px 20px rgba(46,116,181,.28);border:0;width:calc(100% - 36px);text-align:left}
-.newsbtn:active{transform:scale(.985)}
-.newsbtn .nb-ic{width:44px;height:44px;flex:none;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center}
-.newsbtn .nb-tx{flex:1;line-height:1.35}
-.newsbtn .nb-tx b{display:block;font-size:15px;font-weight:800}
-.newsbtn .nb-tx span{font-size:12px;opacity:.92}
-.newsbtn .nb-ar{font-size:20px;opacity:.9}
+.i-news .mc{background:linear-gradient(160deg,#5aa2ea,#2e74b5)}
+.i-orange .mc{background:linear-gradient(160deg,#f2a65a,#e0762f)}
 .visitor{text-align:center;color:var(--muted);font-size:12.5px;margin:16px 0 0;padding-bottom:24px}
 .visitor b{color:var(--ink)}
 .gate{z-index:60}
@@ -158,7 +154,7 @@ canvas{max-height:280px}
 .f-label{font-size:12.5px;font-weight:700;color:var(--muted);margin:12px 2px 6px}
 .f-label:first-child{margin-top:0}
 .f-label .req{color:var(--red)}
-.f-in{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:16px;background:#fff;color:var(--ink);font-family:inherit}
+.f-in{width:100%;padding:11px 12px;border:1px solid var(--inline);border-radius:12px;font-size:16px;background:#fff;color:var(--ink);font-family:inherit}
 textarea.f-in{min-height:66px;resize:vertical}
 .f-primary{width:100%;margin-top:16px;background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer}
 .f-note{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.55;margin-top:9px}
@@ -186,12 +182,13 @@ textarea.f-in{min-height:66px;resize:vertical}
 .pdetail{display:none;padding:12px 13px 14px;border-top:1px solid var(--line);background:#fafbfd}
 .prow.open .pdetail{display:block}
 .tgls{display:flex;flex-wrap:wrap;gap:6px}
-.tgl{border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:12.5px;background:#fff;color:var(--muted);cursor:pointer;font-weight:600}
+.tgl{border:1px solid var(--inline);border-radius:8px;padding:7px 12px;font-size:12.5px;background:#fff;color:var(--muted);cursor:pointer;font-weight:600}
+.tgl.lock{background:#f6f7f9;color:#b6bec9;border:1px dashed #d5dbe4;cursor:default}
 .tgl.on{background:var(--greenSoft);border-color:var(--green);color:var(--green)}
 .cnts{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
 .cnt{display:flex;flex-direction:column;align-items:center;gap:4px}
 .cnt .cl{font-size:11px;color:var(--muted);font-weight:700}
-.cpick{width:72px;height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:16px;font-weight:800;color:var(--ink);text-align:center;cursor:pointer}
+.cpick{width:72px;height:44px;border:1px solid var(--inline);border-radius:10px;background:#fff;font-size:16px;font-weight:800;color:var(--ink);text-align:center;cursor:pointer}
 .absrow{display:flex;gap:8px;align-items:center;margin-top:8px}
 .absrow .nm{min-width:56px;font-weight:700;font-size:13.5px}
 .absrow select.f-in{width:auto;min-width:110px}
@@ -269,12 +266,9 @@ textarea.f-in{min-height:66px;resize:vertical}
     <div class="mtile i-indigo" onclick="goIntake()"><div class="mc"><span style="font-size:28px;font-weight:800;color:#fff">Q</span></div><span>피드백</span></div>
     <div class="mtile i-green" onclick="goMyreq()"><div class="mc"><span style="font-size:28px;font-weight:800;color:#fff">A</span></div><span>피드백 확인</span></div>
     <div class="mtile i-blue" onclick="goReport()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.2a2.55 2.55 0 013.6 3.6L7.6 19.4 2.5 21l1.6-5.1z"/><path d="M14.8 4.9l3.6 3.6"/></svg></div><span>구역보고</span></div>
+    <div class="mtile i-news" onclick="openL('https://igloria.org/notice')"><div class="mc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13v14H6a2 2 0 01-2-2z"/><path d="M17 8h2a1 1 0 011 1v8a2 2 0 01-2 2"/><path d="M7.5 9h6M7.5 12.5h6M7.5 16h3.5"/></svg></div><span>영광소식</span></div>
+    <div class="mtile i-orange" onclick="openL('https://igloria.org/newface')"><div class="mc"><svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.7"/><path d="M5 20.5a7 7 0 0114 0"/><path d="M19.5 2.6v4.2M17.4 4.7h4.2"/></svg></div><span>새가족소개</span></div>
   </div>
-  <button class="newsbtn" onclick="openL('https://igloria.org/notice')">
-    <span class="nb-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13v14H6a2 2 0 01-2-2z"/><path d="M17 8h2a1 1 0 011 1v8a2 2 0 01-2 2"/><path d="M7.5 9h6M7.5 12.5h6M7.5 16h3.5"/></svg></span>
-    <span class="nb-tx"><b>영광소식 바로가기</b><span>이번주 교회 소식</span></span>
-    <span class="nb-ar">›</span>
-  </button>
   <div class="visitor">👥 방문자 · Today <b id="visToday">·</b> · Total <b id="visTotal">·</b></div>
 </div>
 
@@ -766,8 +760,10 @@ function openMine(idx){
 }
 
 // ---------- 구역보고 (예배 출석부: 이름별 접이식) ----------
-const TG=['1부','2부','오후','수요','금요','구역'];
-const CT=[['새벽',7],['성경',100],['QT(가정)',7]];
+const TG=['1부','2부','오후','수요','금요','구역','월삭'];
+const CT=[['새벽',7],['성경',100],['QT(가정)',20]];
+/* 월삭은 매월 첫째 주일(1~7일)에만 선택 가능 */
+function isFirstSunday(d){ const day=parseInt(String(d||'').slice(8,10),10); return day>=1&&day<=7; }
 const ABSENT_REASONS=['선택','개인사정','건강','여행','직장','확인안됨','장기결석','기타'];
 let ATT={}, reportRoster=[], selWeek='', openMonth=0, absNotes={}, absReason={};
 function buildMonths(){const out=[];const base=new Date();base.setDate(1);for(let i=2;i>=0;i--){const x=new Date(base);x.setMonth(base.getMonth()-i);out.push({y:x.getFullYear(),m:x.getMonth()+1});}return out;}
@@ -817,12 +813,13 @@ function sunCount(){return reportRoster.filter(n=>ATT[n].t['1부']||ATT[n].t['2�
 function buildRosterCards(){
   const box=document.getElementById('roster');
   box.innerHTML=reportRoster.map(n=>{
-    const tg=TG.map(t=>`<button class="tgl ${ATT[n].t[t]?'on':''}" data-n="${n}" data-t="${t}">${t}</button>`).join('');
+    const tg=TG.map(t=>{const lock=(t==='월삭')&&!isFirstSunday(selWeek);
+      return `<button class="tgl ${ATT[n].t[t]?'on':''} ${lock?'lock':''}" data-n="${n}" data-t="${t}" ${lock?'data-lock="1" title="월삭은 매월 첫째 주일에만 입력합니다"':''}>${t}</button>`;}).join('');
     const ct=CT.map(([k,mx])=>`<div class="cnt"><span class="cl">${k}</span><select class="cpick" data-n="${n}" data-k="${k}">${Array.from({length:mx+1},(_,i)=>`<option ${ATT[n].c[k]===i?'selected':''}>${i}</option>`).join('')}</select></div>`).join('');
     return `<div class="prow" data-n="${n}"><div class="phead"><span class="pn">${n}</span><span class="psum">미체크</span><span class="pcar">▾</span></div><div class="pdetail"><div class="tgls">${tg}</div><div class="cnts">${ct}</div></div></div>`;
   }).join('');
   box.querySelectorAll('.phead').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
-  box.querySelectorAll('.tgl').forEach(b=>b.onclick=()=>{const n=b.dataset.n,t=b.dataset.t;ATT[n].t[t]=!ATT[n].t[t];b.classList.toggle('on',ATT[n].t[t]);updPsum(n);document.getElementById('sunCnt').textContent=sunCount();if(t==='1부'||t==='2부')buildAbsent();});
+  box.querySelectorAll('.tgl').forEach(b=>b.onclick=()=>{if(b.dataset.lock) return;const n=b.dataset.n,t=b.dataset.t;ATT[n].t[t]=!ATT[n].t[t];b.classList.toggle('on',ATT[n].t[t]);updPsum(n);document.getElementById('sunCnt').textContent=sunCount();if(t==='1부'||t==='2부')buildAbsent();});
   box.querySelectorAll('.cpick').forEach(s=>s.onchange=()=>{const n=s.dataset.n,k=s.dataset.k;ATT[n].c[k]=parseInt(s.value)||0;updPsum(n);});
   reportRoster.forEach(updPsum);
   document.getElementById('sunCnt').textContent=sunCount();
@@ -941,8 +938,8 @@ function renderDash(){
     kpi(missing.length+' <small>/'+DIST_NAMES.length+'</small>','미보고 구역','보고 완료 '+reported.size+'구역','amber')+
     kpi(fbOpen,'처리중 피드백','접수 '+fbBy('접수')+' · 처리중 '+fbBy('처리중')+' · 보류 '+fbBy('보류'));
   // 예배별 참석
-  drawChart('svcChart','bar',{labels:['1부','2부','오후','수요','금요','새벽'],datasets:[{label:'참석(명)',
-    data:[tSum(wkReports,'1부'),tSum(wkReports,'2부'),tSum(wkReports,'오후'),tSum(wkReports,'수요'),tSum(wkReports,'금요'),cSum(wkReports,'새벽')],
+  drawChart('svcChart','bar',{labels:['1부','2부','오후','수요','금요','새벽','월삭'],datasets:[{label:'참석(명)',
+    data:[tSum(wkReports,'1부'),tSum(wkReports,'2부'),tSum(wkReports,'오후'),tSum(wkReports,'수요'),tSum(wkReports,'금요'),cSum(wkReports,'새벽'),tSum(wkReports,'월삭')],
     backgroundColor:'#2fa58f'}]},{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}});
   // 주차별 추이
   const trend=weeks.map(w=>reports.filter(r=>r.date===w).reduce((a,r)=>a+r.sundayPresent.length,0));

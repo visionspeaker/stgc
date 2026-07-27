@@ -174,6 +174,7 @@ canvas{max-height:280px}
 .rmrow .dt{color:var(--muted)}
 .rmrow .dt.none{color:#b6bec9}
 .rmpray{padding:4px 10px 8px 80px;font-size:12px;color:#5b54c9;background:#fbfbfe;border-bottom:1px solid #eef1f6}
+.rmpray.etc{color:var(--muted)}
 .rmabs{background:#fff5f5;border:1px solid #fecaca;border-radius:9px;padding:8px 10px;font-size:12.5px;margin-bottom:6px}
 .rmabs b{color:#b91c1c}
 .rmnote{background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:12.5px;line-height:1.6}
@@ -967,9 +968,9 @@ function showReport(){
 function loadReportInto(){
   reportRoster=DISTRICTS[reportDist]||[];
   ATT={}; absNotes={}; absReason={};
-  reportRoster.forEach(n=>ATT[n]={t:{},c:{'새벽':0,'성경':0,'QT(가정)':0},p:''});
+  reportRoster.forEach(n=>ATT[n]={t:{},c:{'새벽':0,'성경':0,'QT(가정)':0},p:'',e:''});
   const prev=reports.find(r=>r.district===reportDist && r.date===selWeek);
-  if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0,'성경':0,'QT(가정)':0},prev.detail[n].c),p:prev.detail[n].p||''}; }); }
+  if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0,'성경':0,'QT(가정)':0},prev.detail[n].c),p:prev.detail[n].p||'',e:prev.detail[n].e||''}; }); }
   if(prev && prev.sundayAbsent){ prev.sundayAbsent.forEach(a=>{absReason[a.name]=a.reason;absNotes[a.name]=a.note||'';}); }
   const cn=document.getElementById('cellNote'); if(cn) cn.value=(prev&&prev.cell&&prev.cell.note)||'';
 }
@@ -1005,13 +1006,16 @@ function buildRosterCards(){
       return `<button class="tgl ${ATT[n].t[t]?'on':''} ${lock?'lock':''}" data-n="${n}" data-t="${t}" ${lock?'data-lock="1" title="월삭은 매월 첫째 주일에만 입력합니다"':''}>${t}</button>`;}).join('');
     const ct=CT.map(([k,mx])=>`<div class="cnt"><span class="cl">${k}</span><select class="cpick" data-n="${n}" data-k="${k}">${Array.from({length:mx+1},(_,i)=>`<option ${ATT[n].c[k]===i?'selected':''}>${i}</option>`).join('')}</select></div>`).join('');
     const pv=(ATT[n].p||'').replace(/"/g,'&quot;');
+    const ev=(ATT[n].e||'').replace(/"/g,'&quot;');
     const pray=`<div class="pray"><label class="pl">기도제목 <span>· 선택 입력</span></label><input class="ppick" type="text" data-n="${n}" placeholder="세부내용" value="${pv}"/></div>`;
-    return `<div class="prow" data-n="${n}"><div class="phead"><span class="pn">${n}</span><span class="psum">미체크</span><span class="pcar">▾</span></div><div class="pdetail"><div class="tgls">${tg}</div><div class="cnts">${ct}</div>${pray}</div></div>`;
+    const etc=`<div class="pray"><label class="pl">기타 사항 <span>· 선택 입력</span></label><input class="epick" type="text" data-n="${n}" placeholder="세부내용" value="${ev}"/></div>`;
+    return `<div class="prow" data-n="${n}"><div class="phead"><span class="pn">${n}</span><span class="psum">미체크</span><span class="pcar">▾</span></div><div class="pdetail"><div class="tgls">${tg}</div><div class="cnts">${ct}</div>${pray}${etc}</div></div>`;
   }).join('');
   box.querySelectorAll('.phead').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
   box.querySelectorAll('.tgl').forEach(b=>b.onclick=()=>{if(b.dataset.lock) return;const n=b.dataset.n,t=b.dataset.t;ATT[n].t[t]=!ATT[n].t[t];b.classList.toggle('on',ATT[n].t[t]);updPsum(n);document.getElementById('sunCnt').textContent=sunCount();if(t==='1부'||t==='2부')buildAbsent();});
   box.querySelectorAll('.cpick').forEach(s=>s.onchange=()=>{const n=s.dataset.n,k=s.dataset.k;ATT[n].c[k]=parseInt(s.value)||0;updPsum(n);});
   box.querySelectorAll('.ppick').forEach(i=>{const h=()=>{ATT[i.dataset.n].p=i.value;updPsum(i.dataset.n);};i.oninput=h;i.onchange=h;});
+  box.querySelectorAll('.epick').forEach(i=>{const h=()=>{ATT[i.dataset.n].e=i.value;updPsum(i.dataset.n);};i.oninput=h;i.onchange=h;});
   reportRoster.forEach(updPsum);
   document.getElementById('sunCnt').textContent=sunCount();
   buildAbsent();
@@ -1021,7 +1025,8 @@ function updPsum(n){
   const cs=Object.entries(ATT[n].c).filter(([k,v])=>v>0).map(([k,v])=>k.replace('(가정)','')+v);
   const el=document.querySelector('.prow[data-n="'+n+'"] .psum');
   const pr=(ATT[n].p||'').trim()?['기도제목 ✎']:[];
-  if(el) el.textContent=[...parts,...cs,...pr].join(' · ')||'미체크';
+  const et=(ATT[n].e||'').trim()?['기타 ✎']:[];
+  if(el) el.textContent=[...parts,...cs,...pr,...et].join(' · ')||'미체크';
 }
 function buildAbsent(){
   const ab=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부']));
@@ -1050,7 +1055,7 @@ function submitReport(){
   const cellPresent=reportRoster.filter(n=>ATT[n].t['구역']);
   const absent=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부'])).map(n=>({name:n,reason:(absReason[n]&&absReason[n]!=='선택')?absReason[n]:'확인안됨',note:absNotes[n]||''}));
   const note=document.getElementById('cellNote').value;
-  const detail={}; reportRoster.forEach(n=>detail[n]={t:ATT[n].t,c:ATT[n].c,p:(ATT[n].p||'').trim()});
+  const detail={}; reportRoster.forEach(n=>detail[n]={t:ATT[n].t,c:ATT[n].c,p:(ATT[n].p||'').trim(),e:(ATT[n].e||'').trim()});
   const rec={ts:new Date().toISOString(),date:selWeek,district:reportDist,
     sundayPresent:sundayPresent,cellPresent:cellPresent,sundayAbsent:absent,detail:detail,
     cell:{held:cellPresent.length?'진행':'미진행',note:note}};
@@ -1196,10 +1201,12 @@ function openReportDetail(dist,date){
   const svc=TG.map(t=>`<span class="rmchip${t==='월삭'?' v':''}">${t} ${svcCount(r,t)}</span>`).join('');
   const faith=`<span class="rmchip n">새벽 ${cntSum(r,'새벽')}명</span><span class="rmchip n">성경 ${cntSum(r,'성경')}장</span><span class="rmchip n">QT ${cntSum(r,'QT(가정)')}회</span>`;
   /* 미체크(아무 항목도 없음)는 아래 결석자에만 표시 → 목록에서 제외 */
-  const shown=roster.filter(n=>personLine(r,n)||(((r.detail||{})[n]||{}).p||''));
-  const rows=shown.length?shown.map(n=>{const line=personLine(r,n);const pr=((r.detail||{})[n]||{}).p||'';
+  const hasNote=n=>{const d=(r.detail||{})[n]||{};return (d.p||'')||(d.e||'');};
+  const shown=roster.filter(n=>personLine(r,n)||hasNote(n));
+  const rows=shown.length?shown.map(n=>{const line=personLine(r,n);const d=(r.detail||{})[n]||{};
     return `<div class="rmrow"><span class="nm">${esc(n)}</span><span class="dt ${line?'':'none'}">${esc(line||'-')}</span></div>`
-      + (pr?`<div class="rmpray">🙏 ${esc(pr)}</div>`:'');}).join('')
+      + (d.p?`<div class="rmpray">🙏 ${esc(d.p)}</div>`:'')
+      + (d.e?`<div class="rmpray etc">📝 ${esc(d.e)}</div>`:'');}).join('')
     : '<div class="rmrow"><span class="dt none">체크된 인원이 없습니다.</span></div>';
   const abs=(r.sundayAbsent||[]).length
     ? (r.sundayAbsent||[]).map(a=>`<div class="rmabs"><b>${esc(a.name)}</b> · ${esc(a.reason||'확인안됨')}${a.note?' — '+esc(a.note):''}</div>`).join('')
@@ -1246,9 +1253,13 @@ function reportPageHtml(r){
   const dist=r.district, roster=DISTRICTS[dist]||[];
   const svc=TG.map(t=>`<th>${t}</th>`).join('')+'<th>새벽</th><th>성경</th><th>QT</th>';
   const svcv=TG.map(t=>`<td>${svcCount(r,t)}</td>`).join('')+`<td>${cntSum(r,'새벽')}</td><td>${cntSum(r,'성경')}</td><td>${cntSum(r,'QT(가정)')}</td>`;
-  const shown=roster.filter(n=>personLine(r,n)||(((r.detail||{})[n]||{}).p||''));
-  const rows=shown.map(n=>{const pr=((r.detail||{})[n]||{}).p||'';
-    return `<tr><td style="width:80px">${esc(n)}</td><td>${esc(personLine(r,n)||'-')}${pr?'<br><span style="color:#333">🙏 '+esc(pr)+'</span>':''}</td></tr>`;}).join('')
+  const hasNote=n=>{const d=(r.detail||{})[n]||{};return (d.p||'')||(d.e||'');};
+  const shown=roster.filter(n=>personLine(r,n)||hasNote(n));
+  const rows=shown.map(n=>{const d=(r.detail||{})[n]||{};
+    return `<tr><td style="width:80px">${esc(n)}</td><td>${esc(personLine(r,n)||'-')}`
+      + (d.p?'<br><span style="color:#333">🙏 '+esc(d.p)+'</span>':'')
+      + (d.e?'<br><span style="color:#333">📝 '+esc(d.e)+'</span>':'')
+      + `</td></tr>`;}).join('')
     || '<tr><td colspan="2">체크된 인원이 없습니다.</td></tr>';
   const abs=(r.sundayAbsent||[]).length
     ? (r.sundayAbsent||[]).map(a=>`<div class="prline">· <b>${esc(a.name)}</b> — ${esc(a.reason||'확인안됨')}${a.note?' : '+esc(a.note):''}</div>`).join('')

@@ -46,6 +46,9 @@ body{margin:0;font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-syste
 .gatecard .gsub{color:var(--muted);font-size:13px;margin:6px 0 18px;text-align:center}
 header{background:#fff;color:var(--ink);padding:11px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:10;box-shadow:0 1px 0 var(--line),0 4px 14px rgba(60,80,120,.06)}
 header .logo{height:30px;display:block}
+.backbtn{display:flex;align-items:center;gap:2px;background:#f1f4f9;border:0;border-radius:20px;padding:7px 13px 7px 10px;color:var(--ink);font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;flex:none}
+.backbtn:active{background:#e6ebf3}
+.backbtn .bkc{font-size:19px;line-height:1;margin-top:-2px}
 header h1{font-size:15.5px;margin:0;font-weight:800;letter-spacing:-.3px;background:linear-gradient(90deg,#6fbf46,#2fa58f);-webkit-background-clip:text;background-clip:text;color:transparent}
 header .sub{font-size:11.5px;color:var(--muted)}
 nav{display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-top:6px}
@@ -204,6 +207,8 @@ canvas{max-height:280px}
 .home{max-width:540px;margin:0 auto;min-height:100vh;background:#fff}
 .hbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px}
 .hbar .logo{height:34px;display:block}
+.hbrand{display:flex;align-items:center;gap:9px}
+.hbname{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.4px}
 .pwr{width:42px;height:42px;border-radius:50%;background:var(--greenSoft);display:flex;align-items:center;justify-content:center;color:var(--green);cursor:pointer;border:0}
 .hero{margin:4px 16px 0;background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border-radius:18px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 10px 24px rgba(47,165,143,.24)}
 .hero .k{font-size:10.5px;opacity:.9;letter-spacing:1.5px}
@@ -332,7 +337,7 @@ textarea.f-in{min-height:66px;resize:vertical}
 <!-- ================= HOME LAUNCHER ================= -->
 <div id="home" class="home">
   <div class="hbar">
-    <img class="logo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회"/>
+    <div class="hbrand"><img class="logo" src="logo.png" alt="송탄영광교회"/><span class="hbname">송탄영광교회</span></div>
     <button class="pwr" onclick="pwrTap()" title="로그인">
       <svg width="30" height="30" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         <clipPath id="loginClip"><circle cx="24" cy="24" r="18.5"/></clipPath>
@@ -370,7 +375,7 @@ textarea.f-in{min-height:66px;resize:vertical}
 <div id="loginGate" class="gate" style="display:none">
   <div class="gatecard" style="max-width:400px">
     <span class="gx" onclick="closeLogin()">✕</span>
-    <img class="glogo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회"/>
+    <img class="glogo" src="logo.png" alt="송탄영광교회"/>
     <h1>영광 커넥트 로그인</h1>
     <div class="gsub">테스트베드 · 이름과 비밀번호로 로그인하세요. (기본 비밀번호 <b>1234</b>)</div>
     <label style="display:block;font-size:13px;font-weight:600;margin:10px 0 5px">이름</label>
@@ -385,7 +390,8 @@ textarea.f-in{min-height:66px;resize:vertical}
 <!-- ================= APP ================= -->
 <div id="app" style="display:none">
 <header>
-  <img class="logo" src="https://cdn.imweb.me/thumbnail/20260719/1929acb8627a6.png" alt="송탄영광교회" style="cursor:pointer" onclick="goHome()"/>
+  <button class="backbtn" onclick="goHome()" aria-label="뒤로"><span class="bkc">‹</span><span class="bkt">뒤로</span></button>
+  <img class="logo" src="logo.png" alt="송탄영광교회" style="cursor:pointer" onclick="goHome()"/>
   <div><h1>영광 커넥트</h1><div class="sub"><span id="roleLabel"></span></div></div>
   <button class="btn sec sm" style="margin-left:auto" onclick="goHome()">🏠 홈</button>
   <button class="btn sec sm" id="pwBtn" onclick="openPwChange()" style="display:none">🔑 비밀번호 변경</button>
@@ -634,7 +640,7 @@ const CATEGORIES = {
  "행정 (재정·행정·미디어·경조)": {위원장:"이수철 장로", 교역자:"—"},
  "선교 (새가족·바나바·전도·선교회)": {위원장:"엄주철 장로", 교역자:"—"},
  "경조사 요청 (주례·심방·축사 등)": {위원장:"경조부(이진규) 1차 정리", 교역자:"담임목사"},
- "잘 모르겠음": {위원장:"서기(홍춘섭) 분류", 교역자:"—"}
+ "기타 (구분 모름)": {위원장:"서기(홍춘섭) 분류", 교역자:"—"}
 };
 // 위원장이 담당하는 6개 위원회(경조사·잘모르겠음 제외)
 const COMMITTEES = Object.keys(CATEGORIES).slice(0,6);
@@ -650,7 +656,10 @@ function pwrTap(){ if(current&&current.role!=='guest') openApp(); else openLogin
 let reportDist=null;  // 구역보고 대상 구역
 function saveR(){localStorage.setItem(RKEY,JSON.stringify(reports))}
 function saveS(){localStorage.setItem(SKEY,JSON.stringify(subs))}
-function catName(c){return c.split(' (')[0];}
+/* 분류 이름이 바뀌어도 예전 접수 건이 깨지지 않도록 매핑 */
+const CAT_ALIAS={'잘 모르겠음':'기타 (구분 모름)','봉사 (환경미화·시설)':'봉사 (환경미화·시설·카페·주방)'};
+function normCat(c){return CAT_ALIAS[c]||c||'';}
+function catName(c){return normCat(c).split(' (')[0];}
 
 // ---------- backend (구글시트 + Apps Script) ----------
 const API='https://script.google.com/macros/s/AKfycbw_-RjtpsIXGSDt9IoemgcUAjb80u_H96QFrShqFwZRqCZj3BZYSzKZkW7wBZqOBYur3w/exec';
@@ -763,13 +772,24 @@ function loginByName(){
 function openLogin(){document.getElementById('loginGate').style.display='flex';const el=document.getElementById('lgName');if(el){el.value='';el.focus();}const p=document.getElementById('lgPw2');if(p)p.value='';}
 function closeLogin(){document.getElementById('loginGate').style.display='none';}
 function openL(u){window.open(u,'_blank','noopener,noreferrer');}
-function goHome(){document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='none';document.getElementById('home').style.display='block';window.scrollTo(0,0);}
+function goHome(){document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='none';document.getElementById('home').style.display='block';window.scrollTo(0,0);clearAppHist();}
+/* 폰 뒤로가기(안드로이드 버튼 / 아이폰 스와이프)로도 홈으로 */
+let appHist=false;
+function pushAppHist(){ if(appHist) return; try{ history.pushState({app:1},''); appHist=true; }catch(e){} }
+function clearAppHist(){ appHist=false; }
+window.addEventListener('popstate',function(){
+  const rm=document.getElementById('repModal'), pg=document.getElementById('pwGate'), lg=document.getElementById('loginGate');
+  if(rm&&rm.style.display==='flex'){ closeReportDetail(); pushAppHist(); return; }
+  if(pg&&pg.style.display==='flex'){ closePwChange(); pushAppHist(); return; }
+  if(lg&&lg.style.display==='flex'){ closeLogin(); pushAppHist(); return; }
+  if(document.getElementById('app').style.display!=='none'){ appHist=false; goHome(); }
+});
 function openApp(view){
   if(!current) current={role:'guest'};
   document.getElementById('home').style.display='none';
   document.getElementById('loginGate').style.display='none';
   document.getElementById('app').style.display='block';
-  setRoleLabel(); buildNav(view); loadAll(); window.scrollTo(0,0);
+  setRoleLabel(); buildNav(view); loadAll(); window.scrollTo(0,0); pushAppHist();
 }
 /* ---------- 문화 10계명 ---------- */
 const CULTURE=[
@@ -838,6 +858,7 @@ function enterApp(role,scope){
   buildNav();
   loadAll();
   window.scrollTo(0,0);
+  pushAppHist();
 }
 function logout(){current=null;clearSession();['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
 function showView(v){
@@ -1074,7 +1095,7 @@ function renderSubs(){
   const box=document.getElementById('subList');
   const scope=document.getElementById('mgScope');
   const scoped=(current.role==='chair'||current.role==='staff'||current.role==='elder');
-  let base = scoped ? subs.filter(s=>s.category===current.category) : subs;
+  let base = scoped ? subs.filter(s=>normCat(s.category)===normCat(current.category)) : subs;
   scope.textContent = scoped ? '· 담당: '+catName(current.category)+' ('+base.length+'건)' : '· 전체 위원회';
   const open=base.filter(s=>s.status==='접수'||s.status==='처리중'||s.status==='보류').length;
   const overdue=base.filter(isOverdue).length;

@@ -156,6 +156,22 @@ canvas{max-height:280px}
 .cvh{font-size:14px;font-weight:800;color:var(--ink);line-height:1.45}
 .cvd{font-size:13px;color:var(--muted);line-height:1.65;margin-top:3px}
 .cvend{text-align:center;color:var(--muted);font-size:12px;padding:16px 0 4px;line-height:1.7}
+/* ===== 새 접수 알림 ===== */
+.navbadge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:800;line-height:1;vertical-align:middle}
+.ntcard{background:#fff;border-radius:18px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 24px 60px rgba(20,28,45,.3)}
+.nthead{padding:15px 18px;border-bottom:1px solid var(--line);font-size:15px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:7px}
+.ntbell{font-size:17px}
+.ntbody{padding:16px 18px}
+.ntbig{font-size:15px;color:var(--muted)}
+.ntbig b{font-size:30px;color:var(--red);font-weight:800;margin-right:3px}
+.ntsub{font-size:13px;color:var(--muted);margin-top:2px}
+.ntlist{margin-top:13px;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.ntrow{display:flex;gap:8px;align-items:center;padding:9px 11px;border-bottom:1px solid #eef1f6;font-size:12.5px}
+.ntrow:last-child{border-bottom:0}
+.ntcat{flex:none;background:var(--blueSoft);color:#1d4ed8;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:800}
+.nttitle{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ntmore{padding:8px 11px;font-size:12px;color:var(--muted);background:#fafbfd}
+.ntfoot{padding:12px 18px 16px;display:flex;gap:8px}
 /* ===== 보고서 상세 모달 ===== */
 .rmodal{position:fixed;inset:0;background:rgba(20,28,45,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:90}
 .rmcard{background:#fff;border-radius:16px;width:100%;max-width:460px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(20,28,45,.3)}
@@ -627,6 +643,18 @@ textarea.f-in{min-height:66px;resize:vertical}
   </div>
 </div>
 
+<!-- 새 접수 알림 팝업 -->
+<div id="notiGate" class="rmodal" style="display:none;z-index:95">
+  <div class="ntcard">
+    <div class="nthead"><span class="ntbell">🔔</span> 새 피드백 접수</div>
+    <div class="ntbody" id="ntBody"></div>
+    <div class="ntfoot">
+      <button class="btn sec" style="flex:1" onclick="closeNoti()">나중에</button>
+      <button class="btn" style="flex:1.4" onclick="gotoManage()">접수 처리하기</button>
+    </div>
+  </div>
+</div>
+
 <div id="printArea"></div>
 
 <script>
@@ -677,9 +705,58 @@ async function loadAll(){
   try{
     const r=await fetch(API+'?action=all',{method:'GET'});
     const d=await r.json();
-    if(d&&d.ok){ reports=Array.isArray(d.reports)?d.reports:[]; subs=Array.isArray(d.subs)?d.subs:[]; PW_OVERRIDE=(d.accounts&&typeof d.accounts==='object')?d.accounts:{}; setVisitors(d.visitors); saveR(); saveS(); rerender(); }
+    if(d&&d.ok){ reports=Array.isArray(d.reports)?d.reports:[]; subs=Array.isArray(d.subs)?d.subs:[]; PW_OVERRIDE=(d.accounts&&typeof d.accounts==='object')?d.accounts:{}; setVisitors(d.visitors); saveR(); saveS(); rerender(); checkNewSubs(); }
   }catch(e){ console.warn('백엔드 불러오기 실패(로컬 데이터 사용):',e); }
 }
+/* ---------- 새 접수 알림 ---------- */
+const SEEN_KEY='sgc_seen_subs_v1';
+function seenKeyFor(){ return SEEN_KEY+'_'+((current&&current.who)||'guest'); }
+function getSeenAt(){ try{ return localStorage.getItem(seenKeyFor())||''; }catch(e){ return ''; } }
+function setSeenAt(ts){ try{ localStorage.setItem(seenKeyFor(),ts); }catch(e){} }
+/* 담당 범위의 접수만 */
+function mySubs(){
+  if(!current) return [];
+  const r=current.role;
+  if(r==='admin') return subs;
+  if(r==='chair'||r==='staff'||r==='elder') return subs.filter(s=>normCat(s.category)===normCat(current.category));
+  return [];
+}
+/* 마지막 확인 이후 새로 들어온 건 */
+function newSubs(){
+  const seen=getSeenAt();
+  return mySubs().filter(s=>String(s.ts||'')>seen);
+}
+function markSubsSeen(){
+  const all=mySubs();
+  if(!all.length) return;
+  const latest=all.reduce((a,s)=>String(s.ts||'')>a?String(s.ts||''):a,'');
+  setSeenAt(latest); paintSubBadge();
+}
+/* 탭 배지 */
+function paintSubBadge(){
+  const nav=document.getElementById('nav'); if(!nav) return;
+  const btn=[...nav.querySelectorAll('button')].find(b=>b.dataset.v==='manage'); if(!btn) return;
+  const n=newSubs().length;
+  const old=btn.querySelector('.navbadge'); if(old) old.remove();
+  if(n>0){ const b=document.createElement('span'); b.className='navbadge'; b.textContent=n>99?'99+':n; btn.appendChild(b); }
+}
+/* 앱 열 때 새 접수 팝업 */
+let notiShown=false;
+function checkNewSubs(){
+  paintSubBadge();
+  if(notiShown) return;
+  if(!current||!(current.role==='admin'||current.role==='chair'||current.role==='staff'||current.role==='elder')) return;
+  const ns=newSubs(); if(!ns.length) return;
+  notiShown=true;
+  const list=ns.slice(0,4).map(s=>`<div class="ntrow"><span class="ntcat">${esc(catName(s.category))}</span><span class="nttitle">${esc(s.title||'(제목없음)')}</span></div>`).join('');
+  document.getElementById('ntBody').innerHTML=
+    `<div class="ntbig"><b>${ns.length}</b>건</div>
+     <div class="ntsub">확인하지 않은 새 접수가 있습니다.</div>
+     <div class="ntlist">${list}${ns.length>4?`<div class="ntmore">외 ${ns.length-4}건</div>`:''}</div>`;
+  document.getElementById('notiGate').style.display='flex';
+}
+function closeNoti(){ document.getElementById('notiGate').style.display='none'; }
+function gotoManage(){ closeNoti(); openApp('manage'); }
 function countVisit(){ if(!USE_BACKEND) return; try{ if(sessionStorage.getItem('sgc_hit')) return; sessionStorage.setItem('sgc_hit','1'); fetch(API,{method:'POST',body:JSON.stringify({action:'hit'})}).then(r=>r.json()).then(v=>setVisitors(v)).catch(()=>{}); }catch(e){} }
 /* ---- 사진 첨부 ---- */
 let attachedPhoto=null;
@@ -781,7 +858,8 @@ let appHist=false;
 function pushAppHist(){ if(appHist) return; try{ history.pushState({app:1},''); appHist=true; }catch(e){} }
 function clearAppHist(){ appHist=false; }
 window.addEventListener('popstate',function(){
-  const rm=document.getElementById('repModal'), pg=document.getElementById('pwGate'), lg=document.getElementById('loginGate');
+  const rm=document.getElementById('repModal'), pg=document.getElementById('pwGate'), lg=document.getElementById('loginGate'), nt=document.getElementById('notiGate');
+  if(nt&&nt.style.display==='flex'){ closeNoti(); pushAppHist(); return; }
   if(rm&&rm.style.display==='flex'){ closeReportDetail(); pushAppHist(); return; }
   if(pg&&pg.style.display==='flex'){ closePwChange(); pushAppHist(); return; }
   if(lg&&lg.style.display==='flex'){ closeLogin(); pushAppHist(); return; }
@@ -854,6 +932,7 @@ function setRoleLabel(){
 function enterApp(role,scope){
   current=Object.assign({role},scope||{});
   saveSession();
+  notiShown=false; checkNewSubs();
   document.getElementById('home').style.display='none';
   document.getElementById('loginGate').style.display='none';
   document.getElementById('app').style.display='block';
@@ -863,14 +942,14 @@ function enterApp(role,scope){
   window.scrollTo(0,0);
   pushAppHist();
 }
-function logout(){current=null;clearSession();['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
+function logout(){current=null;clearSession();notiShown=false;closeNoti();['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
 function showView(v){
   currentView=v;
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.getElementById(v).classList.add('active');
   if(v==='culture') renderCulture();
   if(v==='report') showReport();
-  if(v==='manage') renderSubs();
+  if(v==='manage'){ renderSubs(); markSubsSeen(); }
   if(v==='myreq') renderMyReq();
   if(v==='dash') renderDash();
 }
@@ -885,6 +964,7 @@ function buildNav(view){
       nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');showView(b.dataset.v);});
   }
   showView(first);
+  paintSubBadge();
 }
 
 // ---------- intake (피드백 접수) ----------

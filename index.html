@@ -369,7 +369,7 @@ textarea.f-in{min-height:66px;resize:vertical}
     <svg class="cross" width="86" height="86" viewBox="0 0 24 24" fill="#fff"><path d="M10 0h4v7h6v4h-6v13h-4V11H4V7h6z"/></svg>
     <div class="k">GLORY CONNECT</div>
     <h2>영광 커넥트</h2>
-    <div class="hl2"><span>바로가기</span><i></i><span>피드백</span><i></i><span>구역보고</span></div>
+    <div class="hl2"><span>바로가기</span><i></i><span>문의하기</span><i></i><span>구역보고</span></div>
   </div>
   <div class="mgrid">
     <div class="mtile i-green" onclick="openL('https://igloria.org/')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg></div><span>홈페이지</span></div>
@@ -381,8 +381,8 @@ textarea.f-in{min-height:66px;resize:vertical}
     <div class="mtile i-indigo" onclick="goCulture()"><div class="mc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9l5 5v11H5z"/><path d="M14 4v5h5"/><path d="M8.5 12.5h7M8.5 16h5"/></svg></div><span>문화 10계명</span></div>
     <div class="mtile i-teal" onclick="openL('https://mas3.ohjic.com/member/home/igloria1')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M10 0h4v7h6v4h-6v13h-4V11H4V7h6z"/></svg></div><span>오직</span></div>
     <div class="mtile i-green" onclick="openL('https://mas3.ohjic.com/pages/donation/donation_list/igloria1')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v12H4z"/><path d="M4 10h16M8 15h4"/></svg></div><span>헌금 조회</span></div>
-    <div class="mtile i-indigo" onclick="goIntake()"><div class="mc"><span style="font-size:28px;font-weight:800;color:#fff">Q</span></div><span>피드백</span></div>
-    <div class="mtile i-green" onclick="goMyreq()"><div class="mc"><span style="font-size:28px;font-weight:800;color:#fff">A</span></div><span>피드백 확인</span></div>
+    <div class="mtile i-indigo" onclick="goIntake()"><div class="mc"><span style="font-size:28px;font-weight:800;color:#fff">Q</span></div><span>문의하기</span></div>
+    <div class="mtile i-green" onclick="goMyreq()"><div class="mc"><span style="font-size:28px;font-weight:800;color:#fff">A</span></div><span>문의 확인</span></div>
     <div class="mtile i-blue" onclick="goReport()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.2a2.55 2.55 0 013.6 3.6L7.6 19.4 2.5 21l1.6-5.1z"/><path d="M14.8 4.9l3.6 3.6"/></svg></div><span>구역보고</span></div>
   </div>
   <div class="visitor">👥 방문자 · Today <b id="visToday">·</b> · Total <b id="visTotal">·</b>
@@ -437,7 +437,7 @@ textarea.f-in{min-height:66px;resize:vertical}
 <!-- 교인 접수 -->
 <section id="intake" class="view">
   <div class="applike">
-    <div class="screenhead"><b>피드백</b></div>
+    <div class="screenhead"><b>문의하기</b></div>
     <div class="sect">
       <div class="f-label">분류 (담당 자동 배정)</div>
       <select class="f-in" id="inCat"></select>
@@ -491,7 +491,7 @@ textarea.f-in{min-height:66px;resize:vertical}
 <!-- 내 접수 조회 -->
 <section id="myreq" class="view">
   <div class="applike">
-    <div class="screenhead"><b>피드백 확인</b></div>
+    <div class="screenhead"><b>문의 확인</b></div>
     <div class="sect">
       <div class="f-note">접수 시 정한 <b>4자리 비밀번호</b>로 본인 글의 내용·처리 상태를 확인합니다.</div>
       <div class="fbfilter" id="fbFilter">
@@ -1000,7 +1000,7 @@ function submitIntake(){
   if(attachedPhoto) rec.photo=attachedPhoto;
   subs.unshift(rec); saveS(); pushSub(rec);
   const withPhoto=!!attachedPhoto;
-  document.getElementById('intakeOk').innerHTML='<div class="ok-box">✅ 접수되었습니다. 담당 <b>'+r.위원장+'</b>'+(r.교역자!=='—'?' / '+r.교역자:'')+' 에게 전달됩니다.'+(withPhoto?'<br>사진은 자동 압축되어 함께 전송됩니다.':'')+'<br>처리 상황은 ‘피드백 확인’에서 비밀번호로 조회하세요.</div>';
+  document.getElementById('intakeOk').innerHTML='<div class="ok-box">✅ 접수되었습니다. 담당 <b>'+r.위원장+'</b>'+(r.교역자!=='—'?' / '+r.교역자:'')+' 에게 전달됩니다.'+(withPhoto?'<br>사진은 자동 압축되어 함께 전송됩니다.':'')+'<br>처리 상황은 ‘문의 확인’에서 비밀번호로 조회하세요.</div>';
   ['inTitle','inBody','inName','inContact','inPin'].forEach(id=>document.getElementById(id).value='');
   clearPhoto();
 }

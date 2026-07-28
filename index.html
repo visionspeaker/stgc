@@ -235,11 +235,18 @@ canvas{max-height:280px}
 .hero .hl2{display:flex;gap:12px;align-items:center;margin-top:8px;font-size:13px;font-weight:700}
 .hero .hl2 i{width:1px;height:12px;background:rgba(255,255,255,.55);display:inline-block}
 .hero .cross{position:absolute;right:-8px;top:50%;transform:translateY(-50%);opacity:.16}
-.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px 10px;padding:24px 18px 8px}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px 4px;padding:22px 14px 8px}
 .mtile{background:transparent;border:0;padding:0;text-align:center;cursor:pointer}
 .mtile:active .mc{transform:scale(.93)}
-.mtile .mc{width:66px;height:66px;margin:0 auto 9px;border-radius:18px;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 7px 16px rgba(60,80,120,.18);transition:transform .08s}
-.mtile span{font-size:12.5px;font-weight:700;display:block;color:var(--ink)}
+/* iOS 홈 화면 비율: 아이콘 74px(화면폭 약 19%), 모서리 22.4%, 심볼 56~62% */
+.mtile .mc{width:74px;height:74px;margin:0 auto 9px;border-radius:17px;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 6px 14px rgba(60,80,120,.16);transition:transform .08s}
+.mtile .mc svg{width:42px;height:42px}
+.i-red .mc svg{width:46px;height:46px}
+.i-yellow .mc svg{width:44px;height:44px}
+.i-teal .mc svg{width:40px;height:40px}
+.i-news .mc svg,.i-indigo .mc svg,.i-blue .mc svg{width:41px;height:41px}
+.mtile span{font-size:12.5px;font-weight:800;display:block;color:var(--ink);letter-spacing:-.3px}
+@media(max-width:360px){.mtile .mc{width:66px;height:66px;border-radius:15px}.mtile .mc svg{width:38px;height:38px}}
 .i-green .mc{background:linear-gradient(160deg,#5cc06a,#2fa07d)}
 .i-red .mc{background:linear-gradient(160deg,#ff5f5f,#e02f2f)}
 .i-teal .mc{background:linear-gradient(160deg,#3cbcb0,#2a8fb2)}
@@ -381,8 +388,8 @@ textarea.f-in{min-height:66px;resize:vertical}
     <div class="mtile i-indigo" onclick="goCulture()"><div class="mc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9l5 5v11H5z"/><path d="M14 4v5h5"/><path d="M8.5 12.5h7M8.5 16h5"/></svg></div><span>문화 10계명</span></div>
     <div class="mtile i-teal" onclick="openL('https://mas3.ohjic.com/member/home/igloria1')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M10 0h4v7h6v4h-6v13h-4V11H4V7h6z"/></svg></div><span>오직</span></div>
     <div class="mtile i-green" onclick="openL('https://mas3.ohjic.com/pages/donation/donation_list/igloria1')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v12H4z"/><path d="M4 10h16M8 15h4"/></svg></div><span>헌금 조회</span></div>
-    <div class="mtile i-indigo" onclick="goIntake()"><div class="mc"><span style="font-size:28px;font-weight:800;color:#fff">Q</span></div><span>문의하기</span></div>
-    <div class="mtile i-green" onclick="goMyreq()"><div class="mc"><span style="font-size:28px;font-weight:800;color:#fff">A</span></div><span>문의 확인</span></div>
+    <div class="mtile i-indigo" onclick="goIntake()"><div class="mc"><span style="font-size:38px;font-weight:800;color:#fff;line-height:1">Q</span></div><span>문의하기</span></div>
+    <div class="mtile i-green" onclick="goMyreq()"><div class="mc"><span style="font-size:38px;font-weight:800;color:#fff;line-height:1">A</span></div><span>문의 확인</span></div>
     <div class="mtile i-blue" onclick="goReport()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.2a2.55 2.55 0 013.6 3.6L7.6 19.4 2.5 21l1.6-5.1z"/><path d="M14.8 4.9l3.6 3.6"/></svg></div><span>구역보고</span></div>
   </div>
   <div class="visitor">👥 방문자 · Today <b id="visToday">·</b> · Total <b id="visTotal">·</b>

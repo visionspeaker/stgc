@@ -59,6 +59,9 @@ header .sub{font-size:11.5px;color:var(--muted)}
 nav{display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-top:6px}
 nav button{background:#f1f4f9;color:var(--ink);border:0;padding:8px 15px;border-radius:22px;font-size:13.5px;cursor:pointer;font-weight:700}
 nav button.active{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;box-shadow:0 4px 12px rgba(47,165,143,.25)}
+nav button.navlink{background:#eaf1fb;color:var(--blue2)}
+nav button.navlink:hover{background:#dde9f8}
+nav button.navlink .exti{font-size:11px;opacity:.75;margin-left:1px}
 main{max-width:1080px;margin:0 auto;padding:18px 18px 84px}
 .view{display:none}.view.active{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(60,80,120,.05)}
@@ -964,7 +967,7 @@ const ROLE_NAV={
  elder:[['report','구역보고'],['manage','문의 접수 처리']],
  chair:[['manage','문의 접수 처리']],
  staff:[['manage','문의 접수 처리']],
- admin:[['dash','대시보드'],['report','구역보고'],['manage','문의 접수 처리']]
+ admin:[['dash','대시보드'],['report','구역보고'],['edu','교육부','https://visionspeaker.github.io/edu-dashboard/'],['manage','문의 접수 처리']]
 };
 const ROLE_LABEL={guest:'교인',member:'일반 교인',leader:'구역장',elder:'장로 · 구역장/위원장',chair:'위원장',staff:'부장',admin:'관리자(교역자·담임목사)'};
 function setRoleLabel(){
@@ -1014,9 +1017,13 @@ function buildNav(view){
   const first=view||(items[0]&&items[0][0])||'intake';
   if(!items.length){ nav.innerHTML=''; nav.style.display='none'; }
   else { nav.style.display='flex';
-    nav.innerHTML=items.map(it=>`<button data-v="${it[0]}" class="${it[0]===first?'active':''}">${it[1]}</button>`).join('');
+    /* it[2]가 있으면 외부 링크(새 창) 항목 */
+    nav.innerHTML=items.map(it=>it[2]
+      ? `<button class="navlink" data-url="${it[2]}" title="새 창으로 열립니다">${it[1]} <span class="exti">↗</span></button>`
+      : `<button data-v="${it[0]}" class="${it[0]===first?'active':''}">${it[1]}</button>`).join('');
     nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{
-      nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');showView(b.dataset.v);});
+      if(b.dataset.url){ openL(b.dataset.url); return; }   /* 링크는 탭 상태를 바꾸지 않음 */
+      nav.querySelectorAll('button').forEach(x=>{if(!x.dataset.url)x.classList.remove('active')});b.classList.add('active');showView(b.dataset.v);});
   }
   showView(first);
   paintSubBadge();

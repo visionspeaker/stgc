@@ -1221,8 +1221,16 @@ function saveReply(i){const ta=document.getElementById('rp'+i);const v=ta?ta.val
 
 // ---------- 대시보드 ----------
 let charts={};
-function initWeekSel(){const weeks=[...new Set(reports.map(r=>r.date))].sort().reverse();
-  document.getElementById('weekSel').innerHTML=weeks.map(w=>`<option>${w}</option>`).join('');}
+/* 목록을 다시 그릴 때 사용자가 고른 날짜가 풀리지 않도록 선택값을 보존한다 */
+function initWeekSel(){
+  const sel=document.getElementById('weekSel');
+  const weeks=[...new Set(reports.map(r=>r.date))].sort().reverse();
+  const keep=sel.value;
+  const same = sel.options.length===weeks.length && [...sel.options].every((o,i)=>o.value===weeks[i]);
+  if(!same) sel.innerHTML=weeks.map(w=>`<option value="${w}">${w}</option>`).join('');
+  if(keep && weeks.includes(keep)) sel.value=keep;
+  else if(weeks.length) sel.value=weeks[0];
+}
 function kpi(n,l,s,cls){return `<div class="kpi${cls?' '+cls:''}"><div class="n">${n}</div><div class="l">${l}</div><div class="s">${s||'&nbsp;'}</div></div>`;}
 function mstat(n,l){return `<div class="mstat"><div class="n">${n}</div><div class="l">${l}</div></div>`;}
 function tSum(wkReports,key){return wkReports.reduce((a,r)=>a+Object.values(r.detail||{}).filter(p=>p.t&&p.t[key]).length,0);}

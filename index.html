@@ -330,6 +330,8 @@ textarea.f-in{min-height:66px;resize:vertical}
 .step{padding:3px 11px;border-radius:20px;background:#eef2f7;color:#94a3b8;font-weight:700}
 .step.on{background:var(--green);color:#fff}
 .reply{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:9px;padding:9px 11px;font-size:12.5px;margin-top:9px;line-height:1.5}
+.reply .rwho{font-weight:600;color:#3f7a55;font-size:11.5px}
+.reply .rtxt{margin-top:4px;color:#166534}
 /* ===== 접수 처리 카드 ===== */
 .subcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(60,80,120,.05)}
 .subcard.over{border-color:#fecaca;background:#fff8f8}
@@ -344,6 +346,10 @@ textarea.f-in{min-height:66px;resize:vertical}
 .sc-l:first-child{margin-top:0}
 .subcard textarea.f-in{min-height:56px}
 .sc-save{display:flex;align-items:center;gap:10px;margin-top:8px}
+.rpmeta{min-height:16px;margin-bottom:3px}
+.rpsaved{font-size:11.5px;font-weight:700;color:var(--ok)}
+.btn.saved{background:#eef2f7;color:#8a94a3;box-shadow:none;cursor:default}
+.btn.saved:hover{filter:none}
 .sc-ok{font-size:13px;font-weight:700;color:var(--ok);opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s}
 .sc-ok.show{opacity:1;transform:none}
 .subcard select.f-in{height:46px}
@@ -1036,7 +1042,8 @@ function openMine(idx){
   if(s.status==='반려'){bar='<div class="steps"><span class="fbadge s-반려">반려</span> <span class="fmeta">처리 불가</span></div>';}
   else{const steps=['접수','처리중','완료'];const cur=s.status==='완료'?2:(s.status==='처리중'||s.status==='보류')?1:0;
     bar='<div class="steps">'+steps.map((st,k)=>`<span class="step ${k<=cur?'on':''}">${st}</span>`).join('<span style="color:#cbd5e1">›</span>')+(s.status==='보류'?' <span class="fmeta">(보류)</span>':'')+'</div>';}
-  const reply=s.reply?`<div class="reply"><b>담당자 회신</b> — ${s.reply}</div>`:'';
+  const rInfo=s.replyBy?` · ${esc(s.replyBy)}${s.replyAt?' · '+fmtDT(s.replyAt):''}`:'';
+  const reply=s.reply?`<div class="reply"><b>담당자 회신</b><span class="rwho">${rInfo}</span><div class="rtxt">${s.reply}</div></div>`:'';
   document.getElementById('lk'+idx).innerHTML=(s.body?`<div class="fmeta" style="color:var(--ink);margin-top:4px">${s.body}</div>`:'')+`<div class="fmeta">담당: ${s.assignee}${s.contact&&s.contact!=='익명'?' · 회신 '+s.contact:''}</div>`+bar+reply;
 }
 
@@ -1189,13 +1196,14 @@ function renderSubs(){
   const scoped=(current.role==='chair'||current.role==='staff'||current.role==='elder');
   let base = scoped ? subs.filter(s=>normCat(s.category)===normCat(current.category)) : subs;
   scope.textContent = scoped ? '· 담당: '+catName(current.category)+' ('+base.length+'건)' : '· 전체 위원회';
-  const open=base.filter(s=>s.status==='접수'||s.status==='처리중'||s.status==='보류').length;
+  /* 보류는 담당자가 판단을 마친 상태로 보고 완료군으로 집계 */
+  const open=base.filter(s=>s.status==='접수'||s.status==='처리중').length;
   const overdue=base.filter(isOverdue).length;
-  const done=base.filter(s=>s.status==='완료'||s.status==='반려').length;
+  const done=base.filter(s=>s.status==='완료'||s.status==='보류'||s.status==='반려').length;
   document.getElementById('mgSummary').innerHTML=
-    `<div class="sumbox"><b>${open}</b>미처리(접수·처리중·보류)</div>`+
+    `<div class="sumbox"><b>${open}</b>미처리(접수·처리중)</div>`+
     `<div class="sumbox ${overdue?'warn':''}"><b>${overdue}</b>접수 48시간 초과 미확인</div>`+
-    `<div class="sumbox"><b>${done}</b>완료·반려</div>`;
+    `<div class="sumbox"><b>${done}</b>완료·보류·반려</div>`;
   const list=base.filter(s=>mgF==='전체'||s.status===mgF);
   box.innerHTML=list.map(s=>{const idx=subs.indexOf(s);const od=isOverdue(s);
     return `<div class="subcard ${od?'over':''}">
@@ -1209,15 +1217,33 @@ function renderSubs(){
         <label class="sc-l">상태 변경</label>
         <select class="f-in" onchange="setStatus(${idx},this.value)">${['접수','처리중','보류','완료','반려'].map(o=>`<option ${o===s.status?'selected':''}>${o}</option>`).join('')}</select>
         <label class="sc-l">회신 / 반려 사유</label>
-        <textarea class="f-in" id="rp${idx}" placeholder="처리 결과나 반려 사유를 적어 회신하세요">${s.reply||''}</textarea>
-        <div class="sc-save"><button class="btn sm" onclick="saveReply(${idx})">회신 저장</button><span class="sc-ok" id="rpok${idx}"></span></div>
+        <div class="rpmeta" id="rpmeta${idx}">${s.reply&&s.replyBy?`<span class="rpsaved">✔ 저장됨 · ${esc(s.replyBy)}${s.replyAt?' · '+fmtDT(s.replyAt):''}</span>`:''}</div>
+        <textarea class="f-in" id="rp${idx}" oninput="onReplyInput(${idx})" placeholder="처리 결과나 반려 사유를 적어 회신하세요">${s.reply||''}</textarea>
+        <div class="sc-save"><button class="btn sm ${s.reply?'saved':''}" id="rpbtn${idx}" ${s.reply?'disabled':''} onclick="saveReply(${idx})">${s.reply?'✔ 저장됨':'회신 저장'}</button></div>
       </div>
     </div>`;
   }).join('') || '<div class="mini" style="margin-top:12px">해당 조건의 접수가 없습니다.</div>';
 }
 function setStatus(i,v){subs[i].status=v;saveS();pushSub(subs[i]);renderSubs();}
 function setReply(i,v){subs[i].reply=v;saveS();pushSub(subs[i]);}
-function saveReply(i){const ta=document.getElementById('rp'+i);const v=ta?ta.value:'';subs[i].reply=v;saveS();pushSub(subs[i]);const ok=document.getElementById('rpok'+i);if(ok){ok.textContent='✔ 저장되었습니다';ok.classList.add('show');setTimeout(()=>{ok.classList.remove('show');},2500);}}
+/* 회신 저장: 담당자·시각 기록 + 버튼을 '저장됨' 상태로 */
+function saveReply(i){
+  const ta=document.getElementById('rp'+i); const v=ta?ta.value:'';
+  subs[i].reply=v;
+  subs[i].replyBy=(current&&current.who)||'담당자';
+  subs[i].replyAt=new Date().toISOString();
+  saveS(); pushSub(subs[i]);
+  setReplySaved(i,true);
+  const meta=document.getElementById('rpmeta'+i);
+  if(meta) meta.innerHTML=v?`<span class="rpsaved">✔ 저장됨 · ${esc(subs[i].replyBy)} · ${fmtDT(subs[i].replyAt)}</span>`:'';
+}
+/* 저장 상태 표시 — 내용을 고치면 다시 '회신 저장'으로 되살아남 */
+function setReplySaved(i,saved){
+  const b=document.getElementById('rpbtn'+i); if(!b) return;
+  if(saved){ b.textContent='✔ 저장됨'; b.classList.add('saved'); b.disabled=true; }
+  else { b.textContent='회신 저장'; b.classList.remove('saved'); b.disabled=false; }
+}
+function onReplyInput(i){ setReplySaved(i,false); }
 
 // ---------- 대시보드 ----------
 let charts={};
@@ -1250,13 +1276,13 @@ function renderDash(){
   const prevSun=wi>0?reports.filter(r=>r.date===weeks[wi-1]).reduce((a,r)=>a+r.sundayPresent.length,0):null;
   const diff=prevSun==null?'':(sunTot-prevSun>=0?'+':'−')+Math.abs(sunTot-prevSun);
   const fbBy=s=>subs.filter(x=>x.status===s).length;
-  const fbOpen=fbBy('접수')+fbBy('처리중')+fbBy('보류');
+  const fbOpen=fbBy('접수')+fbBy('처리중');   /* 보류는 완료군 */
   document.getElementById('kpis').innerHTML=
     kpi(total,'재적','교인 명단(구역) 합계')+
     kpi(sunTot+' <small>·'+rate+'%</small>','주일예배 출석(1·2부)', prevSun==null?'':'전주 대비 '+diff)+
     kpi(absTot,'결석','주일 1·2부 미출석','warn')+
     kpi(missing.length+' <small>/'+DIST_NAMES.length+'</small>','미보고 구역','보고 완료 '+reported.size+'구역','amber')+
-    kpi(fbOpen,'처리중 문의','접수 '+fbBy('접수')+' · 처리중 '+fbBy('처리중')+' · 보류 '+fbBy('보류'));
+    kpi(fbOpen,'미처리 문의','접수 '+fbBy('접수')+' · 처리중 '+fbBy('처리중')+' (보류 '+fbBy('보류')+'는 완료군)');
   // 예배별 참석
   drawChart('svcChart','bar',{labels:['1부','2부','오후','수요','금요','새벽','월삭'],datasets:[{label:'참석(명)',
     data:[tSum(wkReports,'1부'),tSum(wkReports,'2부'),tSum(wkReports,'오후'),tSum(wkReports,'수요'),tSum(wkReports,'금요'),cSum(wkReports,'새벽'),tSum(wkReports,'월삭')],

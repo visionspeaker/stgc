@@ -141,6 +141,10 @@ canvas{max-height:280px}
 .dtable{width:100%;border-collapse:collapse;font-size:12.5px}
 .dtable th,.dtable td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left}
 .dtable th{background:#f6f8fb;font-size:11.5px;color:var(--muted)}
+.dtable tr.rowlink{cursor:pointer}
+.dtable tr.rowlink:hover td{background:#f2f7ff}
+.seeall{background:none;border:0;color:var(--green);font-size:12px;font-weight:800;cursor:pointer;padding:0 0 0 6px;font-family:inherit}
+.seeall:hover{text-decoration:underline}
 @media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.dgrid.g2,.dgrid.g3{grid-template-columns:1fr}}
 /* ===== 문화 10계명 ===== */
 .cvhero{background:linear-gradient(135deg,#6f6ad4,#5b54c9);border-radius:16px;padding:18px;color:#fff;position:relative;overflow:hidden;margin-bottom:6px}
@@ -346,6 +350,10 @@ textarea.f-in{min-height:66px;resize:vertical}
 .sc-l:first-child{margin-top:0}
 .subcard textarea.f-in{min-height:56px}
 .sc-save{display:flex;align-items:center;gap:10px;margin-top:8px}
+.sc-moved{font-size:11.5px;font-weight:800;color:var(--ok);opacity:0;transition:opacity .2s;margin-left:2px}
+.sc-moved.show{opacity:1}
+.subcard.offfilter{opacity:.62;border-style:dashed}
+.sc-offnote{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:8px;padding:7px 10px;font-size:11.5px;line-height:1.5;margin:8px 0 2px}
 .rpmeta{min-height:16px;margin-bottom:3px}
 .rpsaved{font-size:11.5px;font-weight:700;color:var(--ok)}
 .btn.saved{background:#eef2f7;color:#8a94a3;box-shadow:none;cursor:default}
@@ -565,7 +573,7 @@ textarea.f-in{min-height:66px;resize:vertical}
 <section id="manage" class="view">
   <div class="card">
     <h2>문의 접수 처리 <span id="mgScope" class="muted" style="font-weight:400"></span></h2>
-    <p class="desc">접수된 문의를 담당자가 처리 상태로 관리합니다. 매뉴얼 기준: 접수 확인 48시간 · 완료 회신 3일. <b>처리 불가 시 ‘반려’ + 사유</b>를 남겨 회신합니다.</p>
+    <p class="desc">접수된 문의를 담당자가 처리 상태로 관리합니다. 매뉴얼 기준: 접수 확인 48시간 · 완료 회신 3일. 처리 불가 시 <b>‘반려’ + 답변</b>을 남겨 회신합니다.</p>
     <div class="sumstrip" id="mgSummary"></div>
     <div class="tabbar" id="mgFilter">
       <button data-f="전체" class="active">전체</button>
@@ -612,7 +620,7 @@ textarea.f-in{min-height:66px;resize:vertical}
     <div class="dcard"><h3>구역예배 진행률</h3><p class="dd">제출 구역 중 예배 진행</p><canvas id="cellChart"></canvas></div>
   </div>
 
-  <div class="sect-t">문의 접수 처리</div>
+  <div class="sect-t">문의 접수 처리 <button class="seeall" onclick="goManage('전체')">전체 보기 ›</button></div>
   <div class="dgrid g3">
     <div class="dcard"><h3>최근 접수 현황</h3><p class="dd">분류별 담당자에게 자동 배정 · 상태 관리</p><div id="subTable"></div></div>
     <div class="dcard"><h3>상태별 건수</h3><p class="dd">접수·처리중·완료·보류·반려</p><canvas id="subChart"></canvas><div class="dnote">매뉴얼 기준: 접수 확인 48시간 · 완료 회신 3일.</div></div>
@@ -1187,7 +1195,7 @@ function submitReport(){
 // ---------- 접수 처리 ----------
 let mgF='전체';
 document.querySelectorAll('#mgFilter button').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('#mgFilter button').forEach(x=>x.classList.remove('active'));b.classList.add('active');mgF=b.dataset.f;renderSubs();});
+  document.querySelectorAll('#mgFilter button').forEach(x=>x.classList.remove('active'));b.classList.add('active');mgF=b.dataset.f;keepSubId=null;renderSubs();});
 function hoursSince(iso){return (Date.now()-new Date(iso).getTime())/3600000;}
 function isOverdue(s){return s.status==='접수' && hoursSince(s.ts)>48;}
 function renderSubs(){
@@ -1204,10 +1212,12 @@ function renderSubs(){
     `<div class="sumbox"><b>${open}</b>미처리(접수·처리중)</div>`+
     `<div class="sumbox ${overdue?'warn':''}"><b>${overdue}</b>접수 48시간 초과 미확인</div>`+
     `<div class="sumbox"><b>${done}</b>완료·보류·반려</div>`;
-  const list=base.filter(s=>mgF==='전체'||s.status===mgF);
+  const list=base.filter(s=>mgF==='전체'||s.status===mgF||(keepSubId&&s.id===keepSubId));
   box.innerHTML=list.map(s=>{const idx=subs.indexOf(s);const od=isOverdue(s);
-    return `<div class="subcard ${od?'over':''}">
-      <div class="sc-top"><span class="fbadge s-${s.status}">${s.status}</span>${od?'<span class="fbadge s-보류">48시간 초과</span>':''}<span class="sc-date">${fmtDT(s.ts)}</span></div>
+    const off=(mgF!=='전체'&&s.status!==mgF);   /* 현재 필터와 다르지만 방금 바꾼 건 */
+    return `<div class="subcard ${od?'over':''} ${off?'offfilter':''}" data-sid="${esc(s.id||'')}">
+      <div class="sc-top"><span class="fbadge s-${s.status}">${s.status}</span>${od?'<span class="fbadge s-보류">48시간 초과</span>':''}<span class="sc-moved"></span><span class="sc-date">${fmtDT(s.ts)}</span></div>
+      ${off?`<div class="sc-offnote">지금 보고 계신 ‘${esc(mgF)}’ 목록에는 포함되지 않는 상태입니다. 목록을 새로 고르면 정리됩니다.</div>`:''}
       <div class="sc-title">${s.title}</div>
       <div class="sc-meta">${subType(s.type)} · ${catName(s.category)} · 담당 <b>${s.assignee}</b></div>
       <div class="sc-body">${s.body||'(내용 없음)'}</div>
@@ -1216,15 +1226,43 @@ function renderSubs(){
       <div class="sc-ctl">
         <label class="sc-l">상태 변경</label>
         <select class="f-in" onchange="setStatus(${idx},this.value)">${['접수','처리중','보류','완료','반려'].map(o=>`<option ${o===s.status?'selected':''}>${o}</option>`).join('')}</select>
-        <label class="sc-l">회신 / 반려 사유</label>
+        <label class="sc-l">회신 / 처리 답변</label>
         <div class="rpmeta" id="rpmeta${idx}">${s.reply&&s.replyBy?`<span class="rpsaved">✔ 저장됨 · ${esc(s.replyBy)}${s.replyAt?' · '+fmtDT(s.replyAt):''}</span>`:''}</div>
-        <textarea class="f-in" id="rp${idx}" oninput="onReplyInput(${idx})" placeholder="처리 결과나 반려 사유를 적어 회신하세요">${s.reply||''}</textarea>
+        <textarea class="f-in" id="rp${idx}" oninput="onReplyInput(${idx})" placeholder="처리 결과나 답변 내용을 적어 회신하세요">${s.reply||''}</textarea>
         <div class="sc-save"><button class="btn sm ${s.reply?'saved':''}" id="rpbtn${idx}" ${s.reply?'disabled':''} onclick="saveReply(${idx})">${s.reply?'✔ 저장됨':'회신 저장'}</button></div>
       </div>
     </div>`;
   }).join('') || '<div class="mini" style="margin-top:12px">해당 조건의 접수가 없습니다.</div>';
+  paintMoved();
 }
-function setStatus(i,v){subs[i].status=v;saveS();pushSub(subs[i]);renderSubs();}
+/* 대시보드 → 문의 접수 처리로 이동 (상태를 주면 그 목록으로 필터) */
+function goManage(status){
+  const ok=['접수','처리중','보류','완료','반려'];
+  mgF=(status&&ok.includes(status))?status:'전체';
+  keepSubId=null;
+  const nav=document.getElementById('nav');
+  const btn=nav&&[...nav.querySelectorAll('button')].find(b=>b.dataset.v==='manage');
+  if(btn){ nav.querySelectorAll('button').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); }
+  showView('manage');
+  document.querySelectorAll('#mgFilter button').forEach(x=>x.classList.toggle('active',x.dataset.f===mgF));
+  renderSubs(); window.scrollTo(0,0);
+}
+/* 상태를 바꿔도 방금 만진 카드는 목록에 남겨 둔다(필터와 안 맞아도 흐리게 표시) */
+let keepSubId=null;
+function setStatus(i,v){
+  subs[i].status=v; saveS(); pushSub(subs[i]);
+  keepSubId=subs[i].id||null;
+  movedMsg='✔ '+v+'(으)로 변경됨';           /* 저장 후 목록이 다시 그려져도 유지 */
+  if(movedTimer) clearTimeout(movedTimer);
+  movedTimer=setTimeout(()=>{movedMsg=''; movedTimer=null; paintMoved();},2600);
+  renderSubs();
+}
+let movedMsg='', movedTimer=null;
+function paintMoved(){
+  const c=document.querySelector('.subcard[data-sid="'+(keepSubId||'')+'"]');
+  if(!c) return; const t=c.querySelector('.sc-moved'); if(!t) return;
+  t.textContent=movedMsg; t.classList.toggle('show',!!movedMsg);
+}
 function setReply(i,v){subs[i].reply=v;saveS();pushSub(subs[i]);}
 /* 회신 저장: 담당자·시각 기록 + 버튼을 '저장됨' 상태로 */
 function saveReply(i){
@@ -1316,11 +1354,14 @@ function renderDash(){
   const recent=[...subs].sort((a,b)=>String(b.ts||'').localeCompare(String(a.ts||''))).slice(0,8);
   document.getElementById('subTable').innerHTML = recent.length?
     '<table class="dtable"><thead><tr><th>제목</th><th>분류</th><th>담당</th><th>상태</th><th>접수일</th></tr></thead><tbody>'+
-    recent.map(s=>`<tr><td>${s.title||'(제목없음)'}</td><td>${catName(s.category||'')}</td><td>${s.assignee||'-'}</td><td><span class="badge b-${s.status}">${s.status}</span></td><td>${String(s.ts||'').slice(5,10)}</td></tr>`).join('')+
+    recent.map(s=>`<tr class="rowlink" onclick="goManage('${esc(s.status)}')" title="문의 접수 처리로 이동"><td>${s.title||'(제목없음)'}</td><td>${catName(s.category||'')}</td><td>${s.assignee||'-'}</td><td><span class="badge b-${s.status}">${s.status}</span></td><td>${String(s.ts||'').slice(5,10)}</td></tr>`).join('')+
     '</tbody></table>' : '<div class="muted">접수된 문의가 없습니다.</div>';
-  // 상태별 건수
+  // 상태별 건수 (막대 클릭 → 해당 상태 목록으로)
   const stKeys=['접수','처리중','완료','보류','반려'];
-  drawChart('subChart','bar',{labels:stKeys,datasets:[{label:'건수',data:stKeys.map(fbBy),backgroundColor:['#3b82f6','#f59e0b','#22c55e','#a855f7','#e06666']}]},{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});
+  drawChart('subChart','bar',{labels:stKeys,datasets:[{label:'건수',data:stKeys.map(fbBy),backgroundColor:['#3b82f6','#f59e0b','#22c55e','#a855f7','#e06666']}]},
+    {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},
+     onHover:(e,el)=>{e.native.target.style.cursor=el.length?'pointer':'default';},
+     onClick:(e,el)=>{ if(el.length) goManage(stKeys[el[0].index]); }});
   // 이번 주 구역 제출 현황
   document.getElementById('missingBoard').innerHTML = submissionBoardHtml(wk, reported, null, true)
     + (missing.length ? '' : '<div class="ok-box" style="margin-top:10px">🎉 모든 구역이 보고를 완료했습니다.</div>');

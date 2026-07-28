@@ -551,8 +551,8 @@ textarea.f-in{min-height:66px;resize:vertical}
 <!-- 접수 처리 -->
 <section id="manage" class="view">
   <div class="card">
-    <h2>피드백 접수 처리 <span id="mgScope" class="muted" style="font-weight:400"></span></h2>
-    <p class="desc">접수된 사안을 담당자가 처리 상태로 관리합니다. 매뉴얼 기준: 접수 확인 48시간 · 완료 회신 3일. <b>처리 불가 시 ‘반려’ + 사유</b>를 남겨 회신합니다.</p>
+    <h2>문의 접수 처리 <span id="mgScope" class="muted" style="font-weight:400"></span></h2>
+    <p class="desc">접수된 문의를 담당자가 처리 상태로 관리합니다. 매뉴얼 기준: 접수 확인 48시간 · 완료 회신 3일. <b>처리 불가 시 ‘반려’ + 사유</b>를 남겨 회신합니다.</p>
     <div class="sumstrip" id="mgSummary"></div>
     <div class="tabbar" id="mgFilter">
       <button data-f="전체" class="active">전체</button>
@@ -599,7 +599,7 @@ textarea.f-in{min-height:66px;resize:vertical}
     <div class="dcard"><h3>구역예배 진행률</h3><p class="dd">제출 구역 중 예배 진행</p><canvas id="cellChart"></canvas></div>
   </div>
 
-  <div class="sect-t">피드백 접수 처리</div>
+  <div class="sect-t">문의 접수 처리</div>
   <div class="dgrid g3">
     <div class="dcard"><h3>최근 접수 현황</h3><p class="dd">분류별 담당자에게 자동 배정 · 상태 관리</p><div id="subTable"></div></div>
     <div class="dcard"><h3>상태별 건수</h3><p class="dd">접수·처리중·완료·보류·반려</p><canvas id="subChart"></canvas><div class="dnote">매뉴얼 기준: 접수 확인 48시간 · 완료 회신 3일.</div></div>
@@ -646,7 +646,7 @@ textarea.f-in{min-height:66px;resize:vertical}
 <!-- 새 접수 알림 팝업 -->
 <div id="notiGate" class="rmodal" style="display:none;z-index:95">
   <div class="ntcard">
-    <div class="nthead"><span class="ntbell">🔔</span> 새 피드백 접수</div>
+    <div class="nthead"><span class="ntbell">🔔</span> 새 문의 접수</div>
     <div class="ntbody" id="ntBody"></div>
     <div class="ntfoot">
       <button class="btn sec" style="flex:1" onclick="closeNoti()">나중에</button>
@@ -690,6 +690,8 @@ function saveS(){localStorage.setItem(SKEY,JSON.stringify(subs))}
 /* 분류 이름이 바뀌어도 예전 접수 건이 깨지지 않도록 매핑 */
 const CAT_ALIAS={'잘 모르겠음':'기타 (구분 모름)','봉사 (환경미화·시설)':'봉사 (환경미화·시설·카페·주방)'};
 function normCat(c){return CAT_ALIAS[c]||c||'';}
+/* 예전 접수 건의 '피드백' 표기도 '문의'로 보이게 */
+function subType(t){ return t==='피드백'?'문의':(t||''); }
 function catName(c){return normCat(c).split(' (')[0];}
 
 // ---------- backend (구글시트 + Apps Script) ----------
@@ -910,10 +912,10 @@ const ROLE_NAV={
  guest:[],
  member:[],
  leader:[['report','구역보고']],
- elder:[['report','구역보고'],['manage','피드백 접수 처리']],
- chair:[['manage','피드백 접수 처리']],
- staff:[['manage','피드백 접수 처리']],
- admin:[['dash','대시보드'],['report','구역보고'],['manage','접수 처리']]
+ elder:[['report','구역보고'],['manage','문의 접수 처리']],
+ chair:[['manage','문의 접수 처리']],
+ staff:[['manage','문의 접수 처리']],
+ admin:[['dash','대시보드'],['report','구역보고'],['manage','문의 접수 처리']]
 };
 const ROLE_LABEL={guest:'교인',member:'일반 교인',leader:'구역장',elder:'장로 · 구역장/위원장',chair:'위원장',staff:'부장',admin:'관리자(교역자·담임목사)'};
 function setRoleLabel(){
@@ -967,7 +969,7 @@ function buildNav(view){
   paintSubBadge();
 }
 
-// ---------- intake (피드백 접수) ----------
+// ---------- intake (문의 접수) ----------
 function initIntake(){
   const sel=document.getElementById('inCat');
   sel.innerHTML='<option value="">선택</option>'+Object.keys(CATEGORIES).map(c=>`<option>${c}</option>`).join('');
@@ -993,7 +995,7 @@ function submitIntake(){
   const pin=document.getElementById('inPin').value.trim();
   if(!/^\d{4}$/.test(pin)){alert('조회용 비밀번호 4자리(숫자)를 입력해주세요.');return;}
   const r=CATEGORIES[cat];
-  const rec={ts:new Date().toISOString(),type:'피드백',category:cat,title:title,body:document.getElementById('inBody').value,
+  const rec={ts:new Date().toISOString(),type:'문의',category:cat,title:title,body:document.getElementById('inBody').value,
     name:anon?'익명':name,contact:anon?'':contact,status:'접수',pin:pin,
     assignee:r.위원장+(r.교역자!=='—'?' / '+r.교역자:''),
     id:'s'+new Date().getTime()+Math.floor(Math.random()*1000)};
@@ -1005,7 +1007,7 @@ function submitIntake(){
   clearPhoto();
 }
 
-// ---------- 피드백 확인 (myreq) ----------
+// ---------- 문의 확인 (myreq) ----------
 let myF='전체';
 function renderMyReq(){
   const bar=document.getElementById('fbFilter');
@@ -1016,7 +1018,7 @@ function renderMyReq(){
   box.innerHTML=list.map(s=>{const idx=subs.indexOf(s);
     return `<div class="fitem">
       <div class="ftop"><span class="ftitle">${s.title}</span><span class="fbadge s-${s.status}">${s.status}</span><span class="fmeta" style="margin-left:auto">${s.ts.slice(5,10)}</span></div>
-      <div class="fmeta">${s.type} · ${catName(s.category)}</div>
+      <div class="fmeta">${subType(s.type)} · ${catName(s.category)}</div>
       <div id="lk${idx}"><div class="pinrow"><input class="f-in" type="password" maxlength="4" inputmode="numeric" id="pin${idx}" placeholder="비밀번호 4자리" onkeydown="if(event.key==='Enter')openMine(${idx})"/><button class="btnsm" onclick="openMine(${idx})">내용 보기</button></div></div>
     </div>`;}).join('');
 }
@@ -1192,7 +1194,7 @@ function renderSubs(){
     return `<div class="subcard ${od?'over':''}">
       <div class="sc-top"><span class="fbadge s-${s.status}">${s.status}</span>${od?'<span class="fbadge s-보류">48시간 초과</span>':''}<span class="sc-date">${fmtDT(s.ts)}</span></div>
       <div class="sc-title">${s.title}</div>
-      <div class="sc-meta">${s.type} · ${catName(s.category)} · 담당 <b>${s.assignee}</b></div>
+      <div class="sc-meta">${subType(s.type)} · ${catName(s.category)} · 담당 <b>${s.assignee}</b></div>
       <div class="sc-body">${s.body||'(내용 없음)'}</div>
       ${s.hasPhoto?`<div class="sc-photo" id="ph_${s.id}"><button class="btnsm" onclick="loadPhoto('${s.id}')">📷 첨부 사진 보기</button></div>`:''}
       <div class="sc-who">접수자 <b>${s.name}</b>${s.contact?' · '+s.contact:''}</div>
@@ -1239,7 +1241,7 @@ function renderDash(){
     kpi(sunTot+' <small>·'+rate+'%</small>','주일예배 출석(1·2부)', prevSun==null?'':'전주 대비 '+diff)+
     kpi(absTot,'결석','주일 1·2부 미출석','warn')+
     kpi(missing.length+' <small>/'+DIST_NAMES.length+'</small>','미보고 구역','보고 완료 '+reported.size+'구역','amber')+
-    kpi(fbOpen,'처리중 피드백','접수 '+fbBy('접수')+' · 처리중 '+fbBy('처리중')+' · 보류 '+fbBy('보류'));
+    kpi(fbOpen,'처리중 문의','접수 '+fbBy('접수')+' · 처리중 '+fbBy('처리중')+' · 보류 '+fbBy('보류'));
   // 예배별 참석
   drawChart('svcChart','bar',{labels:['1부','2부','오후','수요','금요','새벽','월삭'],datasets:[{label:'참석(명)',
     data:[tSum(wkReports,'1부'),tSum(wkReports,'2부'),tSum(wkReports,'오후'),tSum(wkReports,'수요'),tSum(wkReports,'금요'),cSum(wkReports,'새벽'),tSum(wkReports,'월삭')],
@@ -1274,7 +1276,7 @@ function renderDash(){
   document.getElementById('subTable').innerHTML = recent.length?
     '<table class="dtable"><thead><tr><th>제목</th><th>분류</th><th>담당</th><th>상태</th><th>접수일</th></tr></thead><tbody>'+
     recent.map(s=>`<tr><td>${s.title||'(제목없음)'}</td><td>${catName(s.category||'')}</td><td>${s.assignee||'-'}</td><td><span class="badge b-${s.status}">${s.status}</span></td><td>${String(s.ts||'').slice(5,10)}</td></tr>`).join('')+
-    '</tbody></table>' : '<div class="muted">접수된 피드백이 없습니다.</div>';
+    '</tbody></table>' : '<div class="muted">접수된 문의가 없습니다.</div>';
   // 상태별 건수
   const stKeys=['접수','처리중','완료','보류','반려'];
   drawChart('subChart','bar',{labels:stKeys,datasets:[{label:'건수',data:stKeys.map(fbBy),backgroundColor:['#3b82f6','#f59e0b','#22c55e','#a855f7','#e06666']}]},{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}});

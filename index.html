@@ -643,7 +643,7 @@ textarea.f-in{min-height:66px;resize:vertical}
 
 <div class="footer">송탄영광교회 영광 커넥트<br><span class="cright">© 2026 visionspeaker. All rights reserved. · 무단 복제·배포 금지</span></div>
 </main>
-<button class="fabback" onclick="goHome()" aria-label="뒤로 가기"><span class="bkc">‹</span><span class="bkt">뒤로</span></button>
+<button class="fabback" onclick="goBack()" aria-label="뒤로 가기"><span class="bkc">‹</span><span class="bkt">홈</span></button>
 </div>
 
 <!-- 보고서 상세 모달 -->
@@ -875,25 +875,53 @@ function loginByName(){
 function openLogin(){document.getElementById('loginGate').style.display='flex';const el=document.getElementById('lgName');if(el){el.value='';el.focus();}const p=document.getElementById('lgPw2');if(p)p.value='';}
 function closeLogin(){document.getElementById('loginGate').style.display='none';}
 function openL(u){window.open(u,'_blank','noopener,noreferrer');}
-function goHome(){document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='none';document.getElementById('home').style.display='block';window.scrollTo(0,0);clearAppHist();}
-/* 폰 뒤로가기(안드로이드 버튼 / 아이폰 스와이프)로도 홈으로 */
+function goHome(){document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='none';document.getElementById('home').style.display='block';window.scrollTo(0,0);viewStack=[];clearAppHist();paintBackBtn();}
+/* ---------- 화면 이동 기록 (뒤로가기는 한 단계씩) ---------- */
+let viewStack=[];            /* 거쳐온 화면들 (현재 화면 제외) */
+function pushView(v){ if(v && viewStack[viewStack.length-1]!==v) viewStack.push(v); }
+/* 뒤로: 직전 화면이 있으면 그 화면으로, 없으면 홈으로 */
+function goBack(){
+  const nt=document.getElementById('notiGate'), rm=document.getElementById('repModal'),
+        pg=document.getElementById('pwGate'), lg=document.getElementById('loginGate');
+  if(nt&&nt.style.display==='flex'){ closeNoti(); return; }
+  if(rm&&rm.style.display==='flex'){ closeReportDetail(); return; }
+  if(pg&&pg.style.display==='flex'){ closePwChange(); return; }
+  if(lg&&lg.style.display==='flex'){ closeLogin(); return; }
+  const prev=viewStack.pop();
+  if(prev){ showView(prev,true); syncNav(prev); window.scrollTo(0,0); paintBackBtn(); }
+  else goHome();
+}
+/* 뒤로 버튼 문구: 돌아갈 화면이 있으면 '뒤로', 없으면 '홈' */
+function paintBackBtn(){
+  const b=document.querySelector('.fabback .bkt'); if(!b) return;
+  b.textContent=viewStack.length?'뒤로':'홈';
+}
+/* 상단 탭 활성 표시를 현재 화면에 맞춤 */
+function syncNav(v){
+  const nav=document.getElementById('nav'); if(!nav) return;
+  nav.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x.dataset.v===v));
+}
+/* 폰 뒤로가기(안드로이드 버튼 / 아이폰 스와이프)도 한 단계씩 */
 let appHist=false;
 function pushAppHist(){ if(appHist) return; try{ history.pushState({app:1},''); appHist=true; }catch(e){} }
 function clearAppHist(){ appHist=false; }
 window.addEventListener('popstate',function(){
-  const rm=document.getElementById('repModal'), pg=document.getElementById('pwGate'), lg=document.getElementById('loginGate'), nt=document.getElementById('notiGate');
-  if(nt&&nt.style.display==='flex'){ closeNoti(); pushAppHist(); return; }
-  if(rm&&rm.style.display==='flex'){ closeReportDetail(); pushAppHist(); return; }
-  if(pg&&pg.style.display==='flex'){ closePwChange(); pushAppHist(); return; }
-  if(lg&&lg.style.display==='flex'){ closeLogin(); pushAppHist(); return; }
-  if(document.getElementById('app').style.display!=='none'){ appHist=false; goHome(); }
+  if(document.getElementById('app').style.display==='none') return;
+  const goingHome = !viewStack.length
+    && document.getElementById('notiGate').style.display!=='flex'
+    && document.getElementById('repModal').style.display!=='flex'
+    && document.getElementById('pwGate').style.display!=='flex'
+    && document.getElementById('loginGate').style.display!=='flex';
+  goBack();
+  if(!goingHome) pushAppHist();   /* 앱 안에 남아 있으면 기록 유지 */
+  else appHist=false;
 });
 function openApp(view){
   if(!current) current={role:'guest'};
   document.getElementById('home').style.display='none';
   document.getElementById('loginGate').style.display='none';
   document.getElementById('app').style.display='block';
-  setRoleLabel(); buildNav(view); loadAll(); window.scrollTo(0,0); pushAppHist();
+  viewStack=[]; currentView=''; setRoleLabel(); buildNav(view); loadAll(); window.scrollTo(0,0); pushAppHist(); paintBackBtn();
 }
 /* ---------- 문화 10계명 ---------- */
 const CULTURE=[
@@ -960,14 +988,18 @@ function enterApp(role,scope){
   document.getElementById('loginGate').style.display='none';
   document.getElementById('app').style.display='block';
   setRoleLabel();
+  viewStack=[]; currentView='';
   buildNav();
   loadAll();
   window.scrollTo(0,0);
-  pushAppHist();
+  pushAppHist(); paintBackBtn();
 }
 function logout(){current=null;clearSession();notiShown=false;closeNoti();['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
-function showView(v){
+/* back=true 이면 뒤로가기로 되돌아온 것이므로 기록하지 않는다 */
+function showView(v,back){
+  if(!back && currentView && currentView!==v) pushView(currentView);
   currentView=v;
+  paintBackBtn();
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.getElementById(v).classList.add('active');
   if(v==='culture') renderCulture();

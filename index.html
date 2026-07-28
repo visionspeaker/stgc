@@ -688,7 +688,7 @@ function distNum(d){const m=String(d).match(/(\d+)/);return m?parseInt(m[1],10):
 function sortDist(arr){return [...arr].sort((a,b)=>distNum(a)-distNum(b)||String(a).localeCompare(String(b),'ko'));}
 const DIST_SORTED = sortDist(DIST_NAMES);
 const CATEGORIES = {
- "예배 (예배·방송·찬양)": {위원장:"소세영 장로", 교역자:"양요승 부목사"},
+ "예배 (예배·방송·찬양)": {위원장:"소세영 장로", 교역자:"—"},
  "교육 (유치·유초등·중고등·청년)": {위원장:"김낙훈 장로", 교역자:"강유석 전도사"},
  "봉사 (환경미화·시설·카페·주방)": {위원장:"권보상 장로", 교역자:"—"},
  "차량 (차량·주차)": {위원장:"홍춘섭 장로", 교역자:"—"},
@@ -861,8 +861,7 @@ const ACCOUNTS={
  '박인성':{role:'admin',pw:'1234'},
  '강유석':{role:'admin',pw:'1234'},
  '양선영':{role:'admin',pw:'1234'},
- '김세원':{role:'admin',pw:'1234'},
- '양요승':{role:'admin',pw:'1234'}
+ '김세원':{role:'admin',pw:'1234'}
 };
 function initGate(){const el=document.getElementById('lgName');if(el)el.focus();}
 function loginByName(){

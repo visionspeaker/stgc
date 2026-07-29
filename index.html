@@ -619,7 +619,7 @@ textarea.f-in{min-height:66px;resize:vertical}
 
   <div class="sect-t">구역예배 · 결석 관리</div>
   <div class="dgrid g3">
-    <div class="dcard"><h3>결석자 관리 · 개근자</h3><p class="dd">선택 주일 결석 사유별 / 최근 3주 개근자</p><div id="absentBoard"></div></div>
+    <div class="dcard"><h3>결석자 관리</h3><p class="dd">선택 주일 결석 사유별 집계</p><div id="absentBoard"></div></div>
     <div class="dcard"><h3>구역예배 진행률</h3><p class="dd">제출 구역 중 예배 진행</p><canvas id="cellChart"></canvas></div>
   </div>
 
@@ -1381,10 +1381,10 @@ function renderDash(){
     mstat(cSum(wkReports,'새벽'),'새벽예배 참석(명)')+mstat(cSum(wkReports,'성경').toLocaleString(),'성경읽기(장)')+mstat(cSum(wkReports,'QT(가정)'),'QT·가정예배(회)');
   // 목양 우선사항
   document.getElementById('careBoard').innerHTML=careHtml(wkReports);
-  // 결석자 관리·개근자
+  // 결석자 관리
   document.getElementById('absentBoard').innerHTML = (allAbsent.length?
     Object.entries(byReason).map(([r,arr])=>`<div style="margin:6px 0;font-size:12.5px"><b>${r}</b> (${arr.length}) : <span class="muted">${arr.join(', ')}</span></div>`).join('')+longAbsentHtml()
-    : '<div class="muted">결석 데이터가 없습니다.</div>') + perfectHtml();
+    : '<div class="muted">결석 데이터가 없습니다.</div>');
   // 구역예배 진행률
   const held=wkReports.filter(r=>r.cell.held==='진행').length;
   drawChart('cellChart','doughnut',{labels:['진행','미진행/미보고'],datasets:[{data:[held,DIST_NAMES.length-held],backgroundColor:['#16a34a','#e2e8f0']}]},{});
@@ -1548,17 +1548,6 @@ function careHtml(wkReports){
   });
   if(!items.length) return '<div class="muted">이번 주 목양 우선 대상이 없습니다.</div>';
   return items.map(t=>`<div class="care">${t}</div>`).join('');
-}
-// 개근자: 최근 3주 모두 보고된 구역에서 매주 출석한 성도
-function perfectHtml(){
-  const weeks=[...new Set(reports.map(r=>r.date))].sort().slice(-3);
-  if(weeks.length<2) return '';
-  const byDist={};
-  weeks.forEach(w=>reports.filter(r=>r.date===w).forEach(r=>{(byDist[r.district]=byDist[r.district]||[]).push(new Set(r.sundayPresent));}));
-  const perfect=[];
-  Object.entries(byDist).forEach(([d,sets])=>{ if(sets.length<weeks.length) return;
-    const first=[...sets[0]]; first.forEach(n=>{ if(sets.every(s=>s.has(n))) perfect.push(d+' '+n); });});
-  return perfect.length?`<div class="ok-box" style="margin-top:8px">🌟 최근 ${weeks.length}주 개근자(격려 대상): ${perfect.join(', ')}</div>`:'';
 }
 function stat(n,l,warn){return `<div class="stat${warn?' warn':''}"><div class="n">${n}</div><div class="l">${l}</div></div>`;}
 function drawChart(id,type,data,opts){if(charts[id])charts[id].destroy();

@@ -313,7 +313,29 @@ textarea.f-in{min-height:66px;resize:vertical}
 .cnts{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
 .cnt{display:flex;flex-direction:column;align-items:center;gap:4px}
 .cnt .cl{font-size:11px;color:var(--muted);font-weight:700}
-.cpick{width:72px;height:44px;border:1px solid var(--inline);border-radius:10px;background:#fff;font-size:16px;font-weight:800;color:var(--ink);text-align:center;cursor:pointer}
+.cpick{width:78px;height:52px;border:1.5px solid var(--inline);border-radius:12px;background:#fff;font-size:20px;font-weight:800;color:#98a2b3;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+.cpick:active{background:#eef3fa}
+.cpick.filled{border-color:var(--green);background:var(--greenSoft);color:var(--green)}
+/* 숫자 키패드 */
+.kpad{position:fixed;inset:0;background:rgba(20,28,45,.5);display:none;align-items:flex-end;justify-content:center;z-index:120}
+.kpad.on{display:flex}
+.kpanel{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:520px;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px))}
+.kpanel .kt{font-size:14.5px;font-weight:800;text-align:center;margin-bottom:2px}
+.kpanel .ks{font-size:11.5px;color:var(--muted);text-align:center;margin-bottom:10px}
+.kdisp{height:56px;border:2px solid var(--teal);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;margin-bottom:12px;background:#f7fdfb}
+.kquick{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.kquick button{flex:1;min-width:52px;height:38px;border:1px solid var(--line);background:#f7f9fc;border-radius:10px;font-size:13px;font-weight:800;font-family:inherit;color:var(--ink);cursor:pointer}
+.kgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kgrid button{height:54px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:21px;font-weight:800;font-family:inherit;color:var(--ink);cursor:pointer}
+.kgrid button:active{background:#eef3fa}
+.kgrid button.act{background:#f4f7fb;font-size:15px}
+.kgrid button.ok{background:var(--green);color:#fff;border-color:var(--green)}
+/* 지난주 사유 불러오기 */
+.loadbar{display:flex;align-items:center;gap:8px;background:#fffbf2;border:1px solid #f6d9a8;border-radius:12px;padding:10px 12px;margin-top:10px}
+.loadbar .lt{flex:1;font-size:12.5px;color:#8a5a12;line-height:1.5}
+.loadbar button{border:0;background:var(--warn);color:#fff;border-radius:9px;height:36px;padding:0 12px;font-size:12.5px;font-weight:800;font-family:inherit;cursor:pointer;flex:none}
+.absrow.pre .f-in{border-color:var(--warn);background:#fffbf2}
+.prebadge{display:inline-block;font-size:10.5px;font-weight:800;color:var(--warn);background:#fff4e2;border-radius:20px;padding:2px 7px;margin-left:4px}
 .pray{margin-top:12px}
 .pray .pl{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px}
 .pray .pl span{font-weight:400;color:#98a2b3}
@@ -555,6 +577,7 @@ textarea.f-in{min-height:66px;resize:vertical}
     <div class="sect">
       <h4>결석자 <span class="tag tag-req">주일(1·2부) 미출석</span></h4>
       <div class="d">주일예배 1·2부 모두 미출석자가 자동 표시됩니다 · 사유 선택 + 세부내용</div>
+      <div id="prevAbsBar"></div>
       <div id="absentList"></div>
     </div>
     <div class="sect">
@@ -562,7 +585,7 @@ textarea.f-in{min-height:66px;resize:vertical}
       <div class="d">구역 전체 특이사항·심방 요청 등 (질병·장기결석·연락두절 등은 목양 우선사항으로 자동 표시)</div>
       <textarea class="f-in" id="cellNote" placeholder="예: OO 성도 입원 심방 요청, 새가족 정착 상황 등"></textarea>
     </div>
-    <button class="f-primary" onclick="submitReport()">보고서 제출</button>
+    <button class="f-primary" id="repSubmitBtn" onclick="submitReport()">보고서 제출</button>
     <div id="reportOk"></div>
     <div class="sect" style="margin-top:14px">
       <h4>이번 주 구역 제출 현황</h4>
@@ -679,6 +702,22 @@ textarea.f-in{min-height:66px;resize:vertical}
   </div>
 </div>
 
+<!-- 숫자 키패드 -->
+<div class="kpad" id="kpad" style="display:none" onclick="if(event.target===this)closeKpad(false)">
+  <div class="kpanel">
+    <div class="kt" id="kTitle">숫자 입력</div>
+    <div class="ks" id="kSub"></div>
+    <div class="kdisp" id="kDisp">0</div>
+    <div class="kquick" id="kQuick"></div>
+    <div class="kgrid">
+      <button onclick="kNum('1')">1</button><button onclick="kNum('2')">2</button><button onclick="kNum('3')">3</button>
+      <button onclick="kNum('4')">4</button><button onclick="kNum('5')">5</button><button onclick="kNum('6')">6</button>
+      <button onclick="kNum('7')">7</button><button onclick="kNum('8')">8</button><button onclick="kNum('9')">9</button>
+      <button class="act" onclick="kClear()">지움</button><button onclick="kNum('0')">0</button><button class="ok" onclick="closeKpad(true)">확인</button>
+    </div>
+  </div>
+</div>
+
 <div id="printArea"></div>
 
 <script>
@@ -699,8 +738,19 @@ const CATEGORIES = {
 };
 // 위원장이 담당하는 6개 위원회(경조사·잘모르겠음 제외)
 const COMMITTEES = Object.keys(CATEGORIES).slice(0,6);
+/* 같은 (날짜+구역) 보고서가 여러 건이면 가장 나중에 저장된 1건만 사용 */
+function dedupeReports(list){
+  if(!Array.isArray(list)) return [];
+  const m=new Map();
+  list.forEach(r=>{
+    if(!r||!r.date||!r.district) return;
+    const k=r.date+'||'+r.district, old=m.get(k);
+    if(!old || String(r.ts||'')>=String(old.ts||'')) m.set(k,r);
+  });
+  return [...m.values()];
+}
 const RKEY='sgc_reports_v6', SKEY='sgc_subs_v6';
-let reports = JSON.parse(localStorage.getItem(RKEY)||'null');
+let reports = dedupeReports(JSON.parse(localStorage.getItem(RKEY)||'null'));
 let subs = JSON.parse(localStorage.getItem(SKEY)||'null');
 let current=null;     // {role, district?, category?}
 const SESS_KEY='sgc_session_v1';
@@ -731,7 +781,7 @@ async function loadAll(){
   try{
     const r=await fetch(API+'?action=all',{method:'GET'});
     const d=await r.json();
-    if(d&&d.ok){ reports=Array.isArray(d.reports)?d.reports:[]; subs=Array.isArray(d.subs)?d.subs:[]; PW_OVERRIDE=(d.accounts&&typeof d.accounts==='object')?d.accounts:{}; setVisitors(d.visitors); saveR(); saveS(); rerender(); checkNewSubs(); }
+    if(d&&d.ok){ reports=dedupeReports(Array.isArray(d.reports)?d.reports:[]); subs=Array.isArray(d.subs)?d.subs:[]; PW_OVERRIDE=(d.accounts&&typeof d.accounts==='object')?d.accounts:{}; setVisitors(d.visitors); saveR(); saveS(); rerender(); checkNewSubs(); }
   }catch(e){ console.warn('백엔드 불러오기 실패(로컬 데이터 사용):',e); }
 }
 /* ---------- 새 접수 알림 ---------- */
@@ -885,6 +935,7 @@ function pushView(v){ if(v && viewStack[viewStack.length-1]!==v) viewStack.push(
 function goBack(){
   const nt=document.getElementById('notiGate'), rm=document.getElementById('repModal'),
         pg=document.getElementById('pwGate'), lg=document.getElementById('loginGate');
+  if(typeof kpadOpen==='function'&&kpadOpen()){ closeKpad(false); return; }
   if(nt&&nt.style.display==='flex'){ closeNoti(); return; }
   if(rm&&rm.style.display==='flex'){ closeReportDetail(); return; }
   if(pg&&pg.style.display==='flex'){ closePwChange(); return; }
@@ -1100,6 +1151,7 @@ const CT=[['새벽',7],['성경',100],['QT(가정)',20]];
 function isFirstSunday(d){ const day=parseInt(String(d||'').slice(8,10),10); return day>=1&&day<=7; }
 const ABSENT_REASONS=['선택','개인사정','건강','여행','직장','확인안됨','장기결석','기타'];
 let ATT={}, reportRoster=[], selWeek='', openMonth=0, absNotes={}, absReason={};
+let prevAbs=null, prevAbsUsed=false, preFilled={};
 function buildMonths(){const out=[];const base=new Date();base.setDate(1);for(let i=2;i>=0;i--){const x=new Date(base);x.setMonth(base.getMonth()-i);out.push({y:x.getFullYear(),m:x.getMonth()+1});}return out;}
 const REP_MONTHS=buildMonths();
 function sundaysOf(y,m){const out=[];const d=new Date(y,m-1,1);while(d.getMonth()===m-1){if(d.getDay()===0)out.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));d.setDate(d.getDate()+1);}return out;}
@@ -1139,6 +1191,26 @@ function loadReportInto(){
   if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0,'성경':0,'QT(가정)':0},prev.detail[n].c),p:prev.detail[n].p||'',e:prev.detail[n].e||''}; }); }
   if(prev && prev.sundayAbsent){ prev.sundayAbsent.forEach(a=>{absReason[a.name]=a.reason;absNotes[a.name]=a.note||'';}); }
   const cn=document.getElementById('cellNote'); if(cn) cn.value=(prev&&prev.cell&&prev.cell.note)||'';
+  /* 해당 주일 보고서가 아직 없으면 직전 보고서의 결석 사유를 '불러오기' 후보로 준비 */
+  prevAbs = prev ? null : findPrevAbsent();
+  prevAbsUsed = false; preFilled = {};
+}
+/* 같은 구역의 직전(가장 최근) 보고서에서 결석 사유만 추출 — 출석 체크는 가져오지 않음 */
+function findPrevAbsent(){
+  const past=reports.filter(r=>r.district===reportDist && r.date<selWeek).sort((a,b)=>a.date<b.date?1:-1);
+  for(const r of past){
+    const list=(r.sundayAbsent||[]).filter(a=>a && a.name && DISTRICTS[reportDist].includes(a.name)
+      && a.reason && a.reason!=='선택' && a.reason!=='확인안됨');
+    if(list.length) return {date:r.date, list:list};
+  }
+  return null;
+}
+/* 지난 사유를 현재 결석자 칸에 채움 */
+function applyPrevAbsent(){
+  if(!prevAbs) return;
+  const cur=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부']));
+  prevAbs.list.forEach(a=>{ if(cur.includes(a.name)){ absReason[a.name]=a.reason; absNotes[a.name]=a.note||''; preFilled[a.name]=true; } });
+  prevAbsUsed=true; buildAbsent();
 }
 function adminDistChange(){
   const v=document.getElementById('adminDistSel').value;
@@ -1170,7 +1242,8 @@ function buildRosterCards(){
   box.innerHTML=reportRoster.map(n=>{
     const tg=TG.map(t=>{const lock=(t==='월삭')&&!isFirstSunday(selWeek);
       return `<button class="tgl ${ATT[n].t[t]?'on':''} ${lock?'lock':''}" data-n="${n}" data-t="${t}" ${lock?'data-lock="1" title="월삭은 매월 첫째 주일에만 입력합니다"':''}>${t}</button>`;}).join('');
-    const ct=CT.map(([k,mx])=>`<div class="cnt"><span class="cl">${k}</span><select class="cpick" data-n="${n}" data-k="${k}">${Array.from({length:mx+1},(_,i)=>`<option ${ATT[n].c[k]===i?'selected':''}>${i}</option>`).join('')}</select></div>`).join('');
+    const ct=CT.map(([k,mx])=>{const v=ATT[n].c[k]||0;
+      return `<div class="cnt"><span class="cl">${k}</span><div class="cpick${v>0?' filled':''}" data-n="${n}" data-k="${k}" data-max="${mx}" role="button" tabindex="0">${v}</div></div>`;}).join('');
     const pv=(ATT[n].p||'').replace(/"/g,'&quot;');
     const ev=(ATT[n].e||'').replace(/"/g,'&quot;');
     const pray=`<div class="pray"><label class="pl">기도제목 <span>· 선택 입력</span></label><input class="ppick" type="text" data-n="${n}" placeholder="세부내용" value="${pv}"/></div>`;
@@ -1179,7 +1252,7 @@ function buildRosterCards(){
   }).join('');
   box.querySelectorAll('.phead').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
   box.querySelectorAll('.tgl').forEach(b=>b.onclick=()=>{if(b.dataset.lock) return;const n=b.dataset.n,t=b.dataset.t;ATT[n].t[t]=!ATT[n].t[t];b.classList.toggle('on',ATT[n].t[t]);updPsum(n);document.getElementById('sunCnt').textContent=sunCount();if(t==='1부'||t==='2부')buildAbsent();});
-  box.querySelectorAll('.cpick').forEach(s=>s.onchange=()=>{const n=s.dataset.n,k=s.dataset.k;ATT[n].c[k]=parseInt(s.value)||0;updPsum(n);});
+  box.querySelectorAll('.cpick').forEach(s=>s.onclick=e=>{e.stopPropagation();openKpad(s);});
   box.querySelectorAll('.ppick').forEach(i=>{const h=()=>{ATT[i.dataset.n].p=i.value;updPsum(i.dataset.n);};i.oninput=h;i.onchange=h;});
   box.querySelectorAll('.epick').forEach(i=>{const h=()=>{ATT[i.dataset.n].e=i.value;updPsum(i.dataset.n);};i.oninput=h;i.onchange=h;});
   reportRoster.forEach(updPsum);
@@ -1194,15 +1267,61 @@ function updPsum(n){
   const et=(ATT[n].e||'').trim()?['기타 ✎']:[];
   if(el) el.textContent=[...parts,...cs,...pr,...et].join(' · ')||'미체크';
 }
+/* ---------- 숫자 키패드 ---------- */
+let kTarget=null, kMax=0, kBuf='';
+const KQUICK={'새벽':[0,1,2,3,5,7],'성경':[0,10,20,30,50],'QT(가정)':[0,5,10,15,20]};
+function openKpad(el){
+  kTarget=el; kMax=parseInt(el.dataset.max,10)||0; kBuf='';
+  const k=el.dataset.k;
+  document.getElementById('kTitle').textContent=el.dataset.n+' · '+k;
+  document.getElementById('kSub').textContent='최대 '+kMax+'까지 입력할 수 있습니다';
+  document.getElementById('kDisp').textContent=el.textContent.trim()||'0';
+  const q=KQUICK[k]||[0];
+  document.getElementById('kQuick').innerHTML=q.map(n=>`<button data-q="${n}">${n}</button>`).join('');
+  document.querySelectorAll('#kQuick button').forEach(b=>b.onclick=()=>kSet(+b.dataset.q));
+  const p=document.getElementById('kpad'); p.style.display='flex'; p.classList.add('on');
+}
+function kNum(n){ const t=kBuf+n; const v=parseInt(t,10); if(v>kMax) return; kBuf=String(v); document.getElementById('kDisp').textContent=kBuf; }
+function kSet(n){ kBuf=String(n); document.getElementById('kDisp').textContent=kBuf; }
+function kClear(){ kBuf=''; document.getElementById('kDisp').textContent='0'; }
+function kpadOpen(){ const p=document.getElementById('kpad'); return !!p && p.style.display==='flex'; }
+function closeKpad(save){
+  if(save&&kTarget){
+    const v=parseInt(kBuf===''?document.getElementById('kDisp').textContent:kBuf,10)||0;
+    const n=kTarget.dataset.n, k=kTarget.dataset.k;
+    ATT[n].c[k]=v; kTarget.textContent=v; kTarget.classList.toggle('filled',v>0); updPsum(n);
+  }
+  const p=document.getElementById('kpad'); if(p){ p.style.display='none'; p.classList.remove('on'); }
+  kTarget=null; kBuf='';
+}
 function buildAbsent(){
   const ab=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부']));
   const box=document.getElementById('absentList');
   box.innerHTML= ab.length? ab.map(n=>{
     const opts=ABSENT_REASONS.map(r=>`<option ${absReason[n]===r?'selected':''}>${r}</option>`).join('');
-    return `<div class="absrow"><span class="nm">${n}</span><select class="f-in absR" data-n="${n}">${opts}</select><input class="f-in absN" data-n="${n}" placeholder="세부내용" value="${(absNotes[n]||'').replace(/"/g,'&quot;')}"/></div>`;
+    const pre=preFilled[n];
+    return `<div class="absrow${pre?' pre':''}" data-n="${n}"><span class="nm">${n}${pre?'<span class="prebadge">지난주</span>':''}</span><select class="f-in absR" data-n="${n}">${opts}</select><input class="f-in absN" data-n="${n}" placeholder="세부내용" value="${(absNotes[n]||'').replace(/"/g,'&quot;')}"/></div>`;
   }).join('') : '<div class="mini">주일(1·2부) 전원 출석입니다.</div>';
-  box.querySelectorAll('.absR').forEach(s=>s.onchange=()=>absReason[s.dataset.n]=s.value);
-  box.querySelectorAll('.absN').forEach(i=>i.oninput=()=>absNotes[i.dataset.n]=i.value);
+  box.querySelectorAll('.absR').forEach(s=>s.onchange=()=>{absReason[s.dataset.n]=s.value;clearPre(s.dataset.n);});
+  box.querySelectorAll('.absN').forEach(i=>i.oninput=()=>{absNotes[i.dataset.n]=i.value;clearPre(i.dataset.n);});
+  paintPrevBar(ab);
+}
+/* 직접 수정하면 '지난주' 표시 해제 */
+function clearPre(n){
+  if(!preFilled[n]) return;
+  delete preFilled[n];
+  const row=document.querySelector('#absentList .absrow[data-n="'+n+'"]');
+  if(row){ row.classList.remove('pre'); const b=row.querySelector('.prebadge'); if(b) b.remove(); }
+}
+/* 지난 사유 불러오기 안내줄 */
+function paintPrevBar(ab){
+  const box=document.getElementById('prevAbsBar'); if(!box) return;
+  if(!prevAbs || !ab.length){ box.innerHTML=''; return; }
+  const hit=prevAbs.list.filter(a=>ab.includes(a.name));
+  if(!hit.length){ box.innerHTML=''; return; }
+  box.innerHTML = prevAbsUsed
+    ? `<div class="loadbar"><div class="lt">지난 보고(${prevAbs.date.slice(5).replace('-','.')})의 사유를 가져왔습니다. <b>내용을 확인하고 수정해 주세요.</b></div></div>`
+    : `<div class="loadbar"><div class="lt">지난 보고(${prevAbs.date.slice(5).replace('-','.')})에 결석 사유가 <b>${hit.length}명</b> 있습니다. 그대로 가져올까요?</div><button onclick="applyPrevAbsent()">가져오기</button></div>`;
 }
 function submissionBoardHtml(dateLabel, doneSet, myDist, clickable){
   const pills=DIST_SORTED.map(d=>{const ok=doneSet.has(d);const me=myDist&&d===myDist;const bg=ok?'background:#dcfce7;color:#15803d':'background:#fef2f2;color:#991b1b';
@@ -1215,8 +1334,15 @@ function renderReportStatus(){
   const done=new Set(reports.filter(r=>r.date===selWeek).map(r=>r.district));
   box.innerHTML=submissionBoardHtml(selWeek, done, reportDist);
 }
+let repSubmitting=false;
 function submitReport(){
   if(!reportDist){ alert('구역을 먼저 선택하세요.'); return; }
+  /* 연타로 같은 보고서가 두 번 저장되는 것을 막음 */
+  if(repSubmitting) return;
+  repSubmitting=true;
+  const sb=document.getElementById('repSubmitBtn');
+  if(sb){ sb.disabled=true; sb.style.opacity=.6; }
+  setTimeout(()=>{ repSubmitting=false; if(sb){ sb.disabled=false; sb.style.opacity=1; } },2500);
   const sundayPresent=reportRoster.filter(n=>ATT[n].t['1부']||ATT[n].t['2부']);
   const cellPresent=reportRoster.filter(n=>ATT[n].t['구역']);
   const absent=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부'])).map(n=>({name:n,reason:(absReason[n]&&absReason[n]!=='선택')?absReason[n]:'확인안됨',note:absNotes[n]||''}));
@@ -1340,7 +1466,7 @@ function cSum(wkReports,key){return wkReports.reduce((a,r)=>a+Object.values(r.de
 function renderDash(){
   initWeekSel();
   const wk=document.getElementById('weekSel').value;
-  const wkReports=reports.filter(r=>r.date===wk);
+  const wkReports=dedupeReports(reports.filter(r=>r.date===wk));
   const reported=new Set(wkReports.map(r=>r.district));
   const sunTot=wkReports.reduce((a,r)=>a+r.sundayPresent.length,0);
   const absTot=wkReports.reduce((a,r)=>a+r.sundayAbsent.length,0);

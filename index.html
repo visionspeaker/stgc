@@ -281,7 +281,23 @@ canvas{max-height:280px}
 .f-label .req{color:var(--red)}
 .f-in{width:100%;padding:11px 12px;border:1px solid var(--inline);border-radius:12px;font-size:16px;background:#fff;color:var(--ink);font-family:inherit}
 textarea.f-in{min-height:66px;resize:vertical}
-.f-primary{width:100%;margin-top:16px;background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer}
+.f-primary{width:100%;margin-top:16px;background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
+.f-primary:disabled{opacity:.62;cursor:default}
+.f-primary.sending{background:#9fb3c6}
+.spin{width:17px;height:17px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* 접수 완료 화면 */
+.donecard{border:1px solid #bfe3cd;background:var(--greenSoft);border-radius:16px;padding:24px 18px;text-align:center;margin-top:8px}
+.donecard .ic{width:58px;height:58px;border-radius:50%;background:var(--green);color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.donecard h3{margin:0 0 6px;font-size:17px;color:var(--green)}
+.donecard .dtx{font-size:13px;color:#3d5c4a;line-height:1.7;margin-bottom:14px}
+.rcpt{background:#fff;border:1px solid #cfe6d9;border-radius:12px;padding:12px;text-align:left;font-size:12.5px;line-height:1.9;margin-bottom:14px}
+.rcpt .k{display:inline-block;width:70px;color:var(--muted);font-weight:700}
+.dbtns{display:flex;gap:8px}
+.dbtns button{flex:1;height:46px;border-radius:11px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer}
+.dbtns .bp{border:0;background:var(--green);color:#fff}
+.dbtns .bs{border:1px solid #bfe3cd;background:#fff;color:var(--green)}
+.err-box{background:#fef2f2;border:1px solid #f7c9c9;border-radius:10px;padding:12px;font-size:13.5px;line-height:1.6;margin-top:12px;color:#991b1b}
 .f-note{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.55;margin-top:9px}
 .f-toggle{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:600;color:var(--ink)}
 .f-toggle input{width:auto}
@@ -485,6 +501,7 @@ textarea.f-in{min-height:66px;resize:vertical}
   <div class="applike">
     <div class="screenhead"><b>문의하기</b></div>
     <div class="sect">
+     <div id="intakeForm">
       <div class="f-label">분류 (담당 자동 배정)</div>
       <select class="f-in" id="inCat"></select>
       <div class="mini" id="routePreview"></div>
@@ -515,8 +532,10 @@ textarea.f-in{min-height:66px;resize:vertical}
           </div>
         </div>
       </div>
-      <button class="f-primary" onclick="submitIntake()">접수하기</button>
+      <button class="f-primary" id="intakeBtn" onclick="submitIntake()">접수하기</button>
       <div id="intakeOk"></div>
+     </div>
+     <div id="intakeDone" style="display:none"></div>
     </div>
   </div>
 </section>
@@ -850,10 +869,11 @@ async function pushReport(rec){
   try{ await fetch(API,{method:'POST',body:JSON.stringify({action:'saveReport',record:rec})}); loadAll(); }
   catch(e){ console.warn('구역보고 저장 실패:',e); }
 }
+/* 저장 성공 여부를 돌려준다 (접수 화면에서 완료/실패 표시에 사용) */
 async function pushSub(rec){
-  if(!USE_BACKEND) return;
-  try{ await fetch(API,{method:'POST',body:JSON.stringify({action:'saveSub',record:rec})}); loadAll(); }
-  catch(e){ console.warn('접수 저장 실패:',e); }
+  if(!USE_BACKEND) return true;
+  try{ await fetch(API,{method:'POST',body:JSON.stringify({action:'saveSub',record:rec})}); loadAll(); return true; }
+  catch(e){ console.warn('접수 저장 실패:',e); return false; }
 }
 
 // ---------- utils ----------
@@ -1055,6 +1075,7 @@ function showView(v,back){
   paintBackBtn();
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.getElementById(v).classList.add('active');
+  if(v==='intake') resetIntake();
   if(v==='culture') renderCulture();
   if(v==='report') showReport();
   if(v==='manage'){ renderSubs(); markSubsSeen(); }
@@ -1093,7 +1114,9 @@ function fbAnonToggle(){
   const rn=document.getElementById('reqName'),rc=document.getElementById('reqContact');
   if(rn)rn.style.display=a?'none':'inline'; if(rc)rc.style.display=a?'none':'inline';
 }
-function submitIntake(){
+let intakeSending=false;
+async function submitIntake(){
+  if(intakeSending) return;
   const cat=document.getElementById('inCat').value;
   if(!cat){alert('분류를 선택해주세요.');return;}
   const anon=document.getElementById('inAnon').checked;
@@ -1110,12 +1133,74 @@ function submitIntake(){
     assignee:r.위원장+(r.교역자!=='—'?' / '+r.교역자:''),
     id:'s'+new Date().getTime()+Math.floor(Math.random()*1000)};
   if(attachedPhoto) rec.photo=attachedPhoto;
-  subs.unshift(rec); saveS(); pushSub(rec);
   const withPhoto=!!attachedPhoto;
-  document.getElementById('intakeOk').innerHTML='<div class="ok-box">✅ 접수되었습니다. 담당 <b>'+r.위원장+'</b>'+(r.교역자!=='—'?' / '+r.교역자:'')+' 에게 전달됩니다.'+(withPhoto?'<br>사진은 자동 압축되어 함께 전송됩니다.':'')+'<br>처리 상황은 ‘문의 확인’에서 비밀번호로 조회하세요.</div>';
-  ['inTitle','inBody','inName','inContact','inPin'].forEach(id=>document.getElementById(id).value='');
-  clearPhoto();
+
+  /* 전송 중 표시 + 중복 접수 차단 */
+  intakeSending=true;
+  const btn=document.getElementById('intakeBtn');
+  document.getElementById('intakeOk').innerHTML='';
+  if(btn){ btn.disabled=true; btn.classList.add('sending'); btn.innerHTML='<span class="spin"></span> 전송 중…'; }
+
+  let ok=false;
+  try{ ok=await pushSub(rec); }catch(e){ ok=false; }
+
+  intakeSending=false;
+  if(btn){ btn.disabled=false; btn.classList.remove('sending'); btn.textContent='접수하기'; }
+
+  if(!ok){
+    /* 저장 실패 — 입력 내용은 그대로 두고 다시 시도 안내 */
+    document.getElementById('intakeOk').innerHTML=
+      '<div class="err-box">⚠️ 전송에 실패했습니다. 인터넷 연결을 확인하고 <b>다시 시도</b>해 주세요.<br>입력하신 내용은 그대로 남아 있습니다.</div>';
+    return;
+  }
+
+  /* 저장 성공 — 목록에 반영하고 완료 화면으로 전환 */
+  subs.unshift(rec); saveS();
+  showIntakeDone(rec, r, withPhoto);
 }
+/* 접수번호: 접수일 + 그날 순번 */
+function receiptNo(rec){
+  const d=rec.ts.slice(0,10).replace(/-/g,'');
+  const sameDay=subs.filter(s=>String(s.ts||'').slice(0,10)===rec.ts.slice(0,10)).length;
+  return d.slice(0,4)+'-'+d.slice(4)+'-'+String(sameDay||1).padStart(2,'0');
+}
+function showIntakeDone(rec,r,withPhoto){
+  const no=receiptNo(rec);
+  document.getElementById('intakeDone').innerHTML=
+   `<div class="donecard">
+      <div class="ic">✓</div>
+      <h3>접수되었습니다</h3>
+      <div class="dtx">담당자에게 전달되었습니다.${withPhoto?'<br>첨부하신 사진도 함께 전송되었습니다.':''}<br>처리 상황은 ‘문의 확인’에서 비밀번호로 조회하세요.</div>
+      <div class="rcpt">
+        <div><span class="k">접수번호</span><b>${no}</b></div>
+        <div><span class="k">분류</span>${esc(rec.category)}</div>
+        <div><span class="k">담당</span>${esc(r.위원장)}${r.교역자!=='—'?' / '+esc(r.교역자):''}</div>
+        <div><span class="k">접수시각</span>${fmtDT(rec.ts)}</div>
+      </div>
+      <div class="dbtns">
+        <button class="bs" onclick="resetIntake()">새 문의 접수</button>
+        <button class="bp" onclick="goMyReq()">처리 상황 보기</button>
+      </div>
+    </div>`;
+  document.getElementById('intakeForm').style.display='none';
+  document.getElementById('intakeDone').style.display='block';
+  window.scrollTo(0,0);
+}
+/* 문의하기 화면 초기화 — 화면에 들어올 때마다, '새 문의 접수'를 누를 때마다 */
+function resetIntake(){
+  const df=document.getElementById('intakeDone'); if(df){ df.style.display='none'; df.innerHTML=''; }
+  const ff=document.getElementById('intakeForm'); if(ff) ff.style.display='block';
+  const ok=document.getElementById('intakeOk'); if(ok) ok.innerHTML='';
+  ['inTitle','inBody','inName','inContact','inPin'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+  const cat=document.getElementById('inCat'); if(cat) cat.value='';
+  const an=document.getElementById('inAnon'); if(an&&an.checked){ an.checked=false; fbAnonToggle(); }
+  const btn=document.getElementById('intakeBtn'); if(btn){ btn.disabled=false; btn.classList.remove('sending'); btn.textContent='접수하기'; }
+  intakeSending=false;
+  clearPhoto();
+  if(cat&&cat.onchange) cat.onchange();
+  window.scrollTo(0,0);
+}
+function goMyReq(){ showView('myreq'); syncNav('myreq'); window.scrollTo(0,0); }
 
 // ---------- 문의 확인 (myreq) ----------
 let myF='전체';

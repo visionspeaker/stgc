@@ -208,7 +208,7 @@ canvas{max-height:280px}
 .rmpray.etc{color:var(--muted)}
 .rmabs{background:#fff5f5;border:1px solid #fecaca;border-radius:9px;padding:8px 10px;font-size:12.5px;margin-bottom:6px}
 .rmabs b{color:#b91c1c}
-.rmnote{background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:12.5px;line-height:1.6}
+.rmnote{background:#f8fafc;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
 .pill.clickable{cursor:pointer}
 .pill.clickable:hover{filter:brightness(.95)}
 /* ===== 인쇄 ===== */
@@ -230,7 +230,7 @@ canvas{max-height:280px}
 #printArea th,#printArea td{border:1px solid #999;padding:4px 6px;text-align:left}
 #printArea th{background:#eee}
 #printArea .prline{font-size:11.5px;margin:3px 0}
-#printArea .prbox{border:1px solid #999;padding:6px 8px;font-size:11.5px;line-height:1.5;margin-top:3px}
+#printArea .prbox{border:1px solid #999;padding:6px 8px;font-size:11.5px;line-height:1.5;margin-top:3px;white-space:pre-wrap;word-break:break-word}
 /* ===== home launcher ===== */
 .home{max-width:540px;margin:0 auto;min-height:100vh;background:#fff}
 .hbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px}
@@ -280,7 +280,10 @@ canvas{max-height:280px}
 .f-label:first-child{margin-top:0}
 .f-label .req{color:var(--red)}
 .f-in{width:100%;padding:11px 12px;border:1px solid var(--inline);border-radius:12px;font-size:16px;background:#fff;color:var(--ink);font-family:inherit}
-textarea.f-in{min-height:66px;resize:vertical}
+textarea.f-in{min-height:66px;resize:vertical;line-height:1.6}
+/* 내용에 맞춰 자동으로 늘어나는 입력칸 */
+textarea.f-in.grow{overflow:hidden;resize:none}
+textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-text-fill-color:var(--ink)}
 .f-primary{width:100%;margin-top:16px;background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;border-radius:13px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
 .f-primary:disabled{opacity:.62;cursor:default}
 .f-primary.sending{background:#9fb3c6}
@@ -314,7 +317,9 @@ textarea.f-in{min-height:66px;resize:vertical}
 .f-primary.lockbtn{background:#eef2f7;color:#5b6a7d}
 .f-primary.editbtn{background:linear-gradient(135deg,#4b9fe0,#2e74b5)}
 #repLockArea.locked .tgls,#repLockArea.locked .cnts,#repLockArea.locked .pray,
-#repLockArea.locked .absrow,#repLockArea.locked #cellNote,#repLockArea.locked #prevAbsBar{pointer-events:none;opacity:.6}
+#repLockArea.locked .absrow,#repLockArea.locked #prevAbsBar{pointer-events:none;opacity:.6}
+/* 특이사항은 잠겨도 흐리게 하지 않음 — 읽어야 하는 내용 */
+#repLockArea.locked #cellNote{pointer-events:none;opacity:1}
 .lockmsg{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);font-weight:700;background:#f4f7fb;border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:10px}
 .lockmsg.ed{background:#eef4fd;border-color:#c3d9f5;color:var(--blue2)}
 .f-note{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.55;margin-top:9px}
@@ -389,7 +394,11 @@ textarea.f-in{min-height:66px;resize:vertical}
 .s-접수{background:#e0edfb;color:#1d4ed8}.s-처리중{background:#fef3c7;color:#b45309}.s-완료{background:#dcfce7;color:#15803d}.s-보류{background:#fee2e2;color:#b91c1c}.s-반려{background:#f3e8ff;color:#7c3aed}
 .pinrow{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
 .pinrow .f-in{max-width:150px}
-.btnsm{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;border-radius:10px;padding:10px 15px;font-size:12.5px;font-weight:800;cursor:pointer;white-space:nowrap}
+.btnsm{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;border-radius:10px;padding:10px 15px;font-size:12.5px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit}
+/* 관리자 전용 삭제 버튼 — 실수로 누르지 않도록 눈에 덜 띄게 */
+.btnsm.danger{background:#fff;color:var(--red);border:1px solid #f1c9c9}
+.btnsm.danger:active{background:#fef2f2}
+.delrow{display:flex;justify-content:flex-end;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
 .steps{display:flex;align-items:center;gap:6px;font-size:11.5px;margin-top:10px;flex-wrap:wrap}
 .step{padding:3px 11px;border-radius:20px;background:#eef2f7;color:#94a3b8;font-weight:700}
 .step.on{background:var(--green);color:#fff}
@@ -791,9 +800,12 @@ function dedupeReports(list){
   });
   return [...m.values()];
 }
+/* 삭제 표시된 문의는 앱 어디에도 나타나지 않게 걸러낸다.
+   기록은 스프레드시트에 그대로 남아 있어 필요하면 되살릴 수 있다. */
+function liveSubs(list){ return (Array.isArray(list)?list:[]).filter(s=>s && !s.deleted); }
 const RKEY='sgc_reports_v6', SKEY='sgc_subs_v6';
 let reports = dedupeReports(JSON.parse(localStorage.getItem(RKEY)||'null'));
-let subs = JSON.parse(localStorage.getItem(SKEY)||'null');
+let subs = liveSubs(JSON.parse(localStorage.getItem(SKEY)||'null'));
 let current=null;     // {role, district?, category?}
 const SESS_KEY='sgc_session_v1';
 function saveSession(){ try{ if(current&&current.role&&current.role!=='guest') localStorage.setItem(SESS_KEY,JSON.stringify(current)); }catch(e){} }
@@ -832,7 +844,7 @@ async function loadAll(){
   try{
     const r=await fetch(API+'?action=all',{method:'GET'});
     const d=await r.json();
-    if(d&&d.ok){ reports=dedupeReports(Array.isArray(d.reports)?d.reports:[]); subs=Array.isArray(d.subs)?d.subs:[]; PW_OVERRIDE=(d.accounts&&typeof d.accounts==='object')?d.accounts:{}; setVisitors(d.visitors); saveR(); saveS(); rerender(); checkNewSubs(); }
+    if(d&&d.ok){ reports=dedupeReports(Array.isArray(d.reports)?d.reports:[]); subs=liveSubs(Array.isArray(d.subs)?d.subs:[]); PW_OVERRIDE=(d.accounts&&typeof d.accounts==='object')?d.accounts:{}; setVisitors(d.visitors); saveR(); saveS(); rerender(); checkNewSubs(); }
   }catch(e){ console.warn('백엔드 불러오기 실패(로컬 데이터 사용):',e); }
 }
 /* ---------- 새 접수 알림 ---------- */
@@ -911,6 +923,11 @@ async function pushSub(rec){
 }
 
 // ---------- utils ----------
+/* 입력칸 높이를 내용에 맞춰 자동으로 늘림 (내용이 잘려 안 보이는 것 방지) */
+function autoGrow(t){ if(!t) return; t.style.height='auto'; t.style.height=(t.scrollHeight)+'px'; }
+function bindGrow(t){ if(!t||t.dataset.ag) return; t.dataset.ag='1'; t.classList.add('grow'); t.addEventListener('input',()=>autoGrow(t)); autoGrow(t); }
+/* 화면 안의 모든 대상 textarea에 적용 */
+function growAll(root){ (root||document).querySelectorAll('textarea.f-in').forEach(bindGrow); }
 function localISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function lastSundays(n){const out=[];let d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());for(let i=0;i<n;i++){const x=new Date(d);x.setDate(d.getDate()-7*i);out.push(localISO(x));}return out;}
 function curSunday(){return lastSundays(1)[0];}
@@ -1115,6 +1132,7 @@ function showView(v,back){
   if(v==='manage'){ renderSubs(); markSubsSeen(); }
   if(v==='myreq') renderMyReq();
   if(v==='dash') renderDash();
+  growAll(document.getElementById(v));
 }
 function buildNav(view){
   const nav=document.getElementById('nav');
@@ -1238,18 +1256,45 @@ function goMyReq(){ showView('myreq'); syncNav('myreq'); window.scrollTo(0,0); }
 
 // ---------- 문의 확인 (myreq) ----------
 let myF='전체';
+/* 삭제 권한: 관리자(담임목사·교역자)만 */
+function canDelete(){ return !!current && current.role==='admin'; }
+let subDeleting=false;
+async function deleteSub(id){
+  if(!canDelete()){ alert('삭제 권한이 없습니다.'); return; }
+  if(subDeleting) return;
+  const i=subs.findIndex(s=>s.id===id);
+  if(i<0){ alert('이미 삭제되었거나 찾을 수 없는 문의입니다.'); return; }
+  const s=subs[i];
+  if(!confirm('아래 문의를 삭제할까요?\n\n· '+(s.title||'(제목없음)')+'\n\n삭제하면 앱 목록·집계·알림에서 모두 사라집니다.\n(기록은 관리 시트에 남아 있어 필요하면 되살릴 수 있습니다)')) return;
+  subDeleting=true;
+  const rec=Object.assign({},s,{deleted:true,deletedBy:((current&&current.who)||''),deletedAt:new Date().toISOString()});
+  subs.splice(i,1); saveS();
+  renderMyReq(); if(typeof renderSubs==='function' && currentView==='manage') renderSubs();
+  paintSubBadge();
+  try{ await pushSub(rec); }catch(e){}
+  subDeleting=false;
+}
 function renderMyReq(){
   const bar=document.getElementById('fbFilter');
   if(bar && !bar.dataset.b){bar.dataset.b='1';bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{bar.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');myF=b.dataset.s;renderMyReq();});}
   const box=document.getElementById('myReqList');
   const list=[...subs].filter(s=>myF==='전체'||s.status===myF).sort((a,b)=>b.ts.localeCompare(a.ts));
   if(!list.length){box.innerHTML='<div class="mini" style="margin-top:12px">해당 상태의 접수가 없습니다.</div>';return;}
+  const del=canDelete();
   box.innerHTML=list.map(s=>{const idx=subs.indexOf(s);
+    const delBtn=del?`<button class="btnsm danger" onclick="deleteSub('${esc(s.id||'')}')">🗑 삭제</button>`:'';
     return `<div class="fitem">
       <div class="ftop"><span class="ftitle">${s.title}</span><span class="fbadge s-${s.status}">${s.status}</span><span class="fmeta" style="margin-left:auto">${s.ts.slice(5,10)}</span></div>
       <div class="fmeta">${subType(s.type)} · ${catName(s.category)}</div>
-      <div id="lk${idx}"><div class="pinrow"><input class="f-in" type="password" maxlength="4" inputmode="numeric" id="pin${idx}" placeholder="비밀번호 4자리" onkeydown="if(event.key==='Enter')openMine(${idx})"/><button class="btnsm" onclick="openMine(${idx})">내용 보기</button></div></div>
+      <div id="lk${idx}"><div class="pinrow"><input class="f-in" type="password" maxlength="4" inputmode="numeric" id="pin${idx}" placeholder="비밀번호 4자리" onkeydown="if(event.key==='Enter')openMine(${idx})"/><button class="btnsm" onclick="openMine(${idx})">내용 보기</button>${del?`<button class="btnsm" onclick="adminOpen(${idx})">관리자 열람</button>`:''}</div></div>
+      ${del?`<div class="delrow">${delBtn}</div>`:''}
     </div>`;}).join('');
+}
+/* 관리자는 비밀번호 없이 내용 확인 (삭제 여부 판단용) */
+function adminOpen(idx){
+  if(!canDelete()){ alert('권한이 없습니다.'); return; }
+  const p=document.getElementById('pin'+idx); if(p) p.value=(subs[idx]&&subs[idx].pin)||'';
+  openMine(idx);
 }
 function openMine(idx){
   const s=subs[idx]; const pin=(document.getElementById('pin'+idx).value||'').trim();
@@ -1310,7 +1355,7 @@ function loadReportInto(){
   const prev=reports.find(r=>r.district===reportDist && r.date===selWeek);
   if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0,'성경':0,'QT(가정)':0},prev.detail[n].c),p:prev.detail[n].p||'',e:prev.detail[n].e||''}; }); }
   if(prev && prev.sundayAbsent){ prev.sundayAbsent.forEach(a=>{absReason[a.name]=a.reason;absNotes[a.name]=a.note||'';}); }
-  const cn=document.getElementById('cellNote'); if(cn) cn.value=(prev&&prev.cell&&prev.cell.note)||'';
+  const cn=document.getElementById('cellNote'); if(cn){ cn.value=(prev&&prev.cell&&prev.cell.note)||''; bindGrow(cn); autoGrow(cn); }
   /* 해당 주일 보고서가 아직 없으면 직전 보고서의 결석 사유를 '불러오기' 후보로 준비 */
   prevAbs = prev ? null : findPrevAbsent();
   prevAbsUsed = false; preFilled = {};
@@ -1568,11 +1613,11 @@ function renderSubs(){
         <label class="sc-l">회신 / 처리 답변</label>
         <div class="rpmeta" id="rpmeta${idx}">${s.reply&&s.replyBy?`<span class="rpsaved">✔ 저장됨 · ${esc(s.replyBy)}${s.replyAt?' · '+fmtDT(s.replyAt):''}</span>`:''}</div>
         <textarea class="f-in" id="rp${idx}" oninput="onReplyInput(${idx})" placeholder="처리 결과나 답변 내용을 적어 회신하세요">${s.reply||''}</textarea>
-        <div class="sc-save"><button class="btn sm ${s.reply?'saved':''}" id="rpbtn${idx}" ${s.reply?'disabled':''} onclick="saveReply(${idx})">${s.reply?'✔ 저장됨':'회신 저장'}</button></div>
+        <div class="sc-save"><button class="btn sm ${s.reply?'saved':''}" id="rpbtn${idx}" ${s.reply?'disabled':''} onclick="saveReply(${idx})">${s.reply?'✔ 저장됨':'회신 저장'}</button>${canDelete()?`<button class="btnsm danger" onclick="deleteSub('${esc(s.id||'')}')">🗑 삭제</button>`:''}</div>
       </div>
     </div>`;
   }).join('') || '<div class="mini" style="margin-top:12px">해당 조건의 접수가 없습니다.</div>';
-  paintMoved();
+  growAll(box); paintMoved();
 }
 /* 대시보드 → 문의 접수 처리로 이동 (상태를 주면 그 목록으로 필터) */
 function goManage(status){

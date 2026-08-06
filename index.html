@@ -298,6 +298,25 @@ textarea.f-in{min-height:66px;resize:vertical}
 .dbtns .bp{border:0;background:var(--green);color:#fff}
 .dbtns .bs{border:1px solid #bfe3cd;background:#fff;color:var(--green)}
 .err-box{background:#fef2f2;border:1px solid #f7c9c9;border-radius:10px;padding:12px;font-size:13.5px;line-height:1.6;margin-top:12px;color:#991b1b}
+/* 구역보고 제출 상태 배너 + 잠금 */
+.subbar{display:flex;align-items:center;gap:10px;background:var(--greenSoft);border:1px solid #bfe3cd;border-radius:13px;padding:12px 14px;margin-top:14px}
+.subbar .ck{width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.subbar .st{flex:1;font-size:12.5px;line-height:1.55;color:#2f6b4c}
+.subbar .st b{color:var(--green);font-size:13px}
+.subbar.no{background:#fff7f7;border-color:#f7c9c9}
+.subbar.no .ck{background:var(--red)}
+.subbar.no .st{color:#8f3b3b}
+.subbar.no .st b{color:var(--red)}
+.subbar.ed{background:#eef4fd;border-color:#c3d9f5}
+.subbar.ed .ck{background:var(--blue)}
+.subbar.ed .st{color:#2b4a70}
+.subbar.ed .st b{color:var(--blue2)}
+.f-primary.lockbtn{background:#eef2f7;color:#5b6a7d}
+.f-primary.editbtn{background:linear-gradient(135deg,#4b9fe0,#2e74b5)}
+#repLockArea.locked .tgls,#repLockArea.locked .cnts,#repLockArea.locked .pray,
+#repLockArea.locked .absrow,#repLockArea.locked #cellNote,#repLockArea.locked #prevAbsBar{pointer-events:none;opacity:.6}
+.lockmsg{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);font-weight:700;background:#f4f7fb;border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:10px}
+.lockmsg.ed{background:#eef4fd;border-color:#c3d9f5;color:var(--blue2)}
 .f-note{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.55;margin-top:9px}
 .f-toggle{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:600;color:var(--ink)}
 .f-toggle input{width:auto}
@@ -588,6 +607,8 @@ textarea.f-in{min-height:66px;resize:vertical}
     </div>
     <div id="pickNotice" class="f-note" style="display:none">위에서 <b>구역을 선택</b>하면 해당 구역의 출석부가 나타납니다.</div>
     <div id="reportBody">
+    <div id="repLockArea">
+    <div id="repLockMsg"></div>
     <div class="sect">
       <h4>예배 출석부</h4>
       <div class="d">이름을 누르면 세부 출석 항목이 펼쳐집니다 · 주일출석 <b id="sunCnt">0</b>명</div>
@@ -604,7 +625,9 @@ textarea.f-in{min-height:66px;resize:vertical}
       <div class="d">구역 전체 특이사항·심방 요청 등 (질병·장기결석·연락두절 등은 목양 우선사항으로 자동 표시)</div>
       <textarea class="f-in" id="cellNote" placeholder="예: OO 성도 입원 심방 요청, 새가족 정착 상황 등"></textarea>
     </div>
-    <button class="f-primary" id="repSubmitBtn" onclick="submitReport()">보고서 제출</button>
+    </div>
+    <div id="repSubBar"></div>
+    <button class="f-primary" id="repSubmitBtn" onclick="repMainBtn()">보고서 제출</button>
     <div id="reportOk"></div>
     <div class="sect" style="margin-top:14px">
       <h4>이번 주 구역 제출 현황</h4>
@@ -712,7 +735,7 @@ textarea.f-in{min-height:66px;resize:vertical}
 <!-- 새 접수 알림 팝업 -->
 <div id="notiGate" class="rmodal" style="display:none;z-index:95">
   <div class="ntcard">
-    <div class="nthead"><span class="ntbell">🔔</span> 새 문의 접수</div>
+    <div class="nthead"><span class="ntbell">🔔</span> 처리 대기 문의</div>
     <div class="ntbody" id="ntBody"></div>
     <div class="ntfoot">
       <button class="btn sec" style="flex:1" onclick="closeNoti()">나중에</button>
@@ -792,7 +815,16 @@ const API='https://script.google.com/macros/s/AKfycbw_-RjtpsIXGSDt9IoemgcUAjb80u
 const USE_BACKEND=/script\.google\.com/.test(API);
 let currentView='';
 let PW_OVERRIDE={};   // 백엔드 저장 비밀번호 (name -> pw)
-function rerender(){ if(current&&currentView) showView(currentView); }
+/* 서버 데이터를 다시 받아온 뒤 화면 갱신.
+   입력 중인 화면(문의하기·구역보고)은 통째로 다시 그리지 않는다 —
+   작성 중이던 내용이나 접수 완료 화면이 사라지는 것을 막기 위함. */
+function rerender(){
+  if(!current||!currentView) return;
+  if(currentView==='dash'){ renderDash(); return; }
+  if(currentView==='manage'){ renderSubs(); return; }
+  if(currentView==='myreq'){ renderMyReq(); return; }
+  if(currentView==='report'){ if(reportDist){ renderDatePick(); renderReportStatus(); paintRepState(); } return; }
+}
 function animateCount(el,to){ if(!el) return; const target=Number(to); if(!isFinite(target)){ el.textContent='·'; return; } const start=(/^\d+$/.test(el.textContent))?Number(el.textContent):0; if(start===target){ el.textContent=String(target); return; } if(el._va) cancelAnimationFrame(el._va); const dur=850, t0=performance.now(); const step=(now)=>{ let p=(now-t0)/dur; if(p>1)p=1; const eased=1-Math.pow(1-p,3); el.textContent=String(Math.round(start+(target-start)*eased)); if(p<1){ el._va=requestAnimationFrame(step); } else { el.textContent=String(target); el._va=null; } }; el._va=requestAnimationFrame(step); }
 function setVisitors(v){ if(!v) return; animateCount(document.getElementById('visToday'), v.today); animateCount(document.getElementById('visTotal'), v.total); }
 async function loadAll(){
@@ -804,7 +836,7 @@ async function loadAll(){
   }catch(e){ console.warn('백엔드 불러오기 실패(로컬 데이터 사용):',e); }
 }
 /* ---------- 새 접수 알림 ---------- */
-const SEEN_KEY='sgc_seen_subs_v1';
+const SEEN_KEY='sgc_seen_subs_v2';   /* v2: 시각 대신 '확인한 날짜'를 저장 */
 function seenKeyFor(){ return SEEN_KEY+'_'+((current&&current.who)||'guest'); }
 function getSeenAt(){ try{ return localStorage.getItem(seenKeyFor())||''; }catch(e){ return ''; } }
 function setSeenAt(ts){ try{ localStorage.setItem(seenKeyFor(),ts); }catch(e){} }
@@ -816,22 +848,23 @@ function mySubs(){
   if(r==='chair'||r==='staff'||r==='elder') return subs.filter(s=>normCat(s.category)===normCat(current.category));
   return [];
 }
-/* 마지막 확인 이후 새로 들어온 건 */
+/* 알림 대상 = 아직 처리가 끝나지 않은 건(접수·처리중).
+   완료·보류·반려는 어느 기기에서 로그인하든 알리지 않는다. */
+function openSubs(){ return mySubs().filter(s=>s.status==='접수'||s.status==='처리중'); }
+/* 오늘 이미 알림을 본 계정은 다시 띄우지 않음 (기기별 하루 1회) */
 function newSubs(){
-  const seen=getSeenAt();
-  return mySubs().filter(s=>String(s.ts||'')>seen);
+  const seen=getSeenAt();           /* 마지막으로 알림을 확인한 날짜 (YYYY-MM-DD) */
+  const today=localISO(new Date());
+  if(seen===today) return [];
+  return openSubs();
 }
-function markSubsSeen(){
-  const all=mySubs();
-  if(!all.length) return;
-  const latest=all.reduce((a,s)=>String(s.ts||'')>a?String(s.ts||''):a,'');
-  setSeenAt(latest); paintSubBadge();
-}
+/* 팝업을 보거나 접수 처리 화면에 들어가면 '오늘 확인함'으로 기록 */
+function markSubsSeen(){ setSeenAt(localISO(new Date())); paintSubBadge(); }
 /* 탭 배지 */
 function paintSubBadge(){
   const nav=document.getElementById('nav'); if(!nav) return;
   const btn=[...nav.querySelectorAll('button')].find(b=>b.dataset.v==='manage'); if(!btn) return;
-  const n=newSubs().length;
+  const n=openSubs().length;   /* 배지는 '오늘 봤는지'와 무관하게 미처리 건수를 그대로 */
   const old=btn.querySelector('.navbadge'); if(old) old.remove();
   if(n>0){ const b=document.createElement('span'); b.className='navbadge'; b.textContent=n>99?'99+':n; btn.appendChild(b); }
 }
@@ -846,11 +879,12 @@ function checkNewSubs(){
   const list=ns.slice(0,4).map(s=>`<div class="ntrow"><span class="ntcat">${esc(catName(s.category))}</span><span class="nttitle">${esc(s.title||'(제목없음)')}</span></div>`).join('');
   document.getElementById('ntBody').innerHTML=
     `<div class="ntbig"><b>${ns.length}</b>건</div>
-     <div class="ntsub">확인하지 않은 새 접수가 있습니다.</div>
+     <div class="ntsub">아직 처리하지 않은 문의가 있습니다.</div>
      <div class="ntlist">${list}${ns.length>4?`<div class="ntmore">외 ${ns.length-4}건</div>`:''}</div>`;
   document.getElementById('notiGate').style.display='flex';
 }
-function closeNoti(){ document.getElementById('notiGate').style.display='none'; }
+/* 팝업을 닫는 순간 '오늘 확인함'으로 기록 — '나중에'를 눌러도 같은 날 다시 뜨지 않음 */
+function closeNoti(){ document.getElementById('notiGate').style.display='none'; markSubsSeen(); }
 function gotoManage(){ closeNoti(); openApp('manage'); }
 function countVisit(){ if(!USE_BACKEND) return; try{ if(sessionStorage.getItem('sgc_hit')) return; sessionStorage.setItem('sgc_hit','1'); fetch(API,{method:'POST',body:JSON.stringify({action:'hit'})}).then(r=>r.json()).then(v=>setVisitors(v)).catch(()=>{}); }catch(e){} }
 /* ---- 사진 첨부 ---- */
@@ -1251,6 +1285,7 @@ function setReportBody(on){
 function showReport(){
   const isAdmin=current.role==='admin';
   document.getElementById('adminPick').style.display=isAdmin?'block':'none';
+  repEditing=false;
   selWeek=lastSundays(1)[0]; openMonth=parseInt(selWeek.slice(5,7),10);
   document.getElementById('reportOk').innerHTML='';
   if(isAdmin){
@@ -1266,7 +1301,7 @@ function showReport(){
   setReportBody(true);
   reportDist=current.district;
   document.getElementById('rfWho').textContent=reportDist+' · '+((current&&(current.role==='leader'||current.role==='elder')&&current.who)?current.who:'구역장');
-  loadReportInto(); renderDatePick(); buildRosterCards(); renderReportStatus();
+  loadReportInto(); renderDatePick(); buildRosterCards(); renderReportStatus(); paintRepState();
 }
 function loadReportInto(){
   reportRoster=DISTRICTS[reportDist]||[];
@@ -1300,11 +1335,11 @@ function applyPrevAbsent(){
 function adminDistChange(){
   const v=document.getElementById('adminDistSel').value;
   if(!v){ reportDist=null; document.getElementById('rfWho').textContent='구역 미선택'; setReportBody(false); return; }
-  reportDist=v;
+  reportDist=v; repEditing=false;
   document.getElementById('rfWho').textContent=reportDist+' · 구역장';
   setReportBody(true);
   document.getElementById('reportOk').innerHTML='';
-  loadReportInto(); renderDatePick(); buildRosterCards(); renderReportStatus();}
+  loadReportInto(); renderDatePick(); buildRosterCards(); renderReportStatus(); paintRepState();}
 function toggleDate(){const p=document.getElementById('datePanel');const open=p.style.display==='none';p.style.display=open?'block':'none';document.getElementById('dateBtn').classList.toggle('open',open);}
 function renderDatePick(){
   document.getElementById('dateSel').textContent=fmtSun(selWeek);
@@ -1317,8 +1352,55 @@ function renderDatePick(){
     let st,cls; if(done){st='✔ 작성완료';cls='done';} else if(future){st='예정';cls='future';} else {st='미입력';cls='no';}
     const lock=future&&!done;
     return `<div class="sundayrow ${d===selWeek?'sel':''} ${lock?'dim':''}" ${lock?'':'data-d="'+d+'"'}>${d.slice(5).replace('-','.')} 주일<span class="st ${cls}">${st}</span></div>`;}).join('');
-  document.querySelectorAll('#sundayList .sundayrow[data-d]').forEach(r=>r.onclick=()=>{selWeek=r.dataset.d;toggleDate();loadReportInto();renderDatePick();buildRosterCards();renderReportStatus();});
+  document.querySelectorAll('#sundayList .sundayrow[data-d]').forEach(r=>r.onclick=()=>{selWeek=r.dataset.d;repEditing=false;toggleDate();loadReportInto();renderDatePick();buildRosterCards();renderReportStatus();paintRepState();});
   updWeekNote();
+}
+/* ---------- 제출 상태 표시 + 잠금 (B안) ---------- */
+let repEditing=false;
+function curReport(){ return reports.find(r=>r.district===reportDist && r.date===selWeek)||null; }
+/* 잠금: 입력은 막고, 이름 펼쳐 보기는 그대로 허용 */
+function setRepLock(on){
+  const a=document.getElementById('repLockArea'); if(!a) return;
+  a.classList.toggle('locked',on);
+  a.querySelectorAll('input,select,textarea,button').forEach(el=>{
+    if(el.closest('.phead')) return;
+    el.disabled=on;
+  });
+}
+function paintRepState(){
+  const bar=document.getElementById('repSubBar'), btn=document.getElementById('repSubmitBtn'),
+        msg=document.getElementById('repLockMsg');
+  if(!bar||!btn) return;
+  const prev=curReport();
+  const who=(current&&current.who)?current.who:'';
+  if(!prev){
+    /* 미제출 */
+    repEditing=false; setRepLock(false);
+    if(msg) msg.innerHTML='';
+    bar.innerHTML=`<div class="subbar no"><div class="ck">!</div><div class="st"><b>아직 제출하지 않았습니다</b><br>${fmtSun(selWeek)} · ${esc(reportDist||'')}</div></div>`;
+    btn.className='f-primary'; btn.textContent='보고서 제출'; btn.disabled=false;
+    return;
+  }
+  const when=prev.at?fmtDT(prev.at):(prev.ts?fmtDT(prev.ts):'');
+  const byTx=prev.by?' · '+esc(prev.by):'';
+  if(repEditing){
+    setRepLock(false);
+    if(msg) msg.innerHTML='<div class="lockmsg ed">✎ 수정 중 · 다 고친 뒤 아래 <b>‘수정 내용 다시 제출’</b>을 누르세요</div>';
+    bar.innerHTML=`<div class="subbar ed"><div class="ck">✎</div><div class="st"><b>수정 중</b> · ${fmtSun(selWeek)} · ${esc(reportDist||'')}<br>다시 제출하면 기존 보고서를 덮어씁니다</div></div>`;
+    btn.className='f-primary editbtn'; btn.textContent='수정 내용 다시 제출'; btn.disabled=false;
+  } else {
+    setRepLock(true);
+    if(msg) msg.innerHTML='<div class="lockmsg">🔒 제출된 내용 · 읽기 전용 (이름을 누르면 내용은 볼 수 있습니다)</div>';
+    bar.innerHTML=`<div class="subbar"><div class="ck">✓</div><div class="st"><b>제출 완료</b> · ${fmtSun(selWeek)} · ${esc(reportDist||'')}<br>${when}${byTx} · 수정하려면 아래 ‘수정하기’를 누르세요</div></div>`;
+    btn.className='f-primary lockbtn'; btn.textContent='✎ 수정하기'; btn.disabled=false;
+  }
+}
+/* 제출 버튼 한 개로 상태에 따라 동작 분기 */
+function repMainBtn(){
+  if(repSubmitting) return;
+  const prev=curReport();
+  if(prev && !repEditing){ repEditing=true; paintRepState(); document.getElementById('reportOk').innerHTML=''; return; }
+  return submitReport();
 }
 function updWeekNote(){document.getElementById('weekNote').innerHTML=fmtSun(selWeek)+' · '+(repDone(selWeek)?'<b style="color:var(--green)">작성 완료</b> — 기존 내역 불러옴':'<b style="color:var(--red)">미입력</b> — 새로 작성');}
 function sunCount(){return reportRoster.filter(n=>ATT[n].t['1부']||ATT[n].t['2부']).length;}
@@ -1356,6 +1438,8 @@ function updPsum(n){
 let kTarget=null, kMax=0, kBuf='';
 const KQUICK={'새벽':[0,1,2,3,5,7],'성경':[0,10,20,30,50],'QT(가정)':[0,5,10,15,20]};
 function openKpad(el){
+  const la=document.getElementById('repLockArea');
+  if(la&&la.classList.contains('locked')) return;   /* 제출 잠금 중에는 열지 않음 */
   kTarget=el; kMax=parseInt(el.dataset.max,10)||0; kBuf='';
   const k=el.dataset.k;
   document.getElementById('kTitle').textContent=el.dataset.n+' · '+k;
@@ -1420,25 +1504,31 @@ function renderReportStatus(){
   box.innerHTML=submissionBoardHtml(selWeek, done, reportDist);
 }
 let repSubmitting=false;
-function submitReport(){
+async function submitReport(){
   if(!reportDist){ alert('구역을 먼저 선택하세요.'); return; }
-  /* 연타로 같은 보고서가 두 번 저장되는 것을 막음 */
+  /* 연타로 같은 보고서가 두 번 저장되는 것을 막음 (저장이 끝나면 바로 풀림) */
   if(repSubmitting) return;
-  repSubmitting=true;
-  const sb=document.getElementById('repSubmitBtn');
-  if(sb){ sb.disabled=true; sb.style.opacity=.6; }
-  setTimeout(()=>{ repSubmitting=false; if(sb){ sb.disabled=false; sb.style.opacity=1; } },2500);
+  /* 이미 제출된 주일이면 덮어쓰기 확인 */
+  if(curReport() && !confirm('이미 제출된 보고서입니다.\n새로 입력한 내용으로 덮어쓸까요?')) return;
   const sundayPresent=reportRoster.filter(n=>ATT[n].t['1부']||ATT[n].t['2부']);
   const cellPresent=reportRoster.filter(n=>ATT[n].t['구역']);
   const absent=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부'])).map(n=>({name:n,reason:(absReason[n]&&absReason[n]!=='선택')?absReason[n]:'확인안됨',note:absNotes[n]||''}));
   const note=document.getElementById('cellNote').value;
   const detail={}; reportRoster.forEach(n=>detail[n]={t:ATT[n].t,c:ATT[n].c,p:(ATT[n].p||'').trim(),e:(ATT[n].e||'').trim()});
-  const rec={ts:new Date().toISOString(),date:selWeek,district:reportDist,
+  const now=new Date().toISOString();
+  const rec={ts:now,at:now,by:((current&&current.who)||''),date:selWeek,district:reportDist,
     sundayPresent:sundayPresent,cellPresent:cellPresent,sundayAbsent:absent,detail:detail,
     cell:{held:cellPresent.length?'진행':'미진행',note:note}};
-  reports=reports.filter(r=>!(r.district===rec.district&&r.date===rec.date)); reports.push(rec); saveR(); pushReport(rec);
-  renderDatePick(); renderReportStatus();
-  document.getElementById('reportOk').innerHTML='<div class="ok-box">✅ 보고서가 제출되었습니다. 관리자 대시보드에 즉시 반영됩니다.<br>주일예배 <b>'+sundayPresent.length+'</b>명 · 구역예배 <b>'+cellPresent.length+'</b>명 · 결석 '+absent.length+'명</div>';
+  const wasEdit=!!curReport();
+  /* 저장 중 표시 */
+  repSubmitting=true;
+  const sb=document.getElementById('repSubmitBtn');
+  if(sb){ sb.disabled=true; sb.classList.add('sending'); sb.innerHTML='<span class="spin"></span> 제출 중…'; }
+  reports=reports.filter(r=>!(r.district===rec.district&&r.date===rec.date)); reports.push(rec); saveR();
+  try{ await pushReport(rec); }catch(e){}
+  repSubmitting=false; repEditing=false;
+  renderDatePick(); renderReportStatus(); paintRepState();
+  document.getElementById('reportOk').innerHTML='<div class="ok-box">✅ 보고서가 '+(wasEdit?'수정':'제출')+'되었습니다. 관리자 대시보드에 즉시 반영됩니다.<br>주일예배 <b>'+sundayPresent.length+'</b>명 · 구역예배 <b>'+cellPresent.length+'</b>명 · 결석 '+absent.length+'명</div>';
 }
 
 // ---------- 접수 처리 ----------

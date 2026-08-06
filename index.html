@@ -120,6 +120,13 @@ canvas{max-height:280px}
 .dashhead label{margin:0;font-weight:700;color:var(--muted)}
 .dashhead select{width:auto}
 .dashhead .btn{margin-left:auto}
+/* 보고 대상일 앞뒤 주간 이동 */
+.wkpick{display:flex;align-items:center;gap:6px}
+.wkarrow{width:38px;height:38px;flex:none;border:1px solid var(--inline);background:#f7f9fc;border-radius:10px;
+  font-size:18px;font-weight:800;color:var(--ink);cursor:pointer;font-family:inherit;line-height:1;
+  display:flex;align-items:center;justify-content:center}
+.wkarrow:active{background:#e9eff7}
+.wkarrow:disabled{opacity:.35;cursor:default}
 .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:4px}
 .kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px}
 .kpi .n{font-size:23px;font-weight:800;color:var(--green)}
@@ -670,7 +677,11 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
   <div class="dashhead">
     <h2>관리자 대시보드</h2>
     <label>보고 대상일</label>
-    <select id="weekSel" onchange="renderDash()"></select>
+    <div class="wkpick">
+      <button class="wkarrow" id="wkPrev" onclick="moveWeek(-1)" title="이전 주일" aria-label="이전 주일">‹</button>
+      <select id="weekSel" onchange="renderDash()"></select>
+      <button class="wkarrow" id="wkNext" onclick="moveWeek(1)" title="다음 주일" aria-label="다음 주일">›</button>
+    </div>
     <button class="btn sec sm" onclick="loadAll()">↻ 새로고침</button>
   </div>
 
@@ -1679,6 +1690,23 @@ function initWeekSel(){
   if(!same) sel.innerHTML=weeks.map(w=>`<option value="${w}">${w}</option>`).join('');
   if(keep && weeks.includes(keep)) sel.value=keep;
   else if(weeks.length) sel.value=weeks[0];
+  paintWeekArrows();
+}
+/* 화살표로 앞뒤 주일 이동 — 목록은 최신순이므로 다음 주일은 인덱스 -1 */
+function moveWeek(dir){
+  const sel=document.getElementById('weekSel'); if(!sel||!sel.options.length) return;
+  const i=sel.selectedIndex - dir;
+  if(i<0 || i>=sel.options.length) return;
+  sel.selectedIndex=i; renderDash();
+}
+/* 끝에 도달하면 해당 화살표 비활성 */
+function paintWeekArrows(){
+  const sel=document.getElementById('weekSel');
+  const pv=document.getElementById('wkPrev'), nx=document.getElementById('wkNext');
+  if(!sel||!pv||!nx) return;
+  const n=sel.options.length, i=sel.selectedIndex;
+  pv.disabled = (n===0 || i>=n-1);   /* 더 이전 주일 없음 */
+  nx.disabled = (n===0 || i<=0);     /* 더 최근 주일 없음 */
 }
 function kpi(n,l,s,cls){return `<div class="kpi${cls?' '+cls:''}"><div class="n">${n}</div><div class="l">${l}</div><div class="s">${s||'&nbsp;'}</div></div>`;}
 function mstat(n,l){return `<div class="mstat"><div class="n">${n}</div><div class="l">${l}</div></div>`;}

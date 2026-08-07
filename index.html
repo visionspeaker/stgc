@@ -1290,6 +1290,16 @@ function goMyReq(){ showView('myreq'); syncNav('myreq'); window.scrollTo(0,0); }
 
 // ---------- 문의 확인 (myreq) ----------
 let myF='전체';
+/* 게시판 번호: 먼저 등록된 글이 1번, 최신 글이 큰 번호.
+   상태 필터를 걸어도 번호가 바뀌지 않도록 전체 목록 기준으로 매긴다. */
+function subNoMap(){
+  const m={};
+  [...subs].sort((a,b)=>String(a.ts||'').localeCompare(String(b.ts||'')))
+           .forEach((s,i)=>{ if(s&&s.id) m[s.id]=i+1; });
+  return m;
+}
+/* 최신 글이 위로 */
+function byNewest(a,b){ return String(b.ts||'').localeCompare(String(a.ts||'')); }
 /* 삭제 권한: 관리자(담임목사·교역자)만 */
 function canDelete(){ return !!current && current.role==='admin'; }
 let subDeleting=false;
@@ -1312,10 +1322,11 @@ function renderMyReq(){
   const bar=document.getElementById('fbFilter');
   if(bar && !bar.dataset.b){bar.dataset.b='1';bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{bar.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');myF=b.dataset.s;renderMyReq();});}
   const box=document.getElementById('myReqList');
-  const list=[...subs].filter(s=>myF==='전체'||s.status===myF).sort((a,b)=>b.ts.localeCompare(a.ts));
+  const list=[...subs].filter(s=>myF==='전체'||s.status===myF).sort(byNewest);
+  const NOS=subNoMap();
   if(!list.length){box.innerHTML='<div class="bempty">해당 상태의 접수가 없습니다.</div>';return;}
   const del=canDelete();
-  const rows=list.map((s,k)=>{const idx=subs.indexOf(s); const sid=esc(s.id||''); const no=list.length-k;
+  const rows=list.map((s,k)=>{const idx=subs.indexOf(s); const sid=esc(s.id||''); const no=NOS[s.id]||'';
     const detail=
       `<div id="lk${idx}"><div class="pinrow"><input class="f-in" type="password" maxlength="4" inputmode="numeric" id="pin${idx}" placeholder="비밀번호 4자리" onkeydown="if(event.key==='Enter')openMine(${idx})"/><button class="btnsm" onclick="openMine(${idx})">내용 보기</button>${del?`<button class="btnsm gray" onclick="adminOpen(${idx})">관리자 열람</button>`:''}</div></div>
        ${del?`<div class="delrow"><button class="btnsm danger" onclick="deleteSub('${sid}')">🗑 삭제</button></div>`:''}`;
@@ -1639,11 +1650,12 @@ function renderSubs(){
     `<div class="sumbox"><b>${open}</b>미처리(접수·처리중)</div>`+
     `<div class="sumbox ${overdue?'warn':''}"><b>${overdue}</b>접수 48시간 초과 미확인</div>`+
     `<div class="sumbox"><b>${done}</b>완료·보류·반려</div>`;
-  const list=base.filter(s=>mgF==='전체'||s.status===mgF||(keepSubId&&s.id===keepSubId));
+  const list=base.filter(s=>mgF==='전체'||s.status===mgF||(keepSubId&&s.id===keepSubId)).sort(byNewest);
+  const NOS=subNoMap();
   if(!list.length){ box.innerHTML='<div class="bempty">해당 조건의 접수가 없습니다.</div>'; return; }
   const rows=list.map((s,k)=>{const idx=subs.indexOf(s);const od=isOverdue(s);
     const off=(mgF!=='전체'&&s.status!==mgF);   /* 현재 필터와 다르지만 방금 바꾼 건 */
-    const sid=esc(s.id||''), no=list.length-k;
+    const sid=esc(s.id||''), no=NOS[s.id]||'';
     const detail=
       `${off?`<div class="b-warn">지금 보고 계신 ‘${esc(mgF)}’ 목록에는 포함되지 않는 상태입니다. 목록을 새로 고르면 정리됩니다.</div>`:''}
        <div class="sc-meta">${subType(s.type)} · ${catName(s.category)} · 담당 <b>${s.assignee}</b></div>

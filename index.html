@@ -405,6 +405,7 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
 .btnsm{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;border:0;border-radius:10px;padding:10px 15px;font-size:12.5px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:inherit}
 /* 관리자 전용 삭제 버튼 — 실수로 누르지 않도록 눈에 덜 띄게 */
 .btnsm.danger{background:#fff;color:var(--red);border:1px solid #f1c9c9}
+.btnsm.gray{background:#f4f7fb;color:var(--ink);border:1px solid var(--line)}
 .btnsm.danger:active{background:#fef2f2}
 .delrow{display:flex;justify-content:flex-end;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
 .steps{display:flex;align-items:center;gap:6px;font-size:11.5px;margin-top:10px;flex-wrap:wrap}
@@ -438,6 +439,27 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
 .sc-ok{font-size:13px;font-weight:700;color:var(--ok);opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s}
 .sc-ok.show{opacity:1;transform:none}
 .subcard select.f-in{height:46px}
+/* ---------- 게시판형 목록 (문의 확인 · 문의 접수 처리) ---------- */
+.btable{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:10px}
+.btable th{background:#f4f7fb;font-size:11.5px;color:var(--muted);font-weight:800;padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+.btable td{padding:12px 10px;border-bottom:1px solid #eef2f7;vertical-align:middle}
+.btable tr:last-child td{border-bottom:0}
+.btable tr.brow{cursor:pointer}
+.btable tr.brow:active{background:#f4f7fb}
+.btable tr.brow.open{background:#f4f9ff}
+.btable tr.brow.over td{background:#fff8f8}
+.btable tr.brow.offfilter{opacity:.62}
+.btable .c-no{width:38px;text-align:center;color:#98a2b3;font-size:12px}
+.btable .c-st{width:64px}
+.btable .b-tt{font-weight:700;line-height:1.4}
+.btable .b-tt .car{color:#b6c2d2;font-size:12px;margin-right:4px;display:inline-block;transition:transform .15s}
+.btable tr.brow.open .b-tt .car{transform:rotate(90deg)}
+.btable .c-cat,.btable .c-who{color:var(--muted);font-size:12px;white-space:nowrap}
+.btable .c-dt{color:var(--muted);font-size:12px;white-space:nowrap;text-align:right;width:78px}
+.btable td.bdet{background:#f9fbfe;padding:14px 13px 16px}
+.b-warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:8px;padding:7px 10px;font-size:11.5px;line-height:1.5;margin-bottom:9px}
+.bempty{padding:20px 12px;text-align:center;color:var(--muted);font-size:13px}
+@media(max-width:640px){.btable .c-cat,.btable .c-who{display:none}.btable td,.btable th{padding-left:7px;padding-right:7px}}
 .sc-photo{margin-top:10px}
 .sc-photo img{max-width:190px;max-height:190px;border-radius:11px;border:1px solid var(--line);display:block}
 /* ===== 사진 첨부 ===== */
@@ -1291,16 +1313,25 @@ function renderMyReq(){
   if(bar && !bar.dataset.b){bar.dataset.b='1';bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{bar.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');myF=b.dataset.s;renderMyReq();});}
   const box=document.getElementById('myReqList');
   const list=[...subs].filter(s=>myF==='전체'||s.status===myF).sort((a,b)=>b.ts.localeCompare(a.ts));
-  if(!list.length){box.innerHTML='<div class="mini" style="margin-top:12px">해당 상태의 접수가 없습니다.</div>';return;}
+  if(!list.length){box.innerHTML='<div class="bempty">해당 상태의 접수가 없습니다.</div>';return;}
   const del=canDelete();
-  box.innerHTML=list.map(s=>{const idx=subs.indexOf(s);
-    const delBtn=del?`<button class="btnsm danger" onclick="deleteSub('${esc(s.id||'')}')">🗑 삭제</button>`:'';
-    return `<div class="fitem">
-      <div class="ftop"><span class="ftitle">${s.title}</span><span class="fbadge s-${s.status}">${s.status}</span><span class="fmeta" style="margin-left:auto">${s.ts.slice(5,10)}</span></div>
-      <div class="fmeta">${subType(s.type)} · ${catName(s.category)}</div>
-      <div id="lk${idx}"><div class="pinrow"><input class="f-in" type="password" maxlength="4" inputmode="numeric" id="pin${idx}" placeholder="비밀번호 4자리" onkeydown="if(event.key==='Enter')openMine(${idx})"/><button class="btnsm" onclick="openMine(${idx})">내용 보기</button>${del?`<button class="btnsm" onclick="adminOpen(${idx})">관리자 열람</button>`:''}</div></div>
-      ${del?`<div class="delrow">${delBtn}</div>`:''}
-    </div>`;}).join('');
+  const rows=list.map((s,k)=>{const idx=subs.indexOf(s); const sid=esc(s.id||''); const no=list.length-k;
+    const detail=
+      `<div id="lk${idx}"><div class="pinrow"><input class="f-in" type="password" maxlength="4" inputmode="numeric" id="pin${idx}" placeholder="비밀번호 4자리" onkeydown="if(event.key==='Enter')openMine(${idx})"/><button class="btnsm" onclick="openMine(${idx})">내용 보기</button>${del?`<button class="btnsm gray" onclick="adminOpen(${idx})">관리자 열람</button>`:''}</div></div>
+       ${del?`<div class="delrow"><button class="btnsm danger" onclick="deleteSub('${sid}')">🗑 삭제</button></div>`:''}`;
+    return `<tr class="brow" data-sid="${sid}" onclick="toggleBrow(this,event)">
+      <td class="c-no">${no}</td>
+      <td class="c-st"><span class="fbadge s-${s.status}">${s.status}</span></td>
+      <td class="b-tt"><span class="car">›</span>${s.title}</td>
+      <td class="c-cat">${catName(s.category)}</td>
+      <td class="c-dt">${s.ts.slice(5,10)}</td>
+    </tr>
+    <tr class="bdetrow" style="display:none"><td class="bdet" colspan="5">${detail}</td></tr>`;}).join('');
+  box.innerHTML=
+    `<table class="btable"><thead><tr>
+       <th class="c-no">번호</th><th class="c-st">상태</th><th>제목</th>
+       <th class="c-cat">분류</th><th class="c-dt">등록일</th>
+     </tr></thead><tbody>${rows}</tbody></table>`;
 }
 /* 관리자는 비밀번호 없이 내용 확인 (삭제 여부 판단용) */
 function adminOpen(idx){
@@ -1609,27 +1640,63 @@ function renderSubs(){
     `<div class="sumbox ${overdue?'warn':''}"><b>${overdue}</b>접수 48시간 초과 미확인</div>`+
     `<div class="sumbox"><b>${done}</b>완료·보류·반려</div>`;
   const list=base.filter(s=>mgF==='전체'||s.status===mgF||(keepSubId&&s.id===keepSubId));
-  box.innerHTML=list.map(s=>{const idx=subs.indexOf(s);const od=isOverdue(s);
+  if(!list.length){ box.innerHTML='<div class="bempty">해당 조건의 접수가 없습니다.</div>'; return; }
+  const rows=list.map((s,k)=>{const idx=subs.indexOf(s);const od=isOverdue(s);
     const off=(mgF!=='전체'&&s.status!==mgF);   /* 현재 필터와 다르지만 방금 바꾼 건 */
-    return `<div class="subcard ${od?'over':''} ${off?'offfilter':''}" data-sid="${esc(s.id||'')}">
-      <div class="sc-top"><span class="fbadge s-${s.status}">${s.status}</span>${od?'<span class="fbadge s-보류">48시간 초과</span>':''}<span class="sc-moved"></span><span class="sc-date">${fmtDT(s.ts)}</span></div>
-      ${off?`<div class="sc-offnote">지금 보고 계신 ‘${esc(mgF)}’ 목록에는 포함되지 않는 상태입니다. 목록을 새로 고르면 정리됩니다.</div>`:''}
-      <div class="sc-title">${s.title}</div>
-      <div class="sc-meta">${subType(s.type)} · ${catName(s.category)} · 담당 <b>${s.assignee}</b></div>
-      <div class="sc-body">${s.body||'(내용 없음)'}</div>
-      ${s.hasPhoto?`<div class="sc-photo" id="ph_${s.id}"><button class="btnsm" onclick="loadPhoto('${s.id}')">📷 첨부 사진 보기</button></div>`:''}
-      <div class="sc-who">접수자 <b>${s.name}</b>${s.contact?' · '+s.contact:''}</div>
-      <div class="sc-ctl">
-        <label class="sc-l">상태 변경</label>
-        <select class="f-in" onchange="setStatus(${idx},this.value)">${['접수','처리중','보류','완료','반려'].map(o=>`<option ${o===s.status?'selected':''}>${o}</option>`).join('')}</select>
-        <label class="sc-l">회신 / 처리 답변</label>
-        <div class="rpmeta" id="rpmeta${idx}">${s.reply&&s.replyBy?`<span class="rpsaved">✔ 저장됨 · ${esc(s.replyBy)}${s.replyAt?' · '+fmtDT(s.replyAt):''}</span>`:''}</div>
-        <textarea class="f-in" id="rp${idx}" oninput="onReplyInput(${idx})" placeholder="처리 결과나 답변 내용을 적어 회신하세요">${s.reply||''}</textarea>
-        <div class="sc-save"><button class="btn sm ${s.reply?'saved':''}" id="rpbtn${idx}" ${s.reply?'disabled':''} onclick="saveReply(${idx})">${s.reply?'✔ 저장됨':'회신 저장'}</button>${canDelete()?`<button class="btnsm danger" onclick="deleteSub('${esc(s.id||'')}')">🗑 삭제</button>`:''}</div>
-      </div>
-    </div>`;
-  }).join('') || '<div class="mini" style="margin-top:12px">해당 조건의 접수가 없습니다.</div>';
+    const sid=esc(s.id||''), no=list.length-k;
+    const detail=
+      `${off?`<div class="b-warn">지금 보고 계신 ‘${esc(mgF)}’ 목록에는 포함되지 않는 상태입니다. 목록을 새로 고르면 정리됩니다.</div>`:''}
+       <div class="sc-meta">${subType(s.type)} · ${catName(s.category)} · 담당 <b>${s.assignee}</b></div>
+       <div class="sc-body">${s.body||'(내용 없음)'}</div>
+       ${s.hasPhoto?`<div class="sc-photo" id="ph_${sid}"><button class="btnsm" onclick="loadPhoto('${sid}')">📷 첨부 사진 보기</button></div>`:''}
+       <div class="sc-who">접수자 <b>${s.name}</b>${s.contact?' · '+s.contact:''}</div>
+       <div class="sc-ctl">
+         <label class="sc-l">상태 변경</label>
+         <select class="f-in" onchange="setStatus(${idx},this.value)">${['접수','처리중','보류','완료','반려'].map(o=>`<option ${o===s.status?'selected':''}>${o}</option>`).join('')}</select>
+         <label class="sc-l">회신 / 처리 답변</label>
+         <div class="rpmeta" id="rpmeta${idx}">${s.reply&&s.replyBy?`<span class="rpsaved">✔ 저장됨 · ${esc(s.replyBy)}${s.replyAt?' · '+fmtDT(s.replyAt):''}</span>`:''}</div>
+         <textarea class="f-in" id="rp${idx}" oninput="onReplyInput(${idx})" placeholder="처리 결과나 답변 내용을 적어 회신하세요">${s.reply||''}</textarea>
+         <div class="sc-save"><button class="btn sm ${s.reply?'saved':''}" id="rpbtn${idx}" ${s.reply?'disabled':''} onclick="saveReply(${idx})">${s.reply?'✔ 저장됨':'회신 저장'}</button>${canDelete()?`<button class="btnsm danger" onclick="deleteSub('${sid}')">🗑 삭제</button>`:''}</div>
+       </div>`;
+    return `<tr class="brow ${od?'over':''} ${off?'offfilter':''}" data-sid="${sid}" onclick="toggleBrow(this,event)">
+      <td class="c-no">${no}</td>
+      <td class="c-st"><span class="fbadge s-${s.status}">${s.status}</span></td>
+      <td class="b-tt"><span class="car">›</span>${s.title}${od?' <span class="fbadge s-보류">48h 초과</span>':''}<span class="sc-moved"></span></td>
+      <td class="c-cat">${catName(s.category)}</td>
+      <td class="c-who">${esc(s.assignee||'')}</td>
+      <td class="c-dt">${fmtDT(s.ts).slice(5,10)}</td>
+    </tr>
+    <tr class="bdetrow" style="display:none"><td class="bdet" colspan="6">${detail}</td></tr>`;
+  }).join('');
+  box.innerHTML=
+    `<table class="btable"><thead><tr>
+       <th class="c-no">번호</th><th class="c-st">상태</th><th>제목</th>
+       <th class="c-cat">분류</th><th class="c-who">담당</th><th class="c-dt">등록일</th>
+     </tr></thead><tbody>${rows}</tbody></table>`;
+  restoreOpenRows(box);
   growAll(box); paintMoved();
+}
+/* 행을 눌러 상세 펼치기 — 안쪽 입력칸을 눌렀을 때는 접히지 않게 */
+function toggleBrow(tr,ev){
+  if(ev){ const t=ev.target; if(t.closest && t.closest('button,select,textarea,input,a')) return; }
+  const det=tr.nextElementSibling; if(!det||!det.classList.contains('bdetrow')) return;
+  const on=det.style.display==='none';
+  det.style.display=on?'table-row':'none';
+  tr.classList.toggle('open',on);
+  const sid=tr.dataset.sid||'';
+  if(on) openRows.add(sid); else openRows.delete(sid);
+  if(on) growAll(det);
+}
+/* 목록을 다시 그려도 펼쳐둔 행은 그대로 유지 */
+let openRows=new Set();
+function restoreOpenRows(box){
+  box.querySelectorAll('tr.brow').forEach(tr=>{
+    const sid=tr.dataset.sid||'';
+    if(openRows.has(sid)||(keepSubId&&sid===keepSubId)){
+      const det=tr.nextElementSibling;
+      if(det&&det.classList.contains('bdetrow')){ det.style.display='table-row'; tr.classList.add('open'); openRows.add(sid); }
+    }
+  });
 }
 /* 대시보드 → 문의 접수 처리로 이동 (상태를 주면 그 목록으로 필터) */
 function goManage(status){
@@ -1655,7 +1722,7 @@ function setStatus(i,v){
 }
 let movedMsg='', movedTimer=null;
 function paintMoved(){
-  const c=document.querySelector('.subcard[data-sid="'+(keepSubId||'')+'"]');
+  const c=document.querySelector('tr.brow[data-sid="'+(keepSubId||'')+'"]');
   if(!c) return; const t=c.querySelector('.sc-moved'); if(!t) return;
   t.textContent=movedMsg; t.classList.toggle('show',!!movedMsg);
 }

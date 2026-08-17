@@ -439,6 +439,18 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
 .sc-ok{font-size:13px;font-weight:700;color:var(--ok);opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s}
 .sc-ok.show{opacity:1;transform:none}
 .subcard select.f-in{height:46px}
+/* ---------- 기도제목 (대시보드) ---------- */
+.prayctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.pill2{display:inline-block;font-size:12px;font-weight:800;padding:7px 12px;border-radius:20px;background:#f1f4f9;color:#8a94a3;cursor:pointer;border:0;font-family:inherit}
+.pill2.on{background:#dcfce7;color:#15803d;outline:2px solid var(--teal)}
+.praysrch{flex:1;min-width:140px;height:38px;padding:0 11px;font-size:13.5px}
+.pgroup{border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow:hidden}
+.pghead{display:flex;align-items:center;gap:8px;background:#f4f7fb;padding:9px 12px;font-size:13px;font-weight:800}
+.pghead .cnt{margin-left:auto;font-size:11.5px;font-weight:800;color:#15803d;background:#dcfce7;border-radius:20px;padding:3px 9px}
+.pgrow{display:flex;gap:10px;padding:10px 12px;border-top:1px solid #eef2f7;font-size:13.5px;line-height:1.6}
+.pgrow .nm{width:64px;flex:none;font-weight:800}
+.pgrow .tx{flex:1;white-space:pre-wrap;word-break:break-word}
+.pgrow .etc{color:var(--blue2);background:var(--blueSoft);border-radius:6px;padding:1px 6px;font-size:10.5px;font-weight:800;margin-right:5px;vertical-align:1px}
 /* ---------- 게시판형 목록 (문의 확인 · 문의 접수 처리) ---------- */
 .btable{width:100%;border-collapse:collapse;font-size:13.5px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:10px}
 .btable th{background:#f4f7fb;font-size:11.5px;color:var(--muted);font-weight:800;padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -749,6 +761,18 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
     </div>
     <div id="prnPicks" style="margin-bottom:14px"></div>
     <button class="btn" onclick="printReports()">🖨 선택한 구역 출력</button>
+  </div>
+
+  <div class="sect-t">기도제목</div>
+  <div class="dcard">
+    <p class="dd" id="prayDesc">구역보고에 입력된 성도별 기도제목입니다</p>
+    <div class="prayctl">
+      <button class="pill2 on" id="tgPray" onclick="togglePray('P')">기도제목</button>
+      <button class="pill2" id="tgEtc" onclick="togglePray('E')">기타 사항</button>
+      <input class="f-in praysrch" id="praySrch" placeholder="이름·내용 검색" oninput="renderPray()"/>
+    </div>
+    <div id="prayBoard"></div>
+    <button class="btn" style="width:100%;margin-top:12px" onclick="printPray()">🖨 기도제목 출력</button>
   </div>
 </section>
 
@@ -1858,6 +1882,7 @@ function renderDash(){
   document.getElementById('missingBoard').innerHTML = submissionBoardHtml(wk, reported, null, true)
     + (missing.length ? '' : '<div class="ok-box" style="margin-top:10px">🎉 모든 구역이 보고를 완료했습니다.</div>');
   renderPrnPicks(wk, wkReports);
+  renderPray();
 }
 /* ---------- 보고서 상세 · 출력 ---------- */
 function repOf(dist,date){ return reports.find(r=>r.district===dist&&r.date===date); }
@@ -1921,6 +1946,62 @@ function renderPrnPicks(wk,wkReports){
     p.style.outline=on?'2px solid var(--teal)':'none';
     p.style.background=on?'#dcfce7':'#f1f4f9'; p.style.color=on?'#15803d':'#98a2b3';
   });
+}
+/* ---------- 기도제목 모아보기 ---------- */
+let prayShowP=true, prayShowE=false;
+function togglePray(k){
+  if(k==='P') prayShowP=!prayShowP; else prayShowE=!prayShowE;
+  if(!prayShowP&&!prayShowE){ if(k==='P') prayShowE=true; else prayShowP=true; }
+  const a=document.getElementById('tgPray'), b=document.getElementById('tgEtc');
+  if(a) a.classList.toggle('on',prayShowP);
+  if(b) b.classList.toggle('on',prayShowE);
+  renderPray();
+}
+/* 선택 주일의 보고서에서 성도별 기도제목·기타 사항을 구역별로 모은다 */
+function prayGroups(){
+  const wk=document.getElementById('weekSel'); if(!wk) return {wk:'',groups:[]};
+  const week=wk.value;
+  const q=((document.getElementById('praySrch')||{}).value||'').trim();
+  const wkReports=dedupeReports(reports.filter(r=>r.date===week));
+  const byDist={}; wkReports.forEach(r=>byDist[r.district]=r);
+  const groups=[];
+  sortDist(Object.keys(byDist)).forEach(d=>{
+    const r=byDist[d], roster=DISTRICTS[d]||[], rows=[];
+    roster.forEach(n=>{
+      const t=(r.detail||{})[n]||{};
+      const p=(t.p||'').trim(), e=(t.e||'').trim();
+      if(prayShowP && p) rows.push({n:n, t:p, etc:false});
+      if(prayShowE && e) rows.push({n:n, t:e, etc:true});
+    });
+    const f=q? rows.filter(x=>x.n.includes(q)||x.t.includes(q)) : rows;
+    if(f.length) groups.push({d:d, rows:f});
+  });
+  return {wk:week, groups:groups};
+}
+function renderPray(){
+  const box=document.getElementById('prayBoard'); if(!box) return;
+  const {wk,groups}=prayGroups();
+  const total=groups.reduce((a,g)=>a+g.rows.length,0);
+  const desc=document.getElementById('prayDesc');
+  if(desc) desc.innerHTML = wk? `${wk} 주일 · ${groups.length}개 구역 · <b>${total}</b>건` : '보고 데이터가 없습니다';
+  box.innerHTML = groups.length
+    ? groups.map(g=>`<div class="pgroup"><div class="pghead">${esc(g.d)}<span class="cnt">${g.rows.length}건</span></div>`
+        + g.rows.map(r=>`<div class="pgrow"><span class="nm">${esc(r.n)}</span><span class="tx">${r.etc?'<span class="etc">기타</span>':''}${esc(r.t)}</span></div>`).join('')
+        + `</div>`).join('')
+    : '<div class="muted" style="font-size:12.5px;margin-top:8px">해당 조건의 기도제목이 없습니다.</div>';
+}
+function printPray(){
+  const {wk,groups}=prayGroups();
+  const total=groups.reduce((a,g)=>a+g.rows.length,0);
+  if(!total){ alert('출력할 기도제목이 없습니다.'); return; }
+  document.getElementById('printArea').innerHTML =
+    `<div class="prpage"><h1>구역 기도제목</h1>
+       <div class="prmeta">${fmtSun(wk)} · ${groups.length}개 구역 · ${total}건 · 송탄영광교회 영광 커넥트</div>`
+    + groups.map(g=>`<h2>${esc(g.d)}</h2><table><tr><th style="width:70px">이름</th><th>내용</th></tr>`
+        + g.rows.map(r=>`<tr><td>${esc(r.n)}</td><td>${r.etc?'[기타] ':''}${esc(r.t)}</td></tr>`).join('')
+        + `</table>`).join('')
+    + `</div>`;
+  window.print();
 }
 function prnAll(on){
   document.querySelectorAll('#prnPicks .prnpick').forEach(p=>{

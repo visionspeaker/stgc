@@ -99,6 +99,9 @@ tr.over td{background:#fff6f6}
 .sumbox{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:12.5px}
 .sumbox b{font-size:16px;color:var(--green);display:block}
 .sumbox.warn b{color:var(--red)}
+.sumbox .sbsub{display:block;font-size:10.5px;color:#98a2b3;margin-top:1px}
+.sumbox.clickable{cursor:pointer}
+.sumbox.clickable:active{background:#eef2f7}
 .care{background:#fff5f5;border:1px solid #fecaca;border-radius:10px;padding:9px 11px;margin:5px 0;font-size:13px}
 .care b{color:#b91c1c}
 .pill{display:inline-block;background:var(--greenSoft);color:var(--green);border-radius:20px;padding:3px 11px;font-size:12px;font-weight:700;margin:2px 4px 2px 0}
@@ -1734,6 +1737,12 @@ async function submitReport(){
 let mgF='전체';
 document.querySelectorAll('#mgFilter button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#mgFilter button').forEach(x=>x.classList.remove('active'));b.classList.add('active');mgF=b.dataset.f;keepSubId=null;renderSubs();});
+/* 요약 카드를 누르면 해당 상태 목록으로 */
+function mgPick(f){
+  mgF=f; keepSubId=null;
+  document.querySelectorAll('#mgFilter button').forEach(x=>x.classList.toggle('active',x.dataset.f===f));
+  renderSubs();
+}
 function hoursSince(iso){return (Date.now()-new Date(iso).getTime())/3600000;}
 function isOverdue(s){return s.status==='접수' && hoursSince(s.ts)>48;}
 function renderSubs(){
@@ -1743,14 +1752,15 @@ function renderSubs(){
   const scoped=(current.role==='chair'||current.role==='staff'||current.role==='elder');
   let base = scoped ? subs.filter(s=>normCat(s.category)===normCat(current.category)) : subs;
   scope.textContent = scoped ? '· 담당: '+catName(current.category)+' ('+base.length+'건)' : '· 전체 위원회';
-  /* 보류는 담당자가 판단을 마친 상태로 보고 완료군으로 집계 */
-  const open=base.filter(s=>s.status==='접수'||s.status==='처리중').length;
-  const overdue=base.filter(isOverdue).length;
+  /* 미처리 = 아직 접수 확인이 안 된 건(접수 상태)만. 처리중은 따로 집계 */
+  const cnt단=base.filter(s=>s.status==='접수').length;
+  const cnt처리=base.filter(s=>s.status==='처리중').length;
   const done=base.filter(s=>s.status==='완료'||s.status==='보류'||s.status==='반려').length;
   document.getElementById('mgSummary').innerHTML=
-    `<div class="sumbox"><b>${open}</b>미처리(접수·처리중)</div>`+
-    `<div class="sumbox ${overdue?'warn':''}"><b>${overdue}</b>접수 48시간 초과 미확인</div>`+
-    `<div class="sumbox"><b>${done}</b>완료·보류·반려</div>`;
+    `<div class="sumbox ${cnt단?'warn':''} clickable" onclick="mgPick('접수')"><b>${cnt단}</b>미처리<span class="sbsub">접수 확인 전</span></div>`+
+    `<div class="sumbox clickable" onclick="mgPick('접수')"><b>${cnt단}</b>접수</div>`+
+    `<div class="sumbox clickable" onclick="mgPick('처리중')"><b>${cnt처리}</b>처리중</div>`+
+    `<div class="sumbox clickable" onclick="mgPick('전체')"><b>${done}</b>완료·보류·반려</div>`;
   const list=base.filter(s=>mgF==='전체'||s.status===mgF||(keepSubId&&s.id===keepSubId)).sort(byNewest);
   const NOS=subNoMap();
   if(!list.length){ box.innerHTML='<div class="bempty">해당 조건의 접수가 없습니다.</div>'; return; }

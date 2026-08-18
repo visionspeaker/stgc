@@ -583,8 +583,11 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
       <input class="f-in" id="inName" placeholder="이름"/>
       <div class="f-label">연락처 <span class="req" id="reqContact">*</span></div>
       <input class="f-in" id="inContact" placeholder="전화번호 또는 메일 주소"/>
-      <div class="f-toggle"><input type="checkbox" id="inAnon" onchange="fbAnonToggle()"/> 익명으로 접수 (이름·연락처 숨김)</div>
-      <div class="f-note">평소 이름·연락처는 <b>필수</b>입니다. 익명으로 접수하면 필수가 해제되지만 <b>개별 회신을 받을 수 없습니다.</b></div>
+      <div id="anonBox">
+        <div class="f-toggle"><input type="checkbox" id="inAnon" onchange="fbAnonToggle()"/> 익명으로 접수 (이름·연락처 숨김)</div>
+        <div class="f-note">평소 이름·연락처는 <b>필수</b>입니다. 익명으로 접수하면 필수가 해제되지만 <b>개별 회신을 받을 수 없습니다.</b></div>
+      </div>
+      <div class="f-note" id="anonOffNote" style="display:none">이름과 연락처는 <b>필수</b>입니다. 회신을 받으시려면 정확히 적어주세요.</div>
       <div class="f-label">조회용 비밀번호 (숫자 4자리) <span class="req">*</span></div>
       <input class="f-in" id="inPin" type="password" maxlength="4" inputmode="numeric" placeholder="예: 전화번호 뒷자리"/>
       <div class="f-label">사진 첨부 <span style="color:#6b7686;font-weight:400">(선택)</span></div>
@@ -1230,7 +1233,18 @@ function buildNav(view){
 }
 
 // ---------- intake (문의 접수) ----------
+/* 익명 접수 사용 여부 — true 로 바꾸면 '익명으로 접수' 선택이 다시 나타납니다.
+   기능 코드는 그대로 두고 화면에서만 감춥니다. */
+const ALLOW_ANON=false;
+function applyAnonMode(){
+  const box=document.getElementById('anonBox'), off=document.getElementById('anonOffNote');
+  const an=document.getElementById('inAnon');
+  if(box) box.style.display=ALLOW_ANON?'block':'none';
+  if(off) off.style.display=ALLOW_ANON?'none':'block';
+  if(!ALLOW_ANON && an){ an.checked=false; fbAnonToggle(); }   /* 이름·연락처를 항상 필수로 */
+}
 function initIntake(){
+  applyAnonMode();
   const sel=document.getElementById('inCat');
   sel.innerHTML='<option value="">선택</option>'+Object.keys(CATEGORIES).map(c=>`<option>${c}</option>`).join('');
   const upd=()=>{const c=sel.value;const r=CATEGORIES[c];
@@ -1253,7 +1267,7 @@ async function submitIntake(){
   if(!title){alert('제목을 입력해주세요.');return;}
   const name=document.getElementById('inName').value.trim();
   const contact=document.getElementById('inContact').value.trim();
-  if(!anon && (!name||!contact)){alert('이름과 연락처는 필수입니다. (익명 원하시면 ‘익명으로 접수’ 체크)');return;}
+  if(!anon && (!name||!contact)){alert(ALLOW_ANON?'이름과 연락처는 필수입니다. (익명 원하시면 ‘익명으로 접수’ 체크)':'이름과 연락처는 필수입니다.');return;}
   const pin=document.getElementById('inPin').value.trim();
   if(!/^\d{4}$/.test(pin)){alert('조회용 비밀번호 4자리(숫자)를 입력해주세요.');return;}
   const r=CATEGORIES[cat];
@@ -1323,6 +1337,7 @@ function resetIntake(){
   ['inTitle','inBody','inName','inContact','inPin'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
   const cat=document.getElementById('inCat'); if(cat) cat.value='';
   const an=document.getElementById('inAnon'); if(an&&an.checked){ an.checked=false; fbAnonToggle(); }
+  applyAnonMode();
   const btn=document.getElementById('intakeBtn'); if(btn){ btn.disabled=false; btn.classList.remove('sending'); btn.textContent='접수하기'; }
   intakeSending=false;
   clearPhoto();

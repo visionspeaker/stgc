@@ -835,7 +835,7 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
 <!-- 새 접수 알림 팝업 -->
 <div id="notiGate" class="rmodal" style="display:none;z-index:95">
   <div class="ntcard">
-    <div class="nthead"><span class="ntbell">🔔</span> 처리 대기 문의</div>
+    <div class="nthead"><span class="ntbell">🔔</span> 새 문의 접수</div>
     <div class="ntbody" id="ntBody"></div>
     <div class="ntfoot">
       <button class="btn sec" style="flex:1" onclick="closeNoti()">나중에</button>
@@ -985,9 +985,10 @@ function mySubs(){
   if(r==='chair'||r==='staff'||r==='elder') return subs.filter(s=>normCat(s.category)===normCat(current.category));
   return [];
 }
-/* 알림 대상 = 아직 처리가 끝나지 않은 건(접수·처리중).
-   완료·보류·반려는 어느 기기에서 로그인하든 알리지 않는다. */
-function openSubs(){ return mySubs().filter(s=>s.status==='접수'||s.status==='처리중'); }
+/* 알림·배지 대상 = 아직 접수 확인이 안 된 건(접수 상태)만 = 요약의 '미처리'와 동일.
+   처리중은 담당자가 이미 확인하고 진행 중이므로 알리지 않는다.
+   완료·보류·반려도 어느 기기에서 로그인하든 알리지 않는다. */
+function openSubs(){ return mySubs().filter(s=>s.status==='접수'); }
 /* 오늘 이미 알림을 본 계정은 다시 띄우지 않음 (기기별 하루 1회) */
 function newSubs(){
   const seen=getSeenAt();           /* 마지막으로 알림을 확인한 날짜 (YYYY-MM-DD) */
@@ -1001,7 +1002,7 @@ function markSubsSeen(){ setSeenAt(localISO(new Date())); paintSubBadge(); }
 function paintSubBadge(){
   const nav=document.getElementById('nav'); if(!nav) return;
   const btn=[...nav.querySelectorAll('button')].find(b=>b.dataset.v==='manage'); if(!btn) return;
-  const n=openSubs().length;   /* 배지는 '오늘 봤는지'와 무관하게 미처리 건수를 그대로 */
+  const n=openSubs().length;   /* 배지 = 요약의 '미처리'(접수 확인 전) 건수와 동일 */
   const old=btn.querySelector('.navbadge'); if(old) old.remove();
   if(n>0){ const b=document.createElement('span'); b.className='navbadge'; b.textContent=n>99?'99+':n; btn.appendChild(b); }
 }
@@ -1016,7 +1017,7 @@ function checkNewSubs(){
   const list=ns.slice(0,4).map(s=>`<div class="ntrow"><span class="ntcat">${esc(catName(s.category))}</span><span class="nttitle">${esc(s.title||'(제목없음)')}</span></div>`).join('');
   document.getElementById('ntBody').innerHTML=
     `<div class="ntbig"><b>${ns.length}</b>건</div>
-     <div class="ntsub">아직 처리하지 않은 문의가 있습니다.</div>
+     <div class="ntsub">아직 접수 확인을 하지 않은 문의가 있습니다.</div>
      <div class="ntlist">${list}${ns.length>4?`<div class="ntmore">외 ${ns.length-4}건</div>`:''}</div>`;
   document.getElementById('notiGate').style.display='flex';
 }

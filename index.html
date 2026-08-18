@@ -439,6 +439,17 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
 .sc-ok{font-size:13px;font-weight:700;color:var(--ok);opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s}
 .sc-ok.show{opacity:1;transform:none}
 .subcard select.f-in{height:46px}
+/* ---------- 회신 스레드 ---------- */
+.thread{margin-top:4px}
+.rep{border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-top:8px;background:#f9fbfe}
+.rep .rh{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);margin-bottom:5px;flex-wrap:wrap}
+.rep .rh b{color:var(--ink);font-size:12.5px}
+.rep .rwhen{margin-left:auto;font-size:11px;color:#98a2b3}
+.rep .rx{font-size:11px;color:var(--red);cursor:pointer;border:0;background:none;font-family:inherit;padding:0 2px}
+.rep .rt{font-size:13.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.rep.mine{background:var(--greenSoft);border-color:#bfe3cd}
+.repnone{font-size:12.5px;color:var(--muted);margin-top:6px}
+.rpdraft{font-size:11.5px;font-weight:800;color:var(--warn);background:#fff7e8;border-radius:20px;padding:3px 9px}
 /* ---------- 기도제목 (대시보드) ---------- */
 .prayctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .pill2{display:inline-block;font-size:12px;font-weight:800;padding:7px 12px;border-radius:20px;background:#f1f4f9;color:#8a94a3;cursor:pointer;border:0;font-family:inherit}
@@ -883,6 +894,21 @@ function dedupeReports(list){
 /* 삭제 표시된 문의는 앱 어디에도 나타나지 않게 걸러낸다.
    기록은 스프레드시트에 그대로 남아 있어 필요하면 되살릴 수 있다. */
 function liveSubs(list){ return (Array.isArray(list)?list:[]).filter(s=>s && !s.deleted); }
+/* 회신 목록 — 예전 형식(reply 1건)도 첫 회신으로 그대로 읽어온다 */
+function replyList(s){
+  if(!s) return [];
+  if(Array.isArray(s.replies)) return s.replies.filter(r=>r && String(r.text||'').trim());
+  const t=String(s.reply||'').trim();
+  return t? [{text:t, by:s.replyBy||'담당자', at:s.replyAt||s.ts||''}] : [];
+}
+/* 저장 형식 통일: replies 배열 + 예전 화면 호환용 reply/replyBy/replyAt(마지막 회신) */
+function setReplies(s,list){
+  s.replies=list;
+  const last=list[list.length-1];
+  s.reply=last?last.text:'';
+  s.replyBy=last?last.by:'';
+  s.replyAt=last?last.at:'';
+}
 const RKEY='sgc_reports_v6', SKEY='sgc_subs_v6';
 let reports = dedupeReports(JSON.parse(localStorage.getItem(RKEY)||'null'));
 let subs = liveSubs(JSON.parse(localStorage.getItem(SKEY)||'null'));
@@ -1415,8 +1441,8 @@ function openMine(idx){
   if(s.status==='반려'){bar='<div class="steps"><span class="fbadge s-반려">반려</span> <span class="fmeta">처리 불가</span></div>';}
   else{const steps=['접수','처리중','완료'];const cur=s.status==='완료'?2:(s.status==='처리중'||s.status==='보류')?1:0;
     bar='<div class="steps">'+steps.map((st,k)=>`<span class="step ${k<=cur?'on':''}">${st}</span>`).join('<span style="color:#cbd5e1">›</span>')+(s.status==='보류'?' <span class="fmeta">(보류)</span>':'')+'</div>';}
-  const rInfo=s.replyBy?` · ${esc(s.replyBy)}${s.replyAt?' · '+fmtDT(s.replyAt):''}`:'';
-  const reply=s.reply?`<div class="reply"><b>담당자 회신</b><span class="rwho">${rInfo}</span><div class="rtxt">${s.reply}</div></div>`:'';
+  const rl=replyList(s);
+  const reply=rl.length?`<div class="reply"><b>담당자 회신 ${rl.length>1?'('+rl.length+'건)':''}</b><div class="thread">${replyThreadHtml(s,false,idx)}</div></div>`:'';
   document.getElementById('lk'+idx).innerHTML=(s.body?`<div class="fmeta" style="color:var(--ink);margin-top:4px">${s.body}</div>`:'')+`<div class="fmeta">담당: ${s.assignee}${s.contact&&s.contact!=='익명'?' · 회신 '+s.contact:''}</div>`+bar+reply;
 }
 
@@ -1695,6 +1721,7 @@ document.querySelectorAll('#mgFilter button').forEach(b=>b.onclick=()=>{
 function hoursSince(iso){return (Date.now()-new Date(iso).getTime())/3600000;}
 function isOverdue(s){return s.status==='접수' && hoursSince(s.ts)>48;}
 function renderSubs(){
+  stashDrafts();                       /* 다시 그리기 전에 작성 중인 회신 보관 */
   const box=document.getElementById('subList');
   const scope=document.getElementById('mgScope');
   const scoped=(current.role==='chair'||current.role==='staff'||current.role==='elder');
@@ -1724,9 +1751,12 @@ function renderSubs(){
          <label class="sc-l">상태 변경</label>
          <select class="f-in" onchange="setStatus(${idx},this.value)">${['접수','처리중','보류','완료','반려'].map(o=>`<option ${o===s.status?'selected':''}>${o}</option>`).join('')}</select>
          <label class="sc-l">회신 / 처리 답변</label>
-         <div class="rpmeta" id="rpmeta${idx}">${s.reply&&s.replyBy?`<span class="rpsaved">✔ 저장됨 · ${esc(s.replyBy)}${s.replyAt?' · '+fmtDT(s.replyAt):''}</span>`:''}</div>
-         <textarea class="f-in" id="rp${idx}" oninput="onReplyInput(${idx})" placeholder="처리 결과나 답변 내용을 적어 회신하세요">${s.reply||''}</textarea>
-         <div class="sc-save"><button class="btn sm ${s.reply?'saved':''}" id="rpbtn${idx}" ${s.reply?'disabled':''} onclick="saveReply(${idx})">${s.reply?'✔ 저장됨':'회신 저장'}</button>${canDelete()?`<button class="btnsm danger" onclick="deleteSub('${sid}')">🗑 삭제</button>`:''}</div>
+         <div class="thread" id="thr${idx}">${replyThreadHtml(s,true,idx)}</div>
+         <label class="sc-l">회신 추가</label>
+         <textarea class="f-in" id="rp${idx}" data-sid="${sid}" oninput="onReplyInput(${idx})" placeholder="처리 결과나 답변 내용을 적어 회신하세요">${esc(replyDrafts[sid]||'')}</textarea>
+         <div class="sc-save"><button class="btn sm" id="rpbtn${idx}" onclick="saveReply(${idx})">회신 추가 저장</button>
+           <span class="rpdraft" id="rpmeta${idx}" style="${(replyDrafts[sid]||'').trim()?'':'display:none'}">✎ 작성 중 · 아직 저장되지 않았습니다</span>
+           ${canDelete()?`<button class="btnsm danger" onclick="deleteSub('${sid}')">🗑 삭제</button>`:''}</div>
        </div>`;
     return `<tr class="brow ${od?'over':''} ${off?'offfilter':''}" data-sid="${sid}" onclick="toggleBrow(this,event)">
       <td class="c-no">${no}</td>
@@ -1783,6 +1813,7 @@ function goManage(status){
 /* 상태를 바꿔도 방금 만진 카드는 목록에 남겨 둔다(필터와 안 맞아도 흐리게 표시) */
 let keepSubId=null;
 function setStatus(i,v){
+  stashDrafts();                              /* 작성 중인 회신을 먼저 보관 */
   subs[i].status=v; saveS(); pushSub(subs[i]);
   keepSubId=subs[i].id||null;
   movedMsg='✔ '+v+'(으)로 변경됨';           /* 저장 후 목록이 다시 그려져도 유지 */
@@ -1796,25 +1827,58 @@ function paintMoved(){
   if(!c) return; const t=c.querySelector('.sc-moved'); if(!t) return;
   t.textContent=movedMsg; t.classList.toggle('show',!!movedMsg);
 }
-function setReply(i,v){subs[i].reply=v;saveS();pushSub(subs[i]);}
-/* 회신 저장: 담당자·시각 기록 + 버튼을 '저장됨' 상태로 */
+/* 저장 전 작성 중인 회신 (문의 id별) — 목록을 다시 그려도 사라지지 않게 */
+let replyDrafts={};
+function stashDrafts(){
+  document.querySelectorAll('#subList textarea[data-sid]').forEach(ta=>{
+    const sid=ta.dataset.sid; if(!sid) return;
+    if(String(ta.value||'').trim()) replyDrafts[sid]=ta.value; else delete replyDrafts[sid];
+  });
+}
+/* 회신 목록 표시 — canEdit 이면 본인/관리자 회신에 삭제 버튼 */
+function replyThreadHtml(s,canEdit,idx){
+  const list=replyList(s);
+  if(!list.length) return '<div class="repnone">아직 회신이 없습니다.</div>';
+  const me=(current&&current.who)||'';
+  return list.map((r,k)=>{
+    const mine=!!me && r.by===me;
+    const canDel=canEdit && (mine||canDelete());
+    return `<div class="rep${mine?' mine':''}">
+      <div class="rh"><b>${esc(r.by||'담당자')}</b><span class="rwhen">${r.at?fmtDT(r.at):''}</span>${canDel?`<button class="rx" onclick="delReply(${idx},${k})">삭제</button>`:''}</div>
+      <div class="rt">${esc(r.text)}</div></div>`;
+  }).join('');
+}
+/* 회신 추가 저장 — 기존 회신은 그대로 두고 한 건 덧붙임 */
 function saveReply(i){
-  const ta=document.getElementById('rp'+i); const v=ta?ta.value:'';
-  subs[i].reply=v;
-  subs[i].replyBy=(current&&current.who)||'담당자';
-  subs[i].replyAt=new Date().toISOString();
-  saveS(); pushSub(subs[i]);
-  setReplySaved(i,true);
-  const meta=document.getElementById('rpmeta'+i);
-  if(meta) meta.innerHTML=v?`<span class="rpsaved">✔ 저장됨 · ${esc(subs[i].replyBy)} · ${fmtDT(subs[i].replyAt)}</span>`:'';
+  const ta=document.getElementById('rp'+i); const v=String(ta?ta.value:'').trim();
+  if(!v){ alert('회신 내용을 입력하세요.'); return; }
+  const s=subs[i];
+  const list=replyList(s);
+  list.push({text:v, by:(current&&current.who)||'담당자', at:new Date().toISOString()});
+  setReplies(s,list);
+  if(s.id) delete replyDrafts[s.id];
+  saveS(); pushSub(s);
+  if(ta){ ta.value=''; autoGrow(ta); }
+  const thr=document.getElementById('thr'+i); if(thr) thr.innerHTML=replyThreadHtml(s,true,i);
+  const meta=document.getElementById('rpmeta'+i); if(meta) meta.style.display='none';
 }
-/* 저장 상태 표시 — 내용을 고치면 다시 '회신 저장'으로 되살아남 */
-function setReplySaved(i,saved){
-  const b=document.getElementById('rpbtn'+i); if(!b) return;
-  if(saved){ b.textContent='✔ 저장됨'; b.classList.add('saved'); b.disabled=true; }
-  else { b.textContent='회신 저장'; b.classList.remove('saved'); b.disabled=false; }
+/* 회신 한 건 삭제 (작성자 본인 또는 관리자) */
+function delReply(i,k){
+  const s=subs[i]; const list=replyList(s); const r=list[k]; if(!r) return;
+  const me=(current&&current.who)||'';
+  if(!(r.by===me || canDelete())){ alert('본인이 작성한 회신만 삭제할 수 있습니다.'); return; }
+  if(!confirm('이 회신을 삭제할까요?\n\n· '+r.text.slice(0,40)+(r.text.length>40?'…':''))) return;
+  list.splice(k,1); setReplies(s,list);
+  saveS(); pushSub(s);
+  const thr=document.getElementById('thr'+i); if(thr) thr.innerHTML=replyThreadHtml(s,true,i);
 }
-function onReplyInput(i){ setReplySaved(i,false); }
+/* 작성 중 표시 + 초안 보관 */
+function onReplyInput(i){
+  const ta=document.getElementById('rp'+i); if(!ta) return;
+  const sid=ta.dataset.sid; const has=String(ta.value||'').trim().length>0;
+  if(sid){ if(has) replyDrafts[sid]=ta.value; else delete replyDrafts[sid]; }
+  const meta=document.getElementById('rpmeta'+i); if(meta) meta.style.display=has?'inline-block':'none';
+}
 
 // ---------- 대시보드 ----------
 let charts={};

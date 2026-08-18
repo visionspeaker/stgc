@@ -439,6 +439,22 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
 .sc-ok{font-size:13px;font-weight:700;color:var(--ok);opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s}
 .sc-ok.show{opacity:1;transform:none}
 .subcard select.f-in{height:46px}
+/* ---------- 접수 처리 상세 (섹션 구분) ---------- */
+.dsec{margin-top:14px}
+.dsec:first-child{margin-top:0}
+.dsec .dl{font-size:11px;font-weight:800;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:7px}
+.dsec .dl::after{content:'';flex:1;height:1px;background:var(--line)}
+.qbody{background:#fff;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.qmeta{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6}
+.seg{display:flex;gap:5px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:8px 14px;font-size:12.5px;font-weight:800;font-family:inherit;color:var(--muted);cursor:pointer}
+.seg button:active{background:#f1f4f9}
+.seg button.on{background:var(--green);color:#fff;border-color:var(--green)}
+.addrow{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+/* 목록 줄의 문의 삭제 */
+.btable .c-del{width:36px;text-align:center}
+.trash{border:0;background:none;cursor:pointer;font-size:14px;color:#c3ccd8;padding:3px 5px;font-family:inherit}
+.trash:active{color:var(--red)}
 /* ---------- 회신 스레드 ---------- */
 .thread{margin-top:4px}
 .rep{border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-top:8px;background:#f9fbfe}
@@ -1741,37 +1757,42 @@ function renderSubs(){
   const rows=list.map((s,k)=>{const idx=subs.indexOf(s);const od=isOverdue(s);
     const off=(mgF!=='전체'&&s.status!==mgF);   /* 현재 필터와 다르지만 방금 바꾼 건 */
     const sid=esc(s.id||''), no=NOS[s.id]||'';
+    const nRep=replyList(s).length;
     const detail=
       `${off?`<div class="b-warn">지금 보고 계신 ‘${esc(mgF)}’ 목록에는 포함되지 않는 상태입니다. 목록을 새로 고르면 정리됩니다.</div>`:''}
-       <div class="sc-meta">${subType(s.type)} · ${catName(s.category)} · 담당 <b>${s.assignee}</b></div>
-       <div class="sc-body">${s.body||'(내용 없음)'}</div>
-       ${s.hasPhoto?`<div class="sc-photo" id="ph_${sid}"><button class="btnsm" onclick="loadPhoto('${sid}')">📷 첨부 사진 보기</button></div>`:''}
-       <div class="sc-who">접수자 <b>${s.name}</b>${s.contact?' · '+s.contact:''}</div>
-       <div class="sc-ctl">
-         <label class="sc-l">상태 변경</label>
-         <select class="f-in" onchange="setStatus(${idx},this.value)">${['접수','처리중','보류','완료','반려'].map(o=>`<option ${o===s.status?'selected':''}>${o}</option>`).join('')}</select>
-         <label class="sc-l">회신 / 처리 답변</label>
+       <div class="dsec">
+         <div class="dl">문의 내용</div>
+         <div class="qbody">${s.body||'(내용 없음)'}</div>
+         ${s.hasPhoto?`<div class="sc-photo" id="ph_${sid}"><button class="btnsm" onclick="loadPhoto('${sid}')">📷 첨부 사진 보기</button></div>`:''}
+         <div class="qmeta">${subType(s.type)} · ${catName(s.category)} · 담당 <b>${s.assignee}</b><br>접수자 <b>${s.name}</b>${s.contact?' · '+s.contact:''}</div>
+       </div>
+       <div class="dsec">
+         <div class="dl">처리 상태</div>
+         <div class="seg" id="seg${idx}">${['접수','처리중','보류','완료','반려'].map(o=>`<button class="${o===s.status?'on':''}" onclick="setStatus(${idx},'${o}')">${o}</button>`).join('')}<span class="sc-moved"></span></div>
+       </div>
+       <div class="dsec">
+         <div class="dl">회신${nRep?' '+nRep+'건':''}</div>
          <div class="thread" id="thr${idx}">${replyThreadHtml(s,true,idx)}</div>
-         <label class="sc-l">회신 추가</label>
-         <textarea class="f-in" id="rp${idx}" data-sid="${sid}" oninput="onReplyInput(${idx})" placeholder="처리 결과나 답변 내용을 적어 회신하세요">${esc(replyDrafts[sid]||'')}</textarea>
-         <div class="sc-save"><button class="btn sm" id="rpbtn${idx}" onclick="saveReply(${idx})">회신 추가 저장</button>
-           <span class="rpdraft" id="rpmeta${idx}" style="${(replyDrafts[sid]||'').trim()?'':'display:none'}">✎ 작성 중 · 아직 저장되지 않았습니다</span>
-           ${canDelete()?`<button class="btnsm danger" onclick="deleteSub('${sid}')">🗑 삭제</button>`:''}</div>
+         <textarea class="f-in" style="margin-top:9px" id="rp${idx}" data-sid="${sid}" oninput="onReplyInput(${idx})" placeholder="회신을 추가로 적어주세요">${esc(replyDrafts[sid]||'')}</textarea>
+         <div class="addrow"><button class="btn sm" id="rpbtn${idx}" onclick="saveReply(${idx})">회신 추가 저장</button>
+           <span class="rpdraft" id="rpmeta${idx}" style="${(replyDrafts[sid]||'').trim()?'':'display:none'}">✎ 작성 중 · 아직 저장되지 않았습니다</span></div>
        </div>`;
+    const del=canDelete();
     return `<tr class="brow ${od?'over':''} ${off?'offfilter':''}" data-sid="${sid}" onclick="toggleBrow(this,event)">
       <td class="c-no">${no}</td>
       <td class="c-st"><span class="fbadge s-${s.status}">${s.status}</span></td>
-      <td class="b-tt"><span class="car">›</span>${s.title}${od?' <span class="fbadge s-보류">48h 초과</span>':''}<span class="sc-moved"></span></td>
+      <td class="b-tt"><span class="car">›</span>${s.title}${od?' <span class="fbadge s-보류">48h 초과</span>':''}</td>
       <td class="c-cat">${catName(s.category)}</td>
       <td class="c-who">${esc(s.assignee||'')}</td>
       <td class="c-dt">${fmtDT(s.ts).slice(5,10)}</td>
+      ${del?`<td class="c-del"><button class="trash" title="이 문의 삭제" onclick="deleteSub('${sid}')">🗑</button></td>`:''}
     </tr>
-    <tr class="bdetrow" style="display:none"><td class="bdet" colspan="6">${detail}</td></tr>`;
+    <tr class="bdetrow" style="display:none"><td class="bdet" colspan="${del?7:6}">${detail}</td></tr>`;
   }).join('');
   box.innerHTML=
     `<table class="btable"><thead><tr>
        <th class="c-no">번호</th><th class="c-st">상태</th><th>제목</th>
-       <th class="c-cat">분류</th><th class="c-who">담당</th><th class="c-dt">등록일</th>
+       <th class="c-cat">분류</th><th class="c-who">담당</th><th class="c-dt">등록일</th>${canDelete()?'<th class="c-del"></th>':''}
      </tr></thead><tbody>${rows}</tbody></table>`;
   restoreOpenRows(box);
   growAll(box); paintMoved();
@@ -1824,7 +1845,9 @@ function setStatus(i,v){
 let movedMsg='', movedTimer=null;
 function paintMoved(){
   const c=document.querySelector('tr.brow[data-sid="'+(keepSubId||'')+'"]');
-  if(!c) return; const t=c.querySelector('.sc-moved'); if(!t) return;
+  if(!c) return;
+  const det=c.nextElementSibling;                       /* 변경 표시는 상세의 상태 줄에 */
+  const t=(det&&det.querySelector('.sc-moved'))||c.querySelector('.sc-moved'); if(!t) return;
   t.textContent=movedMsg; t.classList.toggle('show',!!movedMsg);
 }
 /* 저장 전 작성 중인 회신 (문의 id별) — 목록을 다시 그려도 사라지지 않게 */

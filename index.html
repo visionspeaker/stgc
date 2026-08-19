@@ -1062,10 +1062,14 @@ function mySubs(){
   if(r==='chair'||r==='staff'||r==='elder') return subs.filter(s=>normCat(s.category)===normCat(current.category));
   return [];
 }
+/* 담당자가 목록에서 열어본 적이 있으면 '확인' 상태 */
+function subRead(s){ return !!(s && s.readAt); }
+/* 아직 담당자가 열어보지 않은 접수 건 = 미처리 */
+function unreadSubs(){ return mySubs().filter(s=>s.status==='접수' && !subRead(s)); }
 /* 알림·배지 대상 = 아직 접수 확인이 안 된 건(접수 상태)만 = 요약의 '미처리'와 동일.
    처리중은 담당자가 이미 확인하고 진행 중이므로 알리지 않는다.
    완료·보류·반려도 어느 기기에서 로그인하든 알리지 않는다. */
-function openSubs(){ return mySubs().filter(s=>s.status==='접수'); }
+function openSubs(){ return unreadSubs(); }
 /* 오늘 이미 알림을 본 계정은 다시 띄우지 않음 (기기별 하루 1회) */
 function newSubs(){
   const seen=getSeenAt();           /* 마지막으로 알림을 확인한 날짜 (YYYY-MM-DD) */
@@ -1824,6 +1828,7 @@ document.querySelectorAll('#mgFilter button').forEach(b=>b.onclick=()=>{
 function mgPick(f){
   mgF=f; keepSubId=null;
   document.querySelectorAll('#mgFilter button').forEach(x=>x.classList.toggle('active',x.dataset.f===f));
+  if(f==='미확인'){ document.querySelectorAll('#mgFilter button').forEach(x=>x.classList.remove('active')); }
   renderSubs();
 }
 function hoursSince(iso){return (Date.now()-new Date(iso).getTime())/3600000;}
@@ -1835,16 +1840,23 @@ function renderSubs(){
   const scoped=(current.role==='chair'||current.role==='staff'||current.role==='elder');
   let base = scoped ? subs.filter(s=>normCat(s.category)===normCat(current.category)) : subs;
   scope.textContent = scoped ? '· 담당: '+catName(current.category)+' ('+base.length+'건)' : '· 전체 위원회';
-  /* 미처리 = 아직 접수 확인이 안 된 건(접수 상태)만. 처리중은 따로 집계 */
-  const cnt단=base.filter(s=>s.status==='접수').length;
+  /* 미처리 = 담당자가 아직 열어보지 않은 접수 건 / 접수 = 열어서 확인한 접수 건 */
+  const cnt미확인=base.filter(s=>s.status==='접수' && !subRead(s)).length;
+  const cnt확인=base.filter(s=>s.status==='접수' && subRead(s)).length;
   const cnt처리=base.filter(s=>s.status==='처리중').length;
   const done=base.filter(s=>s.status==='완료'||s.status==='보류'||s.status==='반려').length;
   document.getElementById('mgSummary').innerHTML=
-    `<div class="sumbox ${cnt단?'warn':''} clickable" onclick="mgPick('접수')"><b>${cnt단}</b>미처리<span class="sbsub">접수 확인 전</span></div>`+
-    `<div class="sumbox clickable" onclick="mgPick('접수')"><b>${cnt단}</b>접수</div>`+
+    `<div class="sumbox ${cnt미확인?'warn':''} clickable" onclick="mgPick('미확인')"><b>${cnt미확인}</b>미처리<span class="sbsub">담당자 미확인</span></div>`+
+    `<div class="sumbox clickable" onclick="mgPick('접수')"><b>${cnt확인}</b>접수<span class="sbsub">확인함</span></div>`+
     `<div class="sumbox clickable" onclick="mgPick('처리중')"><b>${cnt처리}</b>처리중</div>`+
     `<div class="sumbox clickable" onclick="mgPick('전체')"><b>${done}</b>완료·보류·반려</div>`;
-  const list=base.filter(s=>mgF==='전체'||s.status===mgF||(keepSubId&&s.id===keepSubId)).sort(byNewest);
+  const matchF=s=>{
+    if(mgF==='전체') return true;
+    if(mgF==='미확인') return s.status==='접수' && !subRead(s);
+    if(mgF==='접수')   return s.status==='접수' && subRead(s);
+    return s.status===mgF;
+  };
+  const list=base.filter(s=>matchF(s)||(keepSubId&&s.id===keepSubId)).sort(byNewest);
   const NOS=subNoMap();
   if(!list.length){ box.innerHTML='<div class="bempty">해당 조건의 접수가 없습니다.</div>'; return; }
   const rows=list.map((s,k)=>{const idx=subs.indexOf(s);const od=isOverdue(s);
@@ -1857,7 +1869,7 @@ function renderSubs(){
          <div class="dl">문의 내용</div>
          <div class="qbody">${s.body||'(내용 없음)'}</div>
          ${s.hasPhoto?`<div class="sc-photo" id="ph_${sid}"><button class="btnsm" onclick="loadPhoto('${sid}')">📷 첨부 사진 보기</button></div>`:''}
-         <div class="qmeta">${subType(s.type)} · ${catName(s.category)} · 담당 <b>${s.assignee}</b><br>접수자 <b>${s.name}</b>${s.contact?' · '+s.contact:''}</div>
+         <div class="qmeta">${subType(s.type)} · ${catName(s.category)} · 담당 <b>${s.assignee}</b><br>접수자 <b>${s.name}</b>${s.contact?' · '+s.contact:''}${subRead(s)?`<br><span style="color:var(--green);font-weight:700">✔ 확인 ${esc(s.readBy||'')} · ${fmtDT(s.readAt)}</span>`:''}</div>
        </div>
        <div class="dsec">
          <div class="dl">처리 상태</div>
@@ -1900,6 +1912,18 @@ function toggleBrow(tr,ev){
   const sid=tr.dataset.sid||'';
   if(on) openRows.add(sid); else openRows.delete(sid);
   if(on) growAll(det);
+  if(on && currentView==='manage') markSubRead(sid);
+}
+/* 담당자가 문의를 열어보면 '확인'으로 기록 (접수 상태일 때만) */
+function markSubRead(sid){
+  if(!sid) return;
+  const s=subs.find(x=>x.id===sid);
+  if(!s || s.status!=='접수' || subRead(s)) return;
+  s.readAt=new Date().toISOString();
+  s.readBy=(current&&current.who)||'담당자';
+  saveS(); pushSub(s);
+  renderSubs();                 /* 요약 카드·배지 갱신 (펼침 상태는 유지) */
+  paintSubBadge();
 }
 /* 목록을 다시 그려도 펼쳐둔 행은 그대로 유지 */
 let openRows=new Set();

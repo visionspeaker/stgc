@@ -962,7 +962,27 @@ function rerender(){
   if(currentView==='myreq'){ renderMyReq(); return; }
   if(currentView==='report'){ if(reportDist){ renderDatePick(); renderReportStatus(); paintRepState(); } return; }
 }
-function animateCount(el,to){ if(!el) return; const target=Number(to); if(!isFinite(target)){ el.textContent='·'; return; } const start=(/^\d+$/.test(el.textContent))?Number(el.textContent):0; if(start===target){ el.textContent=String(target); return; } if(el._va) cancelAnimationFrame(el._va); const dur=850, t0=performance.now(); const step=(now)=>{ let p=(now-t0)/dur; if(p>1)p=1; const eased=1-Math.pow(1-p,3); el.textContent=String(Math.round(start+(target-start)*eased)); if(p<1){ el._va=requestAnimationFrame(step); } else { el.textContent=String(target); el._va=null; } }; el._va=requestAnimationFrame(step); }
+/* 숫자 카운트업. 화면이 보이지 않는 상태에서는 requestAnimationFrame 이 멈추므로,
+   같은 시간 뒤에 최종 숫자를 반드시 채워 넣는 보조 타이머를 함께 건다. */
+function animateCount(el,to){
+  if(!el) return;
+  const target=Number(to);
+  if(!isFinite(target)){ el.textContent='·'; return; }
+  const start=(/^\d+$/.test(el.textContent))?Number(el.textContent):0;
+  if(el._vt){ clearTimeout(el._vt); el._vt=null; }
+  if(start===target){ el.textContent=String(target); return; }
+  if(el._va){ cancelAnimationFrame(el._va); el._va=null; }
+  const dur=850, t0=(window.performance&&performance.now)?performance.now():Date.now();
+  const done=()=>{ el.textContent=String(target);
+    if(el._va){ cancelAnimationFrame(el._va); el._va=null; }
+    if(el._vt){ clearTimeout(el._vt); el._vt=null; } };
+  const step=(now)=>{ let p=(now-t0)/dur; if(p>1)p=1;
+    const eased=1-Math.pow(1-p,3);
+    el.textContent=String(Math.round(start+(target-start)*eased));
+    if(p<1){ el._va=requestAnimationFrame(step); } else { done(); } };
+  el._va=requestAnimationFrame(step);
+  el._vt=setTimeout(done, dur+250);          /* 애니메이션이 못 돌아도 숫자는 뜨게 */
+}
 /* 방문자 수는 서버 응답이 올 때까지 비어 있어서 늦게 보인다.
    마지막 숫자를 기기에 저장해 두고 화면에 들어오는 즉시 그 숫자로 카운트업한 뒤,
    서버 응답이 오면 실제 값으로 다시 맞춘다. */

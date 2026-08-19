@@ -469,6 +469,15 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
 .rep.mine{background:var(--greenSoft);border-color:#bfe3cd}
 .repnone{font-size:12.5px;color:var(--muted);margin-top:6px}
 .rpdraft{font-size:11.5px;font-weight:800;color:var(--warn);background:#fff7e8;border-radius:20px;padding:3px 9px}
+/* ---------- 중보기도 요청 ---------- */
+.ipbox{display:flex;align-items:center;gap:8px;margin-top:9px;background:#f6f3fd;border:1px solid #ddd2f5;border-radius:10px;padding:9px 11px;font-size:12.5px;font-weight:700;color:#4b3a86;cursor:pointer}
+.ipbox input{width:auto;accent-color:#7c5cd6;flex:none}
+.ipbadge{display:inline-block;font-size:10px;font-weight:800;background:#efe9fd;color:#7c5cd6;border-radius:20px;padding:2px 7px;margin-right:5px;vertical-align:1px}
+.pill2.ip.on{background:#efe9fd;color:#7c5cd6;outline:2px solid #7c5cd6}
+.prbtns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.prbtns .btn{flex:1;min-width:112px}
+.prok{display:none;font-size:12.5px;font-weight:800;color:var(--green);background:var(--greenSoft);border-radius:20px;padding:6px 12px;margin-top:8px}
+.prok.on{display:inline-block}
 /* ---------- 기도제목 (대시보드) ---------- */
 .prayctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
 .pill2{display:inline-block;font-size:12px;font-weight:800;padding:7px 12px;border-radius:20px;background:#f1f4f9;color:#8a94a3;cursor:pointer;border:0;font-family:inherit}
@@ -674,6 +683,27 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
   </div>
 </section>
 
+<!-- 중보기도 -->
+<section id="pray" class="view">
+  <div class="card">
+    <h2 style="margin:0;font-size:17px;color:var(--green)">중보기도</h2>
+    <p class="dd" id="ipDesc">구역보고에서 <b>중보기도 요청</b>으로 체크된 기도제목만 모았습니다.</p>
+    <div class="prayctl">
+      <button class="wkarrow" id="ipPrev" onclick="moveIpWeek(-1)" title="이전 주일">‹</button>
+      <select class="f-in" id="ipWeek" style="width:auto" onchange="renderIp()"></select>
+      <button class="wkarrow" id="ipNext" onclick="moveIpWeek(1)" title="다음 주일">›</button>
+      <input class="f-in praysrch" id="ipSrch" placeholder="이름·내용 검색" oninput="renderIp()"/>
+    </div>
+    <div id="ipBoard"></div>
+    <div class="prbtns">
+      <button class="btn" onclick="printIp()">🖨 출력</button>
+      <button class="btn sec" onclick="copyIp()">📋 복사하기</button>
+      <button class="btn" style="background:linear-gradient(135deg,#4b9fe0,#2e74b5)" onclick="xlsIp()">⬇ 엑셀</button>
+    </div>
+    <span class="prok" id="ipOk"></span>
+  </div>
+</section>
+
 <!-- 구역보고 -->
 <section id="report" class="view">
   <div class="applike">
@@ -802,10 +832,16 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
     <div class="prayctl">
       <button class="pill2 on" id="tgPray" onclick="togglePray('P')">기도제목</button>
       <button class="pill2" id="tgEtc" onclick="togglePray('E')">기타 사항</button>
+      <button class="pill2 ip" id="tgIp" onclick="togglePray('I')">🙏 중보기도 요청만</button>
       <input class="f-in praysrch" id="praySrch" placeholder="이름·내용 검색" oninput="renderPray()"/>
     </div>
     <div id="prayBoard"></div>
-    <button class="btn" style="width:100%;margin-top:12px" onclick="printPray()">🖨 기도제목 출력</button>
+    <div class="prbtns">
+      <button class="btn" onclick="printPray()">🖨 출력</button>
+      <button class="btn sec" onclick="copyPray()">📋 복사하기</button>
+      <button class="btn" style="background:linear-gradient(135deg,#4b9fe0,#2e74b5)" onclick="xlsPray()">⬇ 엑셀</button>
+    </div>
+    <span class="prok" id="prayOk"></span>
   </div>
 </section>
 
@@ -960,6 +996,7 @@ function rerender(){
   if(currentView==='dash'){ renderDash(); return; }
   if(currentView==='manage'){ renderSubs(); return; }
   if(currentView==='myreq'){ renderMyReq(); return; }
+  if(currentView==='pray'){ renderIp(); return; }
   if(currentView==='report'){ if(reportDist){ renderDatePick(); renderReportStatus(); paintRepState(); } return; }
 }
 /* 숫자 카운트업. 화면이 보이지 않는 상태에서는 requestAnimationFrame 이 멈추므로,
@@ -1145,6 +1182,7 @@ const ACCOUNTS={
  '홍춘섭':{role:'chair',pw:'1234',category:"차량 (차량·주차)"},
  '허미영':{role:'leader',pw:'1234',district:'3구역'},
  '김순이':{role:'leader',pw:'1234',district:'샬롬 구역'},
+ '서은주':{role:'pray',pw:'1234'},
  '박인성':{role:'admin',pw:'1234'},
  '강유석':{role:'admin',pw:'1234'},
  '양선영':{role:'admin',pw:'1234'},
@@ -1253,10 +1291,11 @@ const ROLE_NAV={
  leader:[['report','구역보고']],
  elder:[['report','구역보고'],['manage','문의 접수 처리']],
  chair:[['manage','문의 접수 처리']],
+ pray:[['pray','중보기도']],
  staff:[['manage','문의 접수 처리']],
- admin:[['dash','대시보드'],['report','구역보고'],['edu','교육부','https://visionspeaker.github.io/edu-dashboard/'],['manage','문의 접수 처리']]
+ admin:[['dash','대시보드'],['report','구역보고'],['pray','중보기도'],['edu','교육부','https://visionspeaker.github.io/edu-dashboard/'],['manage','문의 접수 처리']]
 };
-const ROLE_LABEL={guest:'교인',member:'일반 교인',leader:'구역장',elder:'장로 · 구역장/위원장',chair:'위원장',staff:'부장',admin:'관리자(교역자·담임목사)'};
+const ROLE_LABEL={guest:'교인',member:'일반 교인',leader:'구역장',elder:'장로 · 구역장/위원장',chair:'위원장',staff:'부장',pray:'중보기도팀장',admin:'관리자(교역자·담임목사)'};
 function setRoleLabel(){
   const role=current.role;
   let who='<b>'+(ROLE_LABEL[role]||'교인')+'</b>';
@@ -1298,6 +1337,7 @@ function showView(v,back){
   if(v==='manage'){ renderSubs(); markSubsSeen(); }
   if(v==='myreq') renderMyReq();
   if(v==='dash') renderDash();
+  if(v==='pray') renderIp();
   growAll(document.getElementById(v));
 }
 function buildNav(view){
@@ -1549,9 +1589,9 @@ function showReport(){
 function loadReportInto(){
   reportRoster=rosterOf(reportDist,selWeek);
   ATT={}; absNotes={}; absReason={};
-  reportRoster.forEach(n=>ATT[n]={t:{},c:{'새벽':0,'성경':0,'QT(가정)':0},p:'',e:''});
+  reportRoster.forEach(n=>ATT[n]={t:{},c:{'새벽':0,'성경':0,'QT(가정)':0},p:'',e:'',ip:false});
   const prev=reports.find(r=>r.district===reportDist && r.date===selWeek);
-  if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0,'성경':0,'QT(가정)':0},prev.detail[n].c),p:prev.detail[n].p||'',e:prev.detail[n].e||''}; }); }
+  if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0,'성경':0,'QT(가정)':0},prev.detail[n].c),p:prev.detail[n].p||'',e:prev.detail[n].e||'',ip:!!prev.detail[n].ip}; }); }
   if(prev && prev.sundayAbsent){ prev.sundayAbsent.forEach(a=>{absReason[a.name]=a.reason;absNotes[a.name]=a.note||'';}); }
   const cn=document.getElementById('cellNote'); if(cn){ cn.value=(prev&&prev.cell&&prev.cell.note)||''; bindGrow(cn); autoGrow(cn); }
   /* 해당 주일 보고서가 아직 없으면 직전 보고서의 결석 사유를 '불러오기' 후보로 준비 */
@@ -1656,7 +1696,8 @@ function buildRosterCards(){
       return `<div class="cnt"><span class="cl">${k}</span><div class="cpick${v>0?' filled':''}" data-n="${n}" data-k="${k}" data-max="${mx}" role="button" tabindex="0">${v}</div></div>`;}).join('');
     const pv=(ATT[n].p||'').replace(/"/g,'&quot;');
     const ev=(ATT[n].e||'').replace(/"/g,'&quot;');
-    const pray=`<div class="pray"><label class="pl">기도제목 <span>· 선택 입력</span></label><input class="ppick" type="text" data-n="${n}" placeholder="세부내용" value="${pv}"/></div>`;
+    const pray=`<div class="pray"><label class="pl">기도제목 <span>· 선택 입력</span></label><input class="ppick" type="text" data-n="${n}" placeholder="세부내용" value="${pv}"/>`
+      + `<label class="ipbox"><input type="checkbox" class="ipick" data-n="${n}" ${ATT[n].ip?'checked':''}/> 🙏 중보기도 요청 — 중보기도팀에 전달</label></div>`;
     const etc=`<div class="pray"><label class="pl">기타 사항 <span>· 선택 입력</span></label><input class="epick" type="text" data-n="${n}" placeholder="세부내용" value="${ev}"/></div>`;
     return `<div class="prow" data-n="${n}"><div class="phead"><span class="pn">${n}</span><span class="psum">미체크</span><span class="pcar">▾</span></div><div class="pdetail"><div class="tgls">${tg}</div><div class="cnts">${ct}</div>${pray}${etc}</div></div>`;
   }).join('');
@@ -1665,6 +1706,7 @@ function buildRosterCards(){
   box.querySelectorAll('.cpick').forEach(s=>s.onclick=e=>{e.stopPropagation();openKpad(s);});
   box.querySelectorAll('.ppick').forEach(i=>{const h=()=>{ATT[i.dataset.n].p=i.value;updPsum(i.dataset.n);};i.oninput=h;i.onchange=h;});
   box.querySelectorAll('.epick').forEach(i=>{const h=()=>{ATT[i.dataset.n].e=i.value;updPsum(i.dataset.n);};i.oninput=h;i.onchange=h;});
+  box.querySelectorAll('.ipick').forEach(i=>i.onchange=()=>{ATT[i.dataset.n].ip=i.checked;updPsum(i.dataset.n);});
   reportRoster.forEach(updPsum);
   document.getElementById('sunCnt').textContent=sunCount();
   buildAbsent();
@@ -1673,7 +1715,7 @@ function updPsum(n){
   const parts=TG.filter(t=>ATT[n].t[t]);
   const cs=Object.entries(ATT[n].c).filter(([k,v])=>v>0).map(([k,v])=>k.replace('(가정)','')+v);
   const el=document.querySelector('.prow[data-n="'+n+'"] .psum');
-  const pr=(ATT[n].p||'').trim()?['기도제목 ✎']:[];
+  const pr=(ATT[n].p||'').trim()?[(ATT[n].ip?'🙏 ':'')+'기도제목 ✎']:[];
   const et=(ATT[n].e||'').trim()?['기타 ✎']:[];
   if(el) el.textContent=[...parts,...cs,...pr,...et].join(' · ')||'미체크';
 }
@@ -1757,7 +1799,7 @@ async function submitReport(){
   const cellPresent=reportRoster.filter(n=>ATT[n].t['구역']);
   const absent=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부'])).map(n=>({name:n,reason:(absReason[n]&&absReason[n]!=='선택')?absReason[n]:'확인안됨',note:absNotes[n]||''}));
   const note=document.getElementById('cellNote').value;
-  const detail={}; reportRoster.forEach(n=>detail[n]={t:ATT[n].t,c:ATT[n].c,p:(ATT[n].p||'').trim(),e:(ATT[n].e||'').trim()});
+  const detail={}; reportRoster.forEach(n=>detail[n]={t:ATT[n].t,c:ATT[n].c,p:(ATT[n].p||'').trim(),e:(ATT[n].e||'').trim(),ip:!!ATT[n].ip});
   const now=new Date().toISOString();
   const rec={ts:now,at:now,by:((current&&current.who)||''),date:selWeek,district:reportDist,
     sundayPresent:sundayPresent,cellPresent:cellPresent,sundayAbsent:absent,detail:detail,
@@ -2120,20 +2162,127 @@ function renderPrnPicks(wk,wkReports){
   });
 }
 /* ---------- 기도제목 모아보기 ---------- */
-let prayShowP=true, prayShowE=false;
+let prayShowP=true, prayShowE=false, prayOnlyIp=false;
 function togglePray(k){
-  if(k==='P') prayShowP=!prayShowP; else prayShowE=!prayShowE;
-  if(!prayShowP&&!prayShowE){ if(k==='P') prayShowE=true; else prayShowP=true; }
-  const a=document.getElementById('tgPray'), b=document.getElementById('tgEtc');
+  if(k==='I'){ prayOnlyIp=!prayOnlyIp; }
+  else {
+    if(k==='P') prayShowP=!prayShowP; else prayShowE=!prayShowE;
+    if(!prayShowP&&!prayShowE){ if(k==='P') prayShowE=true; else prayShowP=true; }
+  }
+  const a=document.getElementById('tgPray'), b=document.getElementById('tgEtc'), c=document.getElementById('tgIp');
   if(a) a.classList.toggle('on',prayShowP);
   if(b) b.classList.toggle('on',prayShowE);
+  if(c) c.classList.toggle('on',prayOnlyIp);
   renderPray();
 }
+/* ---------- 복사 / 엑셀 (기도제목·중보기도 공용) ---------- */
+function prayToText(title,wk,groups){
+  const NL=String.fromCharCode(10);
+  let s=title+' · '+fmtSun(wk)+NL+NL;
+  groups.forEach(g=>{ s+='['+g.d+']'+NL;
+    g.rows.forEach(r=>{ s+='· '+r.n+' : '+(r.ip?'🙏 ':'')+(r.etc?'[기타] ':'')+r.t+NL; });
+    s+=NL; });
+  return s+'송탄영광교회 영광 커넥트';
+}
+function flashOk(id,msg){ const e=document.getElementById(id); if(!e) return;
+  e.textContent=msg; e.classList.add('on'); setTimeout(()=>e.classList.remove('on'),2400); }
+function copyText(t,okId){
+  const done=()=>flashOk(okId,'✔ 복사했습니다');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(done).catch(()=>copyFallback(t,okId));
+  } else copyFallback(t,okId);
+}
+function copyFallback(t,okId){
+  const ta=document.createElement('textarea'); ta.value=t;
+  ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); flashOk(okId,'✔ 복사했습니다'); }
+  catch(e){ flashOk(okId,'복사에 실패했습니다'); }
+  ta.remove();
+}
+/* 엑셀에서 바로 열리는 표 파일로 저장 */
+function downloadXls(rows,filename,okId){
+  const esc2=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const html='<table border="1">'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+esc2(c)+'</td>').join('')+'</tr>').join('')+'</table>';
+  const blob=new Blob([String.fromCharCode(65279)+'<html><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],
+                      {type:'application/vnd.ms-excel;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000);
+  flashOk(okId,'✔ 다운로드했습니다');
+}
+function prayRows(groups){
+  const rows=[['구역','이름','구분','내용','중보요청']];
+  groups.forEach(g=>g.rows.forEach(r=>rows.push([g.d,r.n,r.etc?'기타 사항':'기도제목',r.t,r.ip?'O':''])));
+  return rows;
+}
+/* ---------- 중보기도 전용 화면 (중보기도팀장·관리자) ---------- */
+function initIpWeek(){
+  const sel=document.getElementById('ipWeek'); if(!sel) return;
+  const weeks=[...new Set(reports.map(r=>r.date))].sort().reverse();
+  const keep=sel.value;
+  const same=sel.options.length===weeks.length && [...sel.options].every((o,i)=>o.value===weeks[i]);
+  if(!same) sel.innerHTML=weeks.map(w=>`<option value="${w}">${w}</option>`).join('');
+  if(keep && weeks.includes(keep)) sel.value=keep; else if(weeks.length) sel.value=weeks[0];
+  const n=sel.options.length, i=sel.selectedIndex;
+  const pv=document.getElementById('ipPrev'), nx=document.getElementById('ipNext');
+  if(pv) pv.disabled=(n===0||i>=n-1);
+  if(nx) nx.disabled=(n===0||i<=0);
+}
+function moveIpWeek(dir){
+  const sel=document.getElementById('ipWeek'); if(!sel||!sel.options.length) return;
+  const i=sel.selectedIndex-dir; if(i<0||i>=sel.options.length) return;
+  sel.selectedIndex=i; renderIp();
+}
+function ipData(){
+  const sel=document.getElementById('ipWeek');
+  const wk=sel?sel.value:'';
+  const q=((document.getElementById('ipSrch')||{}).value||'').trim();
+  return prayGroups(wk,q,true,true,true);        /* 중보 요청만, 기도제목+기타 */
+}
+function renderIp(){
+  initIpWeek();
+  const box=document.getElementById('ipBoard'); if(!box) return;
+  const {wk,groups}=ipData();
+  const total=groups.reduce((a,g)=>a+g.rows.length,0);
+  const d=document.getElementById('ipDesc');
+  if(d) d.innerHTML = wk
+    ? `${fmtSun(wk)} · <b>${groups.length}</b>개 구역 · <b>${total}</b>건 · 구역보고에서 <b>중보기도 요청</b>으로 체크된 기도제목입니다`
+    : '아직 제출된 구역보고가 없습니다';
+  box.innerHTML = groups.length
+    ? groups.map(g=>`<div class="pgroup"><div class="pghead">${esc(g.d)}<span class="cnt">${g.rows.length}건</span></div>`
+        + g.rows.map(r=>`<div class="pgrow"><span class="nm">${esc(r.n)}</span><span class="tx"><span class="ipbadge">🙏 중보</span>${r.etc?'<span class="etc">기타</span>':''}${esc(r.t)}</span></div>`).join('')
+        + `</div>`).join('')
+    : '<div class="muted" style="font-size:12.5px;margin-top:10px">이 주일에는 중보기도 요청이 없습니다.</div>';
+}
+function printIp(){
+  const {wk,groups}=ipData();
+  const total=groups.reduce((a,g)=>a+g.rows.length,0);
+  if(!total){ alert('출력할 중보기도 요청이 없습니다.'); return; }
+  document.getElementById('printArea').innerHTML =
+    `<div class="prpage"><h1>중보기도 요청</h1>
+       <div class="prmeta">${fmtSun(wk)} · ${groups.length}개 구역 · ${total}건 · 송탄영광교회 영광 커넥트</div>`
+    + groups.map(g=>`<h2>${esc(g.d)}</h2><table><tr><th style="width:70px">이름</th><th>내용</th></tr>`
+        + g.rows.map(r=>`<tr><td>${esc(r.n)}</td><td>${r.etc?'[기타] ':''}${esc(r.t)}</td></tr>`).join('')
+        + `</table>`).join('') + `</div>`;
+  window.print();
+}
+function copyIp(){ const {wk,groups}=ipData();
+  if(!groups.length){ alert('복사할 내용이 없습니다.'); return; }
+  copyText(prayToText('중보기도 요청',wk,groups),'ipOk'); }
+function xlsIp(){ const {wk,groups}=ipData();
+  if(!groups.length){ alert('내려받을 내용이 없습니다.'); return; }
+  downloadXls(prayRows(groups),'중보기도_'+wk+'.xls','ipOk'); }
+function copyPray(){ const {wk,groups}=prayGroups();
+  if(!groups.length){ alert('복사할 내용이 없습니다.'); return; }
+  copyText(prayToText(prayOnlyIp?'중보기도 요청':'구역 기도제목',wk,groups),'prayOk'); }
+function xlsPray(){ const {wk,groups}=prayGroups();
+  if(!groups.length){ alert('내려받을 내용이 없습니다.'); return; }
+  downloadXls(prayRows(groups),(prayOnlyIp?'중보기도_':'기도제목_')+wk+'.xls','prayOk'); }
 /* 선택 주일의 보고서에서 성도별 기도제목·기타 사항을 구역별로 모은다 */
-function prayGroups(){
-  const wk=document.getElementById('weekSel'); if(!wk) return {wk:'',groups:[]};
-  const week=wk.value;
-  const q=((document.getElementById('praySrch')||{}).value||'').trim();
+function prayGroups(week,q,onlyIp,showP,showE){
+  if(week===undefined){ const wk=document.getElementById('weekSel'); if(!wk) return {wk:'',groups:[]};
+    week=wk.value; q=((document.getElementById('praySrch')||{}).value||'').trim();
+    onlyIp=prayOnlyIp; showP=prayShowP; showE=prayShowE; }
   const wkReports=dedupeReports(reports.filter(r=>r.date===week));
   const byDist={}; wkReports.forEach(r=>byDist[r.district]=r);
   const groups=[];
@@ -2142,8 +2291,10 @@ function prayGroups(){
     roster.forEach(n=>{
       const t=(r.detail||{})[n]||{};
       const p=(t.p||'').trim(), e=(t.e||'').trim();
-      if(prayShowP && p) rows.push({n:n, t:p, etc:false});
-      if(prayShowE && e) rows.push({n:n, t:e, etc:true});
+      const ip=!!t.ip;
+      if(onlyIp && !ip) return;                    /* 중보기도 요청만 보기 */
+      if(showP && p) rows.push({n:n, t:p, etc:false, ip:ip});
+      if(showE && e) rows.push({n:n, t:e, etc:true, ip:ip});
     });
     const f=q? rows.filter(x=>x.n.includes(q)||x.t.includes(q)) : rows;
     if(f.length) groups.push({d:d, rows:f});
@@ -2155,10 +2306,10 @@ function renderPray(){
   const {wk,groups}=prayGroups();
   const total=groups.reduce((a,g)=>a+g.rows.length,0);
   const desc=document.getElementById('prayDesc');
-  if(desc) desc.innerHTML = wk? `${wk} 주일 · ${groups.length}개 구역 · <b>${total}</b>건` : '보고 데이터가 없습니다';
+  if(desc) desc.innerHTML = wk? `${wk} 주일 · ${groups.length}개 구역 · <b>${total}</b>건${prayOnlyIp?' · <span style="color:#7c5cd6;font-weight:800">🙏 중보기도 요청만</span>':''}` : '보고 데이터가 없습니다';
   box.innerHTML = groups.length
     ? groups.map(g=>`<div class="pgroup"><div class="pghead">${esc(g.d)}<span class="cnt">${g.rows.length}건</span></div>`
-        + g.rows.map(r=>`<div class="pgrow"><span class="nm">${esc(r.n)}</span><span class="tx">${r.etc?'<span class="etc">기타</span>':''}${esc(r.t)}</span></div>`).join('')
+        + g.rows.map(r=>`<div class="pgrow"><span class="nm">${esc(r.n)}</span><span class="tx">${r.ip?'<span class="ipbadge">🙏 중보</span>':''}${r.etc?'<span class="etc">기타</span>':''}${esc(r.t)}</span></div>`).join('')
         + `</div>`).join('')
     : '<div class="muted" style="font-size:12.5px;margin-top:8px">해당 조건의 기도제목이 없습니다.</div>';
 }
@@ -2170,7 +2321,7 @@ function printPray(){
     `<div class="prpage"><h1>구역 기도제목</h1>
        <div class="prmeta">${fmtSun(wk)} · ${groups.length}개 구역 · ${total}건 · 송탄영광교회 영광 커넥트</div>`
     + groups.map(g=>`<h2>${esc(g.d)}</h2><table><tr><th style="width:70px">이름</th><th>내용</th></tr>`
-        + g.rows.map(r=>`<tr><td>${esc(r.n)}</td><td>${r.etc?'[기타] ':''}${esc(r.t)}</td></tr>`).join('')
+        + g.rows.map(r=>`<tr><td>${esc(r.n)}</td><td>${r.ip?'[중보] ':''}${r.etc?'[기타] ':''}${esc(r.t)}</td></tr>`).join('')
         + `</table>`).join('')
     + `</div>`;
   window.print();

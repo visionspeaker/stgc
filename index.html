@@ -1304,7 +1304,7 @@ async function loginByName(){
 function openLogin(){document.getElementById('loginGate').style.display='flex';const el=document.getElementById('lgName');if(el){el.value='';el.focus();}const p=document.getElementById('lgPw2');if(p)p.value='';}
 function closeLogin(){document.getElementById('loginGate').style.display='none';}
 function openL(u){window.open(u,'_blank','noopener,noreferrer');}
-function goHome(){document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='none';document.getElementById('home').style.display='block';window.scrollTo(0,0);viewStack=[];clearAppHist();paintBackBtn();}
+function goHome(){clearMineState();document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='none';document.getElementById('home').style.display='block';window.scrollTo(0,0);viewStack=[];clearAppHist();paintBackBtn();}
 /* ---------- 화면 이동 기록 (뒤로가기는 한 단계씩) ---------- */
 let viewStack=[];            /* 거쳐온 화면들 (현재 화면 제외) */
 function pushView(v){ if(v && viewStack[viewStack.length-1]!==v) viewStack.push(v); }
@@ -1604,7 +1604,40 @@ async function deleteSub(id){
   try{ await pushSub(rec); }catch(e){}
   subDeleting=false;
 }
+/* ── 문의 확인: 목록을 다시 그려도 사용자가 하던 것을 잃지 않게 ──
+   서버에서 자료를 다시 받아오면(loadAll) 목록을 통째로 새로 그리는데,
+   그때 펼쳐둔 글이 접히고 입력 중이던 비밀번호가 사라지는 문제가 있었다.
+   펼침 상태·입력 중인 비밀번호·이미 열어 본 내용·입력칸 포커스를 모두 되살린다. */
+let minePins={};          /* 글id -> 입력 중이던 비밀번호 */
+let mineOpen=new Set();   /* 비밀번호 확인을 통과해 내용을 열어 둔 글id */
+let mineFocus=null;       /* 다시 그린 뒤 포커스를 돌려줄 글id */
+function sidOfDetail(el){
+  const row=el.closest('tr'); const head=row&&row.previousElementSibling;
+  return (head&&head.dataset.sid)||'';
+}
+function stashMine(){
+  mineFocus=null;
+  document.querySelectorAll('#myReqList tr.bdetrow input[id^="pin"]').forEach(inp=>{
+    const sid=sidOfDetail(inp); if(!sid) return;
+    if(inp.value) minePins[sid]=inp.value; else delete minePins[sid];
+    if(document.activeElement===inp) mineFocus=sid;
+  });
+}
+function restoreMine(){
+  document.querySelectorAll('#myReqList tr.brow').forEach(tr=>{
+    const sid=tr.dataset.sid||''; if(!sid) return;
+    const i=subs.findIndex(s=>String(s.id)===sid); if(i<0) return;
+    if(mineOpen.has(sid)){ renderMineDetail(i); return; }
+    const inp=document.getElementById('pin'+i);
+    if(!inp) return;
+    if(minePins[sid]!==undefined) inp.value=minePins[sid];
+    if(mineFocus===sid){ try{ inp.focus(); const n=inp.value.length; inp.setSelectionRange(n,n); }catch(e){} }
+  });
+}
+/* 홈으로 나가면 열어 본 기록은 지운다 */
+function clearMineState(){ minePins={}; mineOpen=new Set(); mineFocus=null; }
 function renderMyReq(){
+  stashMine();
   const bar=document.getElementById('fbFilter');
   if(bar && !bar.dataset.b){bar.dataset.b='1';bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{bar.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');myF=b.dataset.s;renderMyReq();});}
   const box=document.getElementById('myReqList');
@@ -1629,6 +1662,8 @@ function renderMyReq(){
        <th class="c-no">번호</th><th class="c-st">상태</th><th>제목</th>
        <th class="c-cat">분류</th><th class="c-dt">등록일</th>
      </tr></thead><tbody>${rows}</tbody></table>`;
+  restoreOpenRows(box);   /* 펼쳐둔 행 되살리기 */
+  restoreMine();          /* 입력 중이던 비밀번호·열어 본 내용·포커스 되살리기 */
 }
 /* 관리자는 비밀번호 없이 내용 확인 (삭제 여부 판단용) */
 function adminOpen(idx){
@@ -1637,15 +1672,25 @@ function adminOpen(idx){
   openMine(idx);
 }
 function openMine(idx){
-  const s=subs[idx]; const pin=(document.getElementById('pin'+idx).value||'').trim();
+  const s=subs[idx]; if(!s) return;
+  const el=document.getElementById('pin'+idx);
+  const pin=((el&&el.value)||'').trim();
   if(pin!==s.pin){alert('비밀번호가 일치하지 않습니다.');return;}
+  const sid=String(s.id||'');
+  mineOpen.add(sid); delete minePins[sid];   /* 다시 그려도 열린 채로 */
+  renderMineDetail(idx);
+}
+/* 비밀번호 확인이 끝난 글의 내용을 그린다 (다시 그릴 때도 이 함수를 쓴다) */
+function renderMineDetail(idx){
+  const s=subs[idx]; if(!s) return;
+  const box=document.getElementById('lk'+idx); if(!box) return;
   let bar;
   if(s.status==='반려'){bar='<div class="steps"><span class="fbadge s-반려">반려</span> <span class="fmeta">처리 불가</span></div>';}
   else{const steps=['접수','처리중','완료'];const cur=s.status==='완료'?2:(s.status==='처리중'||s.status==='보류')?1:0;
     bar='<div class="steps">'+steps.map((st,k)=>`<span class="step ${k<=cur?'on':''}">${st}</span>`).join('<span style="color:#cbd5e1">›</span>')+(s.status==='보류'?' <span class="fmeta">(보류)</span>':'')+'</div>';}
   const rl=replyList(s);
   const reply=rl.length?`<div class="reply"><b>담당자 회신 ${rl.length>1?'('+rl.length+'건)':''}</b><div class="thread">${replyThreadHtml(s,false,idx)}</div></div>`:'';
-  document.getElementById('lk'+idx).innerHTML=(s.body?`<div class="fmeta" style="color:var(--ink);margin-top:4px">${s.body}</div>`:'')+`<div class="fmeta">담당: ${s.assignee}${s.contact&&s.contact!=='익명'?' · 회신 '+s.contact:''}</div>`+bar+reply;
+  box.innerHTML=(s.body?`<div class="fmeta" style="color:var(--ink);margin-top:4px">${s.body}</div>`:'')+`<div class="fmeta">담당: ${s.assignee}${s.contact&&s.contact!=='익명'?' · 회신 '+s.contact:''}</div>`+bar+reply;
 }
 
 // ---------- 구역보고 (예배 출석부: 이름별 접이식) ----------

@@ -357,7 +357,18 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
 .prow{border:1px solid var(--line);border-radius:12px;margin-top:9px;overflow:hidden}
 .phead{display:flex;align-items:center;gap:8px;padding:12px 13px;cursor:pointer;background:#fff}
 .phead .pn{font-weight:700;font-size:14px}
+/* 이름 옆 연락 버튼 — 아이콘을 눌러도 출석 항목이 펼쳐지지 않게 처리 */
+.phead .pcts{display:flex;align-items:center;gap:5px;flex:none}
+.phead .cbtn{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+border:1px solid var(--line);text-decoration:none;flex:none}
+.phead .cbtn svg{width:14px;height:14px}
+.phead .cbtn.tel{background:#e9f6ee;border-color:#bfe3cd;color:#2f6b4c}
+.phead .cbtn.sms{background:#e8f1fb;border-color:#bcd6f0;color:#2e74b5}
+.phead .cbtn.off{background:#f4f6f9;border-color:var(--line);color:#c3cbd6;pointer-events:none}
+.phead .pph{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.phead .pph.none{color:#c3cbd6}
 .phead .psum{margin-left:auto;font-size:11px;color:var(--muted);text-align:right;max-width:170px}
+@media(max-width:430px){ .phead .pph{display:none} }
 .phead .pcar{color:#b9c2cf;font-size:11px;transition:.15s}
 .prow.open .pcar{transform:rotate(180deg)}
 .pdetail{display:none;padding:12px 13px 14px;border-top:1px solid var(--line);background:#fafbfd}
@@ -917,16 +928,59 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
 <div id="printArea"></div>
 
 <script>
-const DISTRICTS = JSON.parse('{"1구역": ["이세진", "김은미", "김건우", "노선녀", "김재혁", "김지혜", "박우근", "김영인", "박일서", "정서인", "이지성", "임옥란", "이호성", "진다울", "인용교", "김혜란"], "2구역": ["이수철", "양선자", "홍윤기", "최영미", "김준", "한예솔", "남기혁", "정은화", "박덕민", "오세은", "이강천", "홍한나", "이영복", "아셀", "함준식", "이미희"], "3구역": ["권보상", "허미영", "김중원", "유미경", "김성진", "장선정", "배용훈", "이미연", "이진완", "김하나", "임광진", "김보라", "홍민의", "박슬기", "이동호", "지미옥"], "4구역": ["최병윤", "손차진", "김용태", "김은숙", "김대식", "장원아", "박천희", "김미영2", "소성민", "홍세라", "엄정렬", "성경아", "이종민", "김지나", "김민성", "송정민"], "5구역": ["엄주철", "이광연", "장홍주", "권희정", "김병규", "김종수", "김왕곤", "강애순", "윤도순", "이운희"], "6구역": ["임영진", "최미경", "김효종", "이준옥", "공재정", "안미숙", "김춘권", "홍성애", "이승우", "김진자", "임용진", "홍정은", "허진혁", "강희경"], "7구역": ["송준성", "박서희", "서광석", "나선인", "김동욱", "이경미", "정득진", "정영숙", "최영규", "홍지영", "홍관일", "고문희", "김관호", "현인생", "이용섭", "허숙경"], "8구역": ["임재환", "이정애", "김학규", "신경화", "박정호", "조계동", "한태교", "우유경", "김종찬"], "9구역": ["김진환", "노수연", "양대석", "황정심", "박션", "박혜영", "양봉현", "서은주", "이명기", "이재강", "조성령", "채수진", "신기선", "최란숙", "박영자", "이현섭", "박희진"], "10구역": ["강창오", "유소희", "홍춘섭", "우영숙", "오상기", "고선영", "이건실", "채은경", "이창수", "로안", "한재혁", "이성희"], "11구역": ["윤선희", "정정수", "고진수", "김순양", "박지숙", "신미연", "양희경", "오명님", "유경렬", "이미화", "진주아", "채수희"], "12구역": ["윤선미", "조형하", "곽미순", "김경미", "김나연", "김미선", "김여경", "김은정", "김진아2", "박명애", "성한솔", "장선주", "황지혜"], "13구역": ["정순희", "노윤정", "김선희", "김세나", "김연옥", "김유진", "김윤례", "김이레", "김현옥", "양경희", "이연복", "한주희"], "14구역": ["최정희", "강명이", "김선영", "김선옥", "김정희", "송금옥", "이영순", "이은경", "정영아", "천남순", "허자숙"], "15구역": ["노은숙", "박수진", "김정수", "이민순", "이현숙", "전미란", "정신", "허승연", "현인란"], "16구역": ["김연화", "최영경", "강순애", "구지숙", "김미영3", "김양원", "박정숙", "백미영", "서정원", "최복임", "최선경"], "17구역": ["황현진", "김재봉", "김정화", "김현숙", "김현정", "박남순", "손은숙", "유은숙", "윤정숙", "원춘실", "임부희", "장미경", "하정미"], "18구역": ["송영선", "서미하", "김미영1", "박다영", "양민숙", "이미애", "이애란", "인해남", "최은경", "홍선경", "안영렬", "최태윤"], "19구역": ["김명혜", "최신숙", "권정숙", "김연숙", "김영란2", "김이나", "신진자", "심은경", "양숙희", "이윤아"], "20구역": ["강영주", "전혜원", "고한옥", "김경희", "김영기", "김은영", "박은정", "신주희", "이미라", "최명숙", "허경미"], "21구역": ["류근분", "최가자", "김금녀", "김상귀", "신둘이", "양예석", "장평순", "홍정자"], "22구역": ["김길임", "임옥실", "김영란1", "김종숙", "김형숙", "윤영순", "이숙자", "정시안", "홍영자"], "23구역": ["허성옥", "서정석", "강대윤", "고강인", "김성은", "김종선", "김종진", "김형운", "마현근", "문기갑", "손현철", "안세영", "이재찬", "임태빈", "홍춘원", "유병구"], "24구역": ["김낙훈", "김태진", "김덕배", "김용재", "김철", "박규성", "박희영", "손정훈", "심경식", "전현수", "조문래", "조중호", "조현태", "지영시", "이진규", "차지홍", "최병민", "최승만", "현형기"], "25구역": ["소세영", "황근하", "강창용", "김기현", "김동운", "김용철", "김은호", "김주환", "김하정", "박상래", "박종선", "이남경", "이한승", "장종규", "최태운", "황남하"], "샬롬 구역": ["오훈", "김순이", "배재충", "이양순", "서하진", "김수영"]}');
-const DIST_NAMES = Object.keys(DISTRICTS);
-/* ---------- 구역원 변경 이력 ----------
-   DISTRICTS 는 '현재' 명단. 아래 변경일(from) 이전 주일에는 그 변경을 되돌려서 보여준다.
-   add    : 그 날짜부터 새로 들어온 구역원 (이전 주일에는 명단에서 빠짐)
-   remove : 그 날짜부터 빠진 구역원 (이전 주일에는 명단에 남아 있음) */
-const ROSTER_CHANGES=[
-  {district:'9구역', from:'2026-08-16', add:['박영자','이현섭','박희진']},
-  {district:'3구역', from:'2026-08-23', add:['이동호','지미옥']}
-];
+/* ---------- 구역 명단 ----------
+   교인 이름·전화번호는 이 파일에 넣지 않는다.
+   (이 파일은 공개 저장소에 있으므로 넣으면 그대로 공개된다)
+   로그인한 뒤 서버에서 받아와, 권한이 있는 범위만 내려받는다. */
+let DISTRICTS = {};
+let DIST_NAMES = [];
+let DIST_SORTED = [];
+let ROSTER_CHANGES = [];
+let PHONES = {};              /* 이름 -> 전화번호 (관리자=전체, 구역장=본인 구역만) */
+const ROSTER_KEY='sgc_roster_v1';
+function applyRoster(d){
+  if(!d || !d.districts || !Object.keys(d.districts).length) return false;
+  DISTRICTS=d.districts;
+  ROSTER_CHANGES=Array.isArray(d.changes)?d.changes:[];
+  PHONES=d.phones||{};
+  DIST_NAMES=Object.keys(DISTRICTS);
+  DIST_SORTED=sortDist(DIST_NAMES);
+  return true;
+}
+function saveRoster(d){ try{ localStorage.setItem(ROSTER_KEY,JSON.stringify(d)); }catch(e){} }
+function loadRosterCache(){ try{ return JSON.parse(localStorage.getItem(ROSTER_KEY)||'null'); }catch(e){ return null; } }
+function haveRoster(){ return DIST_NAMES.length>0; }
+/* 로그인 직후·앱 진입 시 명단을 받아온다. 실패하면 직전에 받아둔 것을 그대로 쓴다. */
+async function fetchRoster(){
+  if(!USE_BACKEND || !TOKEN) return haveRoster();
+  try{
+    const r=await fetch(withTok(API+'?action=roster'));
+    const d=await r.json();
+    if(d && d.error==='AUTH'){ onAuthLost(); return false; }
+    if(d && d.ok && d.districts){
+      absorbToken(d);
+      const keep={districts:d.districts, changes:d.changes, phones:d.phones};
+      if(applyRoster(keep)){ saveRoster(keep); return true; }
+    }
+  }catch(e){ console.warn('명단 불러오기 실패(직전 명단 사용):',e); }
+  return haveRoster();
+}
+/* 전화번호 (없으면 빈 문자열) */
+function phoneOf(name){ return String(PHONES[name]||'').trim(); }
+function telHref(p){ return 'tel:'+String(p).replace(/[^0-9+]/g,''); }
+function smsHref(p){ return 'sms:'+String(p).replace(/[^0-9+]/g,''); }
+const SVG_TEL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8.1 9.5a16 16 0 0 0 6 6l1.1-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2z"/></svg>';
+const SVG_SMS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-3.8-.9L3 20.5l1.6-4.9A8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/></svg>';
+/* 이름 옆 전화·문자 버튼. 번호가 없으면 흐리게(눌리지 않음) */
+function contactBtns(name){
+  const p=phoneOf(name);
+  if(!p) return '<span class="pcts"><span class="cbtn off">'+SVG_TEL+'</span><span class="cbtn off">'+SVG_SMS+'</span></span><span class="pph none">번호 없음</span>';
+  const t=esc(telHref(p)), s=esc(smsHref(p));
+  return '<span class="pcts">'
+    +'<a class="cbtn tel" href="'+t+'" title="전화걸기" onclick="event.stopPropagation()">'+SVG_TEL+'</a>'
+    +'<a class="cbtn sms" href="'+s+'" title="문자보내기" onclick="event.stopPropagation()">'+SVG_SMS+'</a>'
+    +'</span><span class="pph">'+esc(p)+'</span>';
+}
 /* 특정 주일 기준의 구역 명단 */
 function rosterOf(dist,date){
   let list=(DISTRICTS[dist]||[]).slice();
@@ -941,7 +995,7 @@ function rosterOf(dist,date){
 }
 function distNum(d){const m=String(d).match(/(\d+)/);return m?parseInt(m[1],10):9999;}
 function sortDist(arr){return [...arr].sort((a,b)=>distNum(a)-distNum(b)||String(a).localeCompare(String(b),'ko'));}
-const DIST_SORTED = sortDist(DIST_NAMES);
+applyRoster(loadRosterCache());   /* 지난번에 받아둔 명단이 있으면 바로 적용 */
 const CATEGORIES = {
  "예배 (예배·방송·찬양)": {위원장:"소세영 장로", 교역자:"—"},
  "교육 (유치·유초등·중고등·청년)": {위원장:"김낙훈 장로", 교역자:"강유석 전도사"},
@@ -1094,6 +1148,8 @@ function showCachedVisitors(){
 }
 async function loadAll(){
   if(!USE_BACKEND) return;
+  /* 로그인했는데 아직 명단이 없으면 먼저 받아온다 (앱을 껐다 켠 경우 등) */
+  if(TOKEN && !haveRoster()) await fetchRoster();
   try{
     const r=await fetch(withTok(API+'?action=all'),{method:'GET'});
     const d=await r.json();
@@ -1291,7 +1347,12 @@ async function loginByName(){
   if(!TOKEN){                       /* 출입증을 못 받은 경우 = 예전 방식 */
     if(pw!==acctPw(nm)){ done(); alert('비밀번호가 올바르지 않습니다.'); return; }
   }
+  await fetchRoster();          /* 구역 명단·전화번호를 받아온 뒤 화면을 연다 */
   done();
+  if(!haveRoster()){
+    alert('구역 명단을 불러오지 못했습니다.\n인터넷 연결을 확인하고 다시 로그인해 주세요.');
+    return;
+  }
   enterApp((me&&me.role)||a.role,
            {district:(me&&me.district)||a.district,
             category:(me&&me.category)||a.category, who:nm});
@@ -1846,7 +1907,7 @@ function buildRosterCards(){
     const pray=`<div class="pray"><label class="pl">기도제목 <span>· 선택 입력</span></label><input class="ppick" type="text" data-n="${n}" placeholder="세부내용" value="${pv}"/>`
       + `<label class="ipbox"><input type="checkbox" class="ipick" data-n="${n}" ${ATT[n].ip?'checked':''}/> 🙏 중보기도 요청 — 중보기도팀에 전달</label></div>`;
     const etc=`<div class="pray"><label class="pl">기타 사항 <span>· 선택 입력</span></label><input class="epick" type="text" data-n="${n}" placeholder="세부내용" value="${ev}"/></div>`;
-    return `<div class="prow" data-n="${n}"><div class="phead"><span class="pn">${n}</span><span class="psum">미체크</span><span class="pcar">▾</span></div><div class="pdetail"><div class="tgls">${tg}</div><div class="cnts">${ct}</div>${pray}${etc}</div></div>`;
+    return `<div class="prow" data-n="${n}"><div class="phead"><span class="pn">${n}</span>${contactBtns(n)}<span class="psum">미체크</span><span class="pcar">▾</span></div><div class="pdetail"><div class="tgls">${tg}</div><div class="cnts">${ct}</div>${pray}${etc}</div></div>`;
   }).join('');
   box.querySelectorAll('.phead').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('open'));
   box.querySelectorAll('.tgl').forEach(b=>b.onclick=()=>{if(b.dataset.lock) return;const n=b.dataset.n,t=b.dataset.t;ATT[n].t[t]=!ATT[n].t[t];b.classList.toggle('on',ATT[n].t[t]);updPsum(n);document.getElementById('sunCnt').textContent=sunCount();if(t==='1부'||t==='2부')buildAbsent();});

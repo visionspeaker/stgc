@@ -998,16 +998,29 @@ let DIST_NAMES = [];
 let DIST_SORTED = [];
 let ROSTER_CHANGES = [];
 let PHONES = {};              /* 이름 -> 전화번호 (관리자=전체, 구역장=본인 구역만) */
+let MEMBER_IDS = {};          /* 이름 -> 고유번호(M001) */
+let NAME_ALIAS = {};          /* 예전 표기 -> 지금 표기 */
 const ROSTER_KEY='sgc_roster_v1';
 function applyRoster(d){
   if(!d || !d.districts || !Object.keys(d.districts).length) return false;
   DISTRICTS=d.districts;
   ROSTER_CHANGES=Array.isArray(d.changes)?d.changes:[];
   PHONES=d.phones||{};
+  MEMBER_IDS=d.ids||{};
+  NAME_ALIAS=d.alias||{};
   DIST_NAMES=Object.keys(DISTRICTS);
   DIST_SORTED=sortDist(DIST_NAMES);
   return true;
 }
+/* 예전 표기로 저장된 기록도 지금 사람으로 이어 준다 (개명·표기 정리 대응) */
+function canonName(n){ return NAME_ALIAS[n] || n; }
+/* 그 사람이 지금까지 쓴 모든 표기 (지금 이름 + 옛 이름들) */
+function allNamesOf(name){
+  const out=[name];
+  Object.keys(NAME_ALIAS).forEach(function(old){ if(NAME_ALIAS[old]===name && out.indexOf(old)<0) out.push(old); });
+  return out;
+}
+function memberIdOf(name){ return MEMBER_IDS[canonName(name)] || ''; }
 function saveRoster(d){ try{ localStorage.setItem(ROSTER_KEY,JSON.stringify(d)); }catch(e){} }
 function loadRosterCache(){ try{ return JSON.parse(localStorage.getItem(ROSTER_KEY)||'null'); }catch(e){ return null; } }
 function haveRoster(){ return DIST_NAMES.length>0; }
@@ -1020,7 +1033,8 @@ async function fetchRoster(){
     if(d && d.error==='AUTH'){ onAuthLost(); return false; }
     if(d && d.ok && d.districts){
       absorbToken(d);
-      const keep={districts:d.districts, changes:d.changes, phones:d.phones};
+      const keep={districts:d.districts, changes:d.changes, phones:d.phones,
+                  ids:d.ids, alias:d.alias};
       if(applyRoster(keep)){ saveRoster(keep); return true; }
     }
   }catch(e){ console.warn('명단 불러오기 실패(직전 명단 사용):',e); }
@@ -1848,14 +1862,18 @@ function distOf(name){
   for(const d of ds){ if((DISTRICTS[d]||[]).indexOf(name)>=0) return d; }
   return '';
 }
-/* 그 사람이 등장하는 주간 기록 (최신순) */
+/* 그 사람이 등장하는 주간 기록 (최신순)
+   예전 표기로 남아 있는 기록도 같은 사람으로 함께 모은다. */
 function personWeeks(name){
+  const names=allNamesOf(name);
+  const has=n=>names.indexOf(n)>=0;
   const out=[];
   dedupeReports(reports).forEach(r=>{
-    const d=(r.detail&&r.detail[name])||null;
-    const sun=(r.sundayPresent||[]).indexOf(name)>=0;
-    const cell=(r.cellPresent||[]).indexOf(name)>=0;
-    const ab=(r.sundayAbsent||[]).filter(a=>a&&a.name===name)[0]||null;
+    let d=null;
+    names.forEach(n=>{ if(!d && r.detail && r.detail[n]) d=r.detail[n]; });
+    const sun=(r.sundayPresent||[]).some(has);
+    const cell=(r.cellPresent||[]).some(has);
+    const ab=(r.sundayAbsent||[]).filter(a=>a&&has(a.name))[0]||null;
     if(!d&&!sun&&!cell&&!ab) return;
     out.push({date:r.date, dist:r.district, d:d||{}, sun:sun, cell:cell, ab:ab});
   });
@@ -1933,8 +1951,11 @@ function openMember(name){
 
   box.innerHTML=
    '<div class="mbcard">'
-   +'<div class="mbhd"><div class="n">'+esc(name)+' <span class="sub">· '+esc(dist)+'</span></div>'
-   +'<div class="m">'+(ws.length?'최근 보고 '+esc(ws[0].date):'보고 기록 없음')+'</div></div>'
+   +'<div class="mbhd"><div class="n">'+esc(name)+' <span class="sub">· '+esc(dist)
+   + (memberIdOf(name)?' · '+esc(memberIdOf(name)):'') +'</span></div>'
+   +'<div class="m">'+(ws.length?'최근 보고 '+esc(ws[0].date):'보고 기록 없음')
+   + (allNamesOf(name).length>1?' · 이전 표기 '+esc(allNamesOf(name).slice(1).join(', ')):'')
+   +'</div></div>'
    +'<div class="mbbd">'
    + (ph?'<div class="mbtel">'+contactBtns(name)+'</div>':'<div class="mini">등록된 전화번호가 없습니다.</div>')
    +'<div class="mbmini">'+kpiBox(sunN+'<small>/'+weeks.length+'</small>','주일출석')+kpiBox(rate+'%','출석률')

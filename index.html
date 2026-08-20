@@ -499,6 +499,54 @@ border:1px solid var(--line);text-decoration:none;flex:none}
 .pill2{display:inline-block;font-size:12px;font-weight:800;padding:7px 12px;border-radius:20px;background:#f1f4f9;color:#8a94a3;cursor:pointer;border:0;font-family:inherit}
 .pill2.on{background:#dcfce7;color:#15803d;outline:2px solid var(--teal)}
 .praysrch{flex:1;min-width:140px;height:38px;padding:0 11px;font-size:13.5px}
+/* ---------- 성도 조회 ---------- */
+.mbhits{margin-top:10px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.mbhit{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid #eef2f7;cursor:pointer;font-size:13.5px}
+.mbhit:last-child{border-bottom:0}
+.mbhit:active{background:#f4f7fb}
+.mbhit.on{background:var(--greenSoft,#e9f6ee)}
+.mbhit .nm{font-weight:800;flex:none}
+.mbhit .mt{color:var(--muted);font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mbhit .cnt{font-size:11px;color:var(--muted);flex:none}
+.mbcard{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:16px}
+.mbhd{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;padding:14px 16px}
+.mbhd .n{font-size:18px;font-weight:800}
+.mbhd .n .sub{font-size:12.5px;font-weight:600;opacity:.92}
+.mbhd .m{font-size:12px;opacity:.92;margin-top:3px}
+.mbbd{padding:15px 16px 18px}
+.mbtel{margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.mbtel .pcts{display:flex;gap:5px}
+.mbtel .cbtn{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);text-decoration:none}
+.mbtel .cbtn svg{width:15px;height:15px}
+.mbtel .cbtn.tel{background:#e9f6ee;border-color:#bfe3cd;color:#2f6b4c}
+.mbtel .cbtn.sms{background:#e8f1fb;border-color:#bcd6f0;color:#2e74b5}
+.mbtel .cbtn.off{background:#f4f6f9;color:#c3cbd6;pointer-events:none}
+.mbtel .pph{font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+.mbmini{display:flex;gap:8px;flex-wrap:wrap}
+.mbbox{flex:1;min-width:78px;border:1px solid var(--line);border-radius:11px;padding:10px 11px;background:#fbfcfe}
+.mbbox .v{font-size:18px;font-weight:800;color:var(--green)}
+.mbbox .v small{font-size:12px;font-weight:700;color:var(--muted)}
+.mbbox .k{font-size:10.5px;color:var(--muted);margin-top:2px}
+.mblbl{font-size:11.5px;font-weight:800;color:var(--muted);margin:16px 0 7px}
+.mbspark{display:flex;gap:3px;align-items:flex-end;height:42px}
+.mbspark i{flex:1;height:100%;background:linear-gradient(180deg,#57b45f,#2fa58f);border-radius:3px 3px 0 0;display:block}
+.mbspark i.z{height:14%;background:#e9edf3}
+.mbgrid{border:1px solid var(--line);border-radius:11px;overflow:auto}
+.mbgrid table{width:100%;border-collapse:collapse;font-size:11.5px;background:#fff}
+.mbgrid th,.mbgrid td{text-align:center;padding:6px 4px;white-space:nowrap;border-bottom:1px solid #eef2f7}
+.mbgrid th{background:#f4f7fb;color:var(--muted);font-weight:800;font-size:11px}
+.mbgrid td.d{text-align:left;font-weight:700;padding-left:9px}
+.mbgrid td.o{color:var(--green);font-weight:800}
+.mbgrid td.x{color:#d7dee7}
+.mbgrid td.ab{background:#fdecec;color:var(--red);font-weight:700;text-align:left;padding-left:9px}
+.mbtl{border-left:2px solid var(--line);margin-left:6px;padding-left:14px}
+.mbtli{position:relative;padding:8px 0}
+.mbtli::before{content:'';position:absolute;left:-20px;top:13px;width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid var(--line)}
+.mbtli.pray::before{border-color:#3f8ed4}
+.mbtli.care::before{border-color:var(--red)}
+.mbtli .dt{font-size:11px;color:var(--muted);font-weight:800}
+.mbtli .tx{font-size:13px;line-height:1.6;margin-top:2px}
+.mbchip{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:20px;background:#e8f1fb;color:#2e74b5;margin-left:4px}
 .pgroup{border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow:hidden}
 .pghead{display:flex;align-items:center;gap:8px;background:#f4f7fb;padding:9px 12px;font-size:13px;font-weight:800}
 .pghead .cnt{margin-left:auto;font-size:11.5px;font-weight:800;color:#15803d;background:#dcfce7;border-radius:20px;padding:3px 9px}
@@ -697,6 +745,19 @@ border:1px solid var(--line);text-decoration:none;flex:none}
       <div id="myReqList"></div>
     </div>
   </div>
+</section>
+
+<!-- 성도 조회 -->
+<section id="member" class="view">
+  <div class="card">
+    <h2 style="margin:0;font-size:17px;color:var(--green)">성도 조회</h2>
+    <p class="dd" id="mbDesc">이름으로 찾아 개인별 출석·기도제목·특이사항을 한눈에 봅니다.</p>
+    <div class="prayctl" style="margin-top:10px">
+      <input class="f-in praysrch" id="mbSrch" placeholder="이름 또는 구역으로 검색" oninput="renderMemberSearch()"/>
+    </div>
+    <div id="mbHits"></div>
+  </div>
+  <div id="mbCard"></div>
 </section>
 
 <!-- 중보기도 -->
@@ -1451,12 +1512,12 @@ function goReport(){
 const ROLE_NAV={
  guest:[],
  member:[],
- leader:[['report','구역보고']],
- elder:[['report','구역보고'],['manage','문의 접수 처리']],
+ leader:[['report','구역보고'],['member','성도 조회']],
+ elder:[['report','구역보고'],['member','성도 조회'],['manage','문의 접수 처리']],
  chair:[['manage','문의 접수 처리']],
  pray:[['pray','중보기도']],
  staff:[['manage','문의 접수 처리']],
- admin:[['dash','대시보드'],['report','구역보고'],['pray','중보기도'],['edu','교육부','https://visionspeaker.github.io/edu-dashboard/'],['manage','문의 접수 처리']]
+ admin:[['dash','대시보드'],['report','구역보고'],['member','성도 조회'],['pray','중보기도'],['edu','교육부','https://visionspeaker.github.io/edu-dashboard/'],['manage','문의 접수 처리']]
 };
 const ROLE_LABEL={guest:'교인',member:'일반 교인',leader:'구역장',elder:'장로 · 구역장/위원장',chair:'위원장',staff:'부장',pray:'중보기도팀장',admin:'관리자(교역자·담임목사)'};
 function setRoleLabel(){
@@ -1500,6 +1561,7 @@ function showView(v,back){
   if(v==='manage'){ renderSubs(); markSubsSeen(); }
   if(v==='myreq') renderMyReq();
   if(v==='dash') renderDash();
+  if(v==='member') renderMemberSearch();
   if(v==='pray') renderIp();
   growAll(document.getElementById(v));
 }
@@ -1752,6 +1814,120 @@ function renderMineDetail(idx){
   const rl=replyList(s);
   const reply=rl.length?`<div class="reply"><b>담당자 회신 ${rl.length>1?'('+rl.length+'건)':''}</b><div class="thread">${replyThreadHtml(s,false,idx)}</div></div>`:'';
   box.innerHTML=(s.body?`<div class="fmeta" style="color:var(--ink);margin-top:4px">${s.body}</div>`:'')+`<div class="fmeta">담당: ${s.assignee}${s.contact&&s.contact!=='익명'?' · 회신 '+s.contact:''}</div>`+bar+reply;
+}
+
+// ---------- 성도 조회 (개인별 이력) ----------
+/* 볼 수 있는 구역: 관리자는 전체, 구역장·장로는 본인 구역만 */
+function myDistricts(){
+  if(!current) return [];
+  if(current.role==='admin') return DIST_SORTED.slice();
+  return current.district ? [current.district] : [];
+}
+function canSeeMembers(){ return myDistricts().length>0; }
+/* 그 사람의 소속 구역 (내가 볼 수 있는 범위 안에서) */
+function distOf(name){
+  const ds=myDistricts();
+  for(const d of ds){ if((DISTRICTS[d]||[]).indexOf(name)>=0) return d; }
+  return '';
+}
+/* 그 사람이 등장하는 주간 기록 (최신순) */
+function personWeeks(name){
+  const out=[];
+  dedupeReports(reports).forEach(r=>{
+    const d=(r.detail&&r.detail[name])||null;
+    const sun=(r.sundayPresent||[]).indexOf(name)>=0;
+    const cell=(r.cellPresent||[]).indexOf(name)>=0;
+    const ab=(r.sundayAbsent||[]).filter(a=>a&&a.name===name)[0]||null;
+    if(!d&&!sun&&!cell&&!ab) return;
+    out.push({date:r.date, dist:r.district, d:d||{}, sun:sun, cell:cell, ab:ab});
+  });
+  return out.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+}
+function renderMemberSearch(){
+  const box=document.getElementById('mbHits'); if(!box) return;
+  const desc=document.getElementById('mbDesc');
+  if(desc) desc.innerHTML = (current&&current.role==='admin')
+    ? '이름으로 찾아 개인별 출석·기도제목·특이사항을 한눈에 봅니다.'
+    : '<b>'+esc(myDistricts()[0]||'')+'</b> 구역원만 조회할 수 있습니다.';
+  if(!canSeeMembers()){ box.innerHTML='<div class="bempty">조회 권한이 없습니다.</div>'; return; }
+  const q=((document.getElementById('mbSrch')||{}).value||'').trim();
+  const hits=[];
+  myDistricts().forEach(d=>{
+    (DISTRICTS[d]||[]).forEach(n=>{
+      if(q && n.indexOf(q)<0 && d.indexOf(q)<0) return;
+      hits.push({n:n, d:d});
+    });
+  });
+  if(!hits.length){ box.innerHTML='<div class="bempty">'+(q?'찾는 이름이 없습니다.':'구역원이 없습니다.')+'</div>'; return; }
+  const shown=hits.slice(0,60);
+  box.innerHTML='<div class="mbhits">'+shown.map(h=>{
+    const w=personWeeks(h.n).length;
+    const ph=phoneOf(h.n);
+    return '<div class="mbhit'+(h.n===mbSel?' on':'')+'" onclick="openMember(\''+esc(h.n)+'\')">'
+      +'<span class="nm">'+esc(h.n)+'</span>'
+      +'<span class="mt">'+esc(h.d)+(ph?' · '+esc(ph):'')+'</span>'
+      +'<span class="cnt">'+(w?'보고 '+w+'주':'기록 없음')+'</span></div>';
+  }).join('')+'</div>'
+  +(hits.length>shown.length?'<div class="mini">'+hits.length+'명 중 '+shown.length+'명 표시 — 이름을 더 입력해 보세요.</div>':'');
+}
+let mbSel='';
+function openMember(name){
+  mbSel=name;
+  renderMemberSearch();
+  const box=document.getElementById('mbCard'); if(!box) return;
+  const dist=distOf(name);
+  if(!dist){ box.innerHTML='<div class="card"><div class="bempty">조회할 수 없는 성도입니다.</div></div>'; return; }
+  const ws=personWeeks(name);
+  const weeks=[...new Set(dedupeReports(reports).filter(r=>r.district===dist).map(r=>r.date))].sort();
+  const sunN=ws.filter(w=>w.sun).length;
+  const absN=ws.filter(w=>w.ab).length;
+  const rate=weeks.length?Math.round(sunN/weeks.length*100):0;
+  const dawn=ws.reduce((a,w)=>a+((w.d.c&&w.d.c['새벽'])||0),0);
+  const bible=ws.reduce((a,w)=>a+((w.d.c&&w.d.c['성경'])||0),0);
+  const ph=phoneOf(name);
+
+  const kpiBox=(v,l)=>'<div class="mbbox"><div class="v">'+v+'</div><div class="k">'+l+'</div></div>';
+  /* 최근 12주 출석 막대 */
+  const last=weeks.slice(-12);
+  const spark=last.map(d=>{
+    const w=ws.filter(x=>x.date===d)[0];
+    const on=w&&w.sun;
+    return '<i class="'+(on?'':'z')+'" title="'+esc(d)+(on?' 출석':' 미출석')+'"></i>';
+  }).join('');
+  /* 예배별 표 */
+  const rows=ws.slice(0,12).map(w=>{
+    if(w.ab) return '<tr><td class="d">'+esc(String(w.date).slice(5))+'</td>'
+      +'<td colspan="8" class="ab">결석 · '+esc(w.ab.reason||'-')+(w.ab.note?' ('+esc(w.ab.note)+')':'')+'</td></tr>';
+    const t=w.d.t||{}, c=w.d.c||{};
+    const cell=TG.map(k=>'<td class="'+(t[k]?'o':'x')+'">'+(t[k]?'●':'·')+'</td>').join('');
+    return '<tr><td class="d">'+esc(String(w.date).slice(5))+'</td>'+cell
+      +'<td>'+((c['새벽']||0)||'·')+'</td></tr>';
+  }).join('');
+  /* 기도제목·특이사항·결석 타임라인 */
+  const tl=ws.map(w=>{
+    const items=[];
+    if(w.d.p) items.push({k:'pray',t:'기도제목',v:w.d.p+(w.d.ip?' <span class="mbchip">중보기도 요청</span>':'')});
+    if(w.d.e) items.push({k:'care',t:'특이사항',v:w.d.e});
+    if(w.ab)  items.push({k:'',t:'결석',v:esc(w.ab.reason||'-')+(w.ab.note?' · '+esc(w.ab.note):'')});
+    return items.map(it=>'<div class="mbtli '+it.k+'"><div class="dt">'+esc(w.date)+' · '+it.t+'</div>'
+      +'<div class="tx">'+it.v+'</div></div>').join('');
+  }).join('');
+
+  box.innerHTML=
+   '<div class="mbcard">'
+   +'<div class="mbhd"><div class="n">'+esc(name)+' <span class="sub">· '+esc(dist)+'</span></div>'
+   +'<div class="m">'+(ws.length?'최근 보고 '+esc(ws[0].date):'보고 기록 없음')+'</div></div>'
+   +'<div class="mbbd">'
+   + (ph?'<div class="mbtel">'+contactBtns(name)+'</div>':'<div class="mini">등록된 전화번호가 없습니다.</div>')
+   +'<div class="mbmini">'+kpiBox(sunN+'<small>/'+weeks.length+'</small>','주일출석')+kpiBox(rate+'%','출석률')
+     +kpiBox(absN,'결석')+kpiBox(dawn,'새벽 누계')+kpiBox(bible,'성경 누계')+'</div>'
+   +(last.length?'<div class="mblbl">주일 출석 추이 (최근 '+last.length+'주)</div><div class="mbspark">'+spark+'</div>':'')
+   +(rows?'<div class="mblbl">예배별 참석</div><div class="mbgrid"><table><tr><th>주</th>'
+      +TG.map(k=>'<th>'+k+'</th>').join('')+'<th>새벽</th></tr>'+rows+'</table></div>':'')
+   +(tl?'<div class="mblbl">기도제목 · 특이사항 이력</div><div class="mbtl">'+tl+'</div>'
+       :'<div class="mblbl">기도제목 · 특이사항 이력</div><div class="bempty">기록이 없습니다.</div>')
+   +'</div></div>';
+  try{ box.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
 }
 
 // ---------- 구역보고 (예배 출석부: 이름별 접이식) ----------

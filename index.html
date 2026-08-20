@@ -1207,6 +1207,13 @@ function showCachedVisitors(){
     animateCount(document.getElementById('visTotal'), v.total);
   }catch(e){}
 }
+/* 지금 들고 있는 자료의 지문 — 바뀌었는지 비교하는 데만 쓴다 */
+function dataSig(){
+  try{
+    return (reports||[]).map(r=>r.district+'|'+r.date+'|'+(r.ts||'')).sort().join(';')
+      +'#'+(subs||[]).map(s=>(s.id||'')+'|'+(s.status||'')+'|'+(s.ts||'')+'|'+((s.replies||[]).length)).sort().join(';');
+  }catch(e){ return String(Math.random()); }
+}
 async function loadAll(){
   if(!USE_BACKEND) return;
   /* 로그인했는데 아직 명단이 없으면 먼저 받아온다 (앱을 껐다 켠 경우 등) */
@@ -1215,7 +1222,18 @@ async function loadAll(){
     const r=await fetch(withTok(API+'?action=all'),{method:'GET'});
     const d=await r.json();
     if(d&&d.error==='AUTH'){ onAuthLost(); return; }
-    if(d&&d.ok){ absorbToken(d); reports=dedupeReports(Array.isArray(d.reports)?d.reports:[]); subs=liveSubs(Array.isArray(d.subs)?d.subs:[]); PW_OVERRIDE=(d.accounts&&typeof d.accounts==='object')?d.accounts:{}; setVisitors(d.visitors); saveR(); saveS(); rerender(); checkNewSubs(); }
+    if(d&&d.ok){
+      absorbToken(d);
+      const before=dataSig();
+      reports=dedupeReports(Array.isArray(d.reports)?d.reports:[]);
+      subs=liveSubs(Array.isArray(d.subs)?d.subs:[]);
+      PW_OVERRIDE=(d.accounts&&typeof d.accounts==='object')?d.accounts:{};
+      setVisitors(d.visitors); saveR(); saveS();
+      /* 받아온 자료가 이전과 똑같으면 화면을 다시 그리지 않는다.
+         (괜히 다시 그리면 대시보드 차트 애니메이션이 또 재생된다) */
+      if(dataSig()!==before) rerender();
+      checkNewSubs();
+    }
   }catch(e){ console.warn('백엔드 불러오기 실패(로컬 데이터 사용):',e); }
 }
 /* ---------- 새 접수 알림 ---------- */
@@ -2871,8 +2889,23 @@ function xlsCare(){
   downloadXls(rows,(careMode==='care'?'목양우선사항_':'특이사항_')+wk+'.xls','careOk');
 }
 function stat(n,l,warn){return `<div class="stat${warn?' warn':''}"><div class="n">${n}</div><div class="l">${l}</div></div>`;}
-function drawChart(id,type,data,opts){if(charts[id])charts[id].destroy();
-  charts[id]=new Chart(document.getElementById(id),{type,data,options:Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}}},opts)});}
+/* 차트를 매번 지웠다 다시 만들면 그릴 때마다 애니메이션이 처음부터 재생된다.
+   (대시보드는 화면 진입 때 한 번, 서버 자료를 받은 뒤 또 한 번 그려지므로
+    같은 애니메이션이 두세 번 반복되어 보였다)
+   → 이미 있는 차트는 데이터만 갈아 끼우고 애니메이션 없이 갱신한다. */
+function drawChart(id,type,data,opts){
+  const el=document.getElementById(id); if(!el) return;
+  const c=charts[id];
+  if(c && c._type===type && c.canvas===el){
+    c.data=data;
+    if(opts) c.options=Object.assign(c.options||{},opts);
+    try{ c.update('none'); return; }catch(e){ /* 실패하면 아래에서 새로 만든다 */ }
+  }
+  if(c){ try{ c.destroy(); }catch(e){} }
+  const ch=new Chart(el,{type,data,options:Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}}},opts)});
+  ch._type=type;
+  charts[id]=ch;
+}
 function resetAll(){if(confirm('모든 데이터를 지우고 초기화할까요?')){localStorage.removeItem(RKEY);localStorage.removeItem(SKEY);reports=null;subs=null;seedDemo(true);renderDash();alert('초기화되었습니다.');}}
 
 // ---------- boot ----------

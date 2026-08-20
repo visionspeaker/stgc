@@ -500,6 +500,38 @@ border:1px solid var(--line);text-decoration:none;flex:none}
 .pill2.on{background:#dcfce7;color:#15803d;outline:2px solid var(--teal)}
 .praysrch{flex:1;min-width:140px;height:38px;padding:0 11px;font-size:13.5px}
 /* ---------- 성도 조회 ---------- */
+/* ── 명단 관리 ── */
+.rsbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.rsbar .f-in{height:38px}
+.rsbar #rsSrch{flex:1;min-width:110px}
+.btn.sm{height:38px;padding:0 13px;font-size:12.5px;border-radius:10px}
+.rslist{margin-top:11px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.rsrow{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #eef2f7;font-size:13.5px}
+.rsrow:last-child{border-bottom:0}
+.rsrow .no{font-size:10.5px;color:#a8b2c0;flex:none;width:40px;font-variant-numeric:tabular-nums}
+.rsrow .nm{font-weight:800;flex:none}
+.rsrow .mt{color:var(--muted);font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rsrow .act{display:flex;gap:5px;flex:none}
+.rsmini{border:1px solid var(--line);background:#f7f9fc;border-radius:8px;padding:5px 9px;
+font-size:11.5px;font-weight:800;font-family:inherit;cursor:pointer;color:var(--ink)}
+.rsmini:active{background:#eef2f7}
+.rsmini.red{color:#dc2626;border-color:#f1c9c9;background:#fff}
+.rschip{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:20px;
+background:#e8f1fb;color:#2e74b5;margin-left:4px}
+.rsfm{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px}
+.rsfm h3{margin:0 0 3px;font-size:15.5px;color:var(--green)}
+.rsfm .fd{display:flex;flex-direction:column;gap:4px;margin-top:11px}
+.rsfm .fd label{font-size:11.5px;font-weight:800;color:var(--muted)}
+.rsfm .fd .f-in{width:100%;height:40px}
+.rsfm .fdrow{display:flex;gap:8px}
+.rsfm .fdrow .fd{flex:1}
+.rsfm .fbtns{display:flex;gap:8px;margin-top:15px}
+.rsfm .fbtns .btn{flex:1}
+.rsfm .btn.gray{background:#eef2f7;color:var(--ink)}
+.rsconf{background:#fffbf2;border:1px solid #f6d9a8;border-radius:11px;padding:12px 13px;
+font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
+.rsconf b{color:#6b4409}
+.rsnote{font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:9px}
 .mbhits{margin-top:10px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
 .mbhit{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid #eef2f7;cursor:pointer;font-size:13.5px}
 .mbhit:last-child{border-bottom:0}
@@ -760,6 +792,21 @@ border:1px solid var(--line);text-decoration:none;flex:none}
   <div id="mbCard"></div>
 </section>
 
+<!-- 명단 관리 (관리자) · 연락처 관리 (구역장·장로) -->
+<section id="mroster" class="view">
+  <div class="card">
+    <h2 style="margin:0;font-size:17px;color:var(--green)" id="rsTitle">명단 관리</h2>
+    <p class="dd" id="rsDesc"></p>
+    <div class="rsbar">
+      <select class="f-in" id="rsDist" onchange="renderRoster()"></select>
+      <input class="f-in" id="rsSrch" placeholder="이름 검색" oninput="renderRoster()"/>
+      <button class="btn sm" id="rsAddBtn" onclick="rsOpen('add','')">+ 구역원 추가</button>
+    </div>
+    <div id="rsList"></div>
+  </div>
+  <div id="rsForm"></div>
+</section>
+
 <!-- 중보기도 -->
 <section id="pray" class="view">
   <div class="card">
@@ -1000,6 +1047,7 @@ let ROSTER_CHANGES = [];
 let PHONES = {};              /* 이름 -> 전화번호 (관리자=전체, 구역장=본인 구역만) */
 let MEMBER_IDS = {};          /* 이름 -> 고유번호(M001) */
 let NAME_ALIAS = {};          /* 예전 표기 -> 지금 표기 */
+let MEMBER_ROLE = {};         /* 이름 -> 직책(구역장·권찰 등) */
 const ROSTER_KEY='sgc_roster_v1';
 function applyRoster(d){
   if(!d || !d.districts || !Object.keys(d.districts).length) return false;
@@ -1008,6 +1056,7 @@ function applyRoster(d){
   PHONES=d.phones||{};
   MEMBER_IDS=d.ids||{};
   NAME_ALIAS=d.alias||{};
+  MEMBER_ROLE=d.roles||{};
   DIST_NAMES=Object.keys(DISTRICTS);
   DIST_SORTED=sortDist(DIST_NAMES);
   return true;
@@ -1034,7 +1083,7 @@ async function fetchRoster(){
     if(d && d.ok && d.districts){
       absorbToken(d);
       const keep={districts:d.districts, changes:d.changes, phones:d.phones,
-                  ids:d.ids, alias:d.alias};
+                  ids:d.ids, alias:d.alias, roles:d.roles};
       if(applyRoster(keep)){ saveRoster(keep); return true; }
     }
   }catch(e){ console.warn('명단 불러오기 실패(직전 명단 사용):',e); }
@@ -1544,12 +1593,12 @@ function goReport(){
 const ROLE_NAV={
  guest:[],
  member:[],
- leader:[['report','구역보고'],['member','성도 조회']],
- elder:[['report','구역보고'],['member','성도 조회'],['manage','문의 접수 처리']],
+ leader:[['report','구역보고'],['member','성도 조회'],['mroster','연락처 관리']],
+ elder:[['report','구역보고'],['member','성도 조회'],['mroster','연락처 관리'],['manage','문의 접수 처리']],
  chair:[['manage','문의 접수 처리']],
  pray:[['pray','중보기도']],
  staff:[['manage','문의 접수 처리']],
- admin:[['dash','대시보드'],['report','구역보고'],['member','성도 조회'],['pray','중보기도'],['edu','교육부','https://visionspeaker.github.io/edu-dashboard/'],['manage','문의 접수 처리']]
+ admin:[['dash','대시보드'],['report','구역보고'],['member','성도 조회'],['mroster','명단 관리'],['pray','중보기도'],['edu','교육부','https://visionspeaker.github.io/edu-dashboard/'],['manage','문의 접수 처리']]
 };
 const ROLE_LABEL={guest:'교인',member:'일반 교인',leader:'구역장',elder:'장로 · 구역장/위원장',chair:'위원장',staff:'부장',pray:'중보기도팀장',admin:'관리자(교역자·담임목사)'};
 function setRoleLabel(){
@@ -1594,6 +1643,7 @@ function showView(v,back){
   if(v==='myreq') renderMyReq();
   if(v==='dash') renderDash();
   if(v==='member') renderMemberSearch();
+  if(v==='mroster') openRoster();
   if(v==='pray') renderIp();
   growAll(document.getElementById(v));
 }
@@ -1967,6 +2017,219 @@ function openMember(name){
        :'<div class="mblbl">기도제목 · 특이사항 이력</div><div class="bempty">기록이 없습니다.</div>')
    +'</div></div>';
   try{ box.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+}
+
+// ---------- 명단 관리 (관리자) · 연락처 관리 (구역장·장로) ----------
+/* 관리자만 추가·이동·제외·이름수정을 할 수 있다.
+   구역장·장로는 본인 구역원의 연락처만 고칠 수 있다. (서버에서도 다시 막는다) */
+function rsIsAdmin(){ return !!(current && current.role==='admin'); }
+function rsToday(){ const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+let RS={kind:'',no:'',name:'',dist:'',step:1,busy:false};
+
+function openRoster(){
+  const sel=document.getElementById('rsDist'); if(!sel) return;
+  const ds=myDistricts();
+  const keep=sel.value;
+  sel.innerHTML=ds.map(d=>'<option'+(d===keep?' selected':'')+'>'+esc(d)+'</option>').join('');
+  if(!sel.value && ds.length) sel.value=ds[0];
+  sel.disabled = ds.length<2;
+  const t=document.getElementById('rsTitle'), p=document.getElementById('rsDesc'),
+        ab=document.getElementById('rsAddBtn');
+  if(rsIsAdmin()){
+    if(t) t.textContent='명단 관리';
+    if(p) p.innerHTML='구역원을 <b>추가·이동·수정</b>하고, 전출하신 분을 명단에서 <b>제외</b>합니다. '
+      +'적용일을 넣으면 <b>그 날짜부터</b> 반영되고 지난 보고서는 그대로 남습니다.';
+    if(ab) ab.style.display='';
+  }else{
+    if(t) t.textContent='연락처 관리';
+    if(p) p.innerHTML='<b>'+esc(ds[0]||'')+'</b> 구역원의 <b>전화번호만</b> 고칠 수 있습니다. '
+      +'구역 이동·제외는 교역자에게 말씀해 주세요.';
+    if(ab) ab.style.display='none';
+  }
+  rsClose();
+  renderRoster();
+}
+function renderRoster(){
+  const box=document.getElementById('rsList'); if(!box) return;
+  if(!canSeeMembers()){ box.innerHTML='<div class="bempty">권한이 없습니다.</div>'; return; }
+  const d=(document.getElementById('rsDist')||{}).value||'';
+  const q=((document.getElementById('rsSrch')||{}).value||'').trim();
+  const list=(DISTRICTS[d]||[]).filter(n=>!q||n.indexOf(q)>=0);
+  if(!list.length){ box.innerHTML='<div class="bempty">'+(q?'찾는 이름이 없습니다.':'구역원이 없습니다.')+'</div>'; return; }
+  const pend=rsPending(d);
+  box.innerHTML='<div class="rslist">'+list.map(n=>{
+    const no=memberIdOf(n), ph=phoneOf(n), job=MEMBER_ROLE[n]||'';
+    const from=pend[n]?'<span class="rschip">'+esc(rsShortDate(pend[n]))+'부터</span>':'';
+    const meta=[job, ph].filter(Boolean).join(' · ');
+    const act=rsIsAdmin()
+      ? '<button class="rsmini" onclick="rsOpen(\'edit\',\''+esc(no)+'\')">수정</button>'
+       +'<button class="rsmini" onclick="rsOpen(\'move\',\''+esc(no)+'\')">이동</button>'
+       +'<button class="rsmini red" onclick="rsOpen(\'out\',\''+esc(no)+'\')">제외</button>'
+      : '<button class="rsmini" onclick="rsOpen(\'contact\',\''+esc(no)+'\')">연락처 수정</button>';
+    return '<div class="rsrow"><span class="no">'+esc(no||'—')+'</span>'
+      +'<span class="nm">'+esc(n)+'</span>'
+      +'<span class="mt">'+esc(meta||'번호 없음')+from+'</span>'
+      +'<span class="act">'+act+'</span></div>';
+  }).join('')+'</div>'
+  +'<div class="rsnote">'+list.length+'명'+(q?' (검색 결과)':'')+'</div>';
+}
+/* 그 구역에서 "앞으로 적용될" 변경이 걸려 있는 사람 표시용 */
+function rsPending(dist){
+  const out={}; const t=rsToday();
+  (ROSTER_CHANGES||[]).forEach(c=>{
+    if(c.district!==dist) return;
+    if(String(c.from||'')<=t) return;
+    (c.add||[]).forEach(n=>out[n]=c.from);
+  });
+  return out;
+}
+function rsShortDate(d){ const p=String(d||'').split('-'); return p.length===3?(p[1]*1)+'/'+(p[2]*1):String(d||''); }
+function rsNameOfNo(no){
+  let hit='';
+  Object.keys(MEMBER_IDS).forEach(n=>{ if(!hit && MEMBER_IDS[n]===no) hit=n; });
+  return hit;
+}
+function rsClose(){ RS={kind:'',no:'',name:'',dist:'',step:1,busy:false};
+  const f=document.getElementById('rsForm'); if(f) f.innerHTML=''; }
+
+function rsOpen(kind,no){
+  if(kind!=='contact' && !rsIsAdmin()){ alert('관리자만 할 수 있습니다.'); return; }
+  const dist=(document.getElementById('rsDist')||{}).value||'';
+  RS={kind:kind, no:no||'', name:no?rsNameOfNo(no):'', dist:dist, step:1, busy:false};
+  rsPaint();
+}
+function rsFld(label,id,val,ph,type){
+  return '<div class="fd"><label>'+esc(label)+'</label>'
+    +'<input class="f-in" id="'+id+'" type="'+(type||'text')+'" value="'+esc(val||'')+'"'
+    +(ph?' placeholder="'+esc(ph)+'"':'')+'/></div>';
+}
+function rsDistSel(id,cur){
+  return '<div class="fd"><label>구역</label><select class="f-in" id="'+id+'">'
+    +DIST_SORTED.map(d=>'<option'+(d===cur?' selected':'')+'>'+esc(d)+'</option>').join('')
+    +'</select></div>';
+}
+function rsPaint(){
+  const box=document.getElementById('rsForm'); if(!box) return;
+  const k=RS.kind, n=RS.name;
+  if(!k){ box.innerHTML=''; return; }
+  const dateFld='<div class="fd"><label>적용일 (비워 두면 즉시 적용)</label>'
+    +'<input class="f-in" id="rsFrom" type="date" value=""/></div>';
+  let head='', body='';
+  if(k==='add'){
+    head='<h3>구역원 추가</h3><p class="dd">번호는 자동으로 붙습니다.</p>';
+    body=rsFld('이름','rsNm','','예) 홍길동')
+      +rsDistSel('rsD',RS.dist)
+      +'<div class="fdrow">'+rsFld('직책 (없으면 비움)','rsJob','','예) 권찰')
+      +rsFld('구역내 순서','rsOrd','','예) 12','number')+'</div>'
+      +rsFld('휴대전화','rsPh','','숫자만 넣어 주세요')
+      +dateFld;
+  } else if(k==='move'){
+    head='<h3>구역 이동 — '+esc(n)+'</h3><p class="dd">현재 '+esc(RS.dist)+'</p>';
+    body=rsDistSel('rsD',RS.dist)+rsFld('새 구역내 순서 (비우면 맨 뒤)','rsOrd','','','number')+dateFld;
+  } else if(k==='out'){
+    head='<h3>명단에서 제외 — '+esc(n)+'</h3>'
+      +'<p class="dd">시트에서 지우지 않고 <b>상태만 바꿉니다.</b> 과거 보고서는 그대로 남고, 나중에 되돌릴 수 있습니다.</p>';
+    body='<div class="fd"><label>사유</label><select class="f-in" id="rsSt">'
+      +['전출','소천','이명','기타'].map(x=>'<option>'+x+'</option>').join('')+'</select></div>'+dateFld;
+  } else if(k==='edit'){
+    head='<h3>정보 수정 — '+esc(n)+'</h3>'
+      +'<p class="dd">이름을 바꾸면 <b>옛 표기가 자동으로 기록</b>되어 과거 출석·기도제목이 그대로 따라옵니다.</p>';
+    body=rsFld('이름','rsNm',n,'')
+      +'<div class="fdrow">'+rsFld('직책','rsJob',MEMBER_ROLE[n]||'','')
+      +rsFld('구역내 순서','rsOrd','','바꿀 때만 입력','number')+'</div>'
+      +rsFld('휴대전화','rsPh',phoneOf(n),'숫자만 넣어 주세요');
+  } else if(k==='contact'){
+    head='<h3>연락처 수정 — '+esc(n)+'</h3><p class="dd">전화번호만 바꿀 수 있습니다.</p>';
+    body=rsFld('휴대전화','rsPh',phoneOf(n),'숫자만 넣어 주세요');
+  }
+  box.innerHTML='<div class="rsfm">'+head+body
+    +'<div class="fbtns"><button class="btn gray" onclick="rsClose()">취소</button>'
+    +'<button class="btn" id="rsGo" onclick="rsCheck()">확인</button></div>'
+    +'<div id="rsConf"></div></div>';
+  try{ box.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(e){}
+}
+function rsVal(id){ const e=document.getElementById(id); return e?String(e.value||'').trim():''; }
+/* 1단계 — 무엇이 바뀌는지 먼저 보여준다 */
+function rsCheck(){
+  const k=RS.kind; const lines=[];
+  if(k==='add'){
+    const nm=rsVal('rsNm'); if(!nm){ alert('이름을 입력해 주세요.'); return; }
+    if(DIST_SORTED.some(d=>(DISTRICTS[d]||[]).indexOf(nm)>=0)){
+      alert('이미 같은 표기의 교인이 있습니다. 구분되는 표기로 넣어 주세요.'); return; }
+    lines.push('<b>'+esc(nm)+'</b> 님을 <b>'+esc(rsVal('rsD'))+'</b>에 추가');
+    if(rsVal('rsJob')) lines.push('직책 · '+esc(rsVal('rsJob')));
+    if(rsVal('rsPh')) lines.push('전화 · '+esc(rsVal('rsPh')));
+  } else if(k==='move'){
+    const nd=rsVal('rsD');
+    if(nd===RS.dist){ alert('같은 구역입니다.'); return; }
+    lines.push('<b>'+esc(RS.name)+'</b> 님을 '+esc(RS.dist)+' → <b>'+esc(nd)+'</b> 으로 이동');
+  } else if(k==='out'){
+    lines.push('<b>'+esc(RS.name)+'</b> 님을 <b>'+esc(rsVal('rsSt'))+'</b> 처리 (명단에서 빠짐)');
+    lines.push('시트에는 그대로 남습니다 — 되돌릴 수 있습니다.');
+  } else if(k==='edit'){
+    const nm=rsVal('rsNm'); if(!nm){ alert('이름을 입력해 주세요.'); return; }
+    if(nm!==RS.name) lines.push('이름 <b>'+esc(RS.name)+'</b> → <b>'+esc(nm)+'</b> (옛 표기 자동 보존)');
+    if(rsVal('rsJob')!==(MEMBER_ROLE[RS.name]||'')) lines.push('직책 → '+esc(rsVal('rsJob')||'(없음)'));
+    if(rsVal('rsOrd')) lines.push('구역내 순서 → '+esc(rsVal('rsOrd')));
+    if(rsVal('rsPh')!==phoneOf(RS.name)) lines.push('전화 → '+esc(rsVal('rsPh')||'(없음)'));
+    if(!lines.length){ alert('바뀐 내용이 없습니다.'); return; }
+  } else if(k==='contact'){
+    if(rsVal('rsPh')===phoneOf(RS.name)){ alert('바뀐 내용이 없습니다.'); return; }
+    lines.push('<b>'+esc(RS.name)+'</b> 전화 → '+esc(rsVal('rsPh')||'(없음)'));
+  }
+  const from=rsVal('rsFrom');
+  if(from) lines.push('적용일 · <b>'+esc(from)+'</b> 부터 (그 전 보고서는 그대로)');
+  else if(k!=='edit'&&k!=='contact') lines.push('적용일 · <b>즉시</b>');
+  const c=document.getElementById('rsConf');
+  if(c) c.innerHTML='<div class="rsconf">아래대로 저장합니다.<br>· '+lines.join('<br>· ')+'</div>';
+  const go=document.getElementById('rsGo');
+  if(go){ go.textContent='이대로 저장'; go.setAttribute('onclick','rsSave()'); }
+  RS.step=2;
+}
+/* 2단계 — 실제 저장 */
+async function rsSave(){
+  if(RS.busy) return;
+  const k=RS.kind;
+  let body=null;
+  if(k==='contact'){ body={action:'saveContact','번호':RS.no,'핸드폰':rsVal('rsPh')}; }
+  else if(k==='add'){
+    body={action:'memberChange',kind:'add',from:rsVal('rsFrom'),
+      '이름':rsVal('rsNm'),'앱표기':rsVal('rsNm'),'구역':rsVal('rsD'),
+      '직책':rsVal('rsJob'),'구역내순서':rsVal('rsOrd'),'핸드폰':rsVal('rsPh')};
+  }
+  else if(k==='move'){ body={action:'memberChange',kind:'move','번호':RS.no,
+      '새구역':rsVal('rsD'),'구역내순서':rsVal('rsOrd'),from:rsVal('rsFrom')}; }
+  else if(k==='out'){ body={action:'memberChange',kind:'out','번호':RS.no,
+      '상태':rsVal('rsSt'),from:rsVal('rsFrom')}; }
+  else if(k==='edit'){
+    body={action:'memberChange',kind:'edit','번호':RS.no,
+      '이름':rsVal('rsNm'),'앱표기':rsVal('rsNm'),'직책':rsVal('rsJob'),'핸드폰':rsVal('rsPh')};
+    if(rsVal('rsOrd')) body['구역내순서']=rsVal('rsOrd');
+  }
+  if(!body) return;
+  RS.busy=true;
+  const go=document.getElementById('rsGo');
+  if(go){ go.disabled=true; go.innerHTML='<span class="spin"></span> 저장 중…'; }
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',body:tokBody(body)});
+    d=await r.json().catch(()=>null);
+  }catch(e){ d=null; }
+  RS.busy=false;
+  if(go){ go.disabled=false; go.textContent='이대로 저장'; }
+  if(!d){ alert('전송에 실패했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.'); return; }
+  if(d.error==='AUTH'){ onAuthLost(); return; }
+  if(!d.ok){ alert(d.message||'저장하지 못했습니다. ('+(d.error||'오류')+')'); return; }
+  absorbToken(d);
+  const newDist=(k==='move')?rsVal('rsD'):((k==='add')?rsVal('rsD'):RS.dist);
+  rsClose();
+  await fetchRoster();
+  const sel=document.getElementById('rsDist');
+  openRoster();
+  if(sel && myDistricts().indexOf(newDist)>=0){ sel.value=newDist; renderRoster(); }
+  loadAll();
+  alert('저장했습니다.');
 }
 
 // ---------- 구역보고 (예배 출석부: 이름별 접이식) ----------

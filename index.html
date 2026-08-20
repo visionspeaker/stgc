@@ -102,7 +102,12 @@ tr.over td{background:#fff6f6}
 .sumbox .sbsub{display:block;font-size:10.5px;color:#98a2b3;margin-top:1px}
 .sumbox.clickable{cursor:pointer}
 .sumbox.clickable:active{background:#eef2f7}
-.care{background:#fff5f5;border:1px solid #fecaca;border-radius:10px;padding:9px 11px;margin:5px 0;font-size:13px}
+.care{background:#fff5f5;border:1px solid #fecaca;border-radius:10px;padding:9px 11px;margin:5px 0;font-size:13px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+/* 특이사항 전체 보기 — 목양 항목이 아닌 일반 보고 */
+.care.plain{background:#f8fafc;border-color:var(--line)}
+.care .cd{font-weight:800;display:block;margin-bottom:3px}
+.care .cw{font-weight:400;color:var(--muted);font-size:11.5px}
+.toggle2{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 8px}
 .care b{color:#b91c1c}
 .pill{display:inline-block;background:var(--greenSoft);color:var(--green);border-radius:20px;padding:3px 11px;font-size:12px;font-weight:700;margin:2px 4px 2px 0}
 .notice{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.55;margin-bottom:12px}
@@ -797,7 +802,20 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
   <div class="sect-t">신앙활동 · 목양</div>
   <div class="dgrid g2">
     <div class="dcard"><h3>신앙활동 요약 <small>— 자율 항목</small></h3><p class="dd">구역보고 카운터 합계 — 새벽·성경·QT(가정예배)</p><div class="mini3" id="faithMini"></div><div class="dnote">자율 항목이라 참여 구역만 집계됩니다. 최우선 지표는 출석·결석이며, 이 항목은 참고용입니다.</div></div>
-    <div class="dcard care-card"><h3 style="color:#b91c1c">🔴 목양 우선사항</h3><p class="dd">결석 사유·특이사항에서 질병·장기결석·연락두절·수술·입원 자동 선별</p><div id="careBoard"></div></div>
+    <div class="dcard care-card"><h3 style="color:#b91c1c">🔴 목양 우선사항</h3>
+      <p class="dd" id="careDesc">결석 사유·특이사항에서 질병·장기결석·연락두절·수술·입원 자동 선별</p>
+      <div class="toggle2">
+        <button class="pill2 on" id="careTgA" onclick="setCareMode('care')">목양 필요만</button>
+        <button class="pill2" id="careTgB" onclick="setCareMode('all')">특이사항 전체</button>
+      </div>
+      <div id="careBoard"></div>
+      <div class="prbtns">
+        <button class="btn sm" onclick="printCare()">🖨 출력</button>
+        <button class="btn sec sm" onclick="copyCare()">📋 복사</button>
+        <button class="btn sm" style="background:linear-gradient(135deg,#4b9fe0,#2e74b5)" onclick="xlsCare()">⬇ 엑셀</button>
+      </div>
+      <span class="prok" id="careOk"></span>
+    </div>
   </div>
 
   <div class="sect-t">구역예배 · 결석 관리</div>
@@ -2096,7 +2114,7 @@ function renderDash(){
   document.getElementById('faithMini').innerHTML=
     mstat(cSum(wkReports,'새벽'),'새벽예배 참석(명)')+mstat(cSum(wkReports,'성경').toLocaleString(),'성경읽기(장)')+mstat(cSum(wkReports,'QT(가정)'),'QT·가정예배(회)');
   // 목양 우선사항
-  document.getElementById('careBoard').innerHTML=careHtml(wkReports);
+  renderCare();
   // 결석자 관리
   document.getElementById('absentBoard').innerHTML = (allAbsent.length?
     Object.entries(byReason).map(([r,arr])=>`<div style="margin:6px 0;font-size:12.5px"><b>${r}</b> (${arr.length}) : <span class="muted">${arr.join(', ')}</span></div>`).join('')+longAbsentHtml()
@@ -2419,17 +2437,76 @@ function longAbsentHtml(){
 }
 // 목양 우선사항: 장기결석 사유 + 특이사항/결석메모의 돌봄 키워드
 const CARE_KW=['수술','입원','병원','연락','건강','암','장기결석','소천','상','골절'];
-function careHtml(wkReports){
-  const items=[];
-  wkReports.forEach(r=>{
-    r.sundayAbsent.forEach(a=>{
-      if(a.reason==='장기결석') items.push(`<b>${a.name}</b>(${r.district}) — 장기결석`);
-      else if(a.note && CARE_KW.some(k=>a.note.includes(k))) items.push(`<b>${a.name}</b>(${r.district}) — ${a.note}`);
-    });
-    const cn=r.cell&&r.cell.note; if(cn && CARE_KW.some(k=>cn.includes(k))) items.push(`${r.district} — ${cn}`);
+/* 보기 모드: 'care' = 목양 필요만(자동 선별), 'all' = 특이사항 전체 */
+let careMode='care';
+function setCareMode(m){
+  careMode=m;
+  const a=document.getElementById('careTgA'), b=document.getElementById('careTgB');
+  if(a) a.classList.toggle('on',m==='care');
+  if(b) b.classList.toggle('on',m==='all');
+  renderCare();
+}
+/* 화면·출력에 쓸 항목 목록 */
+function careItems(){
+  const wk=document.getElementById('weekSel');
+  const week=wk?wk.value:'';
+  const wkReports=dedupeReports(reports.filter(r=>r.date===week));
+  const out=[];
+  sortDist(wkReports.map(r=>r.district)).forEach(d=>{
+    const r=wkReports.find(x=>x.district===d); if(!r) return;
+    const who=ACCOUNTS_BY_DIST[d]||'';
+    if(careMode==='care'){
+      (r.sundayAbsent||[]).forEach(a=>{
+        if(a.reason==='장기결석') out.push({d:d,who:who,t:a.name+' — 장기결석',hot:true});
+        else if(a.note && CARE_KW.some(k=>a.note.includes(k))) out.push({d:d,who:who,t:a.name+' — '+a.note,hot:true});
+      });
+      const cn=(r.cell&&r.cell.note||'').trim();
+      if(cn && CARE_KW.some(k=>cn.includes(k))) out.push({d:d,who:who,t:cn,hot:true});
+    } else {
+      const cn=(r.cell&&r.cell.note||'').trim();
+      if(cn) out.push({d:d,who:who,t:cn,hot:CARE_KW.some(k=>cn.includes(k))});
+    }
   });
-  if(!items.length) return '<div class="muted">이번 주 목양 우선 대상이 없습니다.</div>';
-  return items.map(t=>`<div class="care">${t}</div>`).join('');
+  return {wk:week, items:out};
+}
+function renderCare(){
+  const box=document.getElementById('careBoard'); if(!box) return;
+  const {wk,items}=careItems();
+  const desc=document.getElementById('careDesc');
+  if(desc) desc.textContent = careMode==='care'
+    ? '결석 사유·특이사항에서 질병·장기결석·연락두절·수술·입원 자동 선별 · '+items.length+'건'
+    : '구역장이 올린 특이사항 보고 전체 · '+items.length+'개 구역';
+  box.innerHTML = items.length
+    ? items.map(i=>`<div class="care${i.hot?'':' plain'}"><span class="cd">${i.hot&&careMode==='all'?'🔴 ':''}${esc(i.d)}${i.who?`<span class="cw"> · ${esc(i.who)}</span>`:''}</span>${esc(i.t)}</div>`).join('')
+    : (careMode==='care'
+        ? '<div class="muted">이번 주 목양 우선 대상이 없습니다.</div>'
+        : '<div class="muted">이번 주 작성된 특이사항이 없습니다.</div>');
+}
+function careTitle(){ return careMode==='care'?'목양 우선사항':'구역 특이사항 보고'; }
+function printCare(){
+  const {wk,items}=careItems();
+  if(!items.length){ alert('출력할 내용이 없습니다.'); return; }
+  document.getElementById('printArea').innerHTML =
+    `<div class="prpage"><h1>${careTitle()}</h1>
+       <div class="prmeta">${fmtSun(wk)} · ${items.length}건 · 송탄영광교회 영광 커넥트</div>
+       <table><tr><th style="width:80px">구역</th><th style="width:70px">구역장</th><th>내용</th></tr>`
+    + items.map(i=>`<tr><td>${esc(i.d)}</td><td>${esc(i.who)}</td><td>${i.hot?'[목양] ':''}${esc(i.t)}</td></tr>`).join('')
+    + `</table></div>`;
+  window.print();
+}
+function copyCare(){
+  const {wk,items}=careItems();
+  if(!items.length){ alert('복사할 내용이 없습니다.'); return; }
+  const NL=String.fromCharCode(10);
+  let s=careTitle()+' · '+fmtSun(wk)+NL+NL;
+  items.forEach(i=>{ s+='['+i.d+(i.who?' · '+i.who:'')+']'+NL+(i.hot?'🔴 ':'')+i.t+NL+NL; });
+  copyText(s+'송탄영광교회 영광 커넥트','careOk');
+}
+function xlsCare(){
+  const {wk,items}=careItems();
+  if(!items.length){ alert('내려받을 내용이 없습니다.'); return; }
+  const rows=[['구역','구역장','목양','내용']].concat(items.map(i=>[i.d,i.who,i.hot?'O':'',i.t]));
+  downloadXls(rows,(careMode==='care'?'목양우선사항_':'특이사항_')+wk+'.xls','careOk');
 }
 function stat(n,l,warn){return `<div class="stat${warn?' warn':''}"><div class="n">${n}</div><div class="l">${l}</div></div>`;}
 function drawChart(id,type,data,opts){if(charts[id])charts[id].destroy();

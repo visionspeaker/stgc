@@ -517,6 +517,14 @@ border:1px solid var(--line);text-decoration:none;flex:none}
 .plfl label i{color:#dc2626;font-style:normal}
 .plfl .hint{font-size:11.5px;color:var(--muted);font-weight:600;margin-left:4px}
 .plfl .f-in{width:100%;height:44px}
+/* 아이폰에서 날짜·시간 칸이 제 폭보다 넓게 그려져 칸 밖으로 밀려나는 것을 막는다 */
+.plfl input[type=date],.plfl select,.plrow input,.plrow select{
+min-width:0;max-width:100%;box-sizing:border-box}
+.plfl input[type=date]{-webkit-appearance:none;appearance:none;
+display:block;text-align:left;padding-right:10px}
+.plfl input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+.plfl input[type=date]::-webkit-calendar-picker-indicator{margin-left:0;flex:none}
+.plrow{min-width:0}
 .plrow{display:flex;gap:8px;align-items:center}
 .plrow .f-in{flex:1;min-width:0}
 .plrow .tilde{color:var(--muted);font-size:14px;flex:none}
@@ -2220,22 +2228,65 @@ function openMember(name){
 
 // ---------- 장소 사용 신청 ----------
 /* 장소·시간·현황은 모두 서버에서 받는다. 겹침은 화면에서 한 번, 서버에서 한 번 더 막는다. */
-let PLACE=null, plPick='', plTab='next', plSending=false, plDone=null;
+let PLACE=null, plPick='', plTab='next', plSending=false, plDone=null, plLoading=false;
 function goPlace(){ openApp('place'); }
+/* 장소·시간 같은 '설정'만 기기에 저장해 둔다.
+   덕분에 두 번째부터는 서버 응답을 기다리지 않고 신청 칸이 바로 뜬다.
+   신청자 이름·연락처가 든 현황(items)은 저장하지 않는다. */
+const PLACE_KEY='sgc_place_cfg_v1';
+function savePlaceCfg(d){
+  try{
+    localStorage.setItem(PLACE_KEY,JSON.stringify({
+      places:d.places, slots:d.slots, open:d.open, close:d.close,
+      step:d.step, keepDays:d.keepDays, today:d.today }));
+  }catch(e){}
+}
+function loadPlaceCfg(){
+  try{
+    const c=JSON.parse(localStorage.getItem(PLACE_KEY)||'null');
+    if(c&&c.places&&c.slots) return Object.assign({items:[],isAdmin:false},c);
+  }catch(e){}
+  return null;
+}
 async function fetchPlaceInfo(){
   if(!USE_BACKEND) return PLACE;
+  plLoading=true;
   try{
     const r=await fetch(withTok(API+'?action=placeInfo'));
     const d=await r.json();
-    if(d&&d.ok){ PLACE=d; return d; }
+    if(d&&d.ok){ PLACE=d; savePlaceCfg(d); plLoading=false; return d; }
   }catch(e){ console.warn('장소 안내 불러오기 실패:',e); }
+  plLoading=false;
   return PLACE;
 }
 async function openPlace(){
   plSending=false; plDone=null;
+  /* 저장해 둔 설정이 있으면 먼저 그려서 기다리는 느낌을 없앤다 */
+  if(!PLACE){ const c=loadPlaceCfg(); if(c){ PLACE=c; plLoading=true; } }
+  if(PLACE && !plPick) plPick=(PLACE.places||[])[0]||'';
   renderPlace();
   const d=await fetchPlaceInfo();
-  if(d){ if(!plPick) plPick=(d.places||[])[0]||''; renderPlace(); }
+  if(d){
+    if(!plPick) plPick=(d.places||[])[0]||'';
+    if(plDone) return;                 /* 완료 화면을 보고 있으면 건드리지 않는다 */
+    keepPlaceInput(renderPlace);       /* 갱신하는 사이 적어 둔 내용을 지키면서 다시 그린다 */
+  }
+}
+/* 서버 응답이 늦게 도착해 화면을 다시 그릴 때,
+   이미 입력해 둔 이름·연락처 같은 것이 지워지지 않도록 지켰다가 되돌려 놓는다. */
+function keepPlaceInput(fn){
+  const ids=['plDate','plFrom','plTo','plDept','plWho','plN','plPhone','plMemo'];
+  const had=!!document.getElementById('plWho');
+  const keep={};
+  if(had) ids.forEach(function(id){ const e=document.getElementById(id); if(e) keep[id]=e.value; });
+  const focus=(document.activeElement&&document.activeElement.id)||'';
+  fn();
+  if(!had) return;
+  ids.forEach(function(id){
+    const e=document.getElementById(id);
+    if(e && keep[id]!==undefined && keep[id]!=='') e.value=keep[id];
+  });
+  if(focus){ const e=document.getElementById(focus); if(e){ try{ e.focus(); }catch(x){} } }
 }
 /* 07:00 → 오전 7:00 / 13:30 → 오후 1:30 */
 function ampm(t){
@@ -2285,7 +2336,7 @@ function renderPlace(){
     +'<div class="plrow" style="gap:8px">'
     +'<div class="plfl" style="flex:1.5"><label>대표자 이름 <i>*</i></label>'
     +'<input class="f-in" id="plWho" placeholder="이름" autocomplete="name"/></div>'
-    +'<div class="plfl" style="flex:1"><label>인원 <i>*</i></label>'
+    +'<div class="plfl" style="flex:1"><label>인원 <span class="hint">선택</span></label>'
     +'<input class="f-in" id="plN" type="number" inputmode="numeric" min="1" placeholder="예) 12"/></div>'
     +'</div>'
     +'<div class="plfl"><label>연락처 <i>*</i></label>'
@@ -2329,7 +2380,7 @@ async function submitPlace(){
   if(date<plToday()){ plErr('지난 날짜는 신청할 수 없습니다.'); return; }
   if(hm(to)<=hm(from)){ plErr('끝나는 시각이 시작 시각보다 늦어야 합니다.'); return; }
   if(!who){ plErr('대표자 이름을 입력해 주세요.'); return; }
-  if(!(parseInt(n,10)>=1)){ plErr('인원을 숫자로 입력해 주세요.'); return; }
+  if(n && !(parseInt(n,10)>=1)){ plErr('인원은 숫자로 입력해 주세요. (비워 두셔도 됩니다)'); return; }
   if(String(phone).replace(/[^0-9]/g,'').length<9){ plErr('연락처를 정확히 입력해 주세요.'); return; }
   const c=plLocalClash(date,plPick,hm(from),hm(to));
   if(c){ plErr(plClashMsg(c)); return; }
@@ -2353,7 +2404,7 @@ async function submitPlace(){
     return;
   }
   plDone={date:date,place:plPick,from:from,to:to,
-          label:plWho({dept:plVal('plDept'),who:who,n:parseInt(n,10)})};
+          label:plWho({dept:plVal('plDept'),who:who,n:parseInt(n,10)||0})};
   await fetchPlaceInfo();
   renderPlace();
 }
@@ -2385,7 +2436,8 @@ function renderPlaceList(){
     +'<button class="pltab'+(plTab==='past'?' on':'')+'" onclick="plSetTab(\'past\')">지난 사용</button></div>';
   if(!items.length){
     box.innerHTML='<div class="card">'+tabs
-      +'<div class="bempty">'+(plTab==='next'?'예정된 사용 신청이 없습니다.':'지난 사용 기록이 없습니다.')+'</div></div>';
+      +'<div class="bempty">'+(plLoading?'현황을 불러오는 중입니다…'
+        :(plTab==='next'?'예정된 사용 신청이 없습니다.':'지난 사용 기록이 없습니다.'))+'</div></div>';
     return;
   }
   let html='', last='';

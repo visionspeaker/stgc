@@ -282,6 +282,8 @@ canvas{max-height:280px}
 .i-orange .mc{background:linear-gradient(160deg,#f2a65a,#e0762f)}
 .i-purple .mc{background:linear-gradient(160deg,#a97fe6,#7b52c8)}
 .i-purple .mc svg{width:41px;height:41px}
+.i-teal2 .mc{background:linear-gradient(160deg,#3cbcb0,#2a8fb2)}
+.i-teal2 .mc svg{width:40px;height:40px}
 .visitor{text-align:center;color:var(--muted);font-size:12.5px;margin:16px 0 0;padding-bottom:24px}
 .visitor b{color:var(--ink)}
 .cright{font-size:10.5px;color:#9aa4b2;line-height:1.6;letter-spacing:-.1px}
@@ -504,6 +506,54 @@ border:1px solid var(--line);text-decoration:none;flex:none}
 .pill2.on{background:#dcfce7;color:#15803d;outline:2px solid var(--teal)}
 .praysrch{flex:1;min-width:140px;height:38px;padding:0 11px;font-size:13.5px}
 /* ---------- 성도 조회 ---------- */
+/* ── 장소 사용 신청 ── */
+.plcard{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.plhd{background:linear-gradient(135deg,#3cbcb0,#2a8fb2);color:#fff;padding:16px 17px}
+.plhd .n{font-size:20px;font-weight:800}
+.plhd .m{font-size:12.5px;opacity:.95;margin-top:5px}
+.plbd{padding:15px 16px 18px}
+.plfl{margin-bottom:13px}
+.plfl label{display:block;font-size:13px;font-weight:800;margin-bottom:6px}
+.plfl label i{color:#dc2626;font-style:normal}
+.plfl .hint{font-size:11.5px;color:var(--muted);font-weight:600;margin-left:4px}
+.plfl .f-in{width:100%;height:44px}
+.plrow{display:flex;gap:8px;align-items:center}
+.plrow .f-in{flex:1;min-width:0}
+.plrow .tilde{color:var(--muted);font-size:14px;flex:none}
+.plchips{display:flex;gap:7px}
+.plchip{flex:1;border:1px solid var(--inline);border-radius:11px;padding:11px 8px;font-size:13.5px;
+font-weight:700;background:#fff;text-align:center;cursor:pointer}
+.plchip.on{border-color:#0f8f86;background:#e6f7f5;color:#0b6f68;font-weight:800}
+.plbtn{width:100%;border:0;border-radius:12px;height:48px;font-size:15px;font-weight:800;
+font-family:inherit;background:linear-gradient(135deg,#3cbcb0,#2a8fb2);color:#fff;cursor:pointer}
+.plbtn[disabled]{background:#dfe5ee;color:#9aa5b4;cursor:default}
+.plbtn.gray{background:#eef2f7;color:var(--ink)}
+.plerr{background:#fdf3f3;border:1px solid #f0c9c9;border-radius:11px;padding:12px 13px;
+font-size:12.5px;color:#93302f;line-height:1.75;margin-bottom:12px}
+.plerr b{display:block;font-size:13.5px;margin-bottom:3px}
+.pldone{text-align:center;padding:32px 20px}
+.pldone .ck{width:60px;height:60px;border-radius:50%;background:#e6f7f5;color:#0f8f86;
+font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.pldone h3{margin:0 0 8px;font-size:17px}
+.pldone p{margin:0 0 16px;font-size:13px;color:var(--muted);line-height:1.9}
+.pltabs{display:flex;gap:7px;margin-bottom:11px}
+.pltab{flex:1;border:1px solid var(--line);background:#f7f9fc;border-radius:10px;height:38px;
+font-size:12.5px;font-weight:800;color:var(--muted);font-family:inherit;cursor:pointer}
+.pltab.on{background:#e6f7f5;border-color:#a9e0da;color:#0b6f68}
+.plstat{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}
+.pldh{background:#f4f7fb;padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);
+border-bottom:1px solid var(--line)}
+.plrw{display:flex;gap:9px;align-items:flex-start;padding:11px 12px;border-bottom:1px solid #eef2f7}
+.plrw:last-child{border-bottom:0}
+.plrw .tm{flex:none;width:60px;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.5}
+.plrw .bd{flex:1;min-width:0}
+.plrw .pc{display:inline-block;font-size:10.5px;font-weight:800;border-radius:20px;padding:2px 8px;
+background:#e6f7f5;color:#0b6f68;margin-bottom:3px}
+.plrw .pc.b{background:var(--blueSoft);color:var(--blue2)}
+.plrw .wh{font-size:13.5px;font-weight:800}
+.plrw .mt{font-size:11.5px;color:var(--muted);margin-top:2px}
+.plrw .xx{flex:none;border:1px solid #f1c9c9;background:#fff;color:#dc2626;border-radius:8px;
+padding:5px 9px;font-size:11.5px;font-weight:800;font-family:inherit;cursor:pointer}
 /* ── 신급 교육 신청 · 대시보드 ── */
 .gdcardD{padding:15px 16px 17px}
 .gdkpis{display:flex;gap:9px;flex-wrap:wrap}
@@ -715,6 +765,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     <div class="mtile i-green" onclick="goMyreq()"><div class="mc"><span style="font-size:38px;font-weight:800;color:#fff;line-height:1">A</span></div><span>문의 확인</span></div>
     <div class="mtile i-blue" onclick="goReport()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.2a2.55 2.55 0 013.6 3.6L7.6 19.4 2.5 21l1.6-5.1z"/><path d="M14.8 4.9l3.6 3.6"/></svg></div><span>구역보고</span></div>
     <div class="mtile i-purple" onclick="goGrade()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.6-9 4.6-9-4.6z"/><path d="M6.5 10.2v4.6c0 1.6 2.5 2.9 5.5 2.9s5.5-1.3 5.5-2.9v-4.6"/><path d="M21 7.6v5.4"/></svg></div><span>신급 교육 신청</span></div>
+    <div class="mtile i-teal2" onclick="goPlace()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.6"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8.5 14.5h7"/></svg></div><span>장소 사용 신청</span></div>
   </div>
   <div class="visitor">👥 방문자 · Today <b id="visToday">·</b> · Total <b id="visTotal">·</b>
     <div class="cright" style="margin-top:8px">© 2026 songtanglorychurch. All rights reserved.<br>무단 복제·배포 금지</div>
@@ -859,6 +910,12 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 <!-- 신급 교육 신청 (로그인 없이 누구나) -->
 <section id="grade" class="view">
   <div id="gdWrap"></div>
+</section>
+
+<!-- 장소 사용 신청 (로그인 없이 누구나) -->
+<section id="place" class="view">
+  <div id="plForm"></div>
+  <div id="plList"></div>
 </section>
 
 <!-- 명단 관리 (관리자) · 연락처 관리 (구역장·장로) -->
@@ -1785,6 +1842,7 @@ function showView(v,back){
   if(v==='member') renderMemberSearch();
   if(v==='mroster') openRoster();
   if(v==='grade') openGrade();
+  if(v==='place') openPlace();
   if(v==='pray') renderIp();
   growAll(document.getElementById(v));
 }
@@ -2158,6 +2216,217 @@ function openMember(name){
        :'<div class="mblbl">기도제목 · 특이사항 이력</div><div class="bempty">기록이 없습니다.</div>')
    +'</div></div>';
   try{ box.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+}
+
+// ---------- 장소 사용 신청 ----------
+/* 장소·시간·현황은 모두 서버에서 받는다. 겹침은 화면에서 한 번, 서버에서 한 번 더 막는다. */
+let PLACE=null, plPick='', plTab='next', plSending=false, plDone=null;
+function goPlace(){ openApp('place'); }
+async function fetchPlaceInfo(){
+  if(!USE_BACKEND) return PLACE;
+  try{
+    const r=await fetch(withTok(API+'?action=placeInfo'));
+    const d=await r.json();
+    if(d&&d.ok){ PLACE=d; return d; }
+  }catch(e){ console.warn('장소 안내 불러오기 실패:',e); }
+  return PLACE;
+}
+async function openPlace(){
+  plSending=false; plDone=null;
+  renderPlace();
+  const d=await fetchPlaceInfo();
+  if(d){ if(!plPick) plPick=(d.places||[])[0]||''; renderPlace(); }
+}
+/* 07:00 → 오전 7:00 / 13:30 → 오후 1:30 */
+function ampm(t){
+  const p=String(t||'').split(':'); if(p.length!==2) return String(t||'');
+  const h=parseInt(p[0],10);
+  const ap=h<12?'오전':'오후';
+  const hh=(h%12)===0?12:(h%12);
+  return ap+' '+hh+':'+p[1];
+}
+function plDateLabel(d){
+  const p=String(d||'').split('-'); if(p.length!==3) return String(d||'');
+  const wd=['일','월','화','수','목','금','토'][new Date(p[0],p[1]-1,p[2]).getDay()];
+  return (p[1]*1)+'월 '+(p[2]*1)+'일 ('+(wd==='일'?'주일':wd)+')';
+}
+function plToday(){ return (PLACE&&PLACE.today)||localISO(new Date()); }
+function plWho(it){
+  const n=Number(it.n)||0;
+  const t=String(it.who||'')+(n>1?' 등 '+n+'명':(n===1?' 1명':''));
+  return it.dept? (it.dept+' ('+t+')') : t;
+}
+function renderPlace(){
+  const box=document.getElementById('plForm'); if(!box) return;
+  if(plDone){ renderPlaceDone(); return; }
+  if(!PLACE){
+    box.innerHTML='<div class="plcard"><div class="plhd"><div class="n">장소 사용 신청</div></div>'
+      +'<div class="plbd"><div class="bempty">불러오는 중입니다…</div></div></div>';
+    document.getElementById('plList').innerHTML='';
+    return;
+  }
+  const P=PLACE;
+  const chips=(P.places||[]).map(p=>'<div class="plchip'+(p===plPick?' on':'')+'" onclick="pickPlace(\''+esc(p)+'\')">'+esc(p)+'</div>').join('');
+  const slot=(id,sel)=>'<select class="f-in" id="'+id+'">'
+    +(P.slots||[]).map(s=>'<option value="'+esc(s)+'"'+(s===sel?' selected':'')+'>'+esc(ampm(s))+'</option>').join('')
+    +'</select>';
+  box.innerHTML='<div class="plcard">'
+    +'<div class="plhd"><div class="n">장소 사용 신청</div>'
+    +'<div class="m">'+(P.places||[]).map(esc).join(' · ')+' · '+esc(ampm(P.open))+' ~ '+esc(ampm(P.close))+'</div></div>'
+    +'<div class="plbd">'
+    +'<div id="plErr"></div>'
+    +'<div class="plfl"><label>장소 <i>*</i></label><div class="plchips">'+chips+'</div></div>'
+    +'<div class="plfl"><label>날짜 <i>*</i></label>'
+    +'<input class="f-in" id="plDate" type="date" min="'+esc(plToday())+'" value="'+esc(plToday())+'"/></div>'
+    +'<div class="plfl"><label>시간 <i>*</i></label><div class="plrow">'
+    + slot('plFrom','10:00')+'<span class="tilde">~</span>'+slot('plTo','12:00')+'</div></div>'
+    +'<div class="plfl"><label>부서 · 모임 <span class="hint">개인이면 비워 두세요</span></label>'
+    +'<input class="f-in" id="plDept" placeholder="예) 청년부, 여전도회"/></div>'
+    +'<div class="plrow" style="gap:8px">'
+    +'<div class="plfl" style="flex:1.5"><label>대표자 이름 <i>*</i></label>'
+    +'<input class="f-in" id="plWho" placeholder="이름" autocomplete="name"/></div>'
+    +'<div class="plfl" style="flex:1"><label>인원 <i>*</i></label>'
+    +'<input class="f-in" id="plN" type="number" inputmode="numeric" min="1" placeholder="예) 12"/></div>'
+    +'</div>'
+    +'<div class="plfl"><label>연락처 <i>*</i></label>'
+    +'<input class="f-in" id="plPhone" type="tel" inputmode="numeric" placeholder="숫자만 넣어 주세요" autocomplete="tel"/></div>'
+    +'<div class="plfl"><label>사용 내용 <span class="hint">선택</span></label>'
+    +'<input class="f-in" id="plMemo" placeholder="예) 청년부 임원 모임"/></div>'
+    +'<button class="plbtn" id="plBtn" onclick="submitPlace()">신청하기</button>'
+    +'</div></div>';
+  renderPlaceList();
+}
+function pickPlace(p){
+  plPick=p;
+  const box=document.getElementById('plForm'); if(!box) return;
+  box.querySelectorAll('.plchip').forEach(function(el){ el.classList.toggle('on', el.textContent===p); });
+  plErr('');
+}
+function plErr(html){
+  const e=document.getElementById('plErr');
+  if(e) e.innerHTML=html?('<div class="plerr">'+html+'</div>'):'';
+  if(html){ try{ e.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(x){} }
+}
+function plVal(id){ const e=document.getElementById(id); return e?String(e.value||'').trim():''; }
+function hm(t){ const p=String(t||'').split(':'); return p.length===2?(p[0]*60+ +p[1]):-1; }
+/* 화면에서 먼저 걸러 준다 (서버에서 한 번 더 확인한다) */
+function plLocalClash(date,place,s,e){
+  return ((PLACE&&PLACE.items)||[]).filter(it=>it.date===date&&it.place===place)
+    .filter(it=>{ const a=hm(it.from), b=hm(it.to); return s<b && a<e; })[0]||null;
+}
+function plClashMsg(c){
+  return '<b>이미 사용 신청이 있습니다</b>'
+    + esc(plDateLabel(c.date))+' '+esc(c.place)+'은(는)<br><b>'
+    + esc(ampm(c.from))+' ~ '+esc(ampm(c.to))+' · '+esc(c.label||plWho(c))
+    + '</b><br>가 이미 쓰고 있습니다. 다른 시간이나 장소를 골라 주세요.';
+}
+async function submitPlace(){
+  if(plSending) return;
+  const date=plVal('plDate'), from=plVal('plFrom'), to=plVal('plTo');
+  const who=plVal('plWho'), n=plVal('plN'), phone=plVal('plPhone');
+  if(!plPick){ plErr('장소를 골라 주세요.'); return; }
+  if(!date){ plErr('날짜를 골라 주세요.'); return; }
+  if(date<plToday()){ plErr('지난 날짜는 신청할 수 없습니다.'); return; }
+  if(hm(to)<=hm(from)){ plErr('끝나는 시각이 시작 시각보다 늦어야 합니다.'); return; }
+  if(!who){ plErr('대표자 이름을 입력해 주세요.'); return; }
+  if(!(parseInt(n,10)>=1)){ plErr('인원을 숫자로 입력해 주세요.'); return; }
+  if(String(phone).replace(/[^0-9]/g,'').length<9){ plErr('연락처를 정확히 입력해 주세요.'); return; }
+  const c=plLocalClash(date,plPick,hm(from),hm(to));
+  if(c){ plErr(plClashMsg(c)); return; }
+  plErr('');
+  plSending=true;
+  const btn=document.getElementById('plBtn');
+  if(btn){ btn.disabled=true; btn.innerHTML='<span class="spin"></span> 전송 중…'; }
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify({action:'savePlace',
+      record:{'날짜':date,'장소':plPick,'시작':from,'종료':to,'부서':plVal('plDept'),
+              '대표자':who,'인원':n,'연락처':phone,'내용':plVal('plMemo')}})});
+    d=await r.json().catch(()=>null);
+  }catch(e){ d=null; }
+  plSending=false;
+  if(btn){ btn.disabled=false; btn.textContent='신청하기'; }
+  if(!d){ plErr('전송에 실패했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.'); return; }
+  if(!d.ok){
+    if(d.error==='CLASH'&&d.clash){ await fetchPlaceInfo(); renderPlace(); plErr(plClashMsg(d.clash)); }
+    else plErr(esc(d.message||'신청하지 못했습니다.'));
+    return;
+  }
+  plDone={date:date,place:plPick,from:from,to:to,
+          label:plWho({dept:plVal('plDept'),who:who,n:parseInt(n,10)})};
+  await fetchPlaceInfo();
+  renderPlace();
+}
+function renderPlaceDone(){
+  const box=document.getElementById('plForm'); if(!box||!plDone) return;
+  const d=plDone;
+  box.innerHTML='<div class="plcard">'
+    +'<div class="plhd"><div class="n">장소 사용 신청</div></div>'
+    +'<div class="plbd pldone"><div class="ck">✓</div>'
+    +'<h3>사용 신청이 완료되었습니다</h3>'
+    +'<p><b>'+esc(plDateLabel(d.date))+' '+esc(ampm(d.from))+' ~ '+esc(ampm(d.to))+'</b><br>'
+    + esc(d.place)+' · '+esc(d.label)+'<br><br>'
+    +'취소하실 때는 아래 현황에서 <b>취소</b>를 누르고<br>연락처 뒤 4자리를 넣으시면 됩니다.</p>'
+    +'<button class="plbtn gray" onclick="plAgain()">다시 신청하기</button>'
+    +'</div></div>';
+  renderPlaceList();
+  try{ box.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+}
+function plAgain(){ plDone=null; renderPlace(); }
+function renderPlaceList(){
+  const box=document.getElementById('plList'); if(!box) return;
+  if(!PLACE){ box.innerHTML=''; return; }
+  const today=plToday();
+  const all=(PLACE.items||[]);
+  const items=(plTab==='next') ? all.filter(x=>x.date>=today)
+                               : all.filter(x=>x.date<today).slice().reverse();
+  const tabs='<div class="pltabs">'
+    +'<button class="pltab'+(plTab==='next'?' on':'')+'" onclick="plSetTab(\'next\')">앞으로 예정</button>'
+    +'<button class="pltab'+(plTab==='past'?' on':'')+'" onclick="plSetTab(\'past\')">지난 사용</button></div>';
+  if(!items.length){
+    box.innerHTML='<div class="card">'+tabs
+      +'<div class="bempty">'+(plTab==='next'?'예정된 사용 신청이 없습니다.':'지난 사용 기록이 없습니다.')+'</div></div>';
+    return;
+  }
+  let html='', last='';
+  items.forEach(function(it){
+    if(it.date!==last){ html+='<div class="pldh">'+esc(plDateLabel(it.date))+'</div>'; last=it.date; }
+    const second=(PLACE.places||[]).indexOf(it.place)===1;
+    const canCancel=(it.date>=today);
+    html+='<div class="plrw"><span class="tm">'+esc(String(it.from))+'<br>~ '+esc(String(it.to))+'</span>'
+      +'<span class="bd"><span class="pc'+(second?' b':'')+'">'+esc(it.place)+'</span>'
+      +'<span class="wh">'+esc(plWho(it))+'</span>'
+      +(it.memo?'<span class="mt">'+esc(it.memo)+'</span>':'')
+      +(it.phone?'<span class="mt">'+esc(it.phone)+'</span>':'')
+      +'</span>'
+      +(canCancel?'<button class="xx" onclick="cancelPlace(\''+esc(it.id)+'\')">취소</button>':'')
+      +'</div>';
+  });
+  box.innerHTML='<div class="card">'+tabs+'<div class="plstat">'+html+'</div>'
+    +'<div class="mini" style="margin-top:9px">지난 사용 기록은 '
+    +((PLACE.keepDays||90)/30|0)+'개월 뒤 자동으로 지워집니다.</div></div>';
+}
+function plSetTab(t){ plTab=t; renderPlaceList(); }
+async function cancelPlace(id){
+  const isAdm=!!(PLACE&&PLACE.isAdmin);
+  let last4='';
+  if(isAdm){ if(!confirm('이 사용 신청을 취소할까요?')) return; }
+  else{
+    last4=prompt('신청하실 때 넣으신 연락처 뒤 4자리를 입력해 주세요.');
+    if(last4===null) return;
+    last4=String(last4).replace(/[^0-9]/g,'');
+    if(last4.length!==4){ alert('숫자 4자리를 입력해 주세요.'); return; }
+  }
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',body:tokBody({action:'cancelPlace',id:id,last4:last4})});
+    d=await r.json().catch(()=>null);
+  }catch(e){ d=null; }
+  if(!d){ alert('전송에 실패했습니다. 다시 시도해 주세요.'); return; }
+  if(!d.ok){ alert(d.message||'취소하지 못했습니다.'); return; }
+  await fetchPlaceInfo();
+  renderPlace();
+  alert('취소했습니다.');
 }
 
 // ---------- 신급 교육 신청 · 관리자 대시보드 취합 ----------

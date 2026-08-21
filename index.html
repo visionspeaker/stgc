@@ -194,6 +194,8 @@ canvas{max-height:280px}
 .ntcat{flex:none;background:var(--blueSoft);color:#1d4ed8;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:800}
 .nttitle{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ntmore{padding:8px 11px;font-size:12px;color:var(--muted);background:#fafbfd}
+.ntwhen{flex:1;text-align:right;font-size:11.5px;color:var(--muted)}
+.ntcat.gd{background:#f3eefc;color:#7b52c8}
 .ntfoot{padding:12px 18px 16px;display:flex;gap:8px}
 /* ===== 보고서 상세 모달 ===== */
 .rmodal{position:fixed;inset:0;background:rgba(20,28,45,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:90}
@@ -278,6 +280,8 @@ canvas{max-height:280px}
 .i-blue .mc{background:linear-gradient(160deg,#5aa2ea,#3f78d4)}
 .i-news .mc{background:linear-gradient(160deg,#5aa2ea,#2e74b5)}
 .i-orange .mc{background:linear-gradient(160deg,#f2a65a,#e0762f)}
+.i-purple .mc{background:linear-gradient(160deg,#a97fe6,#7b52c8)}
+.i-purple .mc svg{width:41px;height:41px}
 .visitor{text-align:center;color:var(--muted);font-size:12.5px;margin:16px 0 0;padding-bottom:24px}
 .visitor b{color:var(--ink)}
 .cright{font-size:10.5px;color:#9aa4b2;line-height:1.6;letter-spacing:-.1px}
@@ -500,6 +504,65 @@ border:1px solid var(--line);text-decoration:none;flex:none}
 .pill2.on{background:#dcfce7;color:#15803d;outline:2px solid var(--teal)}
 .praysrch{flex:1;min-width:140px;height:38px;padding:0 11px;font-size:13.5px}
 /* ---------- 성도 조회 ---------- */
+/* ── 신급 교육 신청 · 대시보드 ── */
+.gdcardD{padding:15px 16px 17px}
+.gdkpis{display:flex;gap:9px;flex-wrap:wrap}
+.gdkpi{flex:1;min-width:92px;border:1px solid var(--line);border-radius:13px;padding:11px 12px;background:#fbfcfe}
+.gdkpi .v{font-size:22px;font-weight:800;color:#7b52c8}
+.gdkpi .v small{font-size:12px;color:var(--muted);font-weight:700}
+.gdkpi .k{font-size:11px;color:var(--muted);margin-top:2px}
+.gdbar{display:flex;height:11px;border-radius:20px;overflow:hidden;margin-top:13px;background:#eef2f7}
+.gdbar i{display:block}
+.gdleg{display:flex;gap:12px;flex-wrap:wrap;margin-top:9px;font-size:11.5px;color:var(--muted)}
+.gdleg span{display:flex;gap:5px;align-items:center}
+.gdleg em{width:9px;height:9px;border-radius:3px;display:block;font-style:normal}
+.gdtoggle{margin-top:13px;width:100%;border:1px solid var(--line);background:#f7f9fc;border-radius:10px;
+height:38px;font-size:12.5px;font-weight:800;font-family:inherit;color:var(--ink);cursor:pointer}
+.gdlist{margin-top:11px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gdrow{display:flex;gap:8px;align-items:center;padding:9px 11px;border-bottom:1px solid #eef2f7;font-size:12.5px}
+.gdrow:last-child{border-bottom:0}
+.gdrow .gdc{flex:none;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:800}
+.gdrow .gdn{font-weight:800;flex:none}
+.gdrow .gdd{color:var(--muted);font-size:11.5px;flex:none}
+.gdrow .gdp{color:var(--muted);font-size:11.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gdrow .gdt{color:#a8b2c0;font-size:11px;flex:none}
+/* ── 신급 교육 신청 ── */
+.gdcard{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.gdhd{background:linear-gradient(135deg,#a97fe6,#7b52c8);color:#fff;padding:16px 17px}
+.gdhd .k{font-size:11.5px;opacity:.93;font-weight:700;letter-spacing:.3px}
+.gdhd .n{font-size:20px;font-weight:800;margin-top:3px}
+.gdhd .m{font-size:12.5px;opacity:.95;margin-top:6px}
+.gdbd{padding:15px 16px 18px}
+.gdlock{background:#f4f6f9;border:1px solid var(--line);border-radius:12px;padding:13px 14px;
+display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}
+.gdlock .ic{font-size:17px;line-height:1.2}
+.gdlock .tx{font-size:13px;line-height:1.7;color:var(--muted)}
+.gdlock .tx b{display:block;font-size:13.5px;color:var(--ink);margin-bottom:2px}
+.gdqual{background:#fffbf2;border:1px solid #f6d9a8;border-radius:12px;padding:13px 14px;margin-bottom:14px}
+.gdqual b{display:block;font-size:13px;color:#8a5a12;margin-bottom:4px}
+.gdqual div{font-size:12.5px;color:#a06a1a;line-height:1.8}
+.gdfl{margin-bottom:13px}
+.gdfl label{display:block;font-size:13px;font-weight:800;margin-bottom:6px}
+.gdfl label i{color:#dc2626;font-style:normal}
+.gdfl .hint{font-size:11.5px;color:var(--muted);font-weight:600;margin-left:4px}
+.gdfl .f-in{width:100%;height:44px}
+.gdopt{border:1px solid var(--inline);border-radius:12px;padding:12px 14px;margin-bottom:8px;
+display:flex;gap:11px;align-items:flex-start;background:#fff;cursor:pointer}
+.gdopt .rd{width:18px;height:18px;border-radius:50%;border:2px solid #c3cbd6;flex:none;margin-top:2px}
+.gdopt.on{border-color:#7b52c8;background:#f3eefc}
+.gdopt.on .rd{border-color:#7b52c8;background:#7b52c8;box-shadow:inset 0 0 0 3px #fff}
+.gdopt .tt{font-size:14px;font-weight:800;display:block}
+.gdopt .dl{font-size:12px;color:var(--muted);margin-top:2px;display:block}
+.gdbtn{width:100%;border:0;border-radius:12px;height:48px;font-size:15px;font-weight:800;
+font-family:inherit;background:linear-gradient(135deg,#a97fe6,#7b52c8);color:#fff;cursor:pointer}
+.gdbtn[disabled]{background:#dfe5ee;color:#9aa5b4;cursor:default}
+.gddone{text-align:center;padding:34px 20px}
+.gddone .ck{width:60px;height:60px;border-radius:50%;background:#f3eefc;color:#7b52c8;
+font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.gddone h3{margin:0 0 7px;font-size:17px}
+.gddone p{margin:0 0 16px;font-size:13px;color:var(--muted);line-height:1.85}
+.gderr{background:#fdf3f3;border:1px solid #f0c9c9;border-radius:11px;padding:11px 13px;
+font-size:12.5px;color:#93302f;line-height:1.7;margin-bottom:11px}
 /* ── 명단 관리 ── */
 .rsbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:10px}
 .rsbar .f-in{height:38px}
@@ -651,6 +714,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     <div class="mtile i-indigo" onclick="goIntake()"><div class="mc"><span style="font-size:38px;font-weight:800;color:#fff;line-height:1">Q</span></div><span>문의하기</span></div>
     <div class="mtile i-green" onclick="goMyreq()"><div class="mc"><span style="font-size:38px;font-weight:800;color:#fff;line-height:1">A</span></div><span>문의 확인</span></div>
     <div class="mtile i-blue" onclick="goReport()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.2a2.55 2.55 0 013.6 3.6L7.6 19.4 2.5 21l1.6-5.1z"/><path d="M14.8 4.9l3.6 3.6"/></svg></div><span>구역보고</span></div>
+    <div class="mtile i-purple" onclick="goGrade()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.6-9 4.6-9-4.6z"/><path d="M6.5 10.2v4.6c0 1.6 2.5 2.9 5.5 2.9s5.5-1.3 5.5-2.9v-4.6"/><path d="M21 7.6v5.4"/></svg></div><span>신급 교육 신청</span></div>
   </div>
   <div class="visitor">👥 방문자 · Today <b id="visToday">·</b> · Total <b id="visTotal">·</b>
     <div class="cright" style="margin-top:8px">© 2026 songtanglorychurch. All rights reserved.<br>무단 복제·배포 금지</div>
@@ -792,6 +856,11 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
   <div id="mbCard"></div>
 </section>
 
+<!-- 신급 교육 신청 (로그인 없이 누구나) -->
+<section id="grade" class="view">
+  <div id="gdWrap"></div>
+</section>
+
 <!-- 명단 관리 (관리자) · 연락처 관리 (구역장·장로) -->
 <section id="mroster" class="view">
   <div class="card">
@@ -907,6 +976,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
   </div>
 
   <div class="kpis" id="kpis"></div>
+  <div id="gdDash"></div>
 
   <div class="sect-t">출석 현황</div>
   <div class="dgrid g2">
@@ -1013,6 +1083,17 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     <div class="ntfoot">
       <button class="btn sec" style="flex:1" onclick="closeNoti()">나중에</button>
       <button class="btn" style="flex:1.4" onclick="gotoManage()">접수 처리하기</button>
+    </div>
+  </div>
+</div>
+
+<div id="gnotiGate" class="rmodal" style="display:none;z-index:95">
+  <div class="ntcard">
+    <div class="nthead"><span class="ntbell">🎓</span> 우리 구역 신급 교육 신청</div>
+    <div class="ntbody" id="gntBody"></div>
+    <div class="ntfoot">
+      <button class="btn sec" style="flex:1" onclick="closeGNoti(true)">나중에</button>
+      <button class="btn" style="flex:1.4" onclick="closeGNoti(false)">확인했습니다</button>
     </div>
   </div>
 </div>
@@ -1294,11 +1375,60 @@ async function loadAll(){
       setVisitors(d.visitors); saveR(); saveS();
       /* 받아온 자료가 이전과 똑같으면 화면을 다시 그리지 않는다.
          (괜히 다시 그리면 대시보드 차트 애니메이션이 또 재생된다) */
+      GRADES=Array.isArray(d.grades)?d.grades:[];
       if(dataSig()!==before) rerender();
       checkNewSubs();
+      checkNewGrades();
     }
   }catch(e){ console.warn('백엔드 불러오기 실패(로컬 데이터 사용):',e); }
 }
+/* ---------- 신급 교육 신청 알림 (구역장·장로) ----------
+   서버가 이미 권한대로 걸러서 내려주므로, 여기 있는 것은 모두 '내가 봐도 되는' 신청이다. */
+let GRADES=[];
+const GSEEN_KEY='sgc_seen_grade_v1';
+function gseenKey(){ return GSEEN_KEY+'_'+((current&&current.who)||'guest'); }
+function gseenIds(){ try{ return JSON.parse(localStorage.getItem(gseenKey())||'[]')||[]; }catch(e){ return []; } }
+function markGradesSeen(ids){
+  try{
+    const cur=gseenIds();
+    (ids||GRADES.map(g=>g.id)).forEach(i=>{ if(i&&cur.indexOf(i)<0) cur.push(i); });
+    localStorage.setItem(gseenKey(),JSON.stringify(cur.slice(-500)));
+  }catch(e){}
+}
+/* '나중에'는 오늘 하루만 미룬다 (문의 팝업과 같은 방식) */
+function gSnoozeKey(){ return GSEEN_KEY+'_snooze_'+((current&&current.who)||'guest'); }
+function gSnoozed(){ try{ return localStorage.getItem(gSnoozeKey())===localISO(new Date()); }catch(e){ return false; } }
+function gSnooze(){ try{ localStorage.setItem(gSnoozeKey(),localISO(new Date())); }catch(e){} }
+function newGrades(){
+  const seen=gseenIds();
+  return GRADES.filter(g=>g&&g.id&&seen.indexOf(g.id)<0);
+}
+let gnotiShown=false;
+function checkNewGrades(){
+  if(gnotiShown) return;
+  if(!current) return;
+  const r=current.role;
+  if(r!=='leader'&&r!=='elder') return;      /* 관리자는 대시보드에서 본다 */
+  if(gSnoozed()) return;
+  const ns=newGrades(); if(!ns.length) return;
+  gnotiShown=true;
+  const list=ns.slice(0,5).map(g=>
+    '<div class="ntrow"><span class="ntcat gd">'+esc(g.course||'')+'</span>'
+    +'<span class="nttitle">'+esc(g.name||'')+'</span>'
+    +'<span class="ntwhen">'+esc(String(g.ts||'').slice(5,10))+'</span></div>').join('');
+  const el=document.getElementById('gntBody');
+  if(el) el.innerHTML=
+    '<div class="ntbig"><b>'+ns.length+'</b>명</div>'
+    +'<div class="ntsub">'+esc((current&&current.district)||'우리 구역')+' 구역원이 신급 교육을 신청했습니다.</div>'
+    +'<div class="ntlist">'+list+(ns.length>5?'<div class="ntmore">외 '+(ns.length-5)+'명</div>':'')+'</div>';
+  const gt=document.getElementById('gnotiGate'); if(gt) gt.style.display='flex';
+}
+function hideGNoti(){ const gt=document.getElementById('gnotiGate'); if(gt) gt.style.display='none'; }
+function closeGNoti(later){
+  const gt=document.getElementById('gnotiGate'); if(gt) gt.style.display='none';
+  if(later) gSnooze(); else markGradesSeen();
+}
+
 /* ---------- 새 접수 알림 ---------- */
 const SEEN_KEY='sgc_seen_subs_v2';   /* v2: 시각 대신 '확인한 날짜'를 저장 */
 function seenKeyFor(){ return SEEN_KEY+'_'+((current&&current.who)||'guest'); }
@@ -1514,8 +1644,10 @@ function pushView(v){ if(v && viewStack[viewStack.length-1]!==v) viewStack.push(
 /* 뒤로: 직전 화면이 있으면 그 화면으로, 없으면 홈으로 */
 function goBack(){
   const nt=document.getElementById('notiGate'), rm=document.getElementById('repModal'),
-        pg=document.getElementById('pwGate'), lg=document.getElementById('loginGate');
+        pg=document.getElementById('pwGate'), lg=document.getElementById('loginGate'),
+        gn=document.getElementById('gnotiGate');
   if(typeof kpadOpen==='function'&&kpadOpen()){ closeKpad(false); return; }
+  if(gn&&gn.style.display==='flex'){ closeGNoti(true); return; }
   if(nt&&nt.style.display==='flex'){ closeNoti(); return; }
   if(rm&&rm.style.display==='flex'){ closeReportDetail(); return; }
   if(pg&&pg.style.display==='flex'){ closePwChange(); return; }
@@ -1542,6 +1674,7 @@ window.addEventListener('popstate',function(){
   if(document.getElementById('app').style.display==='none') return;
   const goingHome = !viewStack.length
     && document.getElementById('notiGate').style.display!=='flex'
+    && document.getElementById('gnotiGate').style.display!=='flex'
     && document.getElementById('repModal').style.display!=='flex'
     && document.getElementById('pwGate').style.display!=='flex'
     && document.getElementById('loginGate').style.display!=='flex';
@@ -1624,7 +1757,7 @@ function setRoleLabel(){
 function enterApp(role,scope){
   current=Object.assign({role},scope||{});
   saveSession();
-  notiShown=false; checkNewSubs();
+  notiShown=false; gnotiShown=false; checkNewSubs(); checkNewGrades();
   document.getElementById('home').style.display='none';
   document.getElementById('loginGate').style.display='none';
   document.getElementById('app').style.display='block';
@@ -1635,7 +1768,7 @@ function enterApp(role,scope){
   window.scrollTo(0,0);
   pushAppHist(); paintBackBtn();
 }
-function logout(){current=null;clearSession();setToken('');notiShown=false;closeNoti();['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
+function logout(){current=null;clearSession();setToken('');notiShown=false;gnotiShown=false;GRADES=[];hideGNoti();closeNoti();['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
 /* back=true 이면 뒤로가기로 되돌아온 것이므로 기록하지 않는다 */
 function showView(v,back){
   if(!back && currentView && currentView!==v) pushView(currentView);
@@ -1651,6 +1784,7 @@ function showView(v,back){
   if(v==='dash') renderDash();
   if(v==='member') renderMemberSearch();
   if(v==='mroster') openRoster();
+  if(v==='grade') openGrade();
   if(v==='pray') renderIp();
   growAll(document.getElementById(v));
 }
@@ -2026,6 +2160,194 @@ function openMember(name){
   try{ box.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
 }
 
+// ---------- 신급 교육 신청 · 관리자 대시보드 취합 ----------
+let gdOpenList=false;
+/* 마감 뒤 한 달이 지나면 대시보드에서 감춘다 (자료는 시트에 그대로) */
+function gradeStillShow(){
+  if(!GRADES.length) return false;
+  const to=(GRADE&&GRADE.to)||'';
+  if(!to) return true;
+  const d=new Date(to+'T00:00:00'); if(isNaN(d)) return true;
+  d.setDate(d.getDate()+30);
+  return new Date()<=d;
+}
+function renderGradeDash(){
+  const box=document.getElementById('gdDash'); if(!box) return;
+  if(!current||current.role!=='admin'||!gradeStillShow()){ box.innerHTML=''; return; }
+  const list=GRADES.slice().sort((a,b)=>String(b.ts||'').localeCompare(String(a.ts||'')));
+  const names=(GRADE&&GRADE.courses||[]).map(c=>c.name);
+  const cs=names.length?names:['학습','세례','입교'];
+  const cnt={}; cs.forEach(c=>cnt[c]=0);
+  list.forEach(g=>{ if(cnt[g.course]===undefined) cnt[g.course]=0; cnt[g.course]++; });
+  const ds=[...new Set(list.map(g=>g.district))].length;
+  const tot=list.length;
+  const COL={'학습':'#3aa66e','세례':'#3f8ed4','입교':'#9b6fe0'};
+  const colOf=c=>COL[c]||'#94a3b8';
+  const bar=tot?Object.keys(cnt).filter(c=>cnt[c]>0).map(c=>
+    '<i style="width:'+(cnt[c]/tot*100).toFixed(1)+'%;background:'+colOf(c)+'"></i>').join(''):'';
+  const leg=Object.keys(cnt).map(c=>
+    '<span><em style="background:'+colOf(c)+'"></em>'+esc(c)+' '+cnt[c]+'</span>').join('');
+  const rows=list.map(g=>
+    '<div class="gdrow"><span class="gdc" style="background:'+colOf(g.course)+'22;color:'+colOf(g.course)+'">'
+    +esc(g.course||'')+'</span>'
+    +'<span class="gdn">'+esc(g.name||'')+'</span>'
+    +'<span class="gdd">'+esc(g.district||'')+'</span>'
+    +'<span class="gdp">'+esc(g.phone||'')+'</span>'
+    +'<span class="gdt">'+esc(String(g.ts||'').slice(5,10))+'</span></div>').join('');
+  box.innerHTML='<div class="sect-t">신급 교육 신청</div>'
+    +'<div class="dcard gdcardD">'
+    +'<div class="gdkpis">'
+      + gdBox(tot+' <small>명</small>','신청 합계')
+      + cs.map(c=>gdBox(cnt[c]||0,c)).join('')
+      + gdBox(ds+' <small>/'+DIST_NAMES.length+'</small>','신청 있는 구역')
+    +'</div>'
+    +(tot?'<div class="gdbar">'+bar+'</div><div class="gdleg">'+leg+'</div>':'<div class="bempty">아직 신청이 없습니다.</div>')
+    +(tot?'<button class="gdtoggle" onclick="gdOpenList=!gdOpenList;renderGradeDash()">'
+        +(gdOpenList?'명단 접기 ▲':'신청자 명단 보기 ▼')+'</button>':'')
+    +(tot&&gdOpenList?'<div class="gdlist">'+rows+'</div>':'')
+    +'</div>';
+}
+function gdBox(v,l){ return '<div class="gdkpi"><div class="v">'+v+'</div><div class="k">'+esc(l)+'</div></div>'; }
+
+// ---------- 신급 교육 신청 ----------
+/* 안내 문구·기간·구역 목록은 모두 서버에서 받는다.
+   앱 파일에는 교인 이름·전화번호가 절대 들어가지 않는다. */
+let GRADE=null, gdCourse='', gdSending=false;
+const GRADE_KEY='sgc_grade_v1';
+function saveGradeInfo(d){ try{ localStorage.setItem(GRADE_KEY,JSON.stringify(d)); }catch(e){} }
+function loadGradeInfo(){ try{ return JSON.parse(localStorage.getItem(GRADE_KEY)||'null'); }catch(e){ return null; } }
+async function fetchGradeInfo(){
+  if(!USE_BACKEND) return GRADE;
+  try{
+    const r=await fetch(API+'?action=gradeInfo');
+    const d=await r.json();
+    if(d&&d.ok){ GRADE=d; saveGradeInfo(d); return d; }
+  }catch(e){ console.warn('신급 안내 불러오기 실패:',e); }
+  return GRADE;
+}
+function fmtGDate(s){
+  const p=String(s||'').split('-'); if(p.length!==3) return String(s||'');
+  const wd=['일','월','화','수','목','금','토'][new Date(p[0],p[1]-1,p[2]).getDay()];
+  return (p[1]*1)+'/'+(p[2]*1)+'('+wd+')';
+}
+function goGrade(){ openApp('grade'); }
+async function openGrade(){
+  gdCourse=''; gdSending=false;
+  if(!GRADE) GRADE=loadGradeInfo();
+  renderGrade();
+  const d=await fetchGradeInfo();
+  if(d) renderGrade();
+}
+function gradeHead(){
+  const g=GRADE||{};
+  return '<div class="gdhd"><div class="k">'+esc(g.title||'신급 교육 신청')+'</div>'
+    +'<div class="n">'+esc(g.sub||'학습 · 세례 · 입교')+'</div>'
+    +(g.from&&g.to?'<div class="m">신청기간 '+esc(fmtGDate(g.from))+' ~ '+esc(fmtGDate(g.to))+'</div>':'')
+    +'</div>';
+}
+function gradeQual(){
+  const q=(GRADE&&GRADE.qual)||[];
+  if(!q.length) return '';
+  return '<div class="gdqual"><b>신청 자격</b><div>'+q.map(esc).join('<br>')+'</div></div>';
+}
+function renderGrade(){
+  const box=document.getElementById('gdWrap'); if(!box) return;
+  if(!GRADE){
+    box.innerHTML='<div class="gdcard">'+gradeHead()
+      +'<div class="gdbd"><div class="bempty">안내를 불러오는 중입니다…</div></div></div>';
+    return;
+  }
+  const g=GRADE;
+  if(!g.open){
+    const before=String(g.today||'')<String(g.from||'');
+    box.innerHTML='<div class="gdcard">'+gradeHead()+'<div class="gdbd">'
+      +'<div class="gdlock"><span class="ic">🔒</span><span class="tx"><b>'
+      + (before?'아직 신청 기간이 아니에요':'신청이 마감되었습니다')+'</b>'
+      + (before? esc(fmtGDate(g.from))+'부터 신청할 수 있어요. 내용은 미리 확인해 두세요.'
+               : '신청 기간이 지났습니다. 문의하기로 연락 주세요.')
+      +'</span></div>'
+      +gradeQual()
+      +'<button class="gdbtn" disabled>'
+      + (before? esc(fmtGDate(g.from))+'부터 신청할 수 있어요' : '신청이 마감되었습니다')
+      +'</button></div></div>';
+    return;
+  }
+  const ds=(g.districts||[]).slice();
+  const opts='<option value="">구역을 선택하세요</option>'
+    + ds.map(d=>'<option>'+esc(d)+'</option>').join('')
+    + '<option>'+esc(g.noDist||'구역 모름 / 새가족')+'</option>';
+  const cs=(g.courses||[]).map(c=>
+    '<div class="gdopt'+(gdCourse===c.name?' on':'')+'" onclick="pickCourse(\''+esc(c.name)+'\')">'
+    +'<span class="rd"></span><span><span class="tt">'+esc(c.name)+'</span>'
+    +'<span class="dl">'+esc(c.desc||'')+'</span></span></div>').join('');
+  box.innerHTML='<div class="gdcard">'+gradeHead()+'<div class="gdbd">'
+    +gradeQual()
+    +'<div id="gdErr"></div>'
+    +'<div class="gdfl"><label>이름 <i>*</i></label>'
+    +'<input class="f-in" id="gdName" placeholder="이름을 입력하세요" autocomplete="name"/></div>'
+    +'<div class="gdfl"><label>구역 <i>*</i></label>'
+    +'<select class="f-in" id="gdDist">'+opts+'</select></div>'
+    +'<div class="gdfl"><label>연락처 <i>*</i></label>'
+    +'<input class="f-in" id="gdPhone" type="tel" inputmode="numeric" placeholder="숫자만 넣어 주세요" autocomplete="tel"/></div>'
+    +'<div class="gdfl"><label>교육 과정 <i>*</i>'
+    + (g.weeks?'<span class="hint">'+esc(g.weeks)+'</span>':'') +'</label>'+cs+'</div>'
+    +'<button class="gdbtn" id="gdBtn" onclick="submitGrade()">신청하기</button>'
+    +'</div></div>';
+}
+/* 과정을 고를 때 화면 전체를 다시 그리면 이미 입력한 이름·연락처가 지워진다.
+   선택 표시만 바꾼다. */
+function pickCourse(n){
+  gdCourse=n;
+  const box=document.getElementById('gdWrap'); if(!box) return;
+  box.querySelectorAll('.gdopt').forEach(function(el){
+    const t=el.querySelector('.tt');
+    el.classList.toggle('on', !!t && t.textContent===n);
+  });
+  gdErr('');
+}
+function gdErr(msg){
+  const e=document.getElementById('gdErr');
+  if(e) e.innerHTML=msg?'<div class="gderr">'+esc(msg)+'</div>':'';
+  if(msg){ try{ e.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(x){} }
+}
+function gdVal(id){ const e=document.getElementById(id); return e?String(e.value||'').trim():''; }
+async function submitGrade(){
+  if(gdSending) return;
+  const name=gdVal('gdName'), dist=gdVal('gdDist'), phone=gdVal('gdPhone');
+  if(!name){ gdErr('이름을 입력해 주세요.'); return; }
+  if(!dist){ gdErr('구역을 선택해 주세요.'); return; }
+  if(String(phone).replace(/[^0-9]/g,'').length<9){ gdErr('연락처를 정확히 입력해 주세요.'); return; }
+  if(!gdCourse){ gdErr('교육 과정을 선택해 주세요.'); return; }
+  gdErr('');
+  gdSending=true;
+  const btn=document.getElementById('gdBtn');
+  if(btn){ btn.disabled=true; btn.innerHTML='<span class="spin"></span> 전송 중…'; }
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify({action:'saveGrade',
+      record:{'이름':name,'구역':dist,'연락처':phone,'과정':gdCourse}})});
+    d=await r.json().catch(()=>null);
+  }catch(e){ d=null; }
+  gdSending=false;
+  if(btn){ btn.disabled=false; btn.textContent='신청하기'; }
+  if(!d){ gdErr('전송에 실패했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.'); return; }
+  if(!d.ok){ gdErr(d.message||'신청하지 못했습니다.'); if(d.error==='CLOSED'){ fetchGradeInfo().then(renderGrade); } return; }
+  showGradeDone(d, name, dist, gdCourse);
+  loadAll();
+}
+function showGradeDone(d,name,dist,course){
+  const box=document.getElementById('gdWrap'); if(!box) return;
+  box.innerHTML='<div class="gdcard">'+gradeHead()+'<div class="gdbd gddone">'
+    +'<div class="ck">✓</div>'
+    +'<h3>'+(d.dup?'신청 내용을 바꿨습니다':'신청이 접수되었습니다')+'</h3>'
+    +'<p>'+ (d.dup? esc(d.message||'이미 신청하셨습니다.')
+                  : '신청해 주셔서 감사합니다.<br>자세한 일정은 따로 안내해 드릴게요.')
+    +'<br><br><b>'+esc(name)+'</b> · '+esc(dist)+' · '+esc(course)+'</p>'
+    +'<button class="gdbtn" onclick="goHome()">홈으로</button>'
+    +'</div></div>';
+  try{ box.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+}
+
 // ---------- 명단 관리 (관리자) · 연락처 관리 (구역장·장로) ----------
 /* 관리자만 추가·이동·제외·이름수정을 할 수 있다.
    구역장·장로는 본인 구역원의 연락처만 고칠 수 있다. (서버에서도 다시 막는다) */
@@ -2125,7 +2447,7 @@ function rsPaint(){
   let head='', body='';
   if(k==='add'){
     head='<h3>구역원 추가</h3><p class="dd">번호는 자동으로 붙습니다.</p>';
-    body=rsFld('이름','rsNm','','예) 홍길동')
+    body=rsFld('이름','rsNm','','앱에 표시할 이름')
       +rsDistSel('rsD',RS.dist)
       +'<div class="fdrow">'+rsFld('직책 (없으면 비움)','rsJob','','예) 권찰')
       +rsFld('구역내 순서','rsOrd','','예) 12','number')+'</div>'
@@ -2764,6 +3086,7 @@ function renderDash(){
     kpi(absTot,'결석','주일 1·2부 미출석','warn')+
     kpi(missing.length+' <small>/'+DIST_NAMES.length+'</small>','미보고 구역','보고 완료 '+reported.size+'구역','amber')+
     kpi(fbOpen,'미처리 문의','접수 '+fbBy('접수')+' · 처리중 '+fbBy('처리중')+' (보류 '+fbBy('보류')+'는 완료군)');
+  renderGradeDash();
   // 예배별 참석
   drawChart('svcChart','bar',{labels:['1부','2부','오후','수요','금요','새벽','월삭'],datasets:[{label:'참석(명)',
     data:[tSum(wkReports,'1부'),tSum(wkReports,'2부'),tSum(wkReports,'오후'),tSum(wkReports,'수요'),tSum(wkReports,'금요'),cSum(wkReports,'새벽'),tSum(wkReports,'월삭')],

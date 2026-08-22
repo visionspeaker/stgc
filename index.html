@@ -284,6 +284,8 @@ canvas{max-height:280px}
 .i-purple .mc svg{width:41px;height:41px}
 .i-teal2 .mc{background:linear-gradient(160deg,#3cbcb0,#2a8fb2)}
 .i-teal2 .mc svg{width:40px;height:40px}
+.i-rose .mc{background:linear-gradient(160deg,#f096b4,#d9527a)}
+.i-rose .mc svg{width:42px;height:42px}
 .visitor{text-align:center;color:var(--muted);font-size:12.5px;margin:16px 0 0;padding-bottom:24px}
 .visitor b{color:var(--ink)}
 .cright{font-size:10.5px;color:#9aa4b2;line-height:1.6;letter-spacing:-.1px}
@@ -496,6 +498,7 @@ border:1px solid var(--line);text-decoration:none;flex:none}
 .ipbox input{width:auto;accent-color:#7c5cd6;flex:none}
 .ipbadge{display:inline-block;font-size:10px;font-weight:800;background:#efe9fd;color:#7c5cd6;border-radius:20px;padding:2px 7px;margin-right:5px;vertical-align:1px}
 .pill2.ip.on{background:#efe9fd;color:#7c5cd6;outline:2px solid #7c5cd6}
+.pill2.self.on{background:#fdeef2;color:#b03a5b;outline:2px solid #d9527a}
 .prbtns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .prbtns .btn{flex:1;min-width:112px}
 .prok{display:none;font-size:12.5px;font-weight:800;color:var(--green);background:var(--greenSoft);border-radius:20px;padding:6px 12px;margin-top:8px}
@@ -506,6 +509,42 @@ border:1px solid var(--line);text-decoration:none;flex:none}
 .pill2.on{background:#dcfce7;color:#15803d;outline:2px solid var(--teal)}
 .praysrch{flex:1;min-width:140px;height:38px;padding:0 11px;font-size:13.5px}
 /* ---------- 성도 조회 ---------- */
+/* ── 중보기도 신청 ── */
+.prcard{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px}
+.prhd{background:linear-gradient(135deg,#f096b4,#d9527a);color:#fff;padding:16px 17px}
+.prhd .n{font-size:20px;font-weight:800}
+.prhd .m{font-size:12.5px;opacity:.95;margin-top:6px;line-height:1.65}
+.prbd{padding:15px 16px 18px}
+.prfl{margin-bottom:13px}
+.prfl label{display:block;font-size:13px;font-weight:800;margin-bottom:6px}
+.prfl label i{color:#dc2626;font-style:normal}
+.prfl .f-in{width:100%;height:44px}
+.prfl textarea.f-in{height:118px;line-height:1.75;padding:11px 12px;resize:vertical}
+.prchk{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--inline);
+border-radius:12px;padding:12px 13px;background:#fff;cursor:pointer}
+.prchk .bx{width:19px;height:19px;border-radius:6px;border:2px solid #c3cbd6;flex:none;margin-top:1px;
+display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800}
+.prchk.on{border-color:#b03a5b;background:#fdeef2}
+.prchk.on .bx{border-color:#b03a5b;background:#b03a5b}
+.prchk .tt{font-size:13.5px;font-weight:800;display:block}
+.prchk .dl{font-size:11.5px;color:var(--muted);margin-top:3px;display:block;line-height:1.65}
+.prbtn{width:100%;border:0;border-radius:12px;height:48px;font-size:15px;font-weight:800;
+font-family:inherit;background:linear-gradient(135deg,#f096b4,#d9527a);color:#fff;cursor:pointer}
+.prbtn[disabled]{background:#dfe5ee;color:#9aa5b4;cursor:default}
+.prbtn.gray{background:#eef2f7;color:var(--ink)}
+.prerr{background:#fdf3f3;border:1px solid #f0c9c9;border-radius:11px;padding:11px 13px;
+font-size:12.5px;color:#93302f;line-height:1.7;margin-bottom:12px}
+.prdone{text-align:center;padding:34px 20px}
+.prdone .ck{width:62px;height:62px;border-radius:50%;background:#fdeef2;color:#d9527a;
+display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.prdone h3{margin:0 0 8px;font-size:17px}
+.prdone p{margin:0 0 16px;font-size:13px;color:var(--muted);line-height:1.9}
+/* 기도제목 목록에 붙는 구분 배지 */
+.pbadge{display:inline-block;font-size:10.5px;font-weight:800;border-radius:20px;padding:2px 7px;margin-right:5px}
+.pb-ip{background:#eef0fb;color:#5b54c9}
+.pb-self{background:#fdeef2;color:#b03a5b}
+.pb-lock{background:#f4f6f9;color:#6b7686}
+.plocktx{color:#98a2b3;font-style:italic}
 /* ── 장소 사용 신청 ── */
 .plcard{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px}
 .plhd{background:linear-gradient(135deg,#3cbcb0,#2a8fb2);color:#fff;padding:16px 17px}
@@ -774,6 +813,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     <div class="mtile i-blue" onclick="goReport()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.2a2.55 2.55 0 013.6 3.6L7.6 19.4 2.5 21l1.6-5.1z"/><path d="M14.8 4.9l3.6 3.6"/></svg></div><span>구역보고</span></div>
     <div class="mtile i-purple" onclick="goGrade()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.6-9 4.6-9-4.6z"/><path d="M6.5 10.2v4.6c0 1.6 2.5 2.9 5.5 2.9s5.5-1.3 5.5-2.9v-4.6"/><path d="M21 7.6v5.4"/></svg></div><span>신급 교육 신청</span></div>
     <div class="mtile i-teal2" onclick="goPlace()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.6"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8.5 14.5h7"/></svg></div><span>장소 사용 신청</span></div>
+    <div class="mtile i-rose" onclick="goPrayer()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5S3.8 15.4 3.8 9.8A4.3 4.3 0 0112 7.4a4.3 4.3 0 018.2 2.4c0 5.6-8.2 10.7-8.2 10.7z"/></svg></div><span>중보기도 신청</span></div>
   </div>
   <div class="visitor">👥 방문자 · Today <b id="visToday">·</b> · Total <b id="visTotal">·</b>
     <div class="cright" style="margin-top:8px">© 2026 songtanglorychurch. All rights reserved.<br>무단 복제·배포 금지</div>
@@ -918,6 +958,11 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 <!-- 신급 교육 신청 (로그인 없이 누구나) -->
 <section id="grade" class="view">
   <div id="gdWrap"></div>
+</section>
+
+<!-- 중보기도 신청 (로그인 없이 누구나) -->
+<section id="prayer" class="view">
+  <div id="prForm"></div>
 </section>
 
 <!-- 장소 사용 신청 (로그인 없이 누구나) -->
@@ -1105,6 +1150,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
       <button class="pill2 on" id="tgPray" onclick="togglePray('P')">기도제목</button>
       <button class="pill2" id="tgEtc" onclick="togglePray('E')">기타 사항</button>
       <button class="pill2 ip" id="tgIp" onclick="togglePray('I')">🙏 중보기도 요청만</button>
+      <button class="pill2 self" id="tgSelf" onclick="togglePray('S')">✋ 본인 신청만</button>
       <input class="f-in praysrch" id="praySrch" placeholder="이름·내용 검색" oninput="renderPray()"/>
     </div>
     <div id="prayBoard"></div>
@@ -1441,6 +1487,7 @@ async function loadAll(){
       /* 받아온 자료가 이전과 똑같으면 화면을 다시 그리지 않는다.
          (괜히 다시 그리면 대시보드 차트 애니메이션이 또 재생된다) */
       GRADES=Array.isArray(d.grades)?d.grades:[];
+      PRAYERS=Array.isArray(d.prayers)?d.prayers:[];
       if(dataSig()!==before) rerender();
       checkNewSubs();
       checkNewGrades();
@@ -1851,6 +1898,7 @@ function showView(v,back){
   if(v==='mroster') openRoster();
   if(v==='grade') openGrade();
   if(v==='place') openPlace();
+  if(v==='prayer') openPrayer();
   if(v==='pray') renderIp();
   growAll(document.getElementById(v));
 }
@@ -2224,6 +2272,138 @@ function openMember(name){
        :'<div class="mblbl">기도제목 · 특이사항 이력</div><div class="bempty">기록이 없습니다.</div>')
    +'</div></div>';
   try{ box.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+}
+
+// ---------- 중보기도 신청 ----------
+/* 교인이 직접 올리는 기도제목. 로그인 없이 누구나.
+   '교역자에게만'을 체크하면 서버가 교역자 외에는 이름도 내용도 내려보내지 않는다. */
+let PRAYERS=[], PRINFO=null, prSecret=false, prSending=false, prDone=null;
+const PRINFO_KEY='sgc_prayer_cfg_v1';
+function goPrayer(){ openApp('prayer'); }
+function savePrCfg(d){ try{ localStorage.setItem(PRINFO_KEY,JSON.stringify(
+  {districts:d.districts, noDist:d.noDist})); }catch(e){} }
+function loadPrCfg(){ try{ return JSON.parse(localStorage.getItem(PRINFO_KEY)||'null'); }catch(e){ return null; } }
+async function fetchPrayerInfo(){
+  if(!USE_BACKEND) return PRINFO;
+  try{
+    const r=await fetch(API+'?action=prayerInfo');
+    const d=await r.json();
+    if(d&&d.ok){ PRINFO=d; savePrCfg(d); return d; }
+  }catch(e){ console.warn('중보기도 안내 불러오기 실패:',e); }
+  return PRINFO;
+}
+async function openPrayer(){
+  prSending=false; prDone=null;
+  if(!PRINFO) PRINFO=loadPrCfg();
+  renderPrayer();
+  const d=await fetchPrayerInfo();
+  if(d && !prDone) keepPrInput(renderPrayer);
+}
+function keepPrInput(fn){
+  const ids=['prName','prDist','prText'];
+  const had=!!document.getElementById('prName');
+  const keep={};
+  if(had) ids.forEach(function(id){ const e=document.getElementById(id); if(e) keep[id]=e.value; });
+  const focus=(document.activeElement&&document.activeElement.id)||'';
+  fn();
+  if(!had) return;
+  ids.forEach(function(id){ const e=document.getElementById(id);
+    if(e && keep[id]!==undefined && keep[id]!=='') e.value=keep[id]; });
+  if(focus){ const e=document.getElementById(focus); if(e){ try{ e.focus(); }catch(x){} } }
+}
+const PR_HEART='<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5S3.8 15.4 3.8 9.8A4.3 4.3 0 0112 7.4a4.3 4.3 0 018.2 2.4c0 5.6-8.2 10.7-8.2 10.7z"/></svg>';
+function prHead(){
+  return '<div class="prhd"><div class="n">중보기도 신청</div>'
+    +'<div class="m">함께 기도해 주시길 원하는<br>기도제목을 남겨 주세요</div></div>';
+}
+function renderPrayer(){
+  const box=document.getElementById('prForm'); if(!box) return;
+  if(prDone){ renderPrayerDone(); return; }
+  if(!PRINFO){
+    box.innerHTML='<div class="prcard">'+prHead()
+      +'<div class="prbd"><div class="bempty">불러오는 중입니다…</div></div></div>';
+    return;
+  }
+  const ds=(PRINFO.districts||[]);
+  const opts='<option value="">구역을 선택하세요</option>'
+    + ds.map(d=>'<option>'+esc(d)+'</option>').join('')
+    + '<option>'+esc(PRINFO.noDist||'구역 모름 / 새가족')+'</option>';
+  box.innerHTML='<div class="prcard">'+prHead()+'<div class="prbd">'
+    +'<div id="prErr"></div>'
+    +'<div class="prfl"><label>이름 <i>*</i></label>'
+    +'<input class="f-in" id="prName" placeholder="이름을 입력하세요" autocomplete="name"/></div>'
+    +'<div class="prfl"><label>구역 <i>*</i></label>'
+    +'<select class="f-in" id="prDist">'+opts+'</select></div>'
+    +'<div class="prfl"><label>기도제목 <i>*</i></label>'
+    +'<textarea class="f-in" id="prText" placeholder="예) 9월초에 첫 출근을 앞두고 있습니다.&#10;좋은 만남이 되도록 기도해 주세요."></textarea></div>'
+    +'<div class="prfl"><div class="prchk'+(prSecret?' on':'')+'" onclick="togglePrSecret()">'
+    +'<span class="bx">'+(prSecret?'✓':'')+'</span><span>'
+    +'<span class="tt">교역자에게만 알리기</span>'
+    +'<span class="dl">체크하시면 구역장·중보기도팀장에게는 내용이 보이지 않고 교역자만 봅니다.</span>'
+    +'</span></div></div>'
+    +'<button class="prbtn" id="prBtn" onclick="submitPrayer()">기도제목 올리기</button>'
+    +'</div></div>';
+}
+function togglePrSecret(){
+  prSecret=!prSecret;
+  const el=document.querySelector('#prForm .prchk'); if(!el) return;
+  el.classList.toggle('on',prSecret);
+  const bx=el.querySelector('.bx'); if(bx) bx.textContent=prSecret?'✓':'';
+}
+function prErr(msg){
+  const e=document.getElementById('prErr');
+  if(e) e.innerHTML=msg?'<div class="prerr">'+esc(msg)+'</div>':'';
+  if(msg){ try{ e.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(x){} }
+}
+function prVal(id){ const e=document.getElementById(id); return e?String(e.value||'').trim():''; }
+async function submitPrayer(){
+  if(prSending) return;
+  const name=prVal('prName'), dist=prVal('prDist'), text=prVal('prText');
+  if(!name){ prErr('이름을 입력해 주세요.'); return; }
+  if(!dist){ prErr('구역을 선택해 주세요.'); return; }
+  if(!text){ prErr('기도제목을 입력해 주세요.'); return; }
+  prErr('');
+  prSending=true;
+  const btn=document.getElementById('prBtn');
+  if(btn){ btn.disabled=true; btn.innerHTML='<span class="spin"></span> 전송 중…'; }
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify({action:'savePrayer',
+      record:{'이름':name,'구역':dist,'기도제목':text,'비공개':prSecret}})});
+    d=await r.json().catch(()=>null);
+  }catch(e){ d=null; }
+  prSending=false;
+  if(btn){ btn.disabled=false; btn.textContent='기도제목 올리기'; }
+  if(!d){ prErr('전송에 실패했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.'); return; }
+  if(!d.ok){ prErr(d.message||'올리지 못했습니다.'); return; }
+  prDone={name:name, dist:dist, secret:prSecret};
+  renderPrayer();
+  loadAll();
+}
+function renderPrayerDone(){
+  const box=document.getElementById('prForm'); if(!box||!prDone) return;
+  box.innerHTML='<div class="prcard">'+prHead()
+    +'<div class="prbd prdone"><div class="ck">'+PR_HEART+'</div>'
+    +'<h3>기도제목이 접수되었습니다</h3>'
+    +'<p><b>'+esc(prDone.name)+' · '+esc(prDone.dist)+'</b><br><br>'
+    +(prDone.secret
+        ? '교역자에게만 전달됩니다.<br>귀한 마음 나눠 주셔서 감사합니다.'
+        : '중보기도팀이 함께 기도합니다.<br>귀한 기도제목 나눠 주셔서 감사합니다.')
+    +'</p>'
+    +'<button class="prbtn gray" onclick="prAgain()">기도제목 더 올리기</button>'
+    +'</div></div>';
+  try{ box.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+}
+function prAgain(){ prDone=null; prSecret=false; renderPrayer(); }
+/* 내가 볼 수 있는 중보기도 신청을 '기도제목 모아보기'와 같은 모양으로 바꿔 준다.
+   주일(week)로 묶여 있어 구역보고 기도제목과 나란히 놓인다. */
+function prayerRowsOf(week,q){
+  const kw=String(q||'').trim();
+  return (PRAYERS||[]).filter(function(p){
+    if(week && p.week!==week) return false;
+    if(!kw) return true;
+    return String(p.name||'').indexOf(kw)>=0 || String(p.text||'').indexOf(kw)>=0;
+  });
 }
 
 // ---------- 장소 사용 신청 ----------
@@ -3447,7 +3627,7 @@ function renderDash(){
     Object.entries(byReason).map(([r,arr])=>`<div style="margin:6px 0;font-size:12.5px"><b>${r}</b> (${arr.length}) : <span class="muted">${arr.join(', ')}</span></div>`).join('')+longAbsentHtml()
     : '<div class="muted">결석 데이터가 없습니다.</div>');
   // 구역예배 진행률
-  const held=wkReports.filter(r=>r.cell.held==='진행').length;
+  const held=wkReports.filter(r=>r.cell&&r.cell.held==='진행').length;
   drawChart('cellChart','doughnut',{labels:['진행','미진행/미보고'],datasets:[{data:[held,DIST_NAMES.length-held],backgroundColor:['#16a34a','#e2e8f0']}]},{});
   // 최근 접수 표
   const recent=[...subs].sort((a,b)=>String(b.ts||'').localeCompare(String(a.ts||''))).slice(0,8);
@@ -3531,17 +3711,20 @@ function renderPrnPicks(wk,wkReports){
   });
 }
 /* ---------- 기도제목 모아보기 ---------- */
-let prayShowP=true, prayShowE=false, prayOnlyIp=false;
+let prayShowP=true, prayShowE=false, prayOnlyIp=false, prayOnlySelf=false;
 function togglePray(k){
-  if(k==='I'){ prayOnlyIp=!prayOnlyIp; }
+  if(k==='I'){ prayOnlyIp=!prayOnlyIp; if(prayOnlyIp) prayOnlySelf=false; }
+  else if(k==='S'){ prayOnlySelf=!prayOnlySelf; if(prayOnlySelf){ prayOnlyIp=false; prayShowP=true; } }
   else {
     if(k==='P') prayShowP=!prayShowP; else prayShowE=!prayShowE;
     if(!prayShowP&&!prayShowE){ if(k==='P') prayShowE=true; else prayShowP=true; }
   }
-  const a=document.getElementById('tgPray'), b=document.getElementById('tgEtc'), c=document.getElementById('tgIp');
+  const a=document.getElementById('tgPray'), b=document.getElementById('tgEtc'),
+        c=document.getElementById('tgIp'), e=document.getElementById('tgSelf');
   if(a) a.classList.toggle('on',prayShowP);
   if(b) b.classList.toggle('on',prayShowE);
   if(c) c.classList.toggle('on',prayOnlyIp);
+  if(e) e.classList.toggle('on',prayOnlySelf);
   renderPray();
 }
 /* ---------- 복사 / 엑셀 (기도제목·중보기도 공용) ---------- */
@@ -3549,7 +3732,8 @@ function prayToText(title,wk,groups){
   const NL=String.fromCharCode(10);
   let s=title+' · '+fmtSun(wk)+NL+NL;
   groups.forEach(g=>{ s+='['+g.d+']'+NL;
-    g.rows.forEach(r=>{ s+='· '+r.n+' : '+(r.ip?'🙏 ':'')+(r.etc?'[기타] ':'')+r.t+NL; });
+    g.rows.forEach(r=>{ s+='· '+prayPlainName(r)+' : '
+      +((!r.self&&r.ip)?'🙏 ':'')+prayPlain(r)+NL; });
     s+=NL; });
   return s+'송탄영광교회 영광 커넥트';
 }
@@ -3581,7 +3765,8 @@ function downloadXls(rows,filename,okId){
 }
 function prayRows(groups){
   const rows=[['구역','이름','구분','내용','중보요청']];
-  groups.forEach(g=>g.rows.forEach(r=>rows.push([g.d,r.n,r.etc?'기타 사항':'기도제목',r.t,r.ip?'O':''])));
+  groups.forEach(g=>g.rows.forEach(r=>rows.push([g.d, prayPlainName(r),
+    r.self?'본인 신청':(r.etc?'기타 사항':'기도제목'), prayPlain(r), r.ip?'O':''])));
   return rows;
 }
 /* ---------- 중보기도 전용 화면 (중보기도팀장·관리자) ---------- */
@@ -3614,12 +3799,15 @@ function renderIp(){
   const {wk,groups}=ipData();
   const total=groups.reduce((a,g)=>a+g.rows.length,0);
   const d=document.getElementById('ipDesc');
+  const selfN=groups.reduce((a,g)=>a+g.rows.filter(x=>x.self).length,0);
   if(d) d.innerHTML = wk
-    ? `${fmtSun(wk)} · <b>${groups.length}</b>개 구역 · <b>${total}</b>건 · 구역보고에서 <b>중보기도 요청</b>으로 체크된 기도제목입니다`
+    ? `${fmtSun(wk)} · <b>${groups.length}</b>개 구역 · <b>${total}</b>건`
+      + (selfN?` <span style="color:#b03a5b;font-weight:800">(본인 신청 ${selfN}건 포함)</span>`:'')
+      + ` · 구역보고 <b>중보기도 요청</b>과 교인이 직접 올린 <b>중보기도 신청</b>입니다`
     : '아직 제출된 구역보고가 없습니다';
   box.innerHTML = groups.length
     ? groups.map(g=>`<div class="pgroup"><div class="pghead">${esc(g.d)}<span class="cnt">${g.rows.length}건</span></div>`
-        + g.rows.map(r=>`<div class="pgrow"><span class="nm">${esc(r.n)}</span><span class="tx"><span class="ipbadge">🙏 중보</span>${r.etc?'<span class="etc">기타</span>':''}${esc(r.t)}</span></div>`).join('')
+        + g.rows.map(r=>`<div class="pgrow"><span class="nm">${esc(prayPlainName(r))}</span><span class="tx">${prayBadges(r)}${prayText(r)}</span></div>`).join('')
         + `</div>`).join('')
     : '<div class="muted" style="font-size:12.5px;margin-top:10px">이 주일에는 중보기도 요청이 없습니다.</div>';
 }
@@ -3631,7 +3819,7 @@ function printIp(){
     `<div class="prpage"><h1>중보기도 요청</h1>
        <div class="prmeta">${fmtSun(wk)} · ${groups.length}개 구역 · ${total}건 · 송탄영광교회 영광 커넥트</div>`
     + groups.map(g=>`<h2>${esc(g.d)}</h2><table><tr><th style="width:70px">이름</th><th>내용</th></tr>`
-        + g.rows.map(r=>`<tr><td>${esc(r.n)}</td><td>${r.etc?'[기타] ':''}${esc(r.t)}</td></tr>`).join('')
+        + g.rows.map(r=>`<tr><td>${esc(prayPlainName(r))}</td><td>${esc(prayPlain(r))}</td></tr>`).join('')
         + `</table>`).join('') + `</div>`;
   window.print();
 }
@@ -3648,37 +3836,80 @@ function xlsPray(){ const {wk,groups}=prayGroups();
   if(!groups.length){ alert('내려받을 내용이 없습니다.'); return; }
   downloadXls(prayRows(groups),(prayOnlyIp?'중보기도_':'기도제목_')+wk+'.xls','prayOk'); }
 /* 선택 주일의 보고서에서 성도별 기도제목·기타 사항을 구역별로 모은다 */
-function prayGroups(week,q,onlyIp,showP,showE){
+function prayGroups(week,q,onlyIp,showP,showE,onlySelf){
   if(week===undefined){ const wk=document.getElementById('weekSel'); if(!wk) return {wk:'',groups:[]};
     week=wk.value; q=((document.getElementById('praySrch')||{}).value||'').trim();
-    onlyIp=prayOnlyIp; showP=prayShowP; showE=prayShowE; }
+    onlyIp=prayOnlyIp; showP=prayShowP; showE=prayShowE; onlySelf=prayOnlySelf; }
   const wkReports=dedupeReports(reports.filter(r=>r.date===week));
   const byDist={}; wkReports.forEach(r=>byDist[r.district]=r);
-  const groups=[];
-  sortDist(Object.keys(byDist)).forEach(d=>{
-    const r=byDist[d], roster=rosterOf(d,week), rows=[];
-    roster.forEach(n=>{
-      const t=(r.detail||{})[n]||{};
-      const p=(t.p||'').trim(), e=(t.e||'').trim();
-      const ip=!!t.ip;
-      if(onlyIp && !ip) return;                    /* 중보기도 요청만 보기 */
-      if(showP && p) rows.push({n:n, t:p, etc:false, ip:ip});
-      if(showE && e) rows.push({n:n, t:e, etc:true, ip:ip});
+  /* 교인이 직접 올린 기도제목을 같은 주일 칸에 합친다.
+     구역보고를 내지 않은 구역이라도 신청이 있으면 그 구역이 나타난다. */
+  const selfBy={};
+  if(showP){
+    prayerRowsOf(week,q).forEach(function(p){
+      const d=String(p.district||'').trim()||'(구역 모름)';
+      /* 비공개 건은 서버가 이미 이름·내용을 비워서 내려준다.
+         교역자에게는 내용이 담겨 오므로 여기서 다시 가리면 안 된다. */
+      (selfBy[d]=selfBy[d]||[]).push({
+        n: String(p.name||''), t: String(p.text||''),
+        etc:false, ip:true, self:true, secret:!!p.secret });
     });
-    const f=q? rows.filter(x=>x.n.includes(q)||x.t.includes(q)) : rows;
-    if(f.length) groups.push({d:d, rows:f});
+  }
+  const dists=sortDist([...new Set(Object.keys(byDist).concat(Object.keys(selfBy)))]);
+  const groups=[];
+  dists.forEach(d=>{
+    let rows=[];
+    const r=byDist[d];
+    if(r && !onlySelf){
+      rosterOf(d,week).forEach(n=>{
+        const t=(r.detail||{})[n]||{};
+        const p=(t.p||'').trim(), e=(t.e||'').trim();
+        const ip=!!t.ip;
+        if(onlyIp && !ip) return;                  /* 중보기도 요청만 보기 */
+        if(showP && p) rows.push({n:n, t:p, etc:false, ip:ip});
+        if(showE && e) rows.push({n:n, t:e, etc:true, ip:ip});
+      });
+      rows = q? rows.filter(x=>x.n.includes(q)||x.t.includes(q)) : rows;
+    }
+    rows = rows.concat(selfBy[d]||[]);             /* 본인 신청은 구역 아래쪽에 */
+    if(rows.length) groups.push({d:d, rows:rows});
   });
   return {wk:week, groups:groups};
 }
+/* 목록 한 줄의 배지 — 구역보고 건과 본인 신청을 구분해 준다 */
+function prayBadges(r){
+  if(r.self){
+    return '<span class="pbadge pb-self">✋ 본인 신청</span>'
+      + (r.secret? '<span class="pbadge pb-lock">🔒 비공개</span>' : '');
+  }
+  return (r.ip?'<span class="ipbadge">🙏 중보</span>':'')
+    + (r.etc?'<span class="etc">기타</span>':'');
+}
+/* 내용이 비어 있으면 = 서버가 가린 것 (교역자가 아님) */
+function prayHidden(r){ return !!(r.self && r.secret && !String(r.t||'').trim()); }
+function prayText(r){
+  if(prayHidden(r)) return '<span class="plocktx">교역자에게만 보이는 기도제목입니다</span>';
+  return esc(r.t);
+}
+/* 복사·엑셀·인쇄에 쓸 글자 */
+function prayPlain(r){
+  if(prayHidden(r)) return '(교역자에게만 공개된 기도제목)';
+  return (r.self?'[본인신청] ':(r.etc?'[기타] ':'')) + r.t;
+}
+function prayPlainName(r){ return prayHidden(r) ? '(비공개)' : r.n; }
 function renderPray(){
   const box=document.getElementById('prayBoard'); if(!box) return;
   const {wk,groups}=prayGroups();
   const total=groups.reduce((a,g)=>a+g.rows.length,0);
   const desc=document.getElementById('prayDesc');
-  if(desc) desc.innerHTML = wk? `${wk} 주일 · ${groups.length}개 구역 · <b>${total}</b>건${prayOnlyIp?' · <span style="color:#7c5cd6;font-weight:800">🙏 중보기도 요청만</span>':''}` : '보고 데이터가 없습니다';
+  const selfN=groups.reduce((a,g)=>a+g.rows.filter(x=>x.self).length,0);
+  if(desc) desc.innerHTML = wk? `${wk} 주일 · ${groups.length}개 구역 · <b>${total}</b>건`
+    + (selfN?` <span style="color:#b03a5b;font-weight:800">(본인 신청 ${selfN}건 포함)</span>`:'')
+    + (prayOnlyIp?' · <span style="color:#7c5cd6;font-weight:800">🙏 중보기도 요청만</span>':'')
+    + (prayOnlySelf?' · <span style="color:#b03a5b;font-weight:800">✋ 본인 신청만</span>':'') : '보고 데이터가 없습니다';
   box.innerHTML = groups.length
     ? groups.map(g=>`<div class="pgroup"><div class="pghead">${esc(g.d)}<span class="cnt">${g.rows.length}건</span></div>`
-        + g.rows.map(r=>`<div class="pgrow"><span class="nm">${esc(r.n)}</span><span class="tx">${r.ip?'<span class="ipbadge">🙏 중보</span>':''}${r.etc?'<span class="etc">기타</span>':''}${esc(r.t)}</span></div>`).join('')
+        + g.rows.map(r=>`<div class="pgrow"><span class="nm">${esc(prayPlainName(r))}</span><span class="tx">${prayBadges(r)}${prayText(r)}</span></div>`).join('')
         + `</div>`).join('')
     : '<div class="muted" style="font-size:12.5px;margin-top:8px">해당 조건의 기도제목이 없습니다.</div>';
 }

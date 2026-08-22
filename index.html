@@ -561,6 +561,20 @@ min-width:0;max-width:100%;box-sizing:border-box}
 display:block;text-align:left;padding-right:10px}
 .plfl input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 .plfl input[type=date]::-webkit-calendar-picker-indicator{margin-left:0;flex:none}
+.plfl input[type=datetime-local]{-webkit-appearance:none;appearance:none;
+  display:flex;align-items:center;height:44px;font-size:15px}
+.plfl input[type=datetime-local]::-webkit-date-and-time-value{text-align:left;margin:0}
+.plfl input[type=datetime-local]::-webkit-calendar-picker-indicator{margin-left:0;flex:none}
+.durchips{display:flex;gap:6px;flex-wrap:wrap}
+.durchip{border:1px solid var(--inline);border-radius:10px;padding:9px 11px;font-size:13px;
+  font-weight:700;background:#fff;color:var(--ink);font-family:inherit;cursor:pointer}
+.durchip.on{border-color:#0f8f86;background:#e6f7f5;color:#0b6f68;font-weight:800}
+.plcalc{background:#f2f9fa;border:1px solid #d5eaef;border-radius:11px;padding:11px 12px;
+  font-size:13.5px;color:#0b6f68;margin-bottom:13px}
+.plcalc b{font-weight:800}
+.plwarn{background:#fdf3f3;border:1px solid #f0c9c9;border-radius:11px;padding:12px 13px;
+  font-size:12.5px;color:#a33;line-height:1.65;margin:-4px 0 13px}
+.plwarn b{display:block;font-size:13.5px;margin-bottom:3px}
 .plrow{min-width:0}
 .plrow{display:flex;gap:8px;align-items:center}
 .plrow .f-in{flex:1;min-width:0}
@@ -2416,7 +2430,7 @@ function prayerRowsOf(week,q){
 
 // ---------- 장소 사용 신청 ----------
 /* 장소·시간·현황은 모두 서버에서 받는다. 겹침은 화면에서 한 번, 서버에서 한 번 더 막는다. */
-let PLACE=null, plPick='', plTab='next', plSending=false, plDone=null, plLoading=false;
+let PLACE=null, plPick='', plTab='next', plSending=false, plDone=null, plLoading=false, plDur=60;
 function goPlace(){ openApp('place'); }
 /* 장소·시간 같은 '설정'만 기기에 저장해 둔다.
    덕분에 두 번째부터는 서버 응답을 기다리지 않고 신청 칸이 바로 뜬다.
@@ -2463,7 +2477,7 @@ async function openPlace(){
 /* 서버 응답이 늦게 도착해 화면을 다시 그릴 때,
    이미 입력해 둔 이름·연락처 같은 것이 지워지지 않도록 지켰다가 되돌려 놓는다. */
 function keepPlaceInput(fn){
-  const ids=['plDate','plFrom','plTo','plDept','plWho','plN','plPhone','plMemo'];
+  const ids=['plWhen','plDept','plWho','plN','plPhone','plMemo'];
   const had=!!document.getElementById('plWho');
   const keep={};
   if(had) ids.forEach(function(id){ const e=document.getElementById(id); if(e) keep[id]=e.value; });
@@ -2490,6 +2504,57 @@ function plDateLabel(d){
   return (p[1]*1)+'월 '+(p[2]*1)+'일 ('+(wd==='일'?'주일':wd)+')';
 }
 function plToday(){ return (PLACE&&PLACE.today)||localISO(new Date()); }
+/* ── 시작 일시 한 번 + 사용 시간 한 번으로 고른다 ── */
+const PL_DURS=[[30,'30분'],[60,'1시간'],[90,'1시간 30분'],[120,'2시간'],[180,'3시간']];
+function pad2(n){ return ('0'+n).slice(-2); }
+/* 지금 이후의 30분 경계 (오늘이 아니면 오전 10시) */
+function plWhenDefault(){
+  const now=new Date(), t=plToday();
+  if(localISO(now)!==t) return t+'T10:00';
+  let m=now.getHours()*60+now.getMinutes();
+  m=Math.ceil(m/30)*30;
+  if(m>=24*60) return t+'T23:30';
+  return t+'T'+pad2(Math.floor(m/60))+':'+pad2(m%60);
+}
+/* '2026-08-22T10:07' → {date:'2026-08-22', min:600} — 30분 단위로 맞춰서 돌려준다 */
+function plParseWhen(v){
+  const m=String(v||'').match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})/);
+  if(!m) return null;
+  let mm=(+m[2])*60+(+m[3]);
+  mm=Math.round(mm/30)*30;
+  if(mm>=24*60) mm=24*60-30;
+  return {date:m[1], min:mm};
+}
+function pickDur(d){
+  plDur=d;
+  const box=document.getElementById('plForm'); if(!box) return;
+  box.querySelectorAll('.durchip').forEach(function(el){
+    el.classList.toggle('on', el.getAttribute('onclick')==='pickDur('+d+')'); });
+  plOnWhen();
+}
+/* 고른 즉시 '언제부터 언제까지'를 보여 주고, 겹치면 바로 경고한다 */
+function plOnWhen(){
+  const calc=document.getElementById('plCalc'), warn=document.getElementById('plWarn');
+  if(!calc) return;
+  const w=plParseWhen(plVal('plWhen'));
+  if(!w){ calc.innerHTML='<span class="muted">시작 일시를 골라 주세요</span>';
+          if(warn) warn.innerHTML=''; return; }
+  const s=w.min, e=s+plDur;
+  calc.innerHTML=esc(plDateLabel(w.date))+' <b>'+esc(ampm(min2hm(s)))+' ~ '+esc(ampm(min2hm(e)))+'</b>';
+  if(!warn) return;
+  if(e>24*60){
+    warn.innerHTML='<div class="plwarn"><b>하루를 넘겨서 신청할 수 없습니다</b>'
+      +'사용 시간을 줄이거나, 날짜를 나눠 신청해 주세요.</div>';
+    return;
+  }
+  if(w.date<plToday()){
+    warn.innerHTML='<div class="plwarn"><b>지난 날짜입니다</b>오늘 이후 날짜로 골라 주세요.</div>';
+    return;
+  }
+  const c=plLocalClash(w.date,plPick,s,e);
+  warn.innerHTML = c ? '<div class="plwarn">'+plClashMsg(c)+'</div>' : '';
+}
+function min2hm(v){ return pad2(Math.floor(v/60)%24)+':'+pad2(v%60); }
 function plWho(it){
   const n=Number(it.n)||0;
   const t=String(it.who||'')+(n>1?' 등 '+n+'명':(n===1?' 1명':''));
@@ -2506,19 +2571,22 @@ function renderPlace(){
   }
   const P=PLACE;
   const chips=(P.places||[]).map(p=>'<div class="plchip'+(p===plPick?' on':'')+'" onclick="pickPlace(\''+esc(p)+'\')">'+esc(p)+'</div>').join('');
-  const slot=(id,sel)=>'<select class="f-in" id="'+id+'">'
-    +(P.slots||[]).map(s=>'<option value="'+esc(s)+'"'+(s===sel?' selected':'')+'>'+esc(ampm(s))+'</option>').join('')
-    +'</select>';
+  const durs=(PL_DURS.map(function(d){
+    return '<button type="button" class="durchip'+(d[0]===plDur?' on':'')
+      +'" onclick="pickDur('+d[0]+')">'+esc(d[1])+'</button>'; }).join(''));
   box.innerHTML='<div class="plcard">'
     +'<div class="plhd"><div class="n">장소 사용 신청</div>'
-    +'<div class="m">'+(P.places||[]).map(esc).join(' · ')+' · '+esc(ampm(P.open))+' ~ '+esc(ampm(P.close))+'</div></div>'
+    +'<div class="m">'+(P.places||[]).map(esc).join(' · ')+'</div></div>'
     +'<div class="plbd">'
     +'<div id="plErr"></div>'
     +'<div class="plfl"><label>장소 <i>*</i></label><div class="plchips">'+chips+'</div></div>'
-    +'<div class="plfl"><label>날짜 <i>*</i></label>'
-    +'<input class="f-in" id="plDate" type="date" min="'+esc(plToday())+'" value="'+esc(plToday())+'"/></div>'
-    +'<div class="plfl"><label>시간 <i>*</i></label><div class="plrow">'
-    + slot('plFrom','10:00')+'<span class="tilde">~</span>'+slot('plTo','12:00')+'</div></div>'
+    +'<div class="plfl"><label>시작 일시 <i>*</i></label>'
+    +'<input class="f-in" id="plWhen" type="datetime-local" step="1800"'
+    +' min="'+esc(plToday())+'T00:00" value="'+esc(plWhenDefault())+'"'
+    +' onchange="plOnWhen()" oninput="plOnWhen()"/></div>'
+    +'<div class="plfl"><label>사용 시간 <i>*</i></label><div class="durchips">'+durs+'</div></div>'
+    +'<div id="plCalc" class="plcalc"></div>'
+    +'<div id="plWarn"></div>'
     +'<div class="plfl"><label>부서 · 모임 <span class="hint">개인이면 비워 두세요</span></label>'
     +'<input class="f-in" id="plDept" placeholder="예) 청년부, 여전도회"/></div>'
     +'<div class="plrow" style="gap:8px">'
@@ -2533,6 +2601,7 @@ function renderPlace(){
     +'<input class="f-in" id="plMemo" placeholder="예) 청년부 임원 모임"/></div>'
     +'<button class="plbtn" id="plBtn" onclick="submitPlace()">신청하기</button>'
     +'</div></div>';
+  plOnWhen();
   renderPlaceList();
 }
 function pickPlace(p){
@@ -2540,6 +2609,7 @@ function pickPlace(p){
   const box=document.getElementById('plForm'); if(!box) return;
   box.querySelectorAll('.plchip').forEach(function(el){ el.classList.toggle('on', el.textContent===p); });
   plErr('');
+  plOnWhen();          /* 장소를 바꾸면 겹침도 다시 본다 */
 }
 function plErr(html){
   const e=document.getElementById('plErr');
@@ -2561,17 +2631,18 @@ function plClashMsg(c){
 }
 async function submitPlace(){
   if(plSending) return;
-  const date=plVal('plDate'), from=plVal('plFrom'), to=plVal('plTo');
+  const w=plParseWhen(plVal('plWhen'));
   const who=plVal('plWho'), n=plVal('plN'), phone=plVal('plPhone');
   if(!plPick){ plErr('장소를 골라 주세요.'); return; }
-  if(!date){ plErr('날짜를 골라 주세요.'); return; }
+  if(!w){ plErr('시작 일시를 골라 주세요.'); return; }
+  const date=w.date, from=min2hm(w.min), to=min2hm(w.min+plDur);
   if(date<plToday()){ plErr('지난 날짜는 신청할 수 없습니다.'); return; }
-  if(hm(to)<=hm(from)){ plErr('끝나는 시각이 시작 시각보다 늦어야 합니다.'); return; }
+  if(w.min+plDur>24*60){ plErr('하루를 넘겨서 신청할 수 없습니다. 사용 시간을 줄이거나 날짜를 나눠 신청해 주세요.'); return; }
   if(!who){ plErr('대표자 이름을 입력해 주세요.'); return; }
   if(n && !(parseInt(n,10)>=1)){ plErr('인원은 숫자로 입력해 주세요. (비워 두셔도 됩니다)'); return; }
   if(String(phone).replace(/[^0-9]/g,'').length<9){ plErr('연락처를 정확히 입력해 주세요.'); return; }
-  const c=plLocalClash(date,plPick,hm(from),hm(to));
-  if(c){ plErr(plClashMsg(c)); return; }
+  const c=plLocalClash(date,plPick,w.min,w.min+plDur);
+  if(c){ plErr(plClashMsg(c)); plOnWhen(); return; }
   plErr('');
   plSending=true;
   const btn=document.getElementById('plBtn');
@@ -2620,8 +2691,8 @@ function renderPlaceList(){
   const items=(plTab==='next') ? all.filter(x=>x.date>=today)
                                : all.filter(x=>x.date<today).slice().reverse();
   const tabs='<div class="pltabs">'
-    +'<button class="pltab'+(plTab==='next'?' on':'')+'" onclick="plSetTab(\'next\')">앞으로 예정</button>'
-    +'<button class="pltab'+(plTab==='past'?' on':'')+'" onclick="plSetTab(\'past\')">지난 사용</button></div>';
+    +'<button class="pltab'+(plTab==='next'?' on':'')+'" onclick="plSetTab(\'next\')">예약 현황</button>'
+    +'<button class="pltab'+(plTab==='past'?' on':'')+'" onclick="plSetTab(\'past\')">사용 현황</button></div>';
   if(!items.length){
     box.innerHTML='<div class="card">'+tabs
       +'<div class="bempty">'+(plLoading?'현황을 불러오는 중입니다…'

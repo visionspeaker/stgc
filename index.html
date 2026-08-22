@@ -626,8 +626,10 @@ border-bottom:1px solid var(--line)}
 .plrw .pc{display:inline-block;font-size:10.5px;font-weight:800;border-radius:20px;padding:2px 8px;
 background:#e6f7f5;color:#0b6f68;margin-bottom:3px}
 .plrw .pc.b{background:var(--blueSoft);color:var(--blue2)}
-.plrw .wh{font-size:13.5px;font-weight:800}
-.plrw .mt{font-size:11.5px;color:var(--muted);margin-top:2px}
+.plrw .wh{display:block;font-size:13.5px;font-weight:800}
+.plrw .mt{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+.plrw .ph{display:block;font-size:12px;color:var(--blue2);font-weight:700;margin-top:3px;
+  font-variant-numeric:tabular-nums}
 .plrw .xx{flex:none;border:1px solid #f1c9c9;background:#fff;color:#dc2626;border-radius:8px;
 padding:5px 9px;font-size:11.5px;font-weight:800;font-family:inherit;cursor:pointer}
 /* ── 신급 교육 신청 · 대시보드 ── */
@@ -2510,6 +2512,17 @@ function keepPlaceInput(fn){
   });
   if(focus){ const e=document.getElementById(focus); if(e){ try{ e.focus(); }catch(x){} } }
 }
+/* 숫자만 있는 연락처를 하이픈 넣은 모양으로 보여 준다.
+   시트가 앞자리 0을 지워 10자리로 내려오는 경우까지 되살린다. */
+function fmtPhone(p){
+  let d=String(p||'').replace(/[^0-9]/g,'');
+  if(!d) return '';
+  if(d.length===10 && d.charAt(0)==='1') d='0'+d;
+  if(d.length===11) return d.slice(0,3)+'-'+d.slice(3,7)+'-'+d.slice(7);
+  if(d.length===10) return d.slice(0,3)+'-'+d.slice(3,6)+'-'+d.slice(6);
+  if(d.length===9)  return d.slice(0,2)+'-'+d.slice(2,5)+'-'+d.slice(5);
+  return String(p||'');
+}
 /* 07:00 → 오전 7:00 / 13:30 → 오후 1:30 */
 function ampm(t){
   const p=String(t||'').split(':'); if(p.length!==2) return String(t||'');
@@ -2728,7 +2741,7 @@ function renderPlaceList(){
       +'<span class="bd"><span class="pc'+(second?' b':'')+'">'+esc(it.place)+'</span>'
       +'<span class="wh">'+esc(plWho(it))+'</span>'
       +(it.memo?'<span class="mt">'+esc(it.memo)+'</span>':'')
-      +(it.phone?'<span class="mt">'+esc(it.phone)+'</span>':'')
+      +(it.phone?'<span class="ph">📞 '+esc(fmtPhone(it.phone))+'</span>':'')
       +'</span>'
       +(canCancel?'<button class="xx" onclick="cancelPlace(\''+esc(it.id)+'\')">취소</button>':'')
       +'</div>';

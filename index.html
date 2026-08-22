@@ -2397,10 +2397,20 @@ function renderPrayerDone(){
 function prAgain(){ prDone=null; prSecret=false; renderPrayer(); }
 /* 내가 볼 수 있는 중보기도 신청을 '기도제목 모아보기'와 같은 모양으로 바꿔 준다.
    주일(week)로 묶여 있어 구역보고 기도제목과 나란히 놓인다. */
+/* 신청은 '다가오는 주일' 앞으로 저장된다.
+   그 주일의 구역보고가 아직 하나도 없으면 주일 목록에 그 날짜가 없어서 신청이 묻힌다.
+   그래서 목록의 가장 최근 주일을 보고 있을 때는 그 이후 주일 신청도 같이 보여 준다. */
+function prayWeekMatch(week,pw){
+  if(!week) return true;
+  if(pw===week) return true;
+  const weeks=[...new Set(reports.map(r=>r.date))].sort();
+  const last=weeks.length?weeks[weeks.length-1]:'';
+  return (week===last && pw>week);
+}
 function prayerRowsOf(week,q){
   const kw=String(q||'').trim();
   return (PRAYERS||[]).filter(function(p){
-    if(week && p.week!==week) return false;
+    if(!prayWeekMatch(week,p.week)) return false;
     if(!kw) return true;
     return String(p.name||'').indexOf(kw)>=0 || String(p.text||'').indexOf(kw)>=0;
   });
@@ -3772,7 +3782,9 @@ function prayRows(groups){
 /* ---------- 중보기도 전용 화면 (중보기도팀장·관리자) ---------- */
 function initIpWeek(){
   const sel=document.getElementById('ipWeek'); if(!sel) return;
-  const weeks=[...new Set(reports.map(r=>r.date))].sort().reverse();
+  /* 구역보고가 아직 없는 주일이라도 교인이 올린 신청이 있으면 목록에 넣는다 */
+  const weeks=[...new Set(reports.map(r=>r.date).concat((PRAYERS||[]).map(p=>p.week)))]
+    .filter(Boolean).sort().reverse();
   const keep=sel.value;
   const same=sel.options.length===weeks.length && [...sel.options].every((o,i)=>o.value===weeks[i]);
   if(!same) sel.innerHTML=weeks.map(w=>`<option value="${w}">${w}</option>`).join('');

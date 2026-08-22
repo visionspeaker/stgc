@@ -1636,7 +1636,8 @@ async function pushSub(rec){
 // ---------- utils ----------
 /* 입력칸 높이를 내용에 맞춰 자동으로 늘림 (내용이 잘려 안 보이는 것 방지) */
 function autoGrow(t){ if(!t) return; t.style.height='auto'; t.style.height=(t.scrollHeight)+'px'; }
-function bindGrow(t){ if(!t||t.dataset.ag) return; t.dataset.ag='1'; t.classList.add('grow'); t.addEventListener('input',()=>autoGrow(t)); autoGrow(t); }
+/* data-nogrow가 붙은 칸은 정해진 높이를 그대로 쓴다 (열자마자 높이가 변하는 것 방지) */
+function bindGrow(t){ if(!t||t.dataset.ag||t.dataset.nogrow) return; t.dataset.ag='1'; t.classList.add('grow'); t.addEventListener('input',()=>autoGrow(t)); autoGrow(t); }
 /* 화면 안의 모든 대상 textarea에 적용 */
 function growAll(root){ (root||document).querySelectorAll('textarea.f-in').forEach(bindGrow); }
 function localISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -2285,12 +2286,16 @@ async function fetchPrayerInfo(){
   }catch(e){ console.warn('중보기도 안내 불러오기 실패:',e); }
   return PRINFO;
 }
+/* 구역 목록이 바뀌었는지 비교하는 데만 쓰는 지문 */
+function prInfoSig(d){ try{ return d?JSON.stringify([d.districts||[], d.noDist||'']):''; }catch(e){ return ''; } }
 async function openPrayer(){
   prSending=false; prDone=null;
   if(!PRINFO) PRINFO=loadPrCfg();
   renderPrayer();
+  const before=prInfoSig(PRINFO);
   const d=await fetchPrayerInfo();
-  if(d && !prDone) keepPrInput(renderPrayer);
+  /* 받아온 안내가 이전과 같으면 다시 그리지 않는다 (입력칸이 다시 그려지며 깜빡이는 것 방지) */
+  if(d && !prDone && prInfoSig(d)!==before) keepPrInput(renderPrayer);
 }
 function keepPrInput(fn){
   const ids=['prName','prDist','prText'];
@@ -2328,7 +2333,7 @@ function renderPrayer(){
     +'<div class="prfl"><label>구역 <i>*</i></label>'
     +'<select class="f-in" id="prDist">'+opts+'</select></div>'
     +'<div class="prfl"><label>기도제목 <i>*</i></label>'
-    +'<textarea class="f-in" id="prText" placeholder="예) 9월초에 첫 출근을 앞두고 있습니다.&#10;좋은 만남이 되도록 기도해 주세요."></textarea></div>'
+    +'<textarea class="f-in" id="prText" data-nogrow="1" placeholder="예) 9월초에 첫 출근을 앞두고 있습니다.&#10;좋은 만남이 되도록 기도해 주세요."></textarea></div>'
     +'<div class="prfl"><div class="prchk'+(prSecret?' on':'')+'" onclick="togglePrSecret()">'
     +'<span class="bx">'+(prSecret?'✓':'')+'</span><span>'
     +'<span class="tt">교역자에게만 알리기</span>'

@@ -1680,6 +1680,7 @@ async function pushReport(rec){
     const d=await r.json().catch(()=>null);
     if(d&&d.error==='AUTH'){ onAuthLost(); return; }
     if(d&&d.error==='FORBIDDEN'){ alert(d.message||'권한이 없어 저장하지 못했습니다.'); return; }
+    if(d&&d.error==='EMPTY'){ alert(d.message||'이미 저장된 보고서가 있어 빈 내용으로는 덮어쓸 수 없습니다.'); loadAll(); return; }
     absorbToken(d); loadAll();
   }catch(e){ console.warn('구역보고 저장 실패:',e); }
 }
@@ -3454,6 +3455,16 @@ async function submitReport(){
     sundayPresent:sundayPresent,cellPresent:cellPresent,sundayAbsent:absent,detail:detail,
     cell:{held:cellPresent.length?'진행':'미진행',note:note}};
   const wasEdit=!!curReport();
+  /* 내용이 하나도 없으면 실수로 누른 것일 수 있으니 한 번 더 묻는다 */
+  const nothing = !sundayPresent.length && !cellPresent.length
+    && !reportRoster.some(n=>Object.keys(ATT[n].c||{}).some(k=>ATT[n].c[k]>0)
+        || (ATT[n].p||'').trim() || (ATT[n].e||'').trim())
+    && !String(note||'').trim();
+  if(nothing){
+    if(!confirm('아직 아무것도 체크하지 않았습니다.\n\n이대로 빈 보고서를 제출할까요?\n(출석·기도제목을 입력한 뒤 제출하시려면 [취소]를 누르세요)')) return;
+  } else if(!wasEdit){
+    if(!confirm(fmtSun(selWeek)+' '+(reportDist||'')+' 보고서를 제출할까요?\n\n주일예배 '+sundayPresent.length+'명 · 구역예배 '+cellPresent.length+'명 · 결석 '+absent.length+'명')) return;
+  }
   /* 저장 중 표시 */
   repSubmitting=true;
   const sb=document.getElementById('repSubmitBtn');

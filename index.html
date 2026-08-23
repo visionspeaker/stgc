@@ -327,6 +327,8 @@ textarea.f-in:disabled{opacity:1;background:#f8fafc;color:var(--ink);-webkit-tex
 .f-primary:disabled{opacity:.62;cursor:default}
 .f-primary.sending{background:#9fb3c6}
 .spin{width:17px;height:17px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;flex:none}
+/* 밝은 버튼 위에서는 색을 진하게 (흰 테두리는 보이지 않는다) */
+.spin.spin-d{width:13px;height:13px;border-color:rgba(58,166,110,.25);border-top-color:var(--green);display:inline-block;vertical-align:-2px;margin-right:4px}
 @keyframes sp{to{transform:rotate(360deg)}}
 /* 접수 완료 화면 */
 .donecard{border:1px solid #bfe3cd;background:var(--greenSoft);border-radius:16px;padding:24px 18px;text-align:center;margin-top:8px}
@@ -1108,7 +1110,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
       <select id="weekSel" onchange="renderDash()"></select>
       <button class="wkarrow" id="wkNext" onclick="moveWeek(1)" title="다음 주일" aria-label="다음 주일">›</button>
     </div>
-    <button class="btn sec sm" onclick="loadAll()">↻ 새로고침</button>
+    <button class="btn sec sm" id="dashRefBtn" onclick="dashRefresh(this)">↻ 새로고침</button>
   </div>
 
   <div class="kpis" id="kpis"></div>
@@ -1441,6 +1443,22 @@ function onAuthLost(){
 /* 서버 데이터를 다시 받아온 뒤 화면 갱신.
    입력 중인 화면(문의하기·구역보고)은 통째로 다시 그리지 않는다 —
    작성 중이던 내용이나 접수 완료 화면이 사라지는 것을 막기 위함. */
+/* 새로고침 — 누른 표시(회전)와 끝난 표시(✔)를 보여 준다.
+   자료가 그대로여도 화면을 다시 그려서 '눌리지 않는다'는 느낌이 없게 한다. */
+async function dashRefresh(btn){
+  const b=btn||document.getElementById('dashRefBtn');
+  if(b&&b.dataset.busy) return;
+  if(b){ b.dataset.busy='1'; b.disabled=true;
+         b.dataset.t=b.dataset.t||b.textContent;
+         b.innerHTML='<span class="spin spin-d"></span> 불러오는 중…'; }
+  try{ await loadAll(); }catch(e){}
+  try{ rerender(); }catch(e){}
+  if(b){
+    b.disabled=false; delete b.dataset.busy;
+    b.textContent='✔ 최신 자료입니다';
+    setTimeout(function(){ b.textContent=b.dataset.t||'↻ 새로고침'; },1600);
+  }
+}
 function rerender(){
   if(!current||!currentView) return;
   if(currentView==='dash'){ renderDash(); return; }

@@ -1405,7 +1405,7 @@ function catName(c){return normCat(c).split(' (')[0];}
 const API='https://script.google.com/macros/s/AKfycbw_-RjtpsIXGSDt9IoemgcUAjb80u_H96QFrShqFwZRqCZj3BZYSzKZkW7wBZqOBYur3w/exec';
 const USE_BACKEND=/script\.google\.com/.test(API);
 let currentView='';
-let PW_OVERRIDE={};   // 백엔드 저장 비밀번호 (name -> pw)
+/* 비밀번호는 서버만 가지고 있다 — 앱에는 두지 않는다 */
 
 /* ---------- 출입증(로그인 토큰) ----------
    로그인하면 서버가 서명한 출입증을 내주고, 이후 요청에 함께 보낸다.
@@ -1511,7 +1511,6 @@ async function loadAll(){
       const before=dataSig();
       reports=dedupeReports(Array.isArray(d.reports)?d.reports:[]);
       subs=liveSubs(Array.isArray(d.subs)?d.subs:[]);
-      PW_OVERRIDE=(d.accounts&&typeof d.accounts==='object')?d.accounts:{};
       setVisitors(d.visitors); saveR(); saveS();
       /* 받아온 자료가 이전과 똑같으면 화면을 다시 그리지 않는다.
          (괜히 다시 그리면 대시보드 차트 애니메이션이 또 재생된다) */
@@ -1634,19 +1633,28 @@ async function loadPhoto(id){ const box=document.getElementById('ph_'+id); if(!b
 function compressImage(dataUrl,maxDim,q,cb){ const img=new Image(); img.onload=()=>{ let w=img.width,h=img.height; if(w>maxDim||h>maxDim){ if(w>=h){h=Math.round(h*maxDim/w);w=maxDim;}else{w=Math.round(w*maxDim/h);h=maxDim;} } const c=document.createElement('canvas'); c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); try{ cb(c.toDataURL('image/jpeg',q)); }catch(e){ cb(dataUrl); } }; img.onerror=()=>cb(dataUrl); img.src=dataUrl; }
 function clearPhoto(){ attachedPhoto=null; const i=document.getElementById('inPhoto'); if(i)i.value=''; document.getElementById('photoFilled').style.display='none'; document.getElementById('photoEmpty').style.display='block'; }
 /* ---- 비밀번호 변경 ---- */
-function acctPw(nm){ if(PW_OVERRIDE[nm]!==undefined && PW_OVERRIDE[nm]!=='') return String(PW_OVERRIDE[nm]); return ACCOUNTS[nm]?ACCOUNTS[nm].pw:'1234'; }
 function openPwChange(){ if(!current||current.role==='guest'||!current.who){alert('로그인 후 이용하세요.');return;} document.getElementById('pwWho').textContent=current.who+' 님의 로그인 비밀번호를 변경합니다.'; ['pwCur','pwNew','pwNew2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); document.getElementById('pwGate').style.display='flex'; }
 function closePwChange(){ document.getElementById('pwGate').style.display='none'; }
-function submitPwChange(){ const nm=current.who; const cur=(document.getElementById('pwCur').value||'').trim(); const n1=(document.getElementById('pwNew').value||'').trim(); const n2=(document.getElementById('pwNew2').value||'').trim(); if(cur!==acctPw(nm)){alert('현재 비밀번호가 올바르지 않습니다.');return;} if(n1.length<4){alert('새 비밀번호는 4자 이상으로 정해주세요.');return;} if(n1!==n2){alert('새 비밀번호가 서로 다릅니다.');return;} PW_OVERRIDE[nm]=n1;
-  if(USE_BACKEND){
-    /* 비밀번호를 바꾸면 기존 출입증은 무효가 되므로, 서버가 새로 내주는 출입증을 받아 끼운다 */
-    fetch(API,{method:'POST',body:tokBody({action:'setPw',name:nm,pw:n1})})
-      .then(r=>r.json()).then(d=>{
-        if(d&&d.error==='WEAK_PW'){ alert(d.message||'더 안전한 비밀번호로 정해주세요.'); return; }
-        absorbToken(d);
-      }).catch(()=>{});
-  }
-  closePwChange(); alert('비밀번호가 변경되었습니다. 다음 로그인부터 새 비밀번호를 사용하세요.'); }
+async function submitPwChange(){
+  const nm=current.who;
+  const cur=(document.getElementById('pwCur').value||'').trim();
+  const n1=(document.getElementById('pwNew').value||'').trim();
+  const n2=(document.getElementById('pwNew2').value||'').trim();
+  if(!cur){ alert('현재 비밀번호를 입력해 주세요.'); return; }
+  if(n1.length<4){ alert('새 비밀번호는 4자 이상으로 정해주세요.'); return; }
+  if(n1==='1234'){ alert('1234 는 쓸 수 없습니다. 다른 번호로 정해주세요.'); return; }
+  if(n1!==n2){ alert('새 비밀번호가 서로 다릅니다.'); return; }
+  /* 현재 비밀번호 확인도 서버가 한다 (앱에는 비밀번호가 없다) */
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',body:tokBody({action:'setPw',name:nm,cur:cur,pw:n1})});
+    d=await r.json();
+  }catch(e){ alert('변경하지 못했습니다. 인터넷 연결을 확인해 주세요.'); return; }
+  if(!d||!d.ok){ alert((d&&d.message)||'현재 비밀번호가 올바르지 않습니다.'); return; }
+  absorbToken(d);
+  closePwChange();
+  alert('비밀번호가 변경되었습니다. 다음 로그인부터 새 비밀번호를 사용하세요.');
+}
 async function pushReport(rec){
   if(!USE_BACKEND) return;
   try{
@@ -1698,40 +1706,40 @@ function mkSub(type,cat,title,body,name,contact,status,daysAgo){
 
 // ---------- login (테스트베드 계정) ----------
 const ACCOUNTS={
- '이세진':{role:'leader',pw:'1234',district:'1구역'},
- '이수철':{role:'elder',pw:'1234',district:'2구역',category:"행정 (재정·행정·미디어·경조)"},
- '권보상':{role:'elder',pw:'1234',district:'3구역',category:"봉사 (환경미화·시설·카페·주방)"},
- '최병윤':{role:'leader',pw:'1234',district:'4구역'},
- '엄주철':{role:'elder',pw:'1234',district:'5구역',category:"선교 (새가족·바나바·전도·선교회)"},
- '임영진':{role:'leader',pw:'1234',district:'6구역'},
- '송준성':{role:'leader',pw:'1234',district:'7구역'},
- '임재환':{role:'leader',pw:'1234',district:'8구역'},
- '김진환':{role:'leader',pw:'1234',district:'9구역'},
- '강창오':{role:'leader',pw:'1234',district:'10구역'},
- '윤선희':{role:'leader',pw:'1234',district:'11구역'},
- '윤선미':{role:'leader',pw:'1234',district:'12구역'},
- '정순희':{role:'leader',pw:'1234',district:'13구역'},
- '최정희':{role:'leader',pw:'1234',district:'14구역'},
- '노은숙':{role:'leader',pw:'1234',district:'15구역'},
- '김연화':{role:'leader',pw:'1234',district:'16구역'},
- '황현진':{role:'leader',pw:'1234',district:'17구역'},
- '송영선':{role:'leader',pw:'1234',district:'18구역'},
- '김명혜':{role:'leader',pw:'1234',district:'19구역'},
- '강영주':{role:'leader',pw:'1234',district:'20구역'},
- '류근분':{role:'leader',pw:'1234',district:'21구역'},
- '김길임':{role:'leader',pw:'1234',district:'22구역'},
- '허성옥':{role:'leader',pw:'1234',district:'23구역'},
- '김낙훈':{role:'elder',pw:'1234',district:'24구역',category:"교육 (유치·유초등·중고등·청년)"},
- '소세영':{role:'elder',pw:'1234',district:'25구역',category:"예배 (예배·방송·찬양)"},
- '오훈':{role:'leader',pw:'1234',district:'샬롬 구역'},
- '홍춘섭':{role:'chair',pw:'1234',category:"차량 (차량·주차)"},
- '허미영':{role:'leader',pw:'1234',district:'3구역'},
- '김순이':{role:'leader',pw:'1234',district:'샬롬 구역'},
- '서은주':{role:'pray',pw:'1234'},
- '박인성':{role:'admin',pw:'1234'},
- '강유석':{role:'admin',pw:'1234'},
- '양선영':{role:'admin',pw:'1234'},
- '김세원':{role:'admin',pw:'1234'}
+ '이세진':{role:'leader',district:'1구역'},
+ '이수철':{role:'elder',district:'2구역',category:"행정 (재정·행정·미디어·경조)"},
+ '권보상':{role:'elder',district:'3구역',category:"봉사 (환경미화·시설·카페·주방)"},
+ '최병윤':{role:'leader',district:'4구역'},
+ '엄주철':{role:'elder',district:'5구역',category:"선교 (새가족·바나바·전도·선교회)"},
+ '임영진':{role:'leader',district:'6구역'},
+ '송준성':{role:'leader',district:'7구역'},
+ '임재환':{role:'leader',district:'8구역'},
+ '김진환':{role:'leader',district:'9구역'},
+ '강창오':{role:'leader',district:'10구역'},
+ '윤선희':{role:'leader',district:'11구역'},
+ '윤선미':{role:'leader',district:'12구역'},
+ '정순희':{role:'leader',district:'13구역'},
+ '최정희':{role:'leader',district:'14구역'},
+ '노은숙':{role:'leader',district:'15구역'},
+ '김연화':{role:'leader',district:'16구역'},
+ '황현진':{role:'leader',district:'17구역'},
+ '송영선':{role:'leader',district:'18구역'},
+ '김명혜':{role:'leader',district:'19구역'},
+ '강영주':{role:'leader',district:'20구역'},
+ '류근분':{role:'leader',district:'21구역'},
+ '김길임':{role:'leader',district:'22구역'},
+ '허성옥':{role:'leader',district:'23구역'},
+ '김낙훈':{role:'elder',district:'24구역',category:"교육 (유치·유초등·중고등·청년)"},
+ '소세영':{role:'elder',district:'25구역',category:"예배 (예배·방송·찬양)"},
+ '오훈':{role:'leader',district:'샬롬 구역'},
+ '홍춘섭':{role:'chair',category:"차량 (차량·주차)"},
+ '허미영':{role:'leader',district:'3구역'},
+ '김순이':{role:'leader',district:'샬롬 구역'},
+ '서은주':{role:'pray'},
+ '박인성':{role:'admin'},
+ '강유석':{role:'admin'},
+ '양선영':{role:'admin'},
+ '김세원':{role:'admin'}
 };
 function initGate(){const el=document.getElementById('lgName');if(el)el.focus();}
 async function loginByName(){
@@ -1745,21 +1753,16 @@ async function loginByName(){
   const done=()=>{ if(btn){ btn.disabled=false; btn.textContent=btn.dataset.t||'로그인'; } };
 
   let me=null, mustPw=false;
-  if(USE_BACKEND){
-    try{
-      const r=await fetch(API,{method:'POST',body:JSON.stringify({action:'login',name:nm,pw:pw})});
-      const d=await r.json();
-      if(d&&d.ok&&d.token){ setToken(d.token); me=d.me||null; mustPw=!!d.mustChangePw; }
-      else if(d&&d.error==='BAD_LOGIN'){
-        /* 서버가 거절했어도, 기기에 저장된 비밀번호로 맞으면
-           전환 기간 동안에는 예전 방식으로 들여보낸다 (아무도 못 들어오는 일 방지) */
-        if(pw!==acctPw(nm)){ done(); alert('비밀번호가 올바르지 않습니다.'); return; }
-        setToken(''); console.warn('서버 로그인 거절 → 기존 방식으로 진행');
-      }
-    }catch(e){ console.warn('서버 로그인 실패(오프라인?) → 기존 방식으로 진행:',e); }
-  }
-  if(!TOKEN){                       /* 출입증을 못 받은 경우 = 예전 방식 */
-    if(pw!==acctPw(nm)){ done(); alert('비밀번호가 올바르지 않습니다.'); return; }
+  /* 비밀번호 확인은 서버만 한다. 앱은 비밀번호를 가지고 있지 않다. */
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify({action:'login',name:nm,pw:pw})});
+    const d=await r.json();
+    if(d&&d.ok&&d.token){ setToken(d.token); me=d.me||null; mustPw=!!d.mustChangePw; }
+    else { setToken(''); done(); alert((d&&d.message)||'비밀번호가 올바르지 않습니다.'); return; }
+  }catch(e){
+    setToken(''); done();
+    alert('로그인 확인을 하지 못했습니다.\n인터넷 연결을 확인하고 다시 시도해 주세요.');
+    return;
   }
   await fetchRoster();          /* 구역 명단·전화번호를 받아온 뒤 화면을 연다 */
   done();

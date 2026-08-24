@@ -609,6 +609,31 @@ font-family:inherit;background:linear-gradient(135deg,#3cbcb0,#2a8fb2);color:#ff
 .plerr{background:#fdf3f3;border:1px solid #f0c9c9;border-radius:11px;padding:12px 13px;
 font-size:12.5px;color:#93302f;line-height:1.75;margin-bottom:12px}
 .plerr b{display:block;font-size:13.5px;margin-bottom:3px}
+/* 반복 신청 — 평소에는 이 줄 하나만 보인다 */
+.rpopen{width:100%;border:1px dashed #a9c6d8;background:#f7fbfd;border-radius:12px;height:46px;
+font-size:13.5px;font-weight:800;color:#2a7fa0;font-family:inherit;cursor:pointer;margin-bottom:13px}
+.rpbox{border:1px solid #cfe6e2;background:#f4fbfa;border-radius:12px;padding:12px 12px 11px;margin-bottom:13px}
+.rpbox .rt{font-size:12.5px;font-weight:800;color:#0b6f68;margin-bottom:9px;display:flex;align-items:center}
+.rpbox .rt button{margin-left:auto;border:0;background:none;color:#8a95a5;font-size:11.5px;
+font-weight:800;font-family:inherit;cursor:pointer;padding:0}
+.rpbox .rl{display:block;font-size:12px;font-weight:800;margin-bottom:6px}
+.rplist{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:10px}
+.rprw{display:flex;align-items:center;gap:8px;padding:8px 11px;border-bottom:1px solid #eef2f7;font-size:12.5px}
+.rprw:last-child{border-bottom:0}
+.rprw .no{flex:none;width:26px;height:22px;border-radius:6px;background:#eef4f8;color:var(--muted);
+font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.rprw .dt{flex:1;font-weight:700}
+.rprw .st{flex:none;font-size:11px;font-weight:800;color:#0f8f86}
+.rprw.bad{background:#fdf5f5}
+.rprw.bad .dt{color:#93302f;text-decoration:line-through;text-decoration-color:#e3b3b3}
+.rprw.bad .st{color:var(--red)}
+.rprw.bad .no{background:#fae7e7;color:#b04444}
+.rpsum{font-size:12px;color:var(--muted);margin-top:9px;line-height:1.75}
+.rpsum b{color:var(--ink)}
+.serieschip{display:inline-block;font-size:10.5px;font-weight:800;border-radius:20px;padding:2px 8px;
+background:#efe9fb;color:#6b46c1;margin-left:4px}
+.plrw .xx2{flex:none;border:1px solid #ddd7f0;background:#fff;color:#6b46c1;border-radius:8px;
+padding:5px 9px;font-size:11.5px;font-weight:800;font-family:inherit;cursor:pointer}
 .pldone{text-align:center;padding:32px 20px}
 .pldone .ck{width:60px;height:60px;border-radius:50%;background:#e6f7f5;color:#0f8f86;
 font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
@@ -2475,6 +2500,7 @@ function prayerRowsOf(week,q){
 // ---------- 장소 사용 신청 ----------
 /* 장소·시간·현황은 모두 서버에서 받는다. 겹침은 화면에서 한 번, 서버에서 한 번 더 막는다. */
 let PLACE=null, plPick='', plTab='next', plSending=false, plDone=null, plLoading=false, plDur=60;
+let plRep=false, plUntil='';        /* 매주 반복 — 평소에는 꺼져 있다 (1회 신청) */
 function goPlace(){ openApp('place'); }
 /* 장소·시간 같은 '설정'만 기기에 저장해 둔다.
    덕분에 두 번째부터는 서버 응답을 기다리지 않고 신청 칸이 바로 뜬다.
@@ -2521,7 +2547,7 @@ async function openPlace(){
 /* 서버 응답이 늦게 도착해 화면을 다시 그릴 때,
    이미 입력해 둔 이름·연락처 같은 것이 지워지지 않도록 지켰다가 되돌려 놓는다. */
 function keepPlaceInput(fn){
-  const ids=['plWhen','plDept','plWho','plN','plPhone','plMemo'];
+  const ids=['plWhen','plDept','plWho','plN','plPhone','plMemo','plUntil'];
   const had=!!document.getElementById('plWho');
   const keep={};
   if(had) ids.forEach(function(id){ const e=document.getElementById(id); if(e) keep[id]=e.value; });
@@ -2580,6 +2606,84 @@ function plParseWhen(v){
   if(mm>=24*60) mm=24*60-30;
   return {date:m[1], min:mm};
 }
+/* ── 매주 반복 ──────────────────────────────────────────────
+   평소에는 꺼져 있어 지금까지와 똑같이 1회만 신청한다.
+   「＋ 여러 주 반복해서 신청하기」를 누른 사람만 아래 칸이 열린다. */
+const PL_MAX_REP=12;                 /* 한 번에 이 횟수까지만 (서버도 같은 값으로 막는다) */
+function plAddDays(d,n){
+  const p=String(d).split('-');
+  const t=new Date(Date.UTC(+p[0],+p[1]-1,+p[2])+n*86400000);
+  return t.getUTCFullYear()+'-'+pad2(t.getUTCMonth()+1)+'-'+pad2(t.getUTCDate());
+}
+/* 시작일부터 종료일까지 매주 같은 요일 */
+function plWeekly(from,until,max){
+  const out=[]; let d=from;
+  while(d<=until && out.length<(max||PL_MAX_REP)){ out.push(d); d=plAddDays(d,7); }
+  return out;
+}
+function plUntilDefault(from){ return plAddDays(from, 7*7); }   /* 기본 8회 */
+/* 펼치거나 접을 때 이미 적어 둔 내용(일시·이름·연락처)이 지워지면 안 된다 */
+function plRepOn(){
+  const w=plParseWhen(plVal('plWhen'));
+  plUntil = w ? plUntilDefault(w.date) : '';
+  plRep=true;
+  keepPlaceInput(renderPlace);
+  plOnWhen();
+  const e=document.getElementById('plUntil');
+  if(e){ try{ e.scrollIntoView({behavior:'smooth',block:'center'}); }catch(x){} }
+}
+function plRepOff(){ plRep=false; plUntil=''; keepPlaceInput(renderPlace); plOnWhen(); }
+function plOnUntil(){ plUntil=plVal('plUntil'); plRepPreview(); }
+/* 회차 목록을 미리 보여 주고, 겹치는 주는 빼고 세어 준다 */
+function plRepPlan(){
+  const w=plParseWhen(plVal('plWhen'));
+  if(!w) return null;
+  const until=plRep?(plVal('plUntil')||plUntil):'';
+  const bad = plRep && !!until && until<w.date;      /* 종료일이 시작일보다 앞 */
+  const days=(plRep&&until&&!bad) ? plWeekly(w.date,until,PL_MAX_REP+1) : [w.date];
+  const s=w.min, e=s+plDur;
+  const list=days.map(function(d){ return {date:d, clash:plLocalClash(d,plPick,s,e)}; });
+  return {days:days, list:list, ok:list.filter(x=>!x.clash),
+          over:days.length>PL_MAX_REP, badUntil:bad, empty:plRep&&!until};
+}
+function plRepPreview(){
+  const box=document.getElementById('plRepList'); if(!box) return;
+  const plan=plRepPlan();
+  const btn=document.getElementById('plBtn');
+  if(!plan){ box.innerHTML=''; return; }
+  if(plan.empty){
+    box.innerHTML='<div class="rpsum">언제까지 쓰실지 골라 주세요.</div>';
+    if(btn){ btn.disabled=true; btn.textContent='신청하기'; }
+    return;
+  }
+  if(plan.badUntil){
+    box.innerHTML='<div class="rpsum" style="color:#93302f">종료일이 <b>시작 날짜보다 앞</b>입니다. '
+      +'다시 골라 주세요.</div>';
+    if(btn){ btn.disabled=true; btn.textContent='신청하기'; }
+    return;
+  }
+  if(plan.over){
+    box.innerHTML='<div class="rpsum" style="color:#93302f">한 번에 최대 <b>'+PL_MAX_REP
+      +'회</b>까지만 신청할 수 있습니다. 종료일을 앞당겨 주세요.</div>';
+    if(btn){ btn.disabled=true; btn.textContent='신청하기'; }
+    return;
+  }
+  const w=plParseWhen(plVal('plWhen'));
+  const wd=['일','월','화','수','목','금','토'][new Date(w.date.split('-')[0],w.date.split('-')[1]-1,w.date.split('-')[2]).getDay()];
+  const rows=plan.list.map(function(x,i){
+    return '<div class="rprw'+(x.clash?' bad':'')+'"><span class="no">'+(i+1)+'</span>'
+      +'<span class="dt">'+esc(plDateLabel(x.date))+'</span>'
+      +'<span class="st">'+(x.clash?'겹침 · 제외':'신청 가능')+'</span></div>';
+  }).join('');
+  box.innerHTML='<div class="rpsum">'+esc(plDateLabel(w.date))+'부터 <b>'+esc(plDateLabel(plan.days[plan.days.length-1]))
+    +'</b>까지 · 매주 <b>'+esc(wd==='일'?'주일':wd+'요일')+'</b> '
+    + esc(ampm(min2hm(w.min)))+' ~ '+esc(ampm(min2hm(w.min+plDur)))+'<br>모두 <b>'+plan.days.length+'회</b>입니다.</div>'
+    +'<div class="rplist">'+rows+'</div>';
+  if(btn){
+    btn.disabled = plan.ok.length===0;
+    btn.textContent = plan.ok.length>1 ? (plan.ok.length+'회 신청하기') : '신청하기';
+  }
+}
 function pickDur(d){
   plDur=d;
   const box=document.getElementById('plForm'); if(!box) return;
@@ -2606,8 +2710,29 @@ function plOnWhen(){
     warn.innerHTML='<div class="plwarn"><b>지난 날짜입니다</b>오늘 이후 날짜로 골라 주세요.</div>';
     return;
   }
+  if(plRep){
+    /* 반복은 겹치는 주만 빼고 신청하므로 한 주 때문에 전체를 막지 않는다 */
+    plRepPreview();
+    const plan=plRepPlan();
+    if(!plan||plan.over||plan.badUntil||plan.empty){ warn.innerHTML=''; return; }
+    const bad=plan.list.filter(x=>x.clash);
+    if(!bad.length){ warn.innerHTML=''; return; }
+    if(bad.length===plan.days.length){
+      warn.innerHTML='<div class="plwarn"><b>고르신 시간이 모두 사용 중입니다</b>'
+        +'다른 시간이나 장소를 골라 주세요.</div>';
+      return;
+    }
+    const cc=bad[0].clash;
+    warn.innerHTML='<div class="plwarn"><b>'+esc(plDateLabel(bad[0].date))
+      +(bad.length>1?' 등 '+bad.length+'주':'')+'는 빼고 신청됩니다</b>'
+      +'그 시간에 <b>'+esc(cc.label||plWho(cc))+'</b>이(가) 이미 쓰고 있습니다.<br>'
+      +'그 주만 따로 다른 시간에 신청해 주세요.</div>';
+    return;
+  }
   const c=plLocalClash(w.date,plPick,s,e);
   warn.innerHTML = c ? '<div class="plwarn">'+plClashMsg(c)+'</div>' : '';
+  const b0=document.getElementById('plBtn');
+  if(b0){ b0.disabled=false; b0.textContent='신청하기'; }
 }
 function min2hm(v){ return pad2(Math.floor(v/60)%24)+':'+pad2(v%60); }
 function plWho(it){
@@ -2645,7 +2770,7 @@ function renderPlace(){
     +'<div class="plfl"><label>부서 · 모임 <span class="hint">개인이면 비워 두세요</span></label>'
     +'<input class="f-in" id="plDept" placeholder="예) 청년부, 여전도회"/></div>'
     +'<div class="plrow" style="gap:8px">'
-    +'<div class="plfl" style="flex:1.5"><label>대표자 이름 <i>*</i></label>'
+    +'<div class="plfl" style="flex:1.5"><label>신청자 <i>*</i></label>'
     +'<input class="f-in" id="plWho" placeholder="이름" autocomplete="name"/></div>'
     +'<div class="plfl" style="flex:1"><label>인원 <span class="hint">선택</span></label>'
     +'<input class="f-in" id="plN" type="number" inputmode="numeric" min="1" placeholder="예) 12"/></div>'
@@ -2654,6 +2779,14 @@ function renderPlace(){
     +'<input class="f-in" id="plPhone" type="tel" inputmode="numeric" placeholder="숫자만 넣어 주세요" autocomplete="tel"/></div>'
     +'<div class="plfl"><label>사용 내용 <span class="hint">선택</span></label>'
     +'<input class="f-in" id="plMemo" placeholder="예) 청년부 임원 모임"/></div>'
+    + (plRep
+        ? ('<div class="rpbox"><div class="rt">매주 같은 요일 반복'
+          +'<button type="button" onclick="plRepOff()">접기 ✕</button></div>'
+          +'<label class="rl" for="plUntil">언제까지 쓰시나요?</label>'
+          +'<input class="f-in" id="plUntil" type="date" min="'+esc(plToday())+'"'
+          +' value="'+esc(plUntil)+'" onchange="plOnUntil()" oninput="plOnUntil()"/>'
+          +'<div id="plRepList"></div></div>')
+        : '<button type="button" class="rpopen" onclick="plRepOn()">＋ 여러 주 반복해서 신청하기</button>')
     +'<button class="plbtn" id="plBtn" onclick="submitPlace()">신청하기</button>'
     +'</div></div>';
   plOnWhen();
@@ -2693,24 +2826,42 @@ async function submitPlace(){
   const date=w.date, from=min2hm(w.min), to=min2hm(w.min+plDur);
   if(date<plToday()){ plErr('지난 날짜는 신청할 수 없습니다.'); return; }
   if(w.min+plDur>24*60){ plErr('하루를 넘겨서 신청할 수 없습니다. 사용 시간을 줄이거나 날짜를 나눠 신청해 주세요.'); return; }
-  if(!who){ plErr('대표자 이름을 입력해 주세요.'); return; }
+  if(!who){ plErr('신청자 이름을 입력해 주세요.'); return; }
   if(n && !(parseInt(n,10)>=1)){ plErr('인원은 숫자로 입력해 주세요. (비워 두셔도 됩니다)'); return; }
   if(String(phone).replace(/[^0-9]/g,'').length<9){ plErr('연락처를 정확히 입력해 주세요.'); return; }
-  const c=plLocalClash(date,plPick,w.min,w.min+plDur);
-  if(c){ plErr(plClashMsg(c)); plOnWhen(); return; }
+  /* 반복이면 겹치는 주만 빼고 신청한다 — 누르기 전에 한 번 더 확인한다 */
+  const until=plRep?plVal('plUntil'):'';
+  const plan=plRepPlan();
+  if(plRep){
+    if(!until){ plErr('언제까지 쓰실지 골라 주세요.'); return; }
+    if(until<date){ plErr('반복 종료일은 시작 날짜보다 뒤여야 합니다.'); return; }
+    if(!plan||plan.over){ plErr('한 번에 최대 '+PL_MAX_REP+'회까지만 신청할 수 있습니다. 종료일을 앞당겨 주세요.'); return; }
+    if(!plan.ok.length){ plErr('고르신 시간이 모두 사용 중입니다. 다른 시간이나 장소를 골라 주세요.'); return; }
+    const bad=plan.days.length-plan.ok.length;
+    const msg = bad
+      ? ('모두 '+plan.days.length+'회 중 '+bad+'회는 이미 다른 신청이 있어 빼고,\n'
+         +plan.ok.length+'회를 신청합니다.\n\n진행할까요?')
+      : (plDateLabel(plan.days[0])+'부터 매주 '+plan.days.length+'회를 신청합니다.\n\n진행할까요?');
+    if(!confirm(msg)) return;
+  }else{
+    const c=plLocalClash(date,plPick,w.min,w.min+plDur);
+    if(c){ plErr(plClashMsg(c)); plOnWhen(); return; }
+  }
   plErr('');
   plSending=true;
   const btn=document.getElementById('plBtn');
+  const btnTxt=btn?btn.textContent:'신청하기';
   if(btn){ btn.disabled=true; btn.innerHTML='<span class="spin"></span> 전송 중…'; }
   let d=null;
   try{
     const r=await fetch(API,{method:'POST',body:JSON.stringify({action:'savePlace',
       record:{'날짜':date,'장소':plPick,'시작':from,'종료':to,'부서':plVal('plDept'),
-              '대표자':who,'인원':n,'연락처':phone,'내용':plVal('plMemo')}})});
+              '대표자':who,'인원':n,'연락처':phone,'내용':plVal('plMemo'),
+              '반복종료':until}})});
     d=await r.json().catch(()=>null);
   }catch(e){ d=null; }
   plSending=false;
-  if(btn){ btn.disabled=false; btn.textContent='신청하기'; }
+  if(btn){ btn.disabled=false; btn.textContent=btnTxt; }
   if(!d){ plErr('전송에 실패했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.'); return; }
   if(!d.ok){
     if(d.error==='CLASH'&&d.clash){ await fetchPlaceInfo(); renderPlace(); plErr(plClashMsg(d.clash)); }
@@ -2718,26 +2869,41 @@ async function submitPlace(){
     return;
   }
   plDone={date:date,place:plPick,from:from,to:to,
-          label:plWho({dept:plVal('plDept'),who:who,n:parseInt(n,10)||0})};
+          label:plWho({dept:plVal('plDept'),who:who,n:parseInt(n,10)||0}),
+          saved:(d.saved||[date]), skipped:(d.skipped||[]), total:(d.total||1)};
+  plRep=false; plUntil='';
   await fetchPlaceInfo();
   renderPlace();
 }
 function renderPlaceDone(){
   const box=document.getElementById('plForm'); if(!box||!plDone) return;
   const d=plDone;
+  const sv=d.saved||[d.date], sk=d.skipped||[];
+  const many=sv.length>1;
+  const when = many
+    ? ('<b>매주 '+esc(ampm(d.from))+' ~ '+esc(ampm(d.to))+'</b><br>'
+       + esc(plDateLabel(sv[0]))+' ~ '+esc(plDateLabel(sv[sv.length-1])))
+    : ('<b>'+esc(plDateLabel(d.date))+' '+esc(ampm(d.from))+' ~ '+esc(ampm(d.to))+'</b>');
+  const skHtml = sk.length
+    ? ('<div class="plwarn" style="text-align:left;margin:0 0 14px"><b>'
+       + esc(sk.map(x=>plDateLabel(x.date)).join(', '))+'은(는) 신청되지 않았습니다</b>'
+       +'그 시간에 <b>'+esc(sk[0].label||'')+'</b>이(가) 먼저 잡혀 있습니다.<br>'
+       +'그 주만 따로 신청해 주세요.</div>')
+    : '';
   box.innerHTML='<div class="plcard">'
     +'<div class="plhd"><div class="n">장소 사용 신청</div></div>'
     +'<div class="plbd pldone"><div class="ck">✓</div>'
-    +'<h3>사용 신청이 완료되었습니다</h3>'
-    +'<p><b>'+esc(plDateLabel(d.date))+' '+esc(ampm(d.from))+' ~ '+esc(ampm(d.to))+'</b><br>'
+    +'<h3>'+(many?(sv.length+'회 신청되었습니다'):'사용 신청이 완료되었습니다')+'</h3>'
+    +'<p>'+when+'<br>'
     + esc(d.place)+' · '+esc(d.label)+'<br><br>'
     +'취소하실 때는 아래 현황에서 <b>취소</b>를 누르고<br>연락처 뒤 4자리를 넣으시면 됩니다.</p>'
+    + skHtml
     +'<button class="plbtn gray" onclick="plAgain()">다시 신청하기</button>'
     +'</div></div>';
   renderPlaceList();
   try{ box.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
 }
-function plAgain(){ plDone=null; renderPlace(); }
+function plAgain(){ plDone=null; plRep=false; plUntil=''; renderPlace(); }
 function renderPlaceList(){
   const box=document.getElementById('plList'); if(!box) return;
   if(!PLACE){ box.innerHTML=''; return; }
@@ -2761,23 +2927,47 @@ function renderPlaceList(){
     const canCancel=(it.date>=today);
     html+='<div class="plrw"><span class="tm">'+esc(String(it.from))+'<br>~ '+esc(String(it.to))+'</span>'
       +'<span class="bd"><span class="pc'+(second?' b':'')+'">'+esc(it.place)+'</span>'
-      +'<span class="wh">'+esc(plWho(it))+'</span>'
+      +'<span class="wh">'+esc(plWho(it))
+        +(it.sid?'<span class="serieschip">'+it.sn+'회 중 '+it.si+'</span>':'')+'</span>'
       +(it.memo?'<span class="mt">'+esc(it.memo)+'</span>':'')
       +(it.phone?'<span class="ph">📞 '+esc(fmtPhone(it.phone))+'</span>':'')
       +'</span>'
       +(canCancel?'<button class="xx" onclick="cancelPlace(\''+esc(it.id)+'\')">취소</button>':'')
       +'</div>';
   });
+  /* 매주 반복으로 신청한 묶음은 '남은 회차 모두 취소'를 따로 둔다 */
+  if(plTab==='next'){
+    const gp={};
+    items.forEach(function(it){ if(it.sid){ (gp[it.sid]=gp[it.sid]||[]).push(it); } });
+    Object.keys(gp).forEach(function(k){
+      const g=gp[k]; if(g.length<2) return;
+      html+='<div class="plrw" style="background:#fbf9ff">'
+        +'<span class="tm" style="color:#6b46c1">전체</span>'
+        +'<span class="bd"><span class="wh" style="font-size:12.5px;color:#6b46c1">'
+        + esc(g[0].place)+' 반복 신청 남은 '+g.length+'회</span>'
+        +'<span class="mt">'+esc(plDateLabel(g[0].date))+' ~ '+esc(plDateLabel(g[g.length-1].date))
+        +' · '+esc(plWho(g[0]))+'</span></span>'
+        +'<button class="xx2" onclick="cancelPlaceSeries(\''+esc(k)+'\','+g.length+')">모두 취소</button>'
+        +'</div>';
+    });
+  }
   box.innerHTML='<div class="card">'+tabs+'<div class="plstat">'+html+'</div>'
     +'<div class="mini" style="margin-top:9px">지난 사용 기록은 '
     +((PLACE.keepDays||90)/30|0)+'개월 뒤 자동으로 지워집니다.</div></div>';
 }
 function plSetTab(t){ plTab=t; renderPlaceList(); }
-async function cancelPlace(id){
+/* 매주 반복으로 신청한 것 중 '아직 오지 않은' 회차를 한꺼번에 취소한다.
+   지난 회차는 그대로 남는다. */
+function cancelPlaceSeries(sid,n){
+  return cancelPlace('', sid, n);
+}
+async function cancelPlace(id, series, n){
   const isAdm=!!(PLACE&&PLACE.isAdmin);
   let last4='';
-  if(isAdm){ if(!confirm('이 사용 신청을 취소할까요?')) return; }
+  const ask = series ? ('이 반복 신청의 남은 '+n+'회를 모두 취소할까요?') : '이 사용 신청을 취소할까요?';
+  if(isAdm){ if(!confirm(ask)) return; }
   else{
+    if(series && !confirm(ask)) return;
     last4=prompt('신청하실 때 넣으신 연락처 뒤 4자리를 입력해 주세요.');
     if(last4===null) return;
     last4=String(last4).replace(/[^0-9]/g,'');
@@ -2785,14 +2975,15 @@ async function cancelPlace(id){
   }
   let d=null;
   try{
-    const r=await fetch(API,{method:'POST',body:tokBody({action:'cancelPlace',id:id,last4:last4})});
+    const r=await fetch(API,{method:'POST',body:tokBody({action:'cancelPlace',
+      id:id||'', series:series||'', last4:last4})});
     d=await r.json().catch(()=>null);
   }catch(e){ d=null; }
   if(!d){ alert('전송에 실패했습니다. 다시 시도해 주세요.'); return; }
   if(!d.ok){ alert(d.message||'취소하지 못했습니다.'); return; }
   await fetchPlaceInfo();
   renderPlace();
-  alert('취소했습니다.');
+  alert(d.n>1 ? (d.n+'회를 취소했습니다.') : '취소했습니다.');
 }
 
 // ---------- 신급 교육 신청 · 관리자 대시보드 취합 ----------

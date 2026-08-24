@@ -856,9 +856,9 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     <h1>영광 커넥트 로그인</h1>
     <div class="gsub">이름과 비밀번호로 로그인하세요.</div>
     <label style="display:block;font-size:13px;font-weight:600;margin:10px 0 5px">이름</label>
-    <input type="text" id="lgName" placeholder="예: 송영광" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px"/>
+    <input type="text" id="lgName" placeholder="예: 송영광" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:16px"/>
     <label style="display:block;font-size:13px;font-weight:600;margin:12px 0 5px">비밀번호</label>
-    <input type="password" id="lgPw2" placeholder="비밀번호" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px" onkeydown="if(event.key==='Enter')loginByName()"/>
+    <input type="password" id="lgPw2" placeholder="비밀번호" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:16px" onkeydown="if(event.key==='Enter')loginByName()"/>
     <div style="margin-top:16px"><button class="btn" id="lgBtn" style="width:100%" onclick="loginByName()">로그인</button></div>
   </div>
 </div>
@@ -1757,7 +1757,8 @@ const ACCOUNTS={
  '박인성':{role:'admin'},
  '강유석':{role:'admin'},
  '양선영':{role:'admin'},
- '김세원':{role:'admin'}
+ '김세원':{role:'admin'},
+ '유길현':{role:'admin'}
 };
 function initGate(){const el=document.getElementById('lgName');if(el)el.focus();}
 async function loginByName(){

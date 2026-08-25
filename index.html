@@ -196,6 +196,33 @@ canvas{max-height:280px}
 .cvh{font-size:14px;font-weight:800;color:var(--ink);line-height:1.45}
 .cvd{font-size:13px;color:var(--muted);line-height:1.65;margin-top:3px}
 .cvend{text-align:center;color:var(--muted);font-size:12px;padding:16px 0 4px;line-height:1.7}
+/* ── 섬김과 약속 : 두 덩어리를 색으로 갈라 보이게 ── */
+.block{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:16px}
+.bhead{display:flex;align-items:center;gap:10px;padding:13px 15px;color:#fff}
+.bhead .bi{width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.22);
+display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+.bhead .bt{flex:1;min-width:0}
+.bhead .bt b{display:block;font-size:15.5px;font-weight:800}
+.bhead .bt span{display:block;font-size:11.5px;opacity:.93;margin-top:1px}
+.bfold{border:0;background:rgba(255,255,255,.22);color:#fff;border-radius:9px;
+padding:7px 12px;font-size:11.5px;font-weight:800;font-family:inherit;cursor:pointer;flex:none}
+.bbody{padding:13px 13px 15px;background:#fbfcfe}
+.folded{padding:15px;font-size:12.5px;color:var(--muted);background:#fbfcfe;text-align:center}
+.b-serve .bhead{background:linear-gradient(135deg,#3cbcb0,#2a8fb2)}
+.b-culture .bhead{background:linear-gradient(135deg,#6f6ad4,#5b54c9)}
+.orggrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.orggrid{grid-template-columns:1fr}}
+.ocard{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden}
+.ohead{padding:10px 12px 9px;color:#fff}
+.ohead .ok2{font-size:9.5px;font-weight:800;opacity:.9;letter-spacing:.4px}
+.ohead .oname{font-size:14px;font-weight:800;margin-top:2px;display:flex;align-items:center;gap:7px}
+.ohead .ochief{font-size:12px;font-weight:700;background:rgba(255,255,255,.22);
+border-radius:20px;padding:2px 9px;margin-left:auto;white-space:nowrap}
+.orow{display:flex;align-items:baseline;gap:8px;padding:7px 12px;border-bottom:1px solid #f1f5f9;font-size:12.5px}
+.orow:last-child{border-bottom:0}
+.orow .op{flex:1;color:var(--muted);font-weight:700;font-size:12px}
+.orow .on{font-weight:800;letter-spacing:-.2px}
+.ofoot{text-align:center;color:var(--muted);font-size:11.5px;padding:11px 4px 2px;line-height:1.7}
 /* ===== 새 접수 알림 ===== */
 .navbadge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--red);color:#fff;font-size:11px;font-weight:800;line-height:1;vertical-align:middle}
 .ntcard{background:#fff;border-radius:18px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 24px 60px rgba(20,28,45,.3)}
@@ -858,7 +885,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     <div class="mtile i-yellow" onclick="openL('https://open.kakao.com/o/gzZSQVpc')"><div class="mc"><svg width="31" height="31" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.2C6.7 3.2 2.4 6.6 2.4 10.8c0 2.7 1.8 5.1 4.5 6.4-.2.73-.72 2.66-.82 3.07-.13.5.18.5.38.36.16-.1 2.53-1.72 3.56-2.42.63.09 1.28.14 1.98.14 5.3 0 9.6-3.4 9.6-7.62S17.3 3.2 12 3.2z"/></svg></div><span>전교인공지</span></div>
     <div class="mtile i-news" onclick="openL('https://igloria.org/notice')"><div class="mc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13v14H6a2 2 0 01-2-2z"/><path d="M17 8h2a1 1 0 011 1v8a2 2 0 01-2 2"/><path d="M7.5 9h6M7.5 12.5h6M7.5 16h3.5"/></svg></div><span>영광소식</span></div>
     <div class="mtile i-orange" onclick="openL('https://igloria.org/newface')"><div class="mc"><svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.7"/><path d="M5 20.5a7 7 0 0114 0"/><path d="M19.5 2.6v4.2M17.4 4.7h4.2"/></svg></div><span>새가족소개</span></div>
-    <div class="mtile i-indigo" onclick="goCulture()"><div class="mc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9l5 5v11H5z"/><path d="M14 4v5h5"/><path d="M8.5 12.5h7M8.5 16h5"/></svg></div><span>문화10계명</span></div>
+    <div class="mtile i-indigo" onclick="goCulture()"><div class="mc"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h9l5 5v11H5z"/><path d="M14 4v5h5"/><path d="M8.5 12.5h7M8.5 16h5"/></svg></div><span>섬김과약속</span></div>
     <div class="mtile i-teal" onclick="openL('https://mas3.ohjic.com/member/home/igloria1')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M10 0h4v7h6v4h-6v13h-4V11H4V7h6z"/></svg></div><span>오직</span></div>
     <div class="mtile i-green" onclick="openL('https://mas3.ohjic.com/pages/donation/donation_list/igloria1')"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v12H4z"/><path d="M4 10h16M8 15h4"/></svg></div><span>헌금조회</span></div>
     <div class="mtile i-purple" onclick="goGrade()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.6-9 4.6-9-4.6z"/><path d="M6.5 10.2v4.6c0 1.6 2.5 2.9 5.5 2.9s5.5-1.3 5.5-2.9v-4.6"/><path d="M21 7.6v5.4"/></svg></div><span>신급교육신청</span></div>
@@ -968,11 +995,28 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
   <div class="applike">
     <div class="cvhero">
       <svg class="cvcross" width="78" height="78" viewBox="0 0 24 24" fill="#fff"><path d="M10 0h4v7h6v4h-6v13h-4V11H4V7h6z"/></svg>
-      <div class="cvk">CHURCH CULTURE</div>
-      <div class="cvt">영광교회 문화 10계명</div>
-      <div class="cvs">우리가 함께 지켜가는 공동체의 약속</div>
+      <div class="cvk">OUR COMMUNITY</div>
+      <div class="cvt">섬김과 약속</div>
+      <div class="cvs">섬기는 분들과 우리가 지켜갈 약속</div>
     </div>
-    <div id="cultureBody"></div>
+
+    <!-- 섬김 담당하시는 분들 — 내용은 시트(org 탭)에서 받아온다 -->
+    <div class="block b-serve">
+      <div class="bhead">
+        <div class="bi">&#129309;</div>
+        <div class="bt"><b>섬김 담당하시는 분들</b><span id="orgSub">불러오는 중입니다…</span></div>
+        <button class="bfold" id="orgFold" onclick="toggleOrg()">접기 &#9650;</button>
+      </div>
+      <div class="bbody" id="orgBody"></div>
+    </div>
+
+    <div class="block b-culture">
+      <div class="bhead">
+        <div class="bi">&#10013;</div>
+        <div class="bt"><b>문화 10계명</b><span>우리가 함께 지켜가는 공동체의 약속</span></div>
+      </div>
+      <div class="bbody"><div id="cultureBody"></div></div>
+    </div>
   </div>
 </section>
 
@@ -1898,6 +1942,62 @@ const CULTURE=[
    {n:9,h:'우리는 기쁘게 자원한다.',d:'사역을 부담이 아닌 특권으로 여기며, 할 일이 보일 때 시키지 않고 지금 내가 먼저 한다.'},
    {n:10,h:'우리는 잘 내려놓는다.',d:'맡은 직분에는 생명을 다해 충성하지만, 공동체의 유익을 위해서는 언제든 기꺼이 내려놓을 줄 안다.'}]}
 ];
+/* ---------- 섬김 담당 조직도 ----------
+   이름은 앱 파일에 넣지 않는다. 시트(org 탭)에서 받아오므로
+   부장이 바뀌면 시트만 고치면 되고 앱을 다시 배포할 필요가 없다. */
+let ORG=null, orgOpen=true;
+const ORG_KEY='sgc_org_v1', ORG_OPEN_KEY='sgc_org_open_v1';
+function saveOrgInfo(d){ try{ localStorage.setItem(ORG_KEY,JSON.stringify(d)); }catch(e){} }
+function loadOrgInfo(){ try{ return JSON.parse(localStorage.getItem(ORG_KEY)||'null'); }catch(e){ return null; } }
+/* 처음에는 펼쳐져 있고, 접으면 그 상태를 기억한다 */
+function loadOrgOpen(){ try{ return localStorage.getItem(ORG_OPEN_KEY)!=='0'; }catch(e){ return true; } }
+function toggleOrg(){
+  orgOpen=!orgOpen;
+  try{ localStorage.setItem(ORG_OPEN_KEY, orgOpen?'1':'0'); }catch(e){}
+  renderOrg();
+}
+async function fetchOrgInfo(){
+  if(!USE_BACKEND) return ORG;
+  try{
+    const r=await fetch(API+'?action=orgInfo');
+    const d=await r.json();
+    if(d&&d.ok){ ORG=d; saveOrgInfo(d); return d; }
+  }catch(e){ console.warn('조직도 불러오기 실패:',e); }
+  return ORG;
+}
+function renderOrg(){
+  const body=document.getElementById('orgBody');
+  const sub=document.getElementById('orgSub');
+  const fold=document.getElementById('orgFold');
+  if(!body) return;
+  if(fold) fold.innerHTML = orgOpen ? '접기 &#9650;' : '펼치기 &#9660;';
+  if(!ORG){ body.className='bbody'; body.innerHTML='<div class="bempty">불러오는 중입니다…</div>'; return; }
+  const gs=ORG.groups||[];
+  if(sub) sub.textContent=(ORG.year? ORG.year+' · ':'')+gs.length+'개 위원회 '+(ORG.people||0)+'명';
+  if(!orgOpen){ body.className='folded'; body.textContent='눌러서 펼쳐 보세요'; return; }
+  body.className='bbody';
+  if(!gs.length){ body.innerHTML='<div class="bempty">아직 등록된 조직도가 없습니다.</div>'; return; }
+  body.innerHTML='<div class="orggrid">'+gs.map(function(g){
+      return '<div class="ocard"><div class="ohead" style="background:linear-gradient(135deg,'
+        +esc(g.c1||'#8fa3bb')+','+esc(g.c2||'#63788f')+')">'
+        +(g.en?'<div class="ok2">'+esc(g.en)+'</div>':'')
+        +'<div class="oname">'+esc(g.key||'')
+        +(g.chief?'<span class="ochief">위원장 '+esc(g.chief)+'</span>':'')+'</div></div>'
+        +(g.members||[]).map(function(m){
+            return '<div class="orow"><span class="op">'+esc(m.role||'')+'</span>'
+                 +'<span class="on">'+esc(m.name||'')+'</span></div>'; }).join('')
+        +'</div>';
+    }).join('')+'</div>'
+    +'<div class="ofoot">섬겨 주시는 모든 분들께 감사드립니다</div>';
+}
+async function openCulture(){
+  orgOpen=loadOrgOpen();
+  if(!ORG){ const c=loadOrgInfo(); if(c) ORG=c; }
+  renderOrg();
+  renderCulture();
+  const d=await fetchOrgInfo();
+  if(d) renderOrg();
+}
 function renderCulture(){
   const box=document.getElementById('cultureBody'); if(!box) return;
   box.innerHTML=CULTURE.map(p=>
@@ -1969,7 +2069,7 @@ function showView(v,back){
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.getElementById(v).classList.add('active');
   if(v==='intake') resetIntake();
-  if(v==='culture') renderCulture();
+  if(v==='culture') openCulture();
   if(v==='report') showReport();
   if(v==='manage'){ renderSubs(); markSubsSeen(); }
   if(v==='myreq') renderMyReq();

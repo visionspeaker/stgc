@@ -1986,7 +1986,7 @@ function renderOrg(){
   if(fold) fold.innerHTML = orgOpen ? '접기 &#9650;' : '펼치기 &#9660;';
   if(!ORG){ body.className='bbody'; body.innerHTML='<div class="bempty">불러오는 중입니다…</div>'; return; }
   const gs=ORG.groups||[];
-  if(sub) sub.textContent=(ORG.year? ORG.year+' · ':'')+gs.length+'개 위원회 '+(ORG.people||0)+'명';
+  if(sub) sub.textContent=(ORG.year? ORG.year+' · ':'')+gs.length+'개 위원회';
   if(!orgOpen){ body.className='folded'; body.textContent='눌러서 펼쳐 보세요'; return; }
   body.className='bbody';
   if(!gs.length){ body.innerHTML='<div class="bempty">아직 등록된 조직도가 없습니다.</div>'; return; }

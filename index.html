@@ -1180,7 +1180,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
   <div class="sect-t">문의 접수 처리 <button class="seeall" onclick="goManage('전체')">전체 보기 ›</button></div>
   <div class="dgrid g3">
     <div class="dcard"><h3>최근 접수 현황</h3><p class="dd">분류별 담당자에게 자동 배정 · 상태 관리</p><div id="subTable"></div></div>
-    <div class="dcard"><h3>상태별 건수</h3><p class="dd">접수·처리중·완료·보류·반려</p><canvas id="subChart"></canvas><div class="dnote">매뉴얼 기준: 접수 확인 48시간 · 완료 회신 3일.</div></div>
+    <div class="dcard"><h3>상태별 건수</h3><p class="dd">접수·처리중·보류·반려·완료</p><canvas id="subChart"></canvas><div class="dnote">매뉴얼 기준: 접수 확인 48시간 · 완료 회신 3일.</div></div>
   </div>
 
   <div class="sect-t">이번 주 구역 제출 현황</div>
@@ -4003,8 +4003,9 @@ function renderDash(){
     recent.map(s=>`<tr class="rowlink" onclick="goManage('${esc(s.status)}')" title="문의 접수 처리로 이동"><td>${s.title||'(제목없음)'}</td><td>${catName(s.category||'')}</td><td>${s.assignee||'-'}</td><td><span class="badge b-${s.status}">${s.status}</span></td><td>${String(s.ts||'').slice(5,10)}</td></tr>`).join('')+
     '</tbody></table>' : '<div class="muted">접수된 문의가 없습니다.</div>';
   // 상태별 건수 (막대 클릭 → 해당 상태 목록으로)
-  const stKeys=['접수','처리중','완료','보류','반려'];
-  drawChart('subChart','bar',{labels:stKeys,datasets:[{label:'건수',data:stKeys.map(fbBy),backgroundColor:['#3b82f6','#f59e0b','#22c55e','#a855f7','#e06666']}]},
+  /* 아직 손이 가야 할 것(접수·처리중·보류·반려)을 왼쪽에 모으고, 끝난 것(완료)을 맨 끝에 둔다 */
+  const stKeys=['접수','처리중','보류','반려','완료'];
+  drawChart('subChart','bar',{labels:stKeys,datasets:[{label:'건수',data:stKeys.map(fbBy),backgroundColor:['#3b82f6','#f59e0b','#a855f7','#e06666','#22c55e']}]},
     {plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},
      onHover:(e,el)=>{e.native.target.style.cursor=el.length?'pointer':'default';},
      onClick:(e,el)=>{ if(el.length) goManage(stKeys[el[0].index]); }});

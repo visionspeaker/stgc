@@ -1652,6 +1652,17 @@ async function loadAll(){
     if(d&&d.error==='AUTH'){ onAuthLost(); return; }
     if(d&&d.ok){
       absorbToken(d);
+      /* 서버가 알려 준 내 정보(구역·분류·직분)를 조용히 맞춰 둔다.
+         앱을 껐다 켠 사람도 다시 로그인하지 않고 '직분'을 받게 된다.
+         서버 값이 빈칸이면 손대지 않는다(있던 값을 지우지 않기 위해). */
+      let meChanged=false;
+      if(d.me && current){
+        ['district','category','duty'].forEach(function(k){
+          const v=d.me[k]||'';
+          if(v && current[k]!==v){ current[k]=v; meChanged=true; }
+        });
+        if(meChanged){ saveSession(); setRoleLabel(); buildNav(); }
+      }
       const before=dataSig();
       reports=dedupeReports(Array.isArray(d.reports)?d.reports:[]);
       subs=liveSubs(Array.isArray(d.subs)?d.subs:[]);
@@ -1660,7 +1671,7 @@ async function loadAll(){
          (괜히 다시 그리면 대시보드 차트 애니메이션이 또 재생된다) */
       GRADES=Array.isArray(d.grades)?d.grades:[];
       PRAYERS=Array.isArray(d.prayers)?d.prayers:[];
-      if(dataSig()!==before) rerender();
+      if(meChanged || dataSig()!==before) rerender();
       checkNewSubs();
       checkNewGrades();
     }

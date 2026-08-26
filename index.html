@@ -622,6 +622,71 @@ font-size:12.5px;color:#93302f;line-height:1.7;margin-bottom:12px}
 display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
 .prdone h3{margin:0 0 8px;font-size:17px}
 .prdone p{margin:0 0 16px;font-size:13px;color:var(--muted);line-height:1.9}
+/* ── 중보기도 기간 고르기 (기한 없음 / 날짜 지정) ── */
+.pergrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.perbtn{border:1.5px solid var(--inline);background:#fff;border-radius:13px;padding:14px 8px;
+text-align:center;font-family:inherit;color:var(--ink);cursor:pointer;font-size:14px;font-weight:800}
+.perbtn.on{border-color:#b03a5b;background:#fdeef2;color:#8d2c48}
+.perhint{font-size:12px;color:#4b5563;margin-top:10px;line-height:1.75;
+background:#f7f9fc;border-radius:10px;padding:10px 12px}
+.picked{margin-top:9px;display:flex;align-items:center;gap:8px;border:1.5px solid #b03a5b;
+background:#fdeef2;border-radius:12px;padding:11px 12px}
+.picked .dt{flex:1;font-size:14px;font-weight:800;color:#8d2c48}
+.picked .ch{border:1px solid #eec3d0;background:#fff;border-radius:20px;padding:6px 12px;
+font-size:12px;font-weight:800;color:#b03a5b;font-family:inherit;cursor:pointer}
+/* 앱이 직접 그리는 달력 — 기기마다 모양이 달라지지 않는다 */
+.calgate{position:fixed;inset:0;background:rgba(20,28,40,.45);z-index:97;
+display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.calcard{background:#fff;border-radius:18px;width:100%;max-width:420px;overflow:hidden;
+box-shadow:0 -8px 34px rgba(20,30,50,.3)}
+.calhd{display:flex;align-items:center;gap:8px;padding:13px 14px;border-bottom:1px solid var(--line)}
+.calhd .t{flex:1;font-size:15px;font-weight:800;text-align:center}
+.navb{border:1px solid var(--inline);background:#fff;border-radius:10px;width:36px;height:36px;
+font-size:17px;font-family:inherit;color:#4b5563;cursor:pointer;line-height:1}
+.calbd{padding:10px 12px 4px}
+.dowr{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.dowr div{text-align:center;font-size:11.5px;font-weight:800;color:var(--muted);padding:4px 0}
+.dowr div:first-child{color:#d1495b}
+.dowr div:last-child{color:#3a6ea5}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.day{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;border-radius:11px;
+font-size:14px;font-weight:700;cursor:pointer;border:1px solid transparent;color:var(--ink)}
+.day.sun{color:#d1495b}
+.day.sat{color:#3a6ea5}
+.day.off{color:#c8cfd8;cursor:default}
+.day.past{color:#d3d9e0;cursor:default}
+.day.today{border-color:var(--teal);color:#0b6f68}
+.day.sel{background:#b03a5b;color:#fff;border-color:#b03a5b}
+.quick{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px 0}
+.qb{border:1px solid var(--inline);background:#fff;border-radius:20px;padding:7px 12px;
+font-size:12px;font-weight:800;color:#2a7fa0;font-family:inherit;cursor:pointer}
+.calft{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);margin-top:10px;background:#fbfcfe}
+.calft .btn[disabled]{opacity:.45}
+/* ── 중보기도 진행 중 / 응답됨 ── */
+.ptabs{display:flex;gap:6px;margin:2px 0 12px}
+.ptab{flex:1;border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 4px;
+font-size:12.5px;font-weight:800;font-family:inherit;color:var(--muted);text-align:center;cursor:pointer}
+.ptab .n{display:block;font-size:10.5px;font-weight:700;opacity:.85;margin-top:1px}
+.ptab.on{background:var(--green);border-color:var(--green);color:#fff}
+.iprow{padding:11px 11px;border-top:1px solid #f1f5f9}
+.iprow:first-of-type{border-top:0}
+.iprow .l1{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.iprow .nm{font-size:13px;font-weight:800}
+.iprow .tx{font-size:13px;margin-top:5px;line-height:1.7}
+.iprow .l3{display:flex;align-items:center;gap:6px;margin-top:9px;flex-wrap:wrap}
+.iprow.over{background:#fffaf3}
+.iprow.done{background:#f7fcf9}
+.ipsub{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6}
+.dbdg{display:inline-block;font-size:10.5px;font-weight:800;border-radius:20px;padding:2px 7px}
+.d-ok{background:#e2f5f1;color:#0b6f68}
+.d-soon{background:#fdf0e3;color:#b45309}
+.d-over{background:#fde8e8;color:#c0392b}
+.d-inf{background:#eef2f7;color:#4b5563}
+.d-done{background:#e9f6ee;color:#15803d}
+.mini{border:1px solid var(--inline);background:#fff;border-radius:20px;padding:6px 11px;
+font-size:11.5px;font-weight:800;font-family:inherit;color:#2a7fa0;cursor:pointer}
+.mini.ok{border-color:var(--green);color:#0b6f68;background:#e6f7f5}
+.mini.warn{border-color:#e0a35c;color:#b45309;background:#fdf6ec}
 /* 기도제목 목록에 붙는 구분 배지 */
 .pbadge{display:inline-block;font-size:10.5px;font-weight:800;border-radius:20px;padding:2px 7px;margin-right:5px}
 .pb-ip{background:#eef0fb;color:#5b54c9}
@@ -1125,20 +1190,32 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 <section id="pray" class="view">
   <div class="card">
     <h2 style="margin:0;font-size:17px;color:var(--green)">중보기도</h2>
-    <p class="dd" id="ipDesc">구역보고에서 <b>중보기도 요청</b>으로 체크된 기도제목만 모았습니다.</p>
-    <div class="prayctl">
-      <button class="wkarrow" id="ipPrev" onclick="moveIpWeek(-1)" title="이전 주일">‹</button>
-      <select class="f-in" id="ipWeek" style="width:auto" onchange="renderIp()"></select>
-      <button class="wkarrow" id="ipNext" onclick="moveIpWeek(1)" title="다음 주일">›</button>
-      <input class="f-in praysrch" id="ipSrch" placeholder="이름·내용 검색" oninput="renderIp()"/>
+    <div class="ptabs">
+      <div class="ptab on" id="ipTabLive" onclick="setIpTab('live')">진행 중<span class="n" id="ipNLive">·</span></div>
+      <div class="ptab" id="ipTabDone" onclick="setIpTab('done')">응답됨<span class="n" id="ipNDone">·</span></div>
+      <div class="ptab" id="ipTabWeek" onclick="setIpTab('week')">주일별<span class="n">보기</span></div>
     </div>
-    <div id="ipBoard"></div>
-    <div class="prbtns">
-      <button class="btn" onclick="printIp()">🖨 출력</button>
-      <button class="btn sec" onclick="copyIp()">📋 복사하기</button>
-      <button class="btn" style="background:linear-gradient(135deg,#4b9fe0,#2e74b5)" onclick="xlsIp()">⬇ 엑셀</button>
+    <p class="dd" id="ipDesc"></p>
+    <div id="ipLiveWrap">
+      <input class="f-in praysrch" id="ipLiveSrch" style="width:100%;margin-bottom:10px"
+             placeholder="이름·내용 검색" oninput="renderIpList()"/>
+      <div id="ipLiveBoard"></div>
     </div>
-    <span class="prok" id="ipOk"></span>
+    <div id="ipWeekWrap" style="display:none">
+      <div class="prayctl">
+        <button class="wkarrow" id="ipPrev" onclick="moveIpWeek(-1)" title="이전 주일">‹</button>
+        <select class="f-in" id="ipWeek" style="width:auto" onchange="renderIpWeek()"></select>
+        <button class="wkarrow" id="ipNext" onclick="moveIpWeek(1)" title="다음 주일">›</button>
+        <input class="f-in praysrch" id="ipSrch" placeholder="이름·내용 검색" oninput="renderIpWeek()"/>
+      </div>
+      <div id="ipBoard"></div>
+      <div class="prbtns">
+        <button class="btn" onclick="printIp()">🖨 출력</button>
+        <button class="btn sec" onclick="copyIp()">📋 복사하기</button>
+        <button class="btn" style="background:linear-gradient(135deg,#4b9fe0,#2e74b5)" onclick="xlsIp()">⬇ 엑셀</button>
+      </div>
+      <span class="prok" id="ipOk"></span>
+    </div>
   </div>
 </section>
 
@@ -1351,6 +1428,30 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     <div class="ntfoot">
       <button class="btn sec" style="flex:1" onclick="closeOwnPick()">취소</button>
       <button class="btn" style="flex:1.4" onclick="saveOwnPick()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 달력 (중보기도 기간 고르기) -->
+<div id="calGate" class="calgate" style="display:none"></div>
+
+<!-- 중보기도 응답 체크 (중보기도팀장·교역자) -->
+<div id="ipDoneGate" class="rmodal" style="display:none;z-index:96">
+  <div class="ntcard">
+    <div class="nthead">🕊 응답된 기도로 내릴까요?</div>
+    <div class="ntbody">
+      <div id="ipDoneWho" style="font-size:13px;font-weight:800"></div>
+      <div id="ipDoneTx" style="font-size:12.5px;margin:5px 0 13px;line-height:1.7"></div>
+      <div class="prfl" style="margin-bottom:0">
+        <label>한 줄 남기기 <span style="font-weight:600;color:var(--muted)">(안 쓰셔도 됩니다)</span></label>
+        <input class="f-in" id="ipDoneMemo" maxlength="300" placeholder="예) 수술이 잘 끝났습니다. 감사합니다."/>
+      </div>
+      <div class="perhint">진행 중 목록에서 빠지고 <b>「응답됨」</b> 칸으로 옮겨집니다.
+        지운 것이 아니라서 언제든 되돌릴 수 있습니다.</div>
+    </div>
+    <div class="ntfoot">
+      <button class="btn sec" style="flex:1" onclick="closeIpDone()">취소</button>
+      <button class="btn" style="flex:1.4" onclick="saveIpDone()">응답됨으로 내리기</button>
     </div>
   </div>
 </div>
@@ -1639,7 +1740,10 @@ function showCachedVisitors(){
 function dataSig(){
   try{
     return (reports||[]).map(r=>r.district+'|'+r.date+'|'+(r.ts||'')).sort().join(';')
-      +'#'+(subs||[]).map(s=>(s.id||'')+'|'+(s.status||'')+'|'+(s.ts||'')+'|'+((s.replies||[]).length)).sort().join(';');
+      +'#'+(subs||[]).map(s=>(s.id||'')+'|'+(s.status||'')+'|'+(s.ts||'')+'|'+((s.replies||[]).length)).sort().join(';')
+      /* 중보기도 기간·응답이 바뀌면 화면을 다시 그려야 한다 */
+      +'#'+(PRAYERS||[]).map(p=>(p.id||'')+'|'+(p.status||'')+'|'+(p.due||'')).sort().join(';')
+      +'#'+(PRTRACK||[]).map(t=>(t.key||'')+'|'+(t.status||'')+'|'+(t.due||'')).sort().join(';');
   }catch(e){ return String(Math.random()); }
 }
 async function loadAll(){
@@ -1671,6 +1775,7 @@ async function loadAll(){
          (괜히 다시 그리면 대시보드 차트 애니메이션이 또 재생된다) */
       GRADES=Array.isArray(d.grades)?d.grades:[];
       PRAYERS=Array.isArray(d.prayers)?d.prayers:[];
+      PRTRACK=Array.isArray(d.praytrack)?d.praytrack:[];
       if(meChanged || dataSig()!==before) rerender();
       checkNewSubs();
       checkNewGrades();
@@ -2553,7 +2658,8 @@ function openMember(name){
 // ---------- 중보기도 신청 ----------
 /* 교인이 직접 올리는 기도제목. 로그인 없이 누구나.
    '교역자에게만'을 체크하면 서버가 교역자 외에는 이름도 내용도 내려보내지 않는다. */
-let PRAYERS=[], PRINFO=null, prSecret=false, prSending=false, prDone=null;
+let PRAYERS=[], PRTRACK=[], PRINFO=null, prSecret=false, prSending=false, prDone=null;
+let prDue='';        /* 신청자가 고른 종료일. 빈 값 = 기한 없음 (기본) */
 const PRINFO_KEY='sgc_prayer_cfg_v1';
 function goPrayer(){ openApp('prayer'); }
 function savePrCfg(d){ try{ localStorage.setItem(PRINFO_KEY,JSON.stringify(
@@ -2571,7 +2677,7 @@ async function fetchPrayerInfo(){
 /* 구역 목록이 바뀌었는지 비교하는 데만 쓰는 지문 */
 function prInfoSig(d){ try{ return d?JSON.stringify([d.districts||[], d.noDist||'']):''; }catch(e){ return ''; } }
 async function openPrayer(){
-  prSending=false; prDone=null;
+  prSending=false; prDone=null; prDue='';
   if(!PRINFO) PRINFO=loadPrCfg();
   renderPrayer();
   const before=prInfoSig(PRINFO);
@@ -2579,6 +2685,100 @@ async function openPrayer(){
   /* 받아온 안내가 이전과 같으면 다시 그리지 않는다 (입력칸이 다시 그려지며 깜빡이는 것 방지) */
   if(d && !prDone && prInfoSig(d)!==before) keepPrInput(renderPrayer);
 }
+/* ── 달력 (앱이 직접 그린다) ────────────────────────────
+   휴대폰마다 다르게 뜨는 기본 날짜 선택기를 쓰지 않는다.
+   어디서 열어도 같은 모양이고, 글씨가 크고, 지난 날짜는 눌리지 않는다. */
+const DOWN=['일','월','화','수','목','금','토'];
+function d0(d){ return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
+function todayD(){ return d0(new Date()); }
+function isoD(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')
+                       +'-'+String(d.getDate()).padStart(2,'0'); }
+function parseD(s){ const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));
+  return m? new Date(Number(m[1]),Number(m[2])-1,Number(m[3])) : null; }
+function kDate(d){ return d? d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일('+DOWN[d.getDay()]+')' : ''; }
+function mdDate(d){ return d? (d.getMonth()+1)+'/'+d.getDate() : ''; }
+/* 남은 날 (오늘이면 0, 지났으면 음수). 종료일이 없으면 null */
+function daysLeft(s){ const d=parseD(s); return d? Math.round((d0(d)-todayD())/86400000) : null; }
+
+let calSel=null, calView=null, calCb=null;
+function openCalendar(cur,cb){
+  calCb=cb; calSel=parseD(cur);
+  const base=calSel||todayD();
+  calView=new Date(base.getFullYear(),base.getMonth(),1);
+  const g=document.getElementById('calGate'); if(g) g.style.display='flex';
+  drawCalendar();
+}
+function closeCalendar(){ const g=document.getElementById('calGate');
+  if(g) g.style.display='none'; calCb=null; }
+function calMove(n){ calView=new Date(calView.getFullYear(),calView.getMonth()+n,1); drawCalendar(); }
+function calQuick(m){ const t=todayD();
+  const d=new Date(t.getFullYear(),t.getMonth()+m,t.getDate());
+  calSel=d; calView=new Date(d.getFullYear(),d.getMonth(),1); drawCalendar(); }
+function calYearEnd(){ const t=todayD();
+  let d=new Date(t.getFullYear(),11,31);
+  if(d<t) d=new Date(t.getFullYear()+1,11,31);
+  calSel=d; calView=new Date(d.getFullYear(),d.getMonth(),1); drawCalendar(); }
+function calPick(y,m,d){ calSel=new Date(y,m,d); drawCalendar(); }
+function calOk(){ if(!calSel) return;
+  const cb=calCb, v=isoD(calSel);
+  const g=document.getElementById('calGate'); if(g) g.style.display='none';
+  calCb=null; if(cb) cb(v); }
+function drawCalendar(){
+  const box=document.getElementById('calGate'); if(!box||!calView) return;
+  const t=todayD(), v=calView;
+  const first=new Date(v.getFullYear(),v.getMonth(),1);
+  const last =new Date(v.getFullYear(),v.getMonth()+1,0);
+  let h='<div class="calcard"><div class="calhd">'
+    +'<button class="navb" onclick="calMove(-1)">‹</button>'
+    +'<div class="t">'+v.getFullYear()+'년 '+(v.getMonth()+1)+'월</div>'
+    +'<button class="navb" onclick="calMove(1)">›</button></div>'
+    +'<div class="quick">'
+    +'<button class="qb" onclick="calQuick(1)">＋1개월</button>'
+    +'<button class="qb" onclick="calQuick(3)">＋3개월</button>'
+    +'<button class="qb" onclick="calQuick(6)">＋6개월</button>'
+    +'<button class="qb" onclick="calYearEnd()">올해 말</button></div>'
+    +'<div class="calbd"><div class="dowr">'
+    + DOWN.map(function(x){ return '<div>'+x+'</div>'; }).join('')
+    +'</div><div class="days">';
+  for(let i=0;i<first.getDay();i++) h+='<div class="day off"></div>';
+  for(let d=1;d<=last.getDate();d++){
+    const dt=new Date(v.getFullYear(),v.getMonth(),d);
+    const c=['day'];
+    if(dt.getDay()===0) c.push('sun');
+    if(dt.getDay()===6) c.push('sat');
+    if(dt<t) c.push('past');
+    if(dt.getTime()===t.getTime()) c.push('today');
+    if(calSel && dt.getTime()===d0(calSel).getTime()) c.push('sel');
+    h+='<div class="'+c.join(' ')+'"'
+      +(dt<t? '' : ' onclick="calPick('+v.getFullYear()+','+v.getMonth()+','+d+')"')
+      +'>'+d+'</div>';
+  }
+  h+='</div></div><div class="calft">'
+    +'<button class="btn sec" style="flex:1" onclick="closeCalendar()">취소</button>'
+    +'<button class="btn" style="flex:1.7"'+(calSel?'':' disabled')+' onclick="calOk()">'
+    +(calSel? esc(kDate(calSel))+'까지' : '날짜를 골라 주세요')+'</button></div></div>';
+  box.innerHTML=h;
+}
+/* ── 신청 화면의 「언제까지 기도할까요?」 ──
+   기본은 기한 없음. 날짜 지정을 누르면 달력이 올라온다. */
+function prPerHtml(){
+  const d=parseD(prDue), has=!!d;
+  return '<div class="prfl"><label>언제까지 기도할까요?</label>'
+    +'<div class="pergrid">'
+    +'<div class="perbtn'+(has?'':' on')+'" onclick="prSetDue(\'\')">기한 없음</div>'
+    +'<div class="perbtn'+(has?' on':'')+'" onclick="prPickDate()">📅 날짜 지정</div>'
+    +'</div>'
+    +(has? '<div class="picked"><span class="dt">📅 '+esc(kDate(d))+'까지</span>'
+          +'<button class="ch" onclick="prPickDate()">바꾸기</button></div>' : '')
+    +'<div class="perhint">'+(has
+        ? '🕊 <b>'+esc(mdDate(d))+'</b>까지 <b>'+daysLeft(prDue)+'일 동안</b> 중보기도 목록에 남습니다.'
+          +'<br>그 전에 응답이 오면 중보기도팀장님께 말씀해 주세요.'
+        : '🕊 <b>기한 없이</b> 중보기도 목록에 남습니다.<br>응답이 오면 중보기도팀장님이 내려 주십니다.')
+    +'</div></div>';
+}
+function prSetDue(v){ prDue=v||''; keepPrInput(renderPrayer); }
+function prPickDate(){ openCalendar(prDue, function(v){ prDue=v; keepPrInput(renderPrayer); }); }
+
 function keepPrInput(fn){
   const ids=['prName','prDist','prText'];
   const had=!!document.getElementById('prName');
@@ -2616,6 +2816,7 @@ function renderPrayer(){
     +'<select class="f-in" id="prDist">'+opts+'</select></div>'
     +'<div class="prfl"><label>기도제목 <i>*</i></label>'
     +'<textarea class="f-in" id="prText" data-nogrow="1" placeholder="예) 9월초에 첫 출근을 앞두고 있습니다.&#10;좋은 만남이 되도록 기도해 주세요."></textarea></div>'
+    +prPerHtml()
     +'<div class="prfl"><div class="prchk'+(prSecret?' on':'')+'" onclick="togglePrSecret()">'
     +'<span class="bx">'+(prSecret?'✓':'')+'</span><span>'
     +'<span class="tt">교역자에게만 알리기</span>'
@@ -2649,14 +2850,14 @@ async function submitPrayer(){
   let d=null;
   try{
     const r=await fetch(API,{method:'POST',body:JSON.stringify({action:'savePrayer',
-      record:{'이름':name,'구역':dist,'기도제목':text,'비공개':prSecret}})});
+      record:{'이름':name,'구역':dist,'기도제목':text,'비공개':prSecret,'종료일':prDue}})});
     d=await r.json().catch(()=>null);
   }catch(e){ d=null; }
   prSending=false;
   if(btn){ btn.disabled=false; btn.textContent='기도제목 올리기'; }
   if(!d){ prErr('전송에 실패했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.'); return; }
   if(!d.ok){ prErr(d.message||'올리지 못했습니다.'); return; }
-  prDone={name:name, dist:dist, secret:prSecret};
+  prDone={name:name, dist:dist, secret:prSecret, due:prDue};
   renderPrayer();
   loadAll();
 }
@@ -2669,12 +2870,15 @@ function renderPrayerDone(){
     +(prDone.secret
         ? '교역자에게만 전달됩니다.<br>귀한 마음 나눠 주셔서 감사합니다.'
         : '중보기도팀이 함께 기도합니다.<br>귀한 기도제목 나눠 주셔서 감사합니다.')
+    +'<br><br><b>'+(prDone.due
+        ? esc(kDate(parseD(prDone.due)))+'까지 함께 기도합니다.'
+        : '기한 없이 함께 기도합니다.')+'</b>'
     +'</p>'
     +'<button class="prbtn gray" onclick="prAgain()">기도제목 더 올리기</button>'
     +'</div></div>';
   try{ box.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
 }
-function prAgain(){ prDone=null; prSecret=false; renderPrayer(); }
+function prAgain(){ prDone=null; prSecret=false; prDue=''; renderPrayer(); }
 /* 내가 볼 수 있는 중보기도 신청을 '기도제목 모아보기'와 같은 모양으로 바꿔 준다.
    주일(week)로 묶여 있어 구역보고 기도제목과 나란히 놓인다. */
 /* 신청은 '다가오는 주일' 앞으로 저장된다.
@@ -4451,7 +4655,239 @@ function ipData(){
   const q=((document.getElementById('ipSrch')||{}).value||'').trim();
   return prayGroups(wk,q,true,true,true);        /* 중보 요청만, 기도제목+기타 */
 }
+/* ── 진행 중 · 응답됨 (주일과 상관없이 쌓이는 목록) ────────────────
+   기도제목이 오는 길이 둘이라 한 줄 모양으로 합쳐서 다룬다.
+   · self   : 교인이 직접 올린 신청 (prayer 시트)
+   · report : 구역보고에서 🙏 로 체크된 것 (기간·응답은 praytrack 시트)   */
+let ipTab='live';
+function ipItems(){
+  const out=[];
+  (PRAYERS||[]).forEach(function(p){
+    out.push({ kind:'self', id:String(p.id||''), week:String(p.week||''),
+      district:String(p.district||''), name:String(p.name||''), text:String(p.text||''),
+      extra:'', secret:!!p.secret, ts:String(p.ts||p.week||''),
+      due:String(p.due||''), status:String(p.status||'접수'),
+      doneAt:String(p.doneAt||''), doneBy:String(p.doneBy||''), memo:String(p.memo||'') });
+  });
+  const tr={}; (PRTRACK||[]).forEach(function(t){ if(t&&t.key) tr[t.key]=t; });
+  dedupeReports(reports||[]).forEach(function(r){
+    const wk=r.date, d=r.district;
+    rosterOf(d,wk).forEach(function(n){
+      const t=(r.detail||{})[n]||{};
+      if(!t.ip) return;
+      const p=String(t.p||'').trim(), e=String(t.e||'').trim();
+      if(!p && !e) return;
+      const key=wk+'|'+d+'|'+n, k=tr[key]||{};
+      out.push({ kind:'report', id:key, key:key, week:wk, district:d, name:n,
+        text:p||e, extra:(p&&e)?e:'', secret:false, ts:wk,
+        due:String(k.due||''), status:String(k.status||'접수'),
+        doneAt:String(k.doneAt||''), doneBy:String(k.doneBy||''), memo:String(k.memo||'') });
+    });
+  });
+  return out;
+}
+/* 기간을 정하고 응답을 체크할 수 있는 사람 = 중보기도팀장 · 교역자 */
+function canPrayEdit(){
+  const r=current&&current.role;
+  return r==='admin' || r==='pray';
+}
+/* 비공개 기도제목은 내용이 보이지 않으므로 교역자만 다룬다 */
+function canEditItem(it){
+  if(!canPrayEdit()) return false;
+  if(it.secret && (current&&current.role)!=='admin') return false;
+  return true;
+}
+function ipSearchHit(it,q){
+  if(!q) return true;
+  return String(it.name||'').includes(q) || String(it.text||'').includes(q)
+      || String(it.extra||'').includes(q) || String(it.district||'').includes(q);
+}
+/* 진행 중 목록을 네 덩어리로 나눈다 — 급한 것이 항상 위에 온다 */
+function ipLiveGroups(q){
+  const live=ipItems().filter(function(x){ return x.status!=='응답' && ipSearchHit(x,q); });
+  const over=[], soon=[], dated=[], inf=[];
+  live.forEach(function(x){
+    const n=daysLeft(x.due);
+    if(n===null) inf.push(x);
+    else if(n<0) over.push(x);
+    else if(n<=7) soon.push(x);
+    else dated.push(x);
+  });
+  const byDue=function(a,b){ return String(a.due).localeCompare(String(b.due)); };
+  const byNew=function(a,b){ return String(b.ts).localeCompare(String(a.ts)); };
+  over.sort(byDue); soon.sort(byDue); dated.sort(byDue); inf.sort(byNew);
+  const gs=[];
+  if(over.length)  gs.push({t:'⏰ 기간이 지났습니다', rows:over});
+  if(soon.length)  gs.push({t:'🔔 이번 주 안에 마감', rows:soon});
+  if(dated.length) gs.push({t:'🕊 날짜가 있는 기도', rows:dated});
+  if(inf.length)   gs.push({t:'∞ 기한 없는 기도', rows:inf});
+  return gs;
+}
+function ipDoneGroups(q){
+  const done=ipItems().filter(function(x){ return x.status==='응답' && ipSearchHit(x,q); });
+  done.sort(function(a,b){ return String(b.doneAt||b.ts).localeCompare(String(a.doneAt||a.ts)); });
+  const by={};
+  done.forEach(function(x){
+    const m=String(x.doneAt||x.ts||'').slice(0,7) || '(날짜 모름)';
+    (by[m]=by[m]||[]).push(x);
+  });
+  return Object.keys(by).sort().reverse().map(function(m){
+    const t=/^\d{4}-\d{2}$/.test(m) ? (m.slice(0,4)+'년 '+Number(m.slice(5,7))+'월') : m;
+    return {t:t, rows:by[m]};
+  });
+}
+/* 남은 날 배지 */
+function ipDueBadge(it){
+  const n=daysLeft(it.due);
+  if(n===null) return '<span class="dbdg d-inf">기한 없음</span>';
+  const d=parseD(it.due), md=esc(mdDate(d));
+  if(n<0)  return '<span class="dbdg d-over">기간 지남 · '+md+'까지였음</span>';
+  if(n===0) return '<span class="dbdg d-soon">오늘까지</span>';
+  return '<span class="dbdg '+(n<=7?'d-soon':'d-ok')+'">D-'+n+' · '+md+'까지</span>';
+}
+function ipHidden(it){ return it.secret && !String(it.text||'').trim(); }
+function ipRowHtml(it,done,idx){
+  const badges=(it.kind==='self'
+      ? '<span class="pbadge pb-self">✋ 본인 신청</span>'
+      : '<span class="pbadge pb-ip">🙏 중보</span>')
+    + (it.secret? '<span class="pbadge pb-lock">🔒 비공개</span>' : '');
+  const tx = ipHidden(it)
+    ? '<span class="plocktx">교역자에게만 보이는 기도제목입니다</span>'
+    : esc(it.text) + (it.extra? '<br><span style="color:var(--muted)">기타 · '+esc(it.extra)+'</span>' : '');
+  const src = (it.kind==='self' ? String(it.ts||'').slice(0,10)+' 신청' : '구역보고 '+esc(it.week));
+  let sub = esc(it.district)+' · '+src;
+  if(done){
+    sub += (it.doneAt? ' · 응답 '+esc(String(it.doneAt).slice(0,10)) : '')
+        + (it.doneBy? ' · '+esc(it.doneBy)+' 확인' : '');
+    if(it.memo) sub += '<br>“'+esc(it.memo)+'”';
+  }
+  let btns='';
+  if(canEditItem(it)){
+    btns = done
+      ? '<button class="mini" onclick="ipUndo('+idx+')">되돌리기</button>'
+      : '<button class="mini ok" onclick="ipDoneOpen('+idx+')">✔ 응답됨</button>'
+        + '<button class="mini'+(daysLeft(it.due)<0?' warn':'')+'" onclick="ipDueOpen('+idx+')">'
+        + (it.due? '기간 바꾸기' : '📅 기간 정하기')+'</button>';
+  }
+  return '<div class="iprow'+(done?' done':(daysLeft(it.due)<0?' over':''))+'">'
+    +'<div class="l1"><span class="nm">'+esc(it.name||'(이름 없음)')+'</span>'+badges
+    + (done? '<span class="dbdg d-done">✔ 응답</span>' : ipDueBadge(it))+'</div>'
+    +'<div class="tx">'+tx+'</div>'
+    +'<div class="ipsub">'+sub+'</div>'
+    + (btns? '<div class="l3">'+btns+'</div>' : '')
+    +'</div>';
+}
+/* 화면에 그려 둔 줄 그대로를 가리킨다 (버튼을 누를 때마다 다시 그리므로 어긋나지 않는다) */
+let IPVIEW=[];
+function ipFind(i){ return IPVIEW[Number(i)] || null; }
+function setIpTab(t){ ipTab=t; renderIp(); }
 function renderIp(){
+  const lw=document.getElementById('ipLiveWrap'), ww=document.getElementById('ipWeekWrap');
+  if(!lw||!ww) return;
+  initIpWeek();          /* 주일 목록은 어느 칸에 있든 미리 채워 둔다 */
+  ['live','done','week'].forEach(function(k){
+    const el=document.getElementById('ipTab'+k.charAt(0).toUpperCase()+k.slice(1));
+    if(el) el.classList.toggle('on', ipTab===k);
+  });
+  const all=ipItems();
+  const nL=document.getElementById('ipNLive'), nD=document.getElementById('ipNDone');
+  if(nL) nL.textContent=all.filter(function(x){return x.status!=='응답';}).length+'건';
+  if(nD) nD.textContent=all.filter(function(x){return x.status==='응답';}).length+'건';
+  lw.style.display = (ipTab==='week') ? 'none' : '';
+  ww.style.display = (ipTab==='week') ? '' : 'none';
+  if(ipTab==='week') renderIpWeek(); else renderIpList();
+}
+function renderIpList(){
+  const box=document.getElementById('ipLiveBoard'); if(!box) return;
+  const q=((document.getElementById('ipLiveSrch')||{}).value||'').trim();
+  const done=(ipTab==='done');
+  const gs=done? ipDoneGroups(q) : ipLiveGroups(q);
+  const total=gs.reduce(function(a,g){ return a+g.rows.length; },0);
+  const d=document.getElementById('ipDesc');
+  if(d) d.innerHTML = done
+    ? '응답으로 내려온 기도제목 <b>'+total+'</b>건 · 최근 순'
+    : '기간이 남아 있는 기도제목 <b>'+total+'</b>건 · 마감이 가까운 것부터';
+  IPVIEW=[];
+  box.innerHTML = gs.length
+    ? gs.map(function(g){
+        return '<div class="pgroup"><div class="pghead">'+esc(g.t)
+          +'<span class="cnt">'+g.rows.length+'건</span></div>'
+          + g.rows.map(function(r){ IPVIEW.push(r); return ipRowHtml(r,done,IPVIEW.length-1); }).join('')
+          +'</div>';
+      }).join('')
+    : '<div class="muted" style="font-size:12.5px;margin-top:10px">'
+      +(done? '아직 응답으로 내린 기도제목이 없습니다.' : '진행 중인 중보기도가 없습니다.')+'</div>';
+}
+/* ── 기간 정하기 / 응답됨 / 되돌리기 ── */
+let ipEditTag=null;
+function ipDueOpen(tag){
+  const it=ipFind(tag); if(!it) return;
+  if(!canEditItem(it)){ alert('비공개 기도제목은 교역자만 처리할 수 있습니다.'); return; }
+  openCalendar(it.due, function(v){ ipSend(it,'due',v,''); });
+}
+function ipDoneOpen(tag){
+  const it=ipFind(tag); if(!it) return;
+  if(!canEditItem(it)){ alert('비공개 기도제목은 교역자만 처리할 수 있습니다.'); return; }
+  ipEditTag=tag;
+  const w=document.getElementById('ipDoneWho'), t=document.getElementById('ipDoneTx'),
+        m=document.getElementById('ipDoneMemo');
+  if(w) w.innerHTML=esc(it.name||'')+' <span style="font-weight:600;color:var(--muted)">· '+esc(it.district)+'</span>';
+  if(t) t.innerHTML= ipHidden(it)? '<span class="plocktx">교역자에게만 보이는 기도제목입니다</span>' : esc(it.text);
+  if(m) m.value='';
+  document.getElementById('ipDoneGate').style.display='flex';
+}
+function closeIpDone(){ const g=document.getElementById('ipDoneGate');
+  if(g) g.style.display='none'; ipEditTag=null; }
+function saveIpDone(){
+  const it=ipFind(ipEditTag); if(!it){ closeIpDone(); return; }
+  const m=document.getElementById('ipDoneMemo');
+  const memo=m? String(m.value||'').trim() : '';
+  closeIpDone();
+  ipSend(it,'done','',memo);
+}
+function ipUndo(tag){
+  const it=ipFind(tag); if(!it) return;
+  if(!confirm('다시 진행 중으로 되돌릴까요?')) return;
+  ipSend(it,'undo','','');
+}
+async function ipSend(it,op,due,memo){
+  const body={ action:'prayerUpdate', op:op, kind:it.kind, memo:memo||'', due:due||'' };
+  if(it.kind==='self') body.id=it.id;
+  else { body.week=it.week; body.district=it.district; body.name=it.name; }
+  /* 화면을 먼저 바꿔 두면 기다리는 동안 답답하지 않다 (실패하면 되돌린다) */
+  ipApplyLocal(it,op,due,memo);
+  renderIp();
+  let d=null;
+  try{ const r=await fetch(API,{method:'POST',body:tokBody(body)});
+       d=await r.json().catch(function(){ return null; }); absorbToken(d); }catch(e){ d=null; }
+  if(!d || !d.ok){
+    alert((d&&d.message)||'저장하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.');
+  }
+  loadAll();
+}
+/* 서버 응답을 기다리는 동안 화면만 먼저 맞춰 둔다 */
+function ipApplyLocal(it,op,due,memo){
+  const now=new Date();
+  const nowS=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')
+            +'-'+String(now.getDate()).padStart(2,'0');
+  if(it.kind==='self'){
+    const p=(PRAYERS||[]).find(function(x){ return String(x.id)===it.id; });
+    if(!p) return;
+    if(op==='due')  p.due=due||'';
+    if(op==='done'){ p.status='응답'; p.doneAt=nowS; p.doneBy=(current&&current.who)||''; p.memo=memo||''; }
+    if(op==='undo'){ p.status='접수'; p.doneAt=''; p.doneBy=''; p.memo=''; }
+    return;
+  }
+  PRTRACK=PRTRACK||[];
+  let t=PRTRACK.find(function(x){ return x.key===it.key; });
+  if(!t){ t={key:it.key, week:it.week, district:it.district, name:it.name,
+             due:'', status:'접수', doneAt:'', doneBy:'', memo:''}; PRTRACK.push(t); }
+  if(op==='due')  t.due=due||'';
+  if(op==='done'){ t.status='응답'; t.doneAt=nowS; t.doneBy=(current&&current.who)||''; t.memo=memo||''; }
+  if(op==='undo'){ t.status='접수'; t.doneAt=''; t.doneBy=''; t.memo=''; }
+}
+
+function renderIpWeek(){
   initIpWeek();
   const box=document.getElementById('ipBoard'); if(!box) return;
   const {wk,groups}=ipData();

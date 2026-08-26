@@ -256,6 +256,32 @@ white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ntfoot{padding:12px 18px 16px;display:flex;gap:8px}
 /* ===== 보고서 상세 모달 ===== */
 .rmodal{position:fixed;inset:0;background:rgba(20,28,45,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:90}
+/* ── 문의 담당 여럿 지정 ── */
+.owners{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ochip{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:4px 10px;
+font-size:11.5px;font-weight:800;background:#eef2f7;color:#4b5563}
+.ochip.c0{background:#e2f5f1;color:#0b6f68}
+.ochip.c1{background:#efe9fb;color:#6b46c1}
+.ochip.c2{background:#e9f6ee;color:#15803d}
+.ochip.c3{background:#fdf0e3;color:#b45309}
+.ochip.c4{background:#e2eefb;color:#1d4ed8}
+.ochip.c5{background:#fbe8f0;color:#b03a68}
+.ochip.pastor{background:#f3e8ff;color:#7c3aed}
+.ochip.staff{background:#e6f7f5;color:#0f8f86}
+.ochip .ck{font-size:10px;opacity:.85;font-weight:700}
+.ochip.mine{box-shadow:0 0 0 2px #f0a04b inset}
+.addown{border:1px dashed var(--inline);background:#fff;border-radius:20px;padding:4px 10px;
+font-size:11.5px;font-weight:800;color:#2a7fa0;font-family:inherit;cursor:pointer}
+.cklist{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ckrow{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:11px;
+padding:10px 11px;font-size:13px;font-weight:700;background:#fff;cursor:pointer}
+.ckrow.on{border-color:#0f8f86;background:#e6f7f5;color:#0b6f68;font-weight:800}
+.ckbox{width:18px;height:18px;border-radius:5px;border:1.6px solid var(--inline);flex:none;
+display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;background:#fff}
+.ckrow.on .ckbox{background:#0f8f86;border-color:#0f8f86}
+.pnote{font-size:11.5px;color:var(--muted);margin-top:11px;line-height:1.7;
+background:#f7f9fc;border-radius:9px;padding:9px 11px}
+.mineflag{font-size:10px;font-weight:800;color:#b45309;background:#fde9c8;border-radius:20px;padding:1px 7px}
 .rmcard{background:#fff;border-radius:16px;width:100%;max-width:460px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(20,28,45,.3)}
 .rmhead{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
 .rmtitle{font-size:15px;font-weight:800;color:var(--ink)}
@@ -1312,6 +1338,23 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
   </div>
 </div>
 
+<!-- 문의 담당 지정 (교역자만) -->
+<div id="ownGate" class="rmodal" style="display:none;z-index:96">
+  <div class="ntcard">
+    <div class="nthead">🤝 이 문의를 누가 함께 볼까요?</div>
+    <div class="ntbody">
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:11px;line-height:1.6">
+        체크한 곳의 위원장·부장·장로에게 목록과 알림이 함께 갑니다.</div>
+      <div class="cklist" id="ownList"></div>
+      <div class="pnote" id="ownNote"></div>
+    </div>
+    <div class="ntfoot">
+      <button class="btn sec" style="flex:1" onclick="closeOwnPick()">취소</button>
+      <button class="btn" style="flex:1.4" onclick="saveOwnPick()">저장</button>
+    </div>
+  </div>
+</div>
+
 <div id="gnotiGate" class="rmodal" style="display:none;z-index:95">
   <div class="ntcard">
     <div class="nthead"><span class="ntbell">🎓</span> 우리 구역 신급 교육 신청</div>
@@ -1675,12 +1718,40 @@ const SEEN_KEY='sgc_seen_subs_v2';   /* v2: 시각 대신 '확인한 날짜'를 
 function seenKeyFor(){ return SEEN_KEY+'_'+((current&&current.who)||'guest'); }
 function getSeenAt(){ try{ return localStorage.getItem(seenKeyFor())||''; }catch(e){ return ''; } }
 function setSeenAt(ts){ try{ localStorage.setItem(seenKeyFor(),ts); }catch(e){} }
+/* ── 문의 담당(복수 지정) ──────────────────────────────
+   문의 하나에 담당을 여럿 둘 수 있다. 담당 = 위원회 6개 + 담임목사 + 부교역자.
+   지정하지 않은 문의는 예전과 똑같이 '분류' 하나로만 판정한다. */
+const DUTY_PASTOR='담임목사', DUTY_STAFF='부교역자';
+const OWNER_KEYS=COMMITTEES.concat([DUTY_PASTOR, DUTY_STAFF]);
+function ownerLabel(k){ return (k===DUTY_PASTOR||k===DUTY_STAFF) ? k : catName(k)+'위원회'; }
+function subOwners(s){
+  const a=(s&&s.owners); if(!Array.isArray(a)) return [];
+  return a.map(normCat).filter(k=>OWNER_KEYS.indexOf(k)>=0);
+}
+/* 내가 담당으로 잡히는 열쇠들 */
+function myOwnerKeys(){
+  if(!current) return [];
+  const out=[];
+  if(current.category) out.push(normCat(current.category));
+  if(current.duty===DUTY_PASTOR) out.push(DUTY_PASTOR);
+  if(current.duty===DUTY_STAFF)  out.push(DUTY_STAFF);
+  return out;
+}
+/* 이 문의가 나에게 지정되었는가 */
+function ownsMe(s){
+  const mine=myOwnerKeys(); if(!mine.length) return false;
+  return subOwners(s).some(k=>mine.indexOf(k)>=0);
+}
+/* 담당별 확인 기록 */
+function ownerRead(s,k){ const m=(s&&s.ownerRead)||{}; return m[k]||null; }
+
 /* 담당 범위의 접수만 */
 function mySubs(){
   if(!current) return [];
   const r=current.role;
-  if(r==='admin') return subs;
-  if(r==='chair'||r==='staff'||r==='elder') return subs.filter(s=>normCat(s.category)===normCat(current.category));
+  if(r==='admin') return subs;      /* 교역자는 원래 전부 본다 */
+  if(r==='chair'||r==='staff'||r==='elder')
+    return subs.filter(s=>normCat(s.category)===normCat(current.category) || ownsMe(s));
   return [];
 }
 /* 담당자가 목록에서 열어본 적이 있으면 '확인' 상태 */
@@ -1876,7 +1947,8 @@ async function loginByName(){
   }
   enterApp((me&&me.role)||a.role,
            {district:(me&&me.district)||a.district,
-            category:(me&&me.category)||a.category, who:nm});
+            category:(me&&me.category)||a.category,
+            duty:(me&&me.duty)||'', who:nm});
   if(mustPw) setTimeout(function(){
     if(confirm('아직 처음 비밀번호(1234)를 쓰고 계십니다.\n지금 변경하시겠습니까?')) openPwChange();
   },500);
@@ -3801,7 +3873,9 @@ function renderSubs(){
   const box=document.getElementById('subList');
   const scope=document.getElementById('mgScope');
   const scoped=(current.role==='chair'||current.role==='staff'||current.role==='elder');
-  let base = scoped ? subs.filter(s=>normCat(s.category)===normCat(current.category)) : subs;
+  let base = scoped
+    ? subs.filter(s=>normCat(s.category)===normCat(current.category) || ownsMe(s))
+    : subs;
   scope.textContent = scoped ? '· 담당: '+catName(current.category)+' ('+base.length+'건)' : '· 전체 위원회';
   /* 미처리 = 담당자가 아직 열어보지 않은 접수 건 / 접수 = 열어서 확인한 접수 건 */
   const cnt미확인=base.filter(s=>s.status==='접수' && !subRead(s)).length;
@@ -3832,7 +3906,11 @@ function renderSubs(){
          <div class="dl">문의 내용</div>
          <div class="qbody">${s.body||'(내용 없음)'}</div>
          ${s.hasPhoto?`<div class="sc-photo" id="ph_${sid}"><button class="btnsm" onclick="loadPhoto('${sid}')">📷 첨부 사진 보기</button></div>`:''}
-         <div class="qmeta">${subType(s.type)} · ${catName(s.category)} · 담당 <b>${s.assignee}</b><br>접수자 <b>${s.name}</b>${s.contact?' · '+s.contact:''}${subRead(s)?`<br><span style="color:var(--green);font-weight:700">✔ 확인 ${esc(s.readBy||'')} · ${fmtDT(s.readAt)}</span>`:''}</div>
+         <div class="qmeta">${subType(s.type)} · ${catName(s.category)} · 분류 담당 <b>${s.assignee}</b><br>접수자 <b>${s.name}</b>${s.contact?' · '+s.contact:''}${subRead(s)?`<br><span style="color:var(--green);font-weight:700">✔ 확인 ${esc(s.readBy||'')} · ${fmtDT(s.readAt)}</span>`:''}</div>
+       </div>
+       <div class="dsec">
+         <div class="dl">담당 <span style="font-weight:400;color:var(--muted)">· 여럿 지정할 수 있습니다</span></div>
+         ${ownersHtml(s,idx)}
        </div>
        <div class="dsec">
          <div class="dl">처리 상태</div>
@@ -3849,7 +3927,7 @@ function renderSubs(){
     return `<tr class="brow ${od?'over':''} ${off?'offfilter':''}" data-sid="${sid}" onclick="toggleBrow(this,event)">
       <td class="c-no">${no}</td>
       <td class="c-st"><span class="fbadge s-${s.status}">${s.status}</span></td>
-      <td class="b-tt"><span class="car">›</span>${s.title}${od?' <span class="fbadge s-보류">48h 초과</span>':''}</td>
+      <td class="b-tt"><span class="car">›</span>${s.title}${od?' <span class="fbadge s-보류">48h 초과</span>':''}${ownsMe(s)?' <span class="mineflag">담당 지정</span>':''}</td>
       <td class="c-cat">${catName(s.category)}</td>
       <td class="c-who">${esc(s.assignee||'')}</td>
       <td class="c-dt">${fmtDT(s.ts).slice(5,10)}</td>
@@ -3877,11 +3955,97 @@ function toggleBrow(tr,ev){
   if(on) growAll(det);
   if(on && currentView==='manage') markSubRead(sid);
 }
+/* ── 담당 칩 그리기 ── */
+function ownerChipClass(k){
+  if(k===DUTY_PASTOR) return 'pastor';
+  if(k===DUTY_STAFF)  return 'staff';
+  const i=COMMITTEES.indexOf(normCat(k));
+  return i>=0 ? ('c'+i) : '';
+}
+function ownersHtml(s,idx){
+  const ks=subOwners(s), mine=myOwnerKeys();
+  const chips=ks.map(function(k){
+    const rd=ownerRead(s,k);
+    return '<span class="ochip '+ownerChipClass(k)+(mine.indexOf(k)>=0?' mine':'')+'">'
+      + esc(ownerLabel(k))
+      + '<span class="ck">'+(rd? '✔ 확인 '+esc(rd.by||'') : '· 미확인')+'</span></span>';
+  }).join('');
+  const btn = (current&&current.role==='admin')
+    ? '<button class="addown" onclick="openOwnPick(\''+esc(s.id||'')+'\')">'
+      + (ks.length? '담당 고치기' : '＋ 담당 추가') + '</button>' : '';
+  const none = (!ks.length && !btn) ? '<span class="ck" style="color:var(--muted);font-size:11.5px">따로 지정된 담당이 없습니다</span>' : '';
+  return '<div class="owners">'+chips+none+btn+'</div>';
+}
+/* ── 담당 지정 팝업 ── */
+let ownPickId=null, ownPickSel=[];
+function openOwnPick(sid){
+  const s=subs.find(x=>x.id===sid); if(!s) return;
+  ownPickId=sid; ownPickSel=subOwners(s).slice();
+  paintOwnPick();
+  document.getElementById('ownGate').style.display='flex';
+}
+function paintOwnPick(){
+  const box=document.getElementById('ownList'); if(!box) return;
+  box.innerHTML=OWNER_KEYS.map(function(k){
+    const on=ownPickSel.indexOf(k)>=0;
+    return '<div class="ckrow'+(on?' on':'')+'" onclick="ownToggle(\''+esc(k)+'\')">'
+      +'<span class="ckbox">'+(on?'✓':'')+'</span>'+esc(ownerLabel(k))+'</div>';
+  }).join('');
+  const note=document.getElementById('ownNote');
+  if(note){
+    note.innerHTML = ownPickSel.length
+      ? '고른 곳: <b>'+ownPickSel.map(k=>esc(ownerLabel(k))).join(' · ')+'</b><br>'
+        +'저장하면 그분들의 「문의 접수 처리」에 이 문의가 올라오고, 아직 안 열어본 분에게는 알림이 뜹니다.'
+      : '아직 고른 곳이 없습니다. 모두 해제하면 예전처럼 <b>분류에 따른 담당</b>만 보게 됩니다.';
+  }
+}
+function ownToggle(k){
+  const i=ownPickSel.indexOf(k);
+  if(i>=0) ownPickSel.splice(i,1); else ownPickSel.push(k);
+  /* 화면에 보이는 차례는 항상 같게 */
+  ownPickSel.sort((a,b)=>OWNER_KEYS.indexOf(a)-OWNER_KEYS.indexOf(b));
+  paintOwnPick();
+}
+function closeOwnPick(){ document.getElementById('ownGate').style.display='none'; ownPickId=null; }
+function saveOwnPick(){
+  const s=subs.find(x=>x.id===ownPickId);
+  if(!s){ closeOwnPick(); return; }
+  stashDrafts();
+  s.owners=ownPickSel.slice();
+  /* 담당에서 빠진 곳의 확인 기록은 지운다 */
+  const m=s.ownerRead||{}; const keep={};
+  s.owners.forEach(k=>{ if(m[k]) keep[k]=m[k]; });
+  s.ownerRead=keep;
+  keepSubId=s.id||null;
+  saveS(); pushSub(s);
+  closeOwnPick();
+  movedMsg='✔ 담당 '+(s.owners.length||0)+'곳 지정됨';
+  if(movedTimer) clearTimeout(movedTimer);
+  movedTimer=setTimeout(()=>{movedMsg=''; movedTimer=null; paintMoved();},2600);
+  renderSubs(); paintSubBadge();
+}
+
 /* 담당자가 문의를 열어보면 '확인'으로 기록 (접수 상태일 때만) */
 function markSubRead(sid){
   if(!sid) return;
   const s=subs.find(x=>x.id===sid);
-  if(!s || s.status!=='접수' || subRead(s)) return;
+  if(!s) return;
+  /* 담당으로 지정된 사람이면 '누가 확인했는지'를 담당별로 남긴다 */
+  const mine=myOwnerKeys().filter(k=>subOwners(s).indexOf(k)>=0);
+  let touched=false;
+  if(mine.length){
+    s.ownerRead=s.ownerRead||{};
+    mine.forEach(function(k){
+      if(!s.ownerRead[k]){
+        s.ownerRead[k]={by:(current&&current.who)||'담당자', at:new Date().toISOString()};
+        touched=true;
+      }
+    });
+  }
+  if(s.status!=='접수' || subRead(s)){
+    if(touched){ saveS(); pushSub(s); renderSubs(); paintSubBadge(); }
+    return;
+  }
   s.readAt=new Date().toISOString();
   s.readBy=(current&&current.who)||'담당자';
   saveS(); pushSub(s);

@@ -3134,7 +3134,7 @@ function renderGradeDash(){
     +esc(g.course||'')+'</span>'
     +'<span class="gdn">'+esc(g.name||'')+'</span>'
     +'<span class="gdd">'+esc(g.district||'')+'</span>'
-    +'<span class="gdp">'+esc(g.phone||'')+'</span>'
+    +'<span class="gdp">'+esc(fmtPhone(g.phone))+'</span>'
     +'<span class="gdt">'+esc(String(g.ts||'').slice(5,10))+'</span></div>').join('');
   box.innerHTML='<div class="sect-t">신급 교육 신청</div>'
     +'<div class="dcard gdcardD">'

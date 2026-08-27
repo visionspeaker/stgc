@@ -683,10 +683,10 @@ font-size:12.5px;font-weight:800;font-family:inherit;color:var(--muted);text-ali
 .d-over{background:#fde8e8;color:#c0392b}
 .d-inf{background:#eef2f7;color:#4b5563}
 .d-done{background:#e9f6ee;color:#15803d}
-.mini{border:1px solid var(--inline);background:#fff;border-radius:20px;padding:6px 11px;
+.ipbtn{border:1px solid var(--inline);background:#fff;border-radius:20px;padding:6px 11px;
 font-size:11.5px;font-weight:800;font-family:inherit;color:#2a7fa0;cursor:pointer}
-.mini.ok{border-color:var(--green);color:#0b6f68;background:#e6f7f5}
-.mini.warn{border-color:#e0a35c;color:#b45309;background:#fdf6ec}
+.ipbtn.ok{border-color:var(--green);color:#0b6f68;background:#e6f7f5}
+.ipbtn.warn{border-color:#e0a35c;color:#b45309;background:#fdf6ec}
 /* 기도제목 목록에 붙는 구분 배지 */
 .pbadge{display:inline-block;font-size:10.5px;font-weight:800;border-radius:20px;padding:2px 7px;margin-right:5px}
 .pb-ip{background:#eef0fb;color:#5b54c9}
@@ -4764,9 +4764,9 @@ function ipRowHtml(it,done,idx){
   let btns='';
   if(canEditItem(it)){
     btns = done
-      ? '<button class="mini" onclick="ipUndo('+idx+')">되돌리기</button>'
-      : '<button class="mini ok" onclick="ipDoneOpen('+idx+')">✔ 응답됨</button>'
-        + '<button class="mini'+(daysLeft(it.due)<0?' warn':'')+'" onclick="ipDueOpen('+idx+')">'
+      ? '<button class="ipbtn" onclick="ipUndo('+idx+')">되돌리기</button>'
+      : '<button class="ipbtn ok" onclick="ipDoneOpen('+idx+')">✔ 응답됨</button>'
+        + '<button class="ipbtn'+(daysLeft(it.due)<0?' warn':'')+'" onclick="ipDueOpen('+idx+')">'
         + (it.due? '기간 바꾸기' : '📅 기간 정하기')+'</button>';
   }
   return '<div class="iprow'+(done?' done':(daysLeft(it.due)<0?' over':''))+'">'

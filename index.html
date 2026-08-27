@@ -812,6 +812,9 @@ height:38px;font-size:12.5px;font-weight:800;font-family:inherit;color:var(--ink
 .gdrow .gdd{color:var(--muted);font-size:11.5px;flex:none}
 .gdrow .gdp{color:var(--muted);font-size:11.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gdrow .gdt{color:#a8b2c0;font-size:11px;flex:none}
+.gdrow .gddel{flex:none;border:1px solid var(--inline);background:#fff;border-radius:8px;
+width:26px;height:26px;font-size:12px;font-weight:800;color:#b03a3a;font-family:inherit;cursor:pointer;line-height:1}
+.gdrow .gddel:hover{background:#fdf3f3;border-color:#e3b4b4}
 /* ── 신급 교육 신청 ── */
 .gdcard{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px}
 .gdhd{background:linear-gradient(135deg,#a97fe6,#7b52c8);color:#fff;padding:16px 17px}
@@ -1743,7 +1746,9 @@ function dataSig(){
       +'#'+(subs||[]).map(s=>(s.id||'')+'|'+(s.status||'')+'|'+(s.ts||'')+'|'+((s.replies||[]).length)).sort().join(';')
       /* 중보기도 기간·응답이 바뀌면 화면을 다시 그려야 한다 */
       +'#'+(PRAYERS||[]).map(p=>(p.id||'')+'|'+(p.status||'')+'|'+(p.due||'')).sort().join(';')
-      +'#'+(PRTRACK||[]).map(t=>(t.key||'')+'|'+(t.status||'')+'|'+(t.due||'')).sort().join(';');
+      +'#'+(PRTRACK||[]).map(t=>(t.key||'')+'|'+(t.status||'')+'|'+(t.due||'')).sort().join(';')
+      /* 신급 교육 신청이 지워지면 대시보드를 다시 그려야 한다 */
+      +'#'+(GRADES||[]).map(g=>(g.id||'')).sort().join(';');
   }catch(e){ return String(Math.random()); }
 }
 async function loadAll(){
@@ -3422,7 +3427,9 @@ function renderGradeDash(){
     +'<span class="gdn">'+esc(g.name||'')+'</span>'
     +'<span class="gdd">'+esc(g.district||'')+'</span>'
     +'<span class="gdp">'+esc(fmtPhone(g.phone))+'</span>'
-    +'<span class="gdt">'+esc(String(g.ts||'').slice(5,10))+'</span></div>').join('');
+    +'<span class="gdt">'+esc(String(g.ts||'').slice(5,10))+'</span>'
+    +'<button class="gddel" title="이 신청 지우기" onclick="gdDelete(\''+esc(g.id||'')+'\')">✕</button>'
+    +'</div>').join('');
   box.innerHTML='<div class="sect-t">신급 교육 신청</div>'
     +'<div class="dcard gdcardD">'
     +'<div class="gdkpis">'
@@ -3437,6 +3444,23 @@ function renderGradeDash(){
     +'</div>';
 }
 function gdBox(v,l){ return '<div class="gdkpi"><div class="v">'+v+'</div><div class="k">'+esc(l)+'</div></div>'; }
+/* 신급 교육 신청 지우기 — 교역자만. 잘못 들어온 신청·중복을 정리하는 용도 */
+async function gdDelete(id){
+  if(!current || current.role!=='admin') return;
+  const g=(GRADES||[]).find(x=>String(x.id)===String(id));
+  if(!g) return;
+  if(!confirm('이 신청을 지울까요?\n\n'
+    +(g.name||'')+' · '+(g.district||'')+' · '+(g.course||'')
+    +'\n\n지우면 되살릴 수 없습니다.')) return;
+  /* 화면에서 먼저 지워 기다리는 느낌을 줄인다 (실패하면 다시 불러온다) */
+  GRADES=(GRADES||[]).filter(x=>String(x.id)!==String(id));
+  renderGradeDash();
+  let d=null;
+  try{ const r=await fetch(API,{method:'POST',body:tokBody({action:'deleteGrade', id:String(id)})});
+       d=await r.json().catch(function(){ return null; }); absorbToken(d); }catch(e){ d=null; }
+  if(!d || !d.ok) alert((d&&d.message)||'지우지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.');
+  loadAll();
+}
 
 // ---------- 신급 교육 신청 ----------
 /* 안내 문구·기간·구역 목록은 모두 서버에서 받는다.
@@ -3501,10 +3525,14 @@ function renderGrade(){
       +'</button></div></div>';
     return;
   }
-  const ds=(g.districts||[]).slice();
+  /* 고르는 차례 : 구역 모름/새가족 → 중고등부·청년부(서버가 정함) → 1구역 … 샬롬 구역
+     신청하시는 분 대다수가 새가족이라 자주 고르는 것을 위로 올린다. */
+  const ds=[String(g.noDist||'구역 모름 / 새가족')]
+    .concat((g.topDist||[]).map(String))
+    .concat((g.districts||[]).map(String))
+    .filter(function(d,i,a){ return d && a.indexOf(d)===i; });
   const opts='<option value="">구역을 선택하세요</option>'
-    + ds.map(d=>'<option>'+esc(d)+'</option>').join('')
-    + '<option>'+esc(g.noDist||'구역 모름 / 새가족')+'</option>';
+    + ds.map(d=>'<option>'+esc(d)+'</option>').join('');
   const cs=(g.courses||[]).map(c=>
     '<div class="gdopt'+(gdCourse===c.name?' on':'')+'" onclick="pickCourse(\''+esc(c.name)+'\')">'
     +'<span class="rd"></span><span><span class="tt">'+esc(c.name)+'</span>'

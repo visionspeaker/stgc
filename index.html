@@ -3413,7 +3413,6 @@ function renderGradeDash(){
   const cs=names.length?names:['학습','세례','입교'];
   const cnt={}; cs.forEach(c=>cnt[c]=0);
   list.forEach(g=>{ if(cnt[g.course]===undefined) cnt[g.course]=0; cnt[g.course]++; });
-  const ds=[...new Set(list.map(g=>g.district))].length;
   const tot=list.length;
   const COL={'학습':'#3aa66e','세례':'#3f8ed4','입교':'#9b6fe0'};
   const colOf=c=>COL[c]||'#94a3b8';
@@ -3435,7 +3434,6 @@ function renderGradeDash(){
     +'<div class="gdkpis">'
       + gdBox(tot+' <small>명</small>','신청 합계')
       + cs.map(c=>gdBox(cnt[c]||0,c)).join('')
-      + gdBox(ds+' <small>/'+DIST_NAMES.length+'</small>','신청 있는 구역')
     +'</div>'
     +(tot?'<div class="gdbar">'+bar+'</div><div class="gdleg">'+leg+'</div>':'<div class="bempty">아직 신청이 없습니다.</div>')
     +(tot?'<button class="gdtoggle" onclick="gdOpenList=!gdOpenList;renderGradeDash()">'

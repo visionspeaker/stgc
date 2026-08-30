@@ -153,10 +153,12 @@ canvas{max-height:280px}
 .dcard canvas{max-height:250px}
 .dcard.care-card{border-color:#fecaca}
 .mini3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mini1{display:grid;grid-template-columns:1fr;gap:10px}
+.mini1 .mstat .n{font-size:34px}
 .mstat{background:linear-gradient(135deg,#fff,#f6faf7);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
 .mstat .n{font-size:20px;font-weight:800;color:var(--teal)}
 .mstat .l{font-size:11px;color:var(--muted);margin-top:2px}
-/* ── 영성 기록 : 참여 구역 막대 ── */
+/* ── 새벽예배 : 참여 구역 막대 ── */
 .fchips{display:flex;gap:6px;margin:14px 0 4px;flex-wrap:wrap}
 .fchip{border:1px solid var(--line);background:#f7f9fc;border-radius:999px;padding:7px 12px;font-size:12.5px;
   font-weight:700;color:#4a5563;cursor:pointer;font-family:inherit}
@@ -1314,8 +1316,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 
   <div class="sect-t">신앙활동 · 목양</div>
   <div class="dgrid g2">
-    <div class="dcard"><h3>영성 기록 <small>— 자율 항목</small></h3><p class="dd">구역보고 카운터 합계 — 새벽·성경·QT(가정예배)</p><div class="mini3" id="faithMini"></div>
-      <div class="fchips" id="faithChips"></div>
+    <div class="dcard"><h3>새벽예배 <small>— 자율 항목</small></h3><p class="dd">구역보고에 적힌 새벽예배 참석 합계 (선택 주일)</p><div class="mini1" id="faithMini"></div>
       <div class="fmeta" id="faithMeta"></div>
       <div class="fbars" id="faithBars"></div></div>
     <div class="dcard care-card"><h3 style="color:#b91c1c">🔴 목양 우선사항</h3>
@@ -2610,7 +2611,6 @@ function openMember(name){
   const absN=ws.filter(w=>w.ab).length;
   const rate=weeks.length?Math.round(sunN/weeks.length*100):0;
   const dawn=ws.reduce((a,w)=>a+((w.d.c&&w.d.c['새벽'])||0),0);
-  const bible=ws.reduce((a,w)=>a+((w.d.c&&w.d.c['성경'])||0),0);
   const ph=phoneOf(name);
 
   const kpiBox=(v,l)=>'<div class="mbbox"><div class="v">'+v+'</div><div class="k">'+l+'</div></div>';
@@ -2650,7 +2650,7 @@ function openMember(name){
    +'<div class="mbbd">'
    + (ph?'<div class="mbtel">'+contactBtns(name)+'</div>':'<div class="mini">등록된 전화번호가 없습니다.</div>')
    +'<div class="mbmini">'+kpiBox(sunN+'<small>/'+weeks.length+'</small>','주일출석')+kpiBox(rate+'%','출석률')
-     +kpiBox(absN,'결석')+kpiBox(dawn,'새벽 누계')+kpiBox(bible,'성경 누계')+'</div>'
+     +kpiBox(absN,'결석')+kpiBox(dawn,'새벽 누계')+'</div>'
    +(last.length?'<div class="mblbl">주일 출석 추이 (최근 '+last.length+'주)</div><div class="mbspark">'+spark+'</div>':'')
    +(rows?'<div class="mblbl">예배별 참석</div><div class="mbgrid"><table><tr><th>주</th>'
       +TG.map(k=>'<th>'+k+'</th>').join('')+'<th>새벽</th></tr>'+rows+'</table></div>':'')
@@ -3818,7 +3818,9 @@ async function rsSave(){
 
 // ---------- 구역보고 (예배 출석부: 이름별 접이식) ----------
 const TG=['1부','2부','오후','수요','금요','구역','월삭'];
-const CT=[['새벽',7],['성경',100],['QT(가정)',20]];
+/* 2026-08-27 : 성경읽기·QT(가정예배)는 적지 않기로 하여 뺐다.
+   지난 보고서에 들어 있던 값은 지우지 않고 그대로 함께 저장된다. */
+const CT=[['새벽',7]];
 /* 월삭은 매월 첫째 주일(1~7일)에만 선택 가능 */
 function isFirstSunday(d){ const day=parseInt(String(d||'').slice(8,10),10); return day>=1&&day<=7; }
 const ABSENT_REASONS=['선택','개인사정','건강','여행','직장','확인안됨','장기결석','기타'];
@@ -3859,9 +3861,9 @@ function showReport(){
 function loadReportInto(){
   reportRoster=rosterOf(reportDist,selWeek);
   ATT={}; absNotes={}; absReason={};
-  reportRoster.forEach(n=>ATT[n]={t:{},c:{'새벽':0,'성경':0,'QT(가정)':0},p:'',e:'',ip:false});
+  reportRoster.forEach(n=>ATT[n]={t:{},c:{'새벽':0},p:'',e:'',ip:false});
   const prev=reports.find(r=>r.district===reportDist && r.date===selWeek);
-  if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0,'성경':0,'QT(가정)':0},prev.detail[n].c),p:prev.detail[n].p||'',e:prev.detail[n].e||'',ip:!!prev.detail[n].ip}; }); }
+  if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0},prev.detail[n].c),p:prev.detail[n].p||'',e:prev.detail[n].e||'',ip:!!prev.detail[n].ip}; }); }
   if(prev && prev.sundayAbsent){ prev.sundayAbsent.forEach(a=>{absReason[a.name]=a.reason;absNotes[a.name]=a.note||'';}); }
   const cn=document.getElementById('cellNote'); if(cn){ cn.value=(prev&&prev.cell&&prev.cell.note)||''; bindGrow(cn); autoGrow(cn); }
   /* 해당 주일 보고서가 아직 없으면 직전 보고서의 결석 사유를 '불러오기' 후보로 준비 */
@@ -3963,7 +3965,8 @@ function buildRosterCards(){
     const tg=TG.map(t=>{const lock=(t==='월삭')&&!isFirstSunday(selWeek);
       return `<button class="tgl ${ATT[n].t[t]?'on':''} ${lock?'lock':''}" data-n="${n}" data-t="${t}" ${lock?'data-lock="1" title="월삭은 매월 첫째 주일에만 입력합니다"':''}>${t}</button>`;}).join('');
     const ct=CT.map(([k,mx])=>{const v=ATT[n].c[k]||0;
-      return `<div class="cnt"><span class="cl">${k}</span><div class="cpick${v>0?' filled':''}" data-n="${n}" data-k="${k}" data-max="${mx}" role="button" tabindex="0">${v}</div></div>`;}).join('');
+      const lb=(k==='새벽')?'새벽예배 (주 '+mx+'회까지)':k;
+      return `<div class="cnt"><span class="cl">${lb}</span><div class="cpick${v>0?' filled':''}" data-n="${n}" data-k="${k}" data-max="${mx}" role="button" tabindex="0">${v}</div></div>`;}).join('');
     const pv=(ATT[n].p||'').replace(/"/g,'&quot;');
     const ev=(ATT[n].e||'').replace(/"/g,'&quot;');
     const pray=`<div class="pray"><label class="pl">기도제목 <span>· 선택 입력</span></label><input class="ppick" type="text" data-n="${n}" placeholder="세부내용" value="${pv}"/>`
@@ -3983,7 +3986,8 @@ function buildRosterCards(){
 }
 function updPsum(n){
   const parts=TG.filter(t=>ATT[n].t[t]);
-  const cs=Object.entries(ATT[n].c).filter(([k,v])=>v>0).map(([k,v])=>k.replace('(가정)','')+v);
+  const CTK=CT.map(x=>x[0]);
+  const cs=Object.entries(ATT[n].c).filter(([k,v])=>v>0 && CTK.indexOf(k)>=0).map(([k,v])=>k+v);
   const el=document.querySelector('.prow[data-n="'+n+'"] .psum');
   const pr=(ATT[n].p||'').trim()?[(ATT[n].ip?'🙏 ':'')+'기도제목 ✎']:[];
   const et=(ATT[n].e||'').trim()?['기타 ✎']:[];
@@ -3991,7 +3995,7 @@ function updPsum(n){
 }
 /* ---------- 숫자 키패드 ---------- */
 let kTarget=null, kMax=0, kBuf='';
-const KQUICK={'새벽':[0,1,2,3,5,7],'성경':[0,10,20,30,50],'QT(가정)':[0,5,10,15,20]};
+const KQUICK={'새벽':[0,1,2,3,5,7]};
 function openKpad(el){
   const la=document.getElementById('repLockArea');
   if(la&&la.classList.contains('locked')) return;   /* 제출 잠금 중에는 열지 않음 */
@@ -4420,10 +4424,10 @@ function paintWeekArrows(){
 function kpi(n,l,s,cls){return `<div class="kpi${cls?' '+cls:''}"><div class="n">${n}</div><div class="l">${l}</div><div class="s">${s||'&nbsp;'}</div></div>`;}
 function mstat(n,l){return `<div class="mstat"><div class="n">${n}</div><div class="l">${l}</div></div>`;}
 function tSum(wkReports,key){return wkReports.reduce((a,r)=>a+Object.values(r.detail||{}).filter(p=>p.t&&p.t[key]).length,0);}
-/* ── 영성 기록 : 적어 낸 구역만 큰 순서로 ── */
-const FAITH=[['새벽','새벽예배(명)'],['성경','성경읽기(장)'],['QT(가정)','QT·가정예배(회)']];
-let faithKey=0;
-function faithPick(k){ faithKey=k; renderFaith(); }
+/* ── 새벽예배 : 적어 낸 구역만 큰 순서로 ── */
+/* 2026-08-27 : 성경읽기·QT 를 빼고 새벽예배만 남겼다.
+   구역별 막대는 그대로 두고, 고를 것이 하나뿐이라 고르는 단추만 없앴다. */
+const FAITH=[['새벽','새벽예배(명)']];
 function faithRows(wkReports,key){
   return wkReports.map(function(r){
       return {d:r.district, n:Object.values(r.detail||{}).reduce(function(b,p){ return b+((p.c&&p.c[key])||0); },0)};
@@ -4433,17 +4437,14 @@ function renderFaith(){
   const box=document.getElementById('faithBars'); if(!box) return;
   const sel=document.getElementById('weekSel');
   const wkReports=dedupeReports(reports.filter(function(r){ return r.date===(sel?sel.value:''); }));
-  const rows=faithRows(wkReports,FAITH[faithKey][0]);
-  const ch=document.getElementById('faithChips');
-  if(ch) ch.innerHTML=FAITH.map(function(f,i){
-    return '<button class="fchip'+(i===faithKey?' on':'')+'" onclick="faithPick('+i+')">'+esc(f[1])+'</button>'; }).join('');
+  const rows=faithRows(wkReports,FAITH[0][0]);
   const mt=document.getElementById('faithMeta');
   if(mt) mt.innerHTML='참여 <b>'+rows.length+'</b>구역 · 제출 '+wkReports.length+'구역 — '
-    +esc(FAITH[faithKey][1])+' 많은 순';
+    +esc(FAITH[0][1])+' 많은 순';
   const max=Math.max.apply(null,[1].concat(rows.map(function(r){ return r.n; })));
   box.innerHTML = rows.length
     ? rows.map(function(r){
-        return '<div class="fbar b'+(faithKey+1)+'"><span class="d">'+esc(r.d)+'</span>'
+        return '<div class="fbar b1"><span class="d">'+esc(r.d)+'</span>'
           +'<span class="t"><span class="f" style="width:'+Math.round(r.n/max*100)+'%"></span></span>'
           +'<span class="v">'+r.n.toLocaleString()+'</span></div>'; }).join('')
     : '<div class="fempty">아직 적어 낸 구역이 없습니다.</div>';
@@ -4501,9 +4502,9 @@ function renderDash(){
   const byReason={};allAbsent.forEach(a=>{(byReason[a.reason]=byReason[a.reason]||[]).push(a.d+' '+a.name)});
   const rLabels=Object.keys(byReason);
   drawChart('reasonChart','doughnut',{labels:rLabels.length?rLabels:['결석 없음'],datasets:[{data:rLabels.length?rLabels.map(k=>byReason[k].length):[1],backgroundColor:['#57b45f','#3f8ed4','#f2b366','#8f90c4','#94a3b8','#e06666','#f59e0b','#a855f7']}]},{});
-  // 영성 기록
+  // 새벽예배
   document.getElementById('faithMini').innerHTML=
-    mstat(cSum(wkReports,'새벽'),'새벽예배 참석(명)')+mstat(cSum(wkReports,'성경').toLocaleString(),'성경읽기(장)')+mstat(cSum(wkReports,'QT(가정)'),'QT·가정예배(회)');
+    mstat(cSum(wkReports,'새벽'),'새벽예배 참석 (명)');
   renderFaith();
   // 목양 우선사항
   renderCare();
@@ -4553,7 +4554,7 @@ function openReportDetail(dist,date){
   document.getElementById('rmSub').textContent=date+' 주일 · '+who+(r.ts?' · 제출 '+String(r.ts).slice(5,16).replace('T',' '):'');
   const roster=rosterOf(dist,date);
   const svc=TG.map(t=>`<span class="rmchip${t==='월삭'?' v':''}">${t} ${svcCount(r,t)}</span>`).join('');
-  const faith=`<span class="rmchip n">새벽 ${cntSum(r,'새벽')}명</span><span class="rmchip n">성경 ${cntSum(r,'성경')}장</span><span class="rmchip n">QT ${cntSum(r,'QT(가정)')}회</span>`;
+  const faith=`<span class="rmchip n">새벽 ${cntSum(r,'새벽')}명</span>`;
   /* 미체크(아무 항목도 없음)는 아래 결석자에만 표시 → 목록에서 제외 */
   const hasNote=n=>{const d=(r.detail||{})[n]||{};return (d.p||'')||(d.e||'');};
   const shown=roster.filter(n=>personLine(r,n)||hasNote(n));
@@ -5055,8 +5056,8 @@ function prnAll(on){
 }
 function reportPageHtml(r){
   const dist=r.district, roster=rosterOf(dist,r.date);
-  const svc=TG.map(t=>`<th>${t}</th>`).join('')+'<th>새벽</th><th>성경</th><th>QT</th>';
-  const svcv=TG.map(t=>`<td>${svcCount(r,t)}</td>`).join('')+`<td>${cntSum(r,'새벽')}</td><td>${cntSum(r,'성경')}</td><td>${cntSum(r,'QT(가정)')}</td>`;
+  const svc=TG.map(t=>`<th>${t}</th>`).join('')+'<th>새벽</th>';
+  const svcv=TG.map(t=>`<td>${svcCount(r,t)}</td>`).join('')+`<td>${cntSum(r,'새벽')}</td>`;
   const hasNote=n=>{const d=(r.detail||{})[n]||{};return (d.p||'')||(d.e||'');};
   const shown=roster.filter(n=>personLine(r,n)||hasNote(n));
   const rows=shown.map(n=>{const d=(r.detail||{})[n]||{};

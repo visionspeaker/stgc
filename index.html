@@ -374,7 +374,8 @@ background:#f7f9fc;border-radius:9px;padding:9px 11px}
 .cright{font-size:10.5px;color:#9aa4b2;line-height:1.6;letter-spacing:-.1px}
 /* ── 홈 화면에 추가 도우미 ── */
 #a2hs{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;border-top:2px solid var(--teal);
- box-shadow:0 -3px 14px rgba(16,24,40,.10);padding:13px 14px 15px;display:none}
+ box-shadow:0 -3px 14px rgba(16,24,40,.10);display:none;
+ padding:13px 14px calc(15px + env(safe-area-inset-bottom))}
 #a2hs.on{display:block}
 .a2t{display:flex;gap:11px;align-items:center}
 .a2ic{width:40px;height:40px;border-radius:11px;background:var(--teal);color:#fff;display:flex;
@@ -2183,20 +2184,27 @@ function a2hsPaint(){
   const m=a2hsMode();
   const link=document.getElementById('a2hsLink');
   if(link) link.style.display=(homeOn && m!=='none')?'block':'none';
-  if(!homeOn || m==='none' || (a2hsOff() && !a2hsForce)){ box.classList.remove('on'); box.innerHTML=''; return; }
+  if(!homeOn || m==='none' || (a2hsOff() && !a2hsForce)){
+    box.classList.remove('on'); box.innerHTML='';
+    if(home) home.style.paddingBottom=''; return;
+  }
   box.innerHTML=a2hsHtml(m);
   box.classList.add('on');
+  /* 띠가 맨 아랫줄을 가리지 않도록 그만큼 아래를 띄운다 */
+  try{ home.style.paddingBottom=(box.offsetHeight+14)+'px'; }catch(e){}
 }
 function a2hsOpen(){ a2hsForce=true; a2hsPaint(); }
 function a2hsSkip(){
   if(!a2hsForce){ try{ localStorage.setItem(A2KEY,'1'); }catch(e){} }
   a2hsForce=false;
   const box=document.getElementById('a2hs'); if(box){ box.classList.remove('on'); box.innerHTML=''; }
+  const home=document.getElementById('home'); if(home) home.style.paddingBottom='';
 }
 function a2hsInstall(){
   const e=a2hsEvt; if(!e) return;
   a2hsEvt=null;
   const box=document.getElementById('a2hs'); if(box){ box.classList.remove('on'); box.innerHTML=''; }
+  const hm=document.getElementById('home'); if(hm) hm.style.paddingBottom='';
   try{
     e.prompt();
     Promise.resolve(e.userChoice).then(function(r){
@@ -2211,6 +2219,7 @@ try{
     try{ localStorage.setItem(A2KEY,'1'); }catch(e){}
     a2hsEvt=null; const b=document.getElementById('a2hs');
     if(b){ b.classList.remove('on'); b.innerHTML=''; }
+    const hm=document.getElementById('home'); if(hm) hm.style.paddingBottom='';
   });
 }catch(e){}
 function goHome(){clearMineState();document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='none';document.getElementById('home').style.display='block';window.scrollTo(0,0);viewStack=[];clearAppHist();paintBackBtn();a2hsPaint();}

@@ -372,6 +372,28 @@ background:#f7f9fc;border-radius:9px;padding:9px 11px}
 .visitor{text-align:center;color:var(--muted);font-size:12.5px;margin:16px 0 0;padding-bottom:24px}
 .visitor b{color:var(--ink)}
 .cright{font-size:10.5px;color:#9aa4b2;line-height:1.6;letter-spacing:-.1px}
+/* ── 홈 화면에 추가 도우미 ── */
+#a2hs{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;border-top:2px solid var(--teal);
+ box-shadow:0 -3px 14px rgba(16,24,40,.10);padding:13px 14px 15px;display:none}
+#a2hs.on{display:block}
+.a2t{display:flex;gap:11px;align-items:center}
+.a2ic{width:40px;height:40px;border-radius:11px;background:var(--teal);color:#fff;display:flex;
+ align-items:center;justify-content:center;font-size:21px;font-weight:800;flex:none}
+.a2tx{font-size:14px;font-weight:800;line-height:1.35;color:var(--ink)}
+.a2tx small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px}
+.a2go{margin-top:11px;width:100%;background:var(--teal);color:#fff;border:0;border-radius:12px;padding:14px;
+ font-size:16px;font-weight:800;font-family:inherit;cursor:pointer}
+.a2skip{margin-top:7px;width:100%;background:#fff;color:var(--muted);border:1px solid var(--inline);
+ border-radius:12px;padding:10px;font-size:12.5px;font-family:inherit;cursor:pointer}
+.a2steps{margin-top:11px;display:flex;flex-direction:column;gap:8px}
+.a2s{display:flex;gap:10px;align-items:flex-start;background:#f7fafc;border:1px solid var(--line);
+ border-radius:11px;padding:10px 12px;text-align:left}
+.a2s .n{width:23px;height:23px;border-radius:50%;background:var(--teal);color:#fff;font-size:12.5px;
+ font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+.a2s .t{font-size:13px;line-height:1.5;color:var(--ink)}
+.a2s .t b{color:var(--teal)}
+.a2more{background:none;border:0;color:var(--muted);font-size:12.5px;font-family:inherit;
+ text-decoration:underline;cursor:pointer;padding:4px}
 .gate{z-index:60}
 .gatecard{position:relative}
 .gatecard .gx{position:absolute;right:16px;top:14px;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
@@ -1005,9 +1027,13 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     <div class="mtile i-blue" onclick="goReport()"><div class="mc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.2a2.55 2.55 0 013.6 3.6L7.6 19.4 2.5 21l1.6-5.1z"/><path d="M14.8 4.9l3.6 3.6"/></svg></div><span>구역보고</span></div>
   </div>
   <div class="visitor">👥 방문자 · Today <b id="visToday">·</b> · Total <b id="visTotal">·</b>
+    <div id="a2hsLink" style="display:none;margin-top:10px"><button class="a2more" onclick="a2hsOpen()">📱 홈 화면에 추가하는 방법</button></div>
     <div class="cright" style="margin-top:8px">© 2026 songtanglorychurch. All rights reserved.<br>무단 복제·배포 금지</div>
   </div>
 </div>
+
+<!-- 홈 화면에 추가 도우미 (홈 화면에서만 뜬다) -->
+<div id="a2hs"></div>
 
 <!-- ================= LOGIN GATE (overlay) ================= -->
 <div id="loginGate" class="gate" style="display:none">
@@ -2084,7 +2110,110 @@ async function loginByName(){
 function openLogin(){document.getElementById('loginGate').style.display='flex';const el=document.getElementById('lgName');if(el){el.value='';el.focus();}const p=document.getElementById('lgPw2');if(p)p.value='';}
 function closeLogin(){document.getElementById('loginGate').style.display='none';}
 function openL(u){window.open(u,'_blank','noopener,noreferrer');}
-function goHome(){clearMineState();document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='none';document.getElementById('home').style.display='block';window.scrollTo(0,0);viewStack=[];clearAppHist();paintBackBtn();}
+/* ── 홈 화면에 추가 도우미 ────────────────────────────────
+   완전 자동 설치는 휴대폰이 막아 두어 만들 수 없다.
+   안드로이드는 브라우저가 주는 설치창을 대신 띄워 주고(누르는 횟수 2번),
+   아이폰은 자동 단추가 아예 없으므로 어디를 누르는지 글·그림으로 안내한다.
+   이미 홈 화면에서 실행 중이거나 컴퓨터면 아무것도 띄우지 않는다. */
+const A2KEY='sgc_a2hs_off_v1';
+let a2hsEvt=null;      /* 안드로이드 설치창 열쇠 (beforeinstallprompt) */
+let a2hsForce=false;   /* 아래 링크로 일부러 열었을 때 */
+function a2hsUA(){ try{ return navigator.userAgent||''; }catch(e){ return ''; } }
+function a2hsInstalled(){
+  try{ if(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true; }catch(e){}
+  try{ if(navigator.standalone) return true; }catch(e){}
+  return false;
+}
+function a2hsIOS(){
+  const u=a2hsUA();
+  if(/iPad|iPhone|iPod/.test(u)) return true;
+  try{ return /Macintosh/.test(u) && (navigator.maxTouchPoints||0)>1; }catch(e){ return false; }
+}
+function a2hsAndroid(){ return /Android/i.test(a2hsUA()); }
+/* 카카오톡·네이버·인스타 등 '앱 안 브라우저'에서는 홈 화면 추가가 안 된다 */
+function a2hsInApp(){ return /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|FB_IAB|Line\/|DaumApps|kakaostory|everytimeApp/i.test(a2hsUA()); }
+function a2hsOff(){ try{ return localStorage.getItem(A2KEY)==='1'; }catch(e){ return false; } }
+function a2hsMode(){
+  if(a2hsInstalled()) return 'none';
+  if(!(a2hsIOS()||a2hsAndroid())) return 'none';     /* 컴퓨터에는 띄우지 않는다 */
+  if(a2hsInApp()) return a2hsIOS()?'ios-inapp':'and-inapp';
+  if(a2hsEvt) return 'and-go';
+  return a2hsIOS()?'ios':'and';
+}
+function a2hsHead(t,s){ return '<div class="a2t"><div class="a2ic">＋</div><div class="a2tx">'+t+'<small>'+s+'</small></div></div>'; }
+function a2hsStep(n,t){ return '<div class="a2s"><span class="n">'+n+'</span><span class="t">'+t+'</span></div>'; }
+function a2hsHtml(m){
+  const skip='<button class="a2skip" onclick="a2hsSkip()">'+(a2hsForce?'닫기':'나중에 · 다시 보지 않기')+'</button>';
+  const more='<div style="text-align:center;margin-top:8px"><a class="a2more" href="install.html" style="display:inline-block">그림으로 된 자세한 설명 보기</a></div>';
+  if(m==='and-go')
+    return a2hsHead('휴대폰 첫 화면에 놓아 드릴까요?','다음부터 아이콘만 눌러 바로 들어옵니다')
+      +'<button class="a2go" onclick="a2hsInstall()">홈 화면에 추가하기</button>'+skip;
+  if(m==='and')
+    return a2hsHead('첫 화면에 놓는 방법 (3단계)','크롬에서 30초면 됩니다')
+      +'<div class="a2steps">'
+      +a2hsStep(1,'화면 <b>오른쪽 위 ⋮</b> 를 누릅니다')
+      +a2hsStep(2,'<b>「앱 설치」</b> 또는 <b>「홈 화면에 추가」</b> 를 고릅니다')
+      +a2hsStep(3,'<b>「설치」</b> 를 누르면 끝입니다')
+      +'</div>'+more+skip;
+  if(m==='ios')
+    return a2hsHead('첫 화면에 놓는 방법 (3단계)','사파리에서 30초면 됩니다')
+      +'<div class="a2steps">'
+      +a2hsStep(1,'화면 <b>맨 아래 가운데 공유 단추</b>(네모에 위 화살표)를 누릅니다')
+      +a2hsStep(2,'목록을 <b>위로 밀어 올려</b> <b>「홈 화면에 추가」</b> 를 찾습니다')
+      +a2hsStep(3,'오른쪽 위 <b>「추가」</b> 를 누르면 끝입니다')
+      +'</div>'+more+skip;
+  if(m==='ios-inapp')
+    return a2hsHead('사파리로 열어야 추가할 수 있습니다','지금은 다른 앱 안에서 보고 계십니다')
+      +'<div class="a2steps">'
+      +a2hsStep(1,'화면 <b>오른쪽 아래 ⋯</b> 를 누릅니다')
+      +a2hsStep(2,'<b>「다른 브라우저로 열기」</b> 에서 <b>Safari</b> 를 고릅니다')
+      +a2hsStep(3,'사파리에서 이 안내가 다시 뜨면 그대로 따라 하시면 됩니다')
+      +'</div>'+more+skip;
+  return a2hsHead('크롬으로 열어야 추가할 수 있습니다','지금은 다른 앱 안에서 보고 계십니다')
+    +'<div class="a2steps">'
+    +a2hsStep(1,'화면 <b>오른쪽 위(또는 아래) ⋮ · ⋯</b> 를 누릅니다')
+    +a2hsStep(2,'<b>「다른 브라우저로 열기」</b> 에서 <b>Chrome</b> 을 고릅니다')
+    +a2hsStep(3,'크롬에서 이 안내가 다시 뜨면 그대로 따라 하시면 됩니다')
+    +'</div>'+more+skip;
+}
+function a2hsPaint(){
+  const box=document.getElementById('a2hs'); if(!box) return;
+  const home=document.getElementById('home');
+  const homeOn=!!home && home.style.display!=='none';
+  const m=a2hsMode();
+  const link=document.getElementById('a2hsLink');
+  if(link) link.style.display=(homeOn && m!=='none')?'block':'none';
+  if(!homeOn || m==='none' || (a2hsOff() && !a2hsForce)){ box.classList.remove('on'); box.innerHTML=''; return; }
+  box.innerHTML=a2hsHtml(m);
+  box.classList.add('on');
+}
+function a2hsOpen(){ a2hsForce=true; a2hsPaint(); }
+function a2hsSkip(){
+  if(!a2hsForce){ try{ localStorage.setItem(A2KEY,'1'); }catch(e){} }
+  a2hsForce=false;
+  const box=document.getElementById('a2hs'); if(box){ box.classList.remove('on'); box.innerHTML=''; }
+}
+function a2hsInstall(){
+  const e=a2hsEvt; if(!e) return;
+  a2hsEvt=null;
+  const box=document.getElementById('a2hs'); if(box){ box.classList.remove('on'); box.innerHTML=''; }
+  try{
+    e.prompt();
+    Promise.resolve(e.userChoice).then(function(r){
+      if(r && r.outcome==='accepted'){ try{ localStorage.setItem(A2KEY,'1'); }catch(e2){} }
+      else { a2hsForce=false; a2hsPaint(); }
+    }).catch(function(){ a2hsPaint(); });
+  }catch(err){ a2hsPaint(); }
+}
+try{
+  window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); a2hsEvt=e; a2hsPaint(); });
+  window.addEventListener('appinstalled',function(){
+    try{ localStorage.setItem(A2KEY,'1'); }catch(e){}
+    a2hsEvt=null; const b=document.getElementById('a2hs');
+    if(b){ b.classList.remove('on'); b.innerHTML=''; }
+  });
+}catch(e){}
+function goHome(){clearMineState();document.getElementById('app').style.display='none';document.getElementById('loginGate').style.display='none';document.getElementById('home').style.display='block';window.scrollTo(0,0);viewStack=[];clearAppHist();paintBackBtn();a2hsPaint();}
 /* ---------- 화면 이동 기록 (뒤로가기는 한 단계씩) ---------- */
 let viewStack=[];            /* 거쳐온 화면들 (현재 화면 제외) */
 function pushView(v){ if(v && viewStack[viewStack.length-1]!==v) viewStack.push(v); }
@@ -2135,6 +2264,7 @@ function openApp(view){
   document.getElementById('loginGate').style.display='none';
   document.getElementById('app').style.display='block';
   viewStack=[]; currentView=''; setRoleLabel(); buildNav(view); loadAll(); window.scrollTo(0,0); pushAppHist(); paintBackBtn();
+  a2hsForce=false; a2hsPaint();
 }
 /* ---------- 문화 10계명 ---------- */
 const CULTURE=[
@@ -2270,6 +2400,7 @@ function enterApp(role,scope){
   loadAll();
   window.scrollTo(0,0);
   pushAppHist(); paintBackBtn();
+  a2hsForce=false; a2hsPaint();
 }
 function logout(){current=null;clearSession();setToken('');notiShown=false;gnotiShown=false;GRADES=[];hideGNoti();closeNoti();['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
 /* back=true 이면 뒤로가기로 되돌아온 것이므로 기록하지 않는다 */
@@ -5228,6 +5359,13 @@ document.getElementById('app').style.display='none';
 document.getElementById('loginGate').style.display='none';
 /* 방문자 수는 저장해 둔 값으로 먼저 보여 주고(즉시), 서버 응답이 오면 실제 값으로 갱신 */
 showCachedVisitors();
+/* 서비스워커 — 일부러 아무것도 저장하지 않는다.
+   안드로이드에서 '홈 화면에 추가' 설치창을 띄우려면 이 파일이 있어야 한다. */
+try{
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
+}catch(e){}
+/* 홈 화면에 추가 안내 — 화면이 자리를 잡은 뒤 조용히 올라온다 */
+try{ setTimeout(a2hsPaint,1200); }catch(e){}
 /* 방문 카운트를 먼저 보내고(응답이 가벼워 빠름) 이어서 전체 데이터 로드 */
 countVisit(); loadAll();
 </script>

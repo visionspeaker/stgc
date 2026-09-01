@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<!--
+============================================================
+  영광 커넥트 (Glory Connect) — 홈 화면에 추가하는 방법
+  Copyright (c) 2026 songtanglorychurch. All rights reserved.
+  개발 : visionspeaker (실명: 강유석)
+  무단 복제·배포 금지
+============================================================
+-->
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>영광 커넥트 · 홈 화면에 추가하는 방법</title>
+<meta name="description" content="영광 커넥트를 휴대폰 첫 화면에 놓는 방법 — 그림으로 보는 안내"/>
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png?v=2"/>
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2"/>
+<meta name="theme-color" content="#2fa58f"/>
+<style>
+:root{--teal:#2fa58f;--ink:#26313f;--muted:#6b7686;--line:#dde4ee;--inline:#b9c6d8;--bg:#f5f7fb}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font-family:'Malgun Gothic','맑은 고딕',system-ui,-apple-system,sans-serif;line-height:1.65}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 60px}
+
+.top{text-align:center;padding:8px 0 20px}
+.top .ic{width:76px;height:76px;border-radius:19px;background:var(--teal);color:#fff;margin:0 auto 12px;
+ display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;
+ box-shadow:0 6px 16px rgba(47,165,143,.32)}
+.top h1{font-size:24px;margin:0 0 6px}
+.top p{margin:0;color:var(--muted);font-size:15px}
+
+.why{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin:0 0 20px;font-size:16px}
+.why b{color:var(--teal)}
+
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 22px}
+.pick button{background:#fff;border:2px solid var(--inline);border-radius:14px;padding:15px 8px;
+ font-family:inherit;font-size:16px;font-weight:800;color:var(--ink);cursor:pointer}
+.pick button.on{border-color:var(--teal);background:#e9f6f3;color:#12796a}
+.pick button small{display:block;font-weight:500;font-size:12px;color:var(--muted);margin-top:3px}
+
+.panel{display:none}
+.panel.on{display:block}
+
+.step{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px 18px;margin:0 0 13px}
+.step .h{display:flex;gap:12px;align-items:center;margin:0 0 10px}
+.step .n{width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;font-size:17px;
+ font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.step .t{font-size:18px;font-weight:800;line-height:1.35}
+.step .d{font-size:15px;color:var(--muted);margin:0 0 12px}
+.step .d b{color:var(--ink)}
+
+/* 그림 — 폰 화면 흉내 */
+.pic{border:1px solid var(--line);border-radius:13px;background:#eef2f6;padding:10px;overflow:hidden}
+.scr{background:#fff;border-radius:9px;position:relative;min-height:150px;display:flex;flex-direction:column}
+.bar{background:var(--teal);color:#fff;font-size:12px;font-weight:800;padding:8px 10px;border-radius:9px 9px 0 0}
+.grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:10px}
+.gt{background:#f2f5f9;border-radius:8px;height:36px}
+.urlbar{background:#e9edf2;border-radius:8px;margin:8px;padding:7px 10px;font-size:11.5px;color:#6b7686;
+ display:flex;align-items:center;gap:6px}
+.tabbar{background:#f2f5f9;border-radius:0 0 9px 9px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center}
+.tabbar span{font-size:15px;color:#8d97a5}
+.ping{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;
+ background:#ff5a3c;color:#fff;font-size:15px;font-weight:800;box-shadow:0 0 0 6px rgba(255,90,60,.22)}
+.sheet{position:absolute;left:8px;right:8px;bottom:8px;background:#fff;border:1px solid var(--line);
+ border-radius:11px;box-shadow:0 6px 18px rgba(16,24,40,.18);overflow:hidden}
+.sheet div{padding:9px 12px;font-size:12.5px;border-bottom:1px solid #f1f4f8;display:flex;justify-content:space-between}
+.sheet div:last-child{border-bottom:0}
+.sheet .hit{background:#e9f6f3;font-weight:800;color:#12796a}
+.menu{position:absolute;right:8px;top:36px;background:#fff;border:1px solid var(--line);border-radius:11px;
+ box-shadow:0 6px 18px rgba(16,24,40,.18);overflow:hidden;min-width:150px}
+.menu div{padding:9px 12px;font-size:12.5px;border-bottom:1px solid #f1f4f8}
+.menu div:last-child{border-bottom:0}
+.menu .hit{background:#e9f6f3;font-weight:800;color:#12796a}
+
+.done{background:#e9f6f3;border:1px solid #a9ddd2;border-radius:16px;padding:18px;text-align:center;margin-top:6px}
+.done .ic{width:60px;height:60px;border-radius:15px;background:var(--teal);color:#fff;margin:0 auto 10px;
+ display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800}
+.done b{font-size:17px;color:#12796a}
+.done p{margin:6px 0 0;font-size:15px;color:#0f6a5c}
+
+.warn{background:#fff8ec;border:1px solid #f0dcb8;border-radius:14px;padding:15px 17px;font-size:15px;
+ color:#8a5a08;margin:0 0 16px}
+.warn b{color:#7c4a03}
+
+.go{display:block;text-align:center;background:var(--teal);color:#fff;text-decoration:none;
+ border-radius:14px;padding:17px;font-size:18px;font-weight:800;margin:24px 0 10px}
+.help{text-align:center;font-size:14px;color:var(--muted);margin:16px 0 0;line-height:1.8}
+.help b{color:var(--ink)}
+.cright{text-align:center;font-size:11px;color:#9aa4b2;margin-top:26px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="top">
+  <div class="ic">영광</div>
+  <h1>첫 화면에 놓는 방법</h1>
+  <p>영광 커넥트 · 송탄영광교회</p>
+</div>
+
+<div class="why">
+  한 번만 해 두시면 다음부터는 <b>주소를 찾을 필요 없이</b><br>
+  휴대폰 첫 화면에서 <b>아이콘만 누르면</b> 바로 열립니다.<br>
+  <span style="color:var(--muted);font-size:14px">앱을 새로 내려받는 것이 아니라, 바로가기를 놓는 것입니다. 용량을 거의 쓰지 않습니다.</span>
+</div>
+
+<div class="pick">
+  <button id="bA" onclick="pick('a')">안드로이드<small>갤럭시 · LG 등</small></button>
+  <button id="bI" onclick="pick('i')">아이폰<small>아이패드 포함</small></button>
+</div>
+
+<!-- ============ 안드로이드 ============ -->
+<div class="panel" id="pA">
+  <div class="warn" id="wA" style="display:none">
+    <b>먼저 크롬으로 열어 주세요.</b><br>
+    지금은 카카오톡 같은 다른 앱 안에서 보고 계셔서 추가가 되지 않습니다.<br>
+    화면 <b>구석의 ⋮ 또는 ⋯</b> 를 누르고 <b>「다른 브라우저로 열기」 → Chrome</b> 을 골라 주세요.
+  </div>
+
+  <div class="step">
+    <div class="h"><div class="n">1</div><div class="t">오른쪽 위 ⋮ 를 누릅니다</div></div>
+    <div class="d">점 세 개가 세로로 있는 단추입니다.</div>
+    <div class="pic"><div class="scr">
+      <div class="urlbar">🔒 visionspeaker.github.io/stgc
+        <span style="margin-left:auto"><span class="ping">⋮</span></span></div>
+      <div class="grid"><div class="gt"></div><div class="gt"></div><div class="gt"></div>
+        <div class="gt"></div><div class="gt"></div><div class="gt"></div></div>
+    </div></div>
+  </div>
+
+  <div class="step">
+    <div class="h"><div class="n">2</div><div class="t">「앱 설치」를 고릅니다</div></div>
+    <div class="d">휴대폰에 따라 <b>「홈 화면에 추가」</b> 라고 적혀 있기도 합니다. 둘 다 같은 것입니다.</div>
+    <div class="pic"><div class="scr">
+      <div class="urlbar">🔒 visionspeaker.github.io/stgc</div>
+      <div class="grid" style="opacity:.4"><div class="gt"></div><div class="gt"></div><div class="gt"></div>
+        <div class="gt"></div><div class="gt"></div><div class="gt"></div></div>
+      <div class="menu">
+        <div>새 탭</div><div>북마크</div>
+        <div class="hit">앱 설치 ↓</div>
+        <div>공유</div><div>설정</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="step">
+    <div class="h"><div class="n">3</div><div class="t">「설치」를 누릅니다</div></div>
+    <div class="d">이것으로 끝입니다.</div>
+    <div class="pic"><div class="scr">
+      <div class="urlbar">🔒 visionspeaker.github.io/stgc</div>
+      <div class="grid" style="opacity:.3"><div class="gt"></div><div class="gt"></div><div class="gt"></div>
+        <div class="gt"></div><div class="gt"></div><div class="gt"></div></div>
+      <div class="sheet">
+        <div><b>영광 커넥트 설치</b></div>
+        <div style="color:#8d97a5">visionspeaker.github.io</div>
+        <div class="hit"><span>취소</span><span>설치</span></div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ============ 아이폰 ============ -->
+<div class="panel" id="pI">
+  <div class="warn">
+    <b>반드시 사파리(Safari)에서 하셔야 합니다.</b><br>
+    카카오톡 안에서 열었거나 크롬으로 열었으면 추가가 되지 않습니다.<br>
+    그럴 때는 화면 <b>오른쪽 아래 ⋯</b> 를 누르고 <b>「다른 브라우저로 열기」 → Safari</b> 를 골라 주세요.
+  </div>
+
+  <div class="step">
+    <div class="h"><div class="n">1</div><div class="t">맨 아래 공유 단추를 누릅니다</div></div>
+    <div class="d">화면 <b>맨 아래 가운데</b>에 있는, 네모에서 위로 화살표가 나온 단추입니다.</div>
+    <div class="pic"><div class="scr">
+      <div class="bar">영광 커넥트</div>
+      <div class="grid"><div class="gt"></div><div class="gt"></div><div class="gt"></div>
+        <div class="gt"></div><div class="gt"></div><div class="gt"></div></div>
+      <div class="tabbar"><span>◀</span><span>▶</span><span class="ping">↑</span><span>📖</span><span>⧉</span></div>
+    </div></div>
+  </div>
+
+  <div class="step">
+    <div class="h"><div class="n">2</div><div class="t">「홈 화면에 추가」를 찾습니다</div></div>
+    <div class="d">바로 안 보이면 목록을 <b>위로 밀어 올려</b> 주세요. 아래쪽에 있습니다.</div>
+    <div class="pic"><div class="scr">
+      <div class="bar" style="opacity:.5">영광 커넥트</div>
+      <div class="grid" style="opacity:.3"><div class="gt"></div><div class="gt"></div><div class="gt"></div></div>
+      <div class="sheet">
+        <div>복사<span>🔗</span></div>
+        <div>즐겨찾기에 추가<span>★</span></div>
+        <div class="hit">홈 화면에 추가<span>＋</span></div>
+        <div>프린트<span>🖨</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="step">
+    <div class="h"><div class="n">3</div><div class="t">오른쪽 위 「추가」를 누릅니다</div></div>
+    <div class="d">이것으로 끝입니다.</div>
+    <div class="pic"><div class="scr">
+      <div class="urlbar" style="justify-content:space-between"><span>취소</span>
+        <b style="color:var(--ink)">홈 화면에 추가</b><span class="ping">추가</span></div>
+      <div class="grid" style="grid-template-columns:56px 1fr;align-items:center">
+        <div class="gt" style="height:52px;background:var(--teal);border-radius:12px"></div>
+        <div style="font-size:13px;font-weight:800">영광 커넥트</div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<div class="done">
+  <div class="ic">영광</div>
+  <b>다 되었습니다</b>
+  <p>첫 화면에 <b>영광 커넥트</b> 아이콘이 생겼습니다.<br>이제 아이콘만 누르면 바로 열립니다.</p>
+</div>
+
+<a class="go" href="./">영광 커넥트 열기</a>
+
+<div class="help">
+  잘 안 되시면 <b>구역장님</b>이나 <b>강유석 전도사</b>에게 말씀해 주세요.<br>
+  옆에서 함께 한 번 눌러 드리면 금방 됩니다.
+</div>
+
+<div class="cright">
+  © 2026 songtanglorychurch. All rights reserved.<br>
+  무단 복제·배포 금지
+</div>
+
+</div>
+
+<script>
+function pick(k){
+  document.getElementById('pA').className = 'panel' + (k==='a'?' on':'');
+  document.getElementById('pI').className = 'panel' + (k==='i'?' on':'');
+  document.getElementById('bA').className = (k==='a'?'on':'');
+  document.getElementById('bI').className = (k==='i'?'on':'');
+  window.scrollTo(0, 300);
+}
+/* 들고 계신 휴대폰에 맞는 쪽을 먼저 펴 둔다 */
+(function(){
+  var u = navigator.userAgent || '';
+  var ios = /iPad|iPhone|iPod/.test(u) || (/Macintosh/.test(u) && (navigator.maxTouchPoints||0) > 1);
+  document.getElementById('pA').className = 'panel' + (ios?'':' on');
+  document.getElementById('pI').className = 'panel' + (ios?' on':'');
+  document.getElementById('bA').className = (ios?'':'on');
+  document.getElementById('bI').className = (ios?'on':'');
+  /* 안드로이드인데 앱 안 브라우저면 크롬으로 열라고 먼저 알린다 */
+  if(!ios && /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|FB_IAB|Line\/|DaumApps/i.test(u)){
+    document.getElementById('wA').style.display = 'block';
+  }
+})();
+</script>
+</body>
+</html>

@@ -3722,6 +3722,8 @@ function renderGrade(){
     + (g.weeks?'<span class="hint">'+esc(g.weeks)+'</span>':'') +'</label>'+cs+'</div>'
     +'<button class="gdbtn" id="gdBtn" onclick="submitGrade()">신청하기</button>'
     +'</div></div>';
+  /* 안내를 늦게 받아 다시 그릴 때가 있어, 골라 둔 과정의 안내를 되살린다 */
+  paintKidNote();
 }
 /* 과정을 고를 때 화면 전체를 다시 그리면 이미 입력한 이름·연락처가 지워진다.
    선택 표시만 바꾼다. */

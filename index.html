@@ -855,6 +855,13 @@ display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}
 .gdqual{background:#fffbf2;border:1px solid #f6d9a8;border-radius:12px;padding:13px 14px;margin-bottom:14px}
 .gdqual b{display:block;font-size:13px;color:#8a5a12;margin-bottom:4px}
 .gdqual div{font-size:12.5px;color:#a06a1a;line-height:1.8}
+.qrow{display:flex;gap:8px;align-items:flex-start;margin:6px 0}
+.qlb{flex:none;background:#f6e3c2;color:#7c4a03;border-radius:7px;padding:2px 7px;font-size:11px;
+ font-weight:800;white-space:nowrap;margin-top:1px}
+.qtx{font-size:12.5px;color:#a06a1a;line-height:1.65}
+.gdkid{background:#eef6fb;border:1px solid #c7e0ef;border-radius:11px;padding:10px 12px;
+ font-size:12.5px;color:#12607f;margin-bottom:11px;line-height:1.6}
+.gdkid b{color:#0b4a63}
 .gdfl{margin-bottom:13px}
 .gdfl label{display:block;font-size:13px;font-weight:800;margin-bottom:6px}
 .gdfl label i{color:#dc2626;font-style:normal}
@@ -3554,11 +3561,15 @@ function renderGradeDash(){
   if(!current||current.role!=='admin'||!gradeStillShow()){ box.innerHTML=''; return; }
   const list=GRADES.slice().sort((a,b)=>String(b.ts||'').localeCompare(String(a.ts||'')));
   const names=(GRADE&&GRADE.courses||[]).map(c=>c.name);
-  const cs=names.length?names:['학습','세례','입교'];
+  const cs0=names.length?names:['학습','세례','입교'];
+  /* 대시보드에서는 유아세례·어린이세례를 「아동세례」 한 칸으로 묶어 센다.
+     아래 명단에는 실제로 고른 과정 이름이 그대로 나온다. */
+  const cs=cs0.map(gdG).filter(function(c,i,a){ return a.indexOf(c)===i; });
   const cnt={}; cs.forEach(c=>cnt[c]=0);
-  list.forEach(g=>{ if(cnt[g.course]===undefined) cnt[g.course]=0; cnt[g.course]++; });
+  list.forEach(g=>{ const k=gdG(g.course); if(cnt[k]===undefined) cnt[k]=0; cnt[k]++; });
   const tot=list.length;
-  const COL={'학습':'#3aa66e','세례':'#3f8ed4','입교':'#9b6fe0'};
+  const COL={'학습':'#3aa66e','세례':'#3f8ed4','입교':'#9b6fe0',
+             '유아세례':'#e0729b','어린이세례':'#e0913c','아동세례':'#e0729b'};
   const colOf=c=>COL[c]||'#94a3b8';
   const bar=tot?Object.keys(cnt).filter(c=>cnt[c]>0).map(c=>
     '<i style="width:'+(cnt[c]/tot*100).toFixed(1)+'%;background:'+colOf(c)+'"></i>').join(''):'';
@@ -3586,6 +3597,15 @@ function renderGradeDash(){
     +'</div>';
 }
 function gdBox(v,l){ return '<div class="gdkpi"><div class="v">'+v+'</div><div class="k">'+esc(l)+'</div></div>'; }
+/* 아이를 대신해 신청하는 과정 (서버가 알려 준다 — 예전 서버면 아래 기본값) */
+function gdKidList(){
+  const k=(GRADE&&GRADE.kid);
+  return (Array.isArray(k)&&k.length)? k.map(String) : ['유아세례','어린이세례'];
+}
+function gdKidLabel(){ return (GRADE&&GRADE.kidLabel)||'아동세례'; }
+function isKidCourse(c){ return gdKidList().indexOf(String(c||''))>=0; }
+/* 대시보드에서 묶어 셀 이름 */
+function gdG(c){ return isKidCourse(c)? gdKidLabel() : String(c||''); }
 /* 신급 교육 신청 지우기 — 교역자만. 잘못 들어온 신청·중복을 정리하는 용도 */
 async function gdDelete(id){
   if(!current || current.role!=='admin') return;
@@ -3643,7 +3663,16 @@ function gradeHead(){
 function gradeQual(){
   const q=(GRADE&&GRADE.qual)||[];
   if(!q.length) return '';
-  return '<div class="gdqual"><b>신청 자격</b><div>'+q.map(esc).join('<br>')+'</div></div>';
+  /* 「학습·세례·입교 : 교회 출석 6개월 이상 …」 처럼 콜론이 있으면 앞을 이름표로 뽑는다.
+     콜론이 없는 줄은 예전처럼 그냥 한 줄로 보여 준다. */
+  const rows=q.map(function(x){
+    const t=String(x||'');
+    const i=t.indexOf(' : ');
+    if(i<0) return '<div class="qtx">'+esc(t)+'</div>';
+    return '<div class="qrow"><span class="qlb">'+esc(t.slice(0,i))+'</span>'
+      +'<span class="qtx">'+esc(t.slice(i+3))+'</span></div>';
+  }).join('');
+  return '<div class="gdqual"><b>신청 자격</b><div>'+rows+'</div></div>';
 }
 function renderGrade(){
   const box=document.getElementById('gdWrap'); if(!box) return;
@@ -3682,6 +3711,7 @@ function renderGrade(){
   box.innerHTML='<div class="gdcard">'+gradeHead()+'<div class="gdbd">'
     +gradeQual()
     +'<div id="gdErr"></div>'
+    +'<div id="gdKid"></div>'
     +'<div class="gdfl"><label>이름 <i>*</i></label>'
     +'<input class="f-in" id="gdName" placeholder="이름을 입력하세요" autocomplete="name"/></div>'
     +'<div class="gdfl"><label>구역 <i>*</i></label>'
@@ -3702,7 +3732,16 @@ function pickCourse(n){
     const t=el.querySelector('.tt');
     el.classList.toggle('on', !!t && t.textContent===n);
   });
+  paintKidNote();
   gdErr('');
+}
+/* 유아세례·어린이세례는 부모님이 아이를 대신해 넣는다.
+   부모님 이름을 적는 실수를 막으려고 이름 칸 위에 한 줄 띄운다. */
+function paintKidNote(){
+  const el=document.getElementById('gdKid'); if(!el) return;
+  el.innerHTML = isKidCourse(gdCourse)
+    ? '<div class="gdkid">👶 <b>세례받을 아이의 이름</b>을 적어 주세요. 연락처는 <b>보호자 연락처</b>로 적으시면 됩니다.</div>'
+    : '';
 }
 function gdErr(msg){
   const e=document.getElementById('gdErr');

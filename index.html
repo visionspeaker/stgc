@@ -2607,6 +2607,7 @@ async function deleteSub(id){
    그때 펼쳐둔 글이 접히고 입력 중이던 비밀번호가 사라지는 문제가 있었다.
    펼침 상태·입력 중인 비밀번호·이미 열어 본 내용·입력칸 포커스를 모두 되살린다. */
 let minePins={};          /* 글id -> 입력 중이던 비밀번호 */
+let minePinOk={};         /* 글id -> 확인을 통과한 비밀번호 (삭제할 때 서버에 다시 보낸다) */
 let mineOpen=new Set();   /* 비밀번호 확인을 통과해 내용을 열어 둔 글id */
 let mineFocus=null;       /* 다시 그린 뒤 포커스를 돌려줄 글id */
 function sidOfDetail(el){
@@ -2633,7 +2634,7 @@ function restoreMine(){
   });
 }
 /* 홈으로 나가면 열어 본 기록은 지운다 */
-function clearMineState(){ minePins={}; mineOpen=new Set(); mineFocus=null; }
+function clearMineState(){ minePins={}; minePinOk={}; mineOpen=new Set(); mineFocus=null; }
 function renderMyReq(){
   stashMine();
   const bar=document.getElementById('fbFilter');
@@ -2676,6 +2677,7 @@ function openMine(idx){
   if(pin!==s.pin){alert('비밀번호가 일치하지 않습니다.');return;}
   const sid=String(s.id||'');
   mineOpen.add(sid); delete minePins[sid];   /* 다시 그려도 열린 채로 */
+  minePinOk[sid]=pin;                        /* 삭제할 때 서버에 다시 보낸다 */
   renderMineDetail(idx);
 }
 /* 비밀번호 확인이 끝난 글의 내용을 그린다 (다시 그릴 때도 이 함수를 쓴다) */
@@ -2688,7 +2690,52 @@ function renderMineDetail(idx){
     bar='<div class="steps">'+steps.map((st,k)=>`<span class="step ${k<=cur?'on':''}">${st}</span>`).join('<span style="color:#cbd5e1">›</span>')+(s.status==='보류'?' <span class="fmeta">(보류)</span>':'')+'</div>';}
   const rl=replyList(s);
   const reply=rl.length?`<div class="reply"><b>담당자 회신 ${rl.length>1?'('+rl.length+'건)':''}</b><div class="thread">${replyThreadHtml(s,false,idx)}</div></div>`:'';
-  box.innerHTML=(s.body?`<div class="fmeta" style="color:var(--ink);margin-top:4px">${s.body}</div>`:'')+`<div class="fmeta">담당: ${s.assignee}${s.contact&&s.contact!=='익명'?' · 회신 '+s.contact:''}</div>`+bar+reply;
+  box.innerHTML=(s.body?`<div class="fmeta" style="color:var(--ink);margin-top:4px">${s.body}</div>`:'')+`<div class="fmeta">담당: ${s.assignee}${s.contact&&s.contact!=='익명'?' · 회신 '+s.contact:''}</div>`+bar+reply+mineDelHtml(s,idx);
+}
+/* ── 본인 삭제 단추 ─────────────────────────────────
+   비밀번호로 내용을 연 성도님만 보인다.
+   교역자는 목록에 이미 삭제 단추가 있으므로 여기서는 빼서 헷갈리지 않게 한다.
+   「완료」된 문의는 지울 수 없다(처리가 끝난 기록이라). */
+function canMineDelete(s){
+  if(!s || canDelete()) return false;
+  return String(s.status||'')!=='완료';
+}
+function mineDelHtml(s,idx){
+  if(!canMineDelete(s)) return '';
+  return '<div class="delrow"><button class="btnsm danger" onclick="deleteMine('+idx+')">🗑 이 문의 삭제</button></div>';
+}
+let mineDeleting=false;
+async function deleteMine(idx){
+  if(mineDeleting) return;
+  const s=subs[idx]; if(!s) return;
+  const sid=String(s.id||'');
+  const pin=minePinOk[sid]||'';
+  if(!pin){ alert('비밀번호를 다시 입력해 주세요.'); return; }
+  if(String(s.status||'')==='완료'){ alert('처리가 완료된 문의는 지울 수 없습니다.'); return; }
+  const rn=replyList(s).length;
+  if(!confirm('이 문의를 지울까요?\n\n· '+(s.title||'(제목없음)')
+      +(rn?'\n\n담당자 회신이 '+rn+'건 있습니다.':'')
+      +'\n지우면 목록에서 사라지고 다시 볼 수 없습니다.')) return;
+
+  mineDeleting=true;
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify({action:'deleteMySub',id:sid,pin:pin})});
+    d=await r.json().catch(function(){ return null; });
+  }catch(e){ d=null; }
+  mineDeleting=false;
+
+  if(!d){ alert('전송에 실패했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.'); return; }
+  if(!d.ok){ alert(d.message||'지우지 못했습니다.'); return; }
+
+  /* 화면에서 먼저 지우고, 서버 자료도 다시 받아 맞춘다 */
+  const i=subs.findIndex(x=>String(x.id)===sid);
+  if(i>=0) subs.splice(i,1);
+  saveS();
+  mineOpen.delete(sid); delete minePinOk[sid]; delete minePins[sid];
+  renderMyReq(); paintSubBadge();
+  alert('삭제되었습니다.');
+  loadAll();
 }
 
 // ---------- 성도 조회 (개인별 이력) ----------

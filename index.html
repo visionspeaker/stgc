@@ -4528,6 +4528,19 @@ function toggleBrow(tr,ev){
   if(ev){ const t=ev.target; if(t.closest && t.closest('button,select,textarea,input,a')) return; }
   const det=tr.nextElementSibling; if(!det||!det.classList.contains('bdetrow')) return;
   const on=det.style.display==='none';
+  /*  문의 확인 — 한 번에 한 건만 펼친다.
+      누르는 대로 다 열리면 화면이 길어져 어느 것이 내 글인지 찾기 어렵다.
+      (교역자 처리 화면은 여러 건을 견줘 봐야 해서 그대로 둔다) */
+  if(on && currentView==='myreq'){
+    const tb=tr.parentNode;
+    if(tb) tb.querySelectorAll('tr.brow.open').forEach(function(o){
+      if(o===tr) return;
+      const d=o.nextElementSibling;
+      if(d && d.classList.contains('bdetrow')) d.style.display='none';
+      o.classList.remove('open');
+      openRows.delete(o.dataset.sid||'');
+    });
+  }
   det.style.display=on?'table-row':'none';
   tr.classList.toggle('open',on);
   const sid=tr.dataset.sid||'';

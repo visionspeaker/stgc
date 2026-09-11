@@ -1818,6 +1818,11 @@ async function loadAll(){
           const v=d.me[k]||'';
           if(v && current[k]!==v){ current[k]=v; meChanged=true; }
         });
+        /*  「권한」 칸만은 빈칸도 뜻이 있다 — 비우면 제한을 푸는 것이다.
+            그래서 이 값은 빈칸이어도 그대로 맞춘다.
+            시트에서 고치면 다시 로그인하지 않아도 다음 새로고침에 반영된다. */
+        const sc=String(d.me.scope||'').trim();
+        if(String(current.scope||'').trim()!==sc){ current.scope=sc; meChanged=true; }
         if(meChanged){ saveSession(); setRoleLabel(); buildNav(); }
       }
       const before=dataSig();
@@ -2077,16 +2082,22 @@ async function loginByName(){
     alert('로그인 확인을 하지 못했습니다.\n인터넷 연결을 확인하고 다시 시도해 주세요.');
     return;
   }
-  await fetchRoster();          /* 구역 명단·전화번호를 받아온 뒤 화면을 연다 */
-  done();
-  if(!haveRoster()){
-    alert('구역 명단을 불러오지 못했습니다.\n인터넷 연결을 확인하고 다시 로그인해 주세요.');
-    return;
-  }
+  /*  「문의만」으로 묶인 분은 구역 명단이 필요 없다 (서버도 안 내려준다).
+      그래서 명단을 받아오지도, 없다고 막지도 않는다. */
+  const subOnly = String((me&&me.scope)||'').trim()==='문의만';
+  if(!subOnly){
+    await fetchRoster();        /* 구역 명단·전화번호를 받아온 뒤 화면을 연다 */
+    done();
+    if(!haveRoster()){
+      alert('구역 명단을 불러오지 못했습니다.\n인터넷 연결을 확인하고 다시 로그인해 주세요.');
+      return;
+    }
+  } else { done(); }
   enterApp((me&&me.role)||'',
            {district:(me&&me.district)||'',
             category:(me&&me.category)||'',
-            duty:(me&&me.duty)||'', who:(me&&me.name)||nm});
+            duty:(me&&me.duty)||'', scope:(me&&me.scope)||'',
+            who:(me&&me.name)||nm});
   if(mustPw) setTimeout(function(){
     if(confirm('아직 처음 비밀번호(1234)를 쓰고 계십니다.\n지금 변경하시겠습니까?')) openPwChange();
   },500);
@@ -2345,6 +2356,7 @@ function goIntake(){openApp('intake');}
 function goMyreq(){openApp('myreq');}
 function goReport(){
   const r=(current&&current.role)||'guest';
+  if(subOnlyMe()){ openApp('manage'); return; }            /* 「문의만」은 문의 접수 처리부터 */
   if(r==='admin'){ openApp('dash'); return; }              /* 관리자는 대시보드부터 */
   if(r==='leader'||r==='elder'){ openApp('report'); return; }
   /* 구역보고 대상은 아니지만 이미 로그인한 분(중보기도팀장·위원장·부장 등)은
@@ -2383,6 +2395,13 @@ function setRoleLabel(){
 }
 function enterApp(role,scope){
   current=Object.assign({role},scope||{});
+  /*  「문의만」으로 바뀐 분은 예전에 받아 둔 구역 명단이 기기에 남아 있을 수 있다.
+      그대로 두면 교인 이름이 계속 보이므로 여기서 지운다. */
+  if(subOnlyMe()){
+    try{ localStorage.removeItem(ROSTER_KEY); }catch(e){}
+    DISTRICTS={}; DIST_NAMES=[]; DIST_SORTED=[]; PHONES={}; MEMBER_IDS={};
+    NAME_ALIAS={}; MEMBER_ROLE={}; ROSTER_CHANGES=[];
+  }
   saveSession();
   notiShown=false; gnotiShown=false; checkNewSubs(); checkNewGrades();
   document.getElementById('home').style.display='none';
@@ -2418,9 +2437,13 @@ function showView(v,back){
   if(v==='pray') renderIp();
   growAll(document.getElementById(v));
 }
+/*  「문의만」으로 묶인 분 — 문의 접수 처리 말고는 메뉴를 드리지 않는다.
+    (서버도 구역보고·신급·기도·명단 자료를 아예 안 내려보낸다) */
+const SCOPE_SUB_ONLY='문의만';
+function subOnlyMe(){ return !!current && String(current.scope||'').trim()===SCOPE_SUB_ONLY; }
 function buildNav(view){
   const nav=document.getElementById('nav');
-  const items=ROLE_NAV[current.role]||[];
+  const items=subOnlyMe() ? [['manage','문의 접수 처리']] : (ROLE_NAV[current.role]||[]);
   const first=view||(items[0]&&items[0][0])||'intake';
   if(!items.length){ nav.innerHTML=''; nav.style.display='none'; }
   else { nav.style.display='flex';

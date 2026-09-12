@@ -269,6 +269,8 @@ font-size:11.5px;font-weight:800;background:#eef2f7;color:#4b5563}
 .ochip.c3{background:#fdf0e3;color:#b45309}
 .ochip.c4{background:#e2eefb;color:#1d4ed8}
 .ochip.c5{background:#fbe8f0;color:#b03a68}
+.ochip.c6{background:#f0ecfe;color:#5b3fd1}
+.ochip.c7{background:#eef1f5;color:#55606d}
 .ochip.pastor{background:#f3e8ff;color:#7c3aed}
 .ochip.staff{background:#e6f7f5;color:#0f8f86}
 .ochip .ck{font-size:10px;opacity:.85;font-weight:700}
@@ -1625,7 +1627,10 @@ const CATEGORIES = {
  "행정 (재정·행정·미디어·경조)": {위원장:"이수철 장로", 교역자:"—"},
  "선교 (새가족·바나바·전도·선교회)": {위원장:"엄주철 장로", 교역자:"—"},
  "경조사 요청 (주례·심방·축사 등)": {위원장:"경조부(이진규) 1차 정리", 교역자:"담임목사"},
- "기타 (구분 모름)": {위원장:"서기(홍춘섭) 분류", 교역자:"—"},
+ /* 2026-09-12 : 「기타」는 어느 위원회에도 딱 맞지 않으므로 교역자가 직접 본다.
+    예전에는 서기 장로님이 분류하시는 것으로 적혀 있었는데, 그분 담당은 차량 하나뿐이라
+    적힌 것과 실제가 달랐다. */
+ "기타 (구분 모름)": {위원장:"교역자 확인", 교역자:"—"},
  /* 2026-08-30 : 앱 자체에 대한 오류·건의 접수. 담당은 강유석 전도사.
     어느 위원회에도 속하지 않으므로 위원장님들 목록에는 뜨지 않고 교역자만 본다.
     반드시 맨 아래에 두어야 한다 — COMMITTEES 가 앞에서 6개를 잘라 쓰기 때문이다. */
@@ -1896,8 +1901,21 @@ function setSeenAt(ts){ try{ localStorage.setItem(seenKeyFor(),ts); }catch(e){} 
    문의 하나에 담당을 여럿 둘 수 있다. 담당 = 위원회 6개 + 담임목사 + 부교역자.
    지정하지 않은 문의는 예전과 똑같이 '분류' 하나로만 판정한다. */
 const DUTY_PASTOR='담임목사', DUTY_STAFF='부교역자';
-const OWNER_KEYS=COMMITTEES.concat([DUTY_PASTOR, DUTY_STAFF]);
-function ownerLabel(k){ return (k===DUTY_PASTOR||k===DUTY_STAFF) ? k : catName(k)+'위원회'; }
+/*  담당으로 지정할 수 있는 것.
+ *  위원회 6개 + 경조부 + 기타 + 담임목사 + 부교역자.
+ *  ★ 2026-09-12 ★ 경조사·기타가 빠져 있어서 교역자가 그 두 가지로는
+ *  담당을 넘길 수 없었다. (경조사는 이진규 집사님이 1차로 정리하신다) */
+const CAT_GRIEF='경조사 요청 (주례·심방·축사 등)';
+const CAT_ETC  ='기타 (구분 모름)';
+const OWNER_KEYS=COMMITTEES.concat([CAT_GRIEF, CAT_ETC, DUTY_PASTOR, DUTY_STAFF]);
+/* 화면에 보일 이름 — 「경조사 요청위원회」처럼 어색해지지 않게 따로 적어 둔다 */
+const OWNER_LABEL={};
+OWNER_LABEL[CAT_GRIEF]='경조부';
+OWNER_LABEL[CAT_ETC]  ='기타 (분류 미정)';
+function ownerLabel(k){
+  if(k===DUTY_PASTOR||k===DUTY_STAFF) return k;
+  return OWNER_LABEL[k] || (catName(k)+'위원회');
+}
 function subOwners(s){
   const a=(s&&s.owners); if(!Array.isArray(a)) return [];
   return a.map(normCat).filter(k=>OWNER_KEYS.indexOf(k)>=0);
@@ -4575,6 +4593,8 @@ function toggleBrow(tr,ev){
 function ownerChipClass(k){
   if(k===DUTY_PASTOR) return 'pastor';
   if(k===DUTY_STAFF)  return 'staff';
+  if(k===CAT_GRIEF) return 'c6';
+  if(k===CAT_ETC)   return 'c7';
   const i=COMMITTEES.indexOf(normCat(k));
   return i>=0 ? ('c'+i) : '';
 }

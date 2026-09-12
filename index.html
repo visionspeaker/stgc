@@ -650,6 +650,48 @@ font-size:12.5px;color:#93302f;line-height:1.7;margin-bottom:12px}
 display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
 .prdone h3{margin:0 0 8px;font-size:17px}
 .prdone p{margin:0 0 16px;font-size:13px;color:var(--muted);line-height:1.9}
+/* ── 아카이브 · 영광 커넥트 헬프데스크 ──────────────────
+   헬프데스크는 앱이 어려우신 분들이 보는 화면이다.
+   글씨를 키우고, 칸을 크게 하고, 넣을 것은 이름·연락처 두 가지뿐이다. */
+.arwrap{margin-bottom:14px}
+.arhd{background:linear-gradient(135deg,#7f93ad,#4a5b72);color:#fff;padding:17px 18px;
+border-radius:16px 16px 0 0}
+.arhd .n{font-size:17px;font-weight:800}
+.arhd .m{font-size:12.5px;opacity:.92;margin-top:5px;line-height:1.7}
+.arbd{background:#fff;border:1px solid var(--line);border-top:0;border-radius:0 0 16px 16px;
+padding:14px 15px 16px}
+.arlist{display:flex;flex-direction:column;gap:9px}
+.aritem{display:flex;align-items:center;gap:12px;border:1.5px solid var(--inline);
+background:#fff;border-radius:13px;padding:13px 14px;cursor:pointer;text-align:left;
+font-family:inherit;color:var(--ink);width:100%}
+.aritem:active{background:#f5f8fb}
+.aritem .ic{width:40px;height:40px;border-radius:11px;flex:0 0 auto;display:flex;
+align-items:center;justify-content:center;color:#fff;
+background:linear-gradient(135deg,#2fa58f,#1f7d6d)}
+.aritem .tx{flex:1;min-width:0}
+.aritem .tt{display:block;font-size:14.5px;font-weight:800}
+.aritem .dl{display:block;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.6}
+.aritem .ar{color:#9aa5b4;font-size:19px}
+.arnote{font-size:12px;color:var(--muted);line-height:1.75;background:#f7f9fc;
+border-radius:10px;padding:11px 12px;margin-top:12px}
+/* 신청 화면 — 어르신도 편하시도록 크게 */
+.hdhd{background:linear-gradient(135deg,#3fb8a0,#1f7d6d)}
+.hdbig .f-in{height:56px;font-size:18px}
+.hdbig label{font-size:15px}
+.hdhint{font-size:14px;color:#25405b;line-height:1.85;background:#eef7f5;
+border:1px solid #cfe8e2;border-radius:12px;padding:13px 14px;margin-bottom:15px}
+.hdbtn{background:linear-gradient(135deg,#3fb8a0,#1f7d6d);height:56px;font-size:17px}
+.hdbtn[disabled]{background:#dfe5ee;color:#9aa5b4}
+.hddone .ck{background:#eaf7f3;color:#1f7d6d}
+/* 대시보드 신청 명단 (담당 한 사람만 본다) */
+.hdrow{display:flex;align-items:center;gap:10px;border:1px solid var(--inline);
+border-radius:12px;padding:11px 12px;margin-bottom:8px;background:#fff}
+.hdrow.done{background:#f7f9fc;opacity:.72}
+.hdrow .who{flex:1;min-width:0}
+.hdrow .who b{font-size:14px}
+.hdrow .who .tel{display:block;font-size:13px;color:#1f7d6d;font-weight:700;margin-top:2px}
+.hdrow .who .tm{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+.hdrow .btn{flex:0 0 auto}
 /* ── 중보기도 기간 고르기 (기한 없음 / 날짜 지정) ── */
 .pergrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .perbtn{border:1.5px solid var(--inline);background:#fff;border-radius:13px;padding:14px 8px;
@@ -1227,6 +1269,17 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
   <div id="plList"></div>
 </section>
 
+<!-- 아카이브 — 홈 화면에는 두지 않는다.
+     QR·주소(?go=archive)로 오시거나 교역자 메뉴에서 들어온다. -->
+<section id="archive" class="view">
+  <div id="arWrap"></div>
+</section>
+
+<!-- 영광 커넥트 헬프데스크 신청 (로그인 없이 누구나) -->
+<section id="helpdesk" class="view">
+  <div id="hdForm"></div>
+</section>
+
 <!-- 명단 관리 (관리자) · 연락처 관리 (구역장·장로) -->
 <section id="mroster" class="view">
   <div class="card">
@@ -1403,6 +1456,9 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 
   <!-- 신급 교육 신청 (관리자에게만 · 마감 한 달 뒤 자동으로 사라짐) -->
   <div id="gdDash"></div>
+
+  <!-- 헬프데스크 신청 (담당 한 사람에게만 · 서버가 다른 분께는 자료를 주지 않는다) -->
+  <div id="hdDash"></div>
 
   <div class="sect-t">보고서 출력</div>
   <div class="dcard">
@@ -1801,7 +1857,9 @@ function dataSig(){
       +'#'+(PRAYERS||[]).map(p=>(p.id||'')+'|'+(p.status||'')+'|'+(p.due||'')).sort().join(';')
       +'#'+(PRTRACK||[]).map(t=>(t.key||'')+'|'+(t.status||'')+'|'+(t.due||'')).sort().join(';')
       /* 신급 교육 신청이 지워지면 대시보드를 다시 그려야 한다 */
-      +'#'+(GRADES||[]).map(g=>(g.id||'')).sort().join(';');
+      +'#'+(GRADES||[]).map(g=>(g.id||'')).sort().join(';')
+      /* 헬프데스크 신청 (담당 한 사람에게만 내려온다) */
+      +'#'+(HELP||[]).map(h=>(h.id||'')+'|'+(h.status||'')).sort().join(';');
   }catch(e){ return String(Math.random()); }
 }
 async function loadAll(){
@@ -1839,6 +1897,8 @@ async function loadAll(){
       GRADES=Array.isArray(d.grades)?d.grades:[];
       PRAYERS=Array.isArray(d.prayers)?d.prayers:[];
       PRTRACK=Array.isArray(d.praytrack)?d.praytrack:[];
+      /* 헬프데스크 — 담당이 아니면 서버가 아예 빈 배열을 준다 */
+      HELP=Array.isArray(d.help)?d.help:[];
       if(meChanged || dataSig()!==before) rerender();
       checkNewSubs();
       checkNewGrades();
@@ -2372,6 +2432,167 @@ function renderCulture(){
 function goCulture(){openApp('culture');}
 function goIntake(){openApp('intake');}
 function goMyreq(){openApp('myreq');}
+
+/* ══════════ 아카이브 · 영광 커넥트 헬프데스크 ══════════
+ *
+ *  아카이브는 **홈 화면에 두지 않는** 서랍이다.
+ *  홈에는 자주 쓰는 것만 두고, 한동안만 쓰거나 안내용으로만 쓰는 것은 여기 넣는다.
+ *  들어오는 길은 세 가지 —
+ *    ① 벽에 붙인 QR / 주소 뒤에 ?go=helpdesk  (바로 신청 화면)
+ *    ② 주소 뒤에 ?go=archive                 (서랍 목록)
+ *    ③ 교역자 메뉴의 「아카이브」
+ *
+ *  ARCHIVE 에 줄을 하나 더 넣으면 서랍에 항목이 하나 늘어난다.
+ *  (view = 화면 이름, on = false 로 두면 목록에서 감춘다) */
+const ARCHIVE=[
+  { view:'helpdesk', on:true,
+    title:'영광 커넥트 헬프데스크',
+    desc :'앱 설치·사용이 어려우신 분을 도와드립니다',
+    icon :'<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13a8 8 0 0116 0"/><path d="M4 13v3.4A1.6 1.6 0 005.6 18h.9a1 1 0 001-1v-3.4a1 1 0 00-1-1h-.9A1.6 1.6 0 004 14.2"/><path d="M20 13v3.4A1.6 1.6 0 0118.4 18h-.9a1 1 0 01-1-1v-3.4a1 1 0 011-1h.9A1.6 1.6 0 0120 14.2"/><path d="M18 18v.8a2.2 2.2 0 01-2.2 2.2H13"/></svg>' }
+];
+function archiveItems(){ return ARCHIVE.filter(function(a){ return a.on; }); }
+function goArchive(){ openApp('archive'); }
+function goHelpdesk(){ openApp('helpdesk'); }
+function renderArchive(){
+  const box=document.getElementById('arWrap'); if(!box) return;
+  const its=archiveItems();
+  box.innerHTML='<div class="arwrap">'
+    +'<div class="arhd"><div class="n">아카이브</div>'
+    +'<div class="m">홈 화면에는 두지 않은 안내·신청 창구입니다</div></div>'
+    +'<div class="arbd">'
+    +(its.length
+      ? '<div class="arlist">'+its.map(function(a){
+          return '<button class="aritem" onclick="openApp(\''+jsq(a.view)+'\')">'
+            +'<span class="ic">'+a.icon+'</span>'
+            +'<span class="tx"><span class="tt">'+esc(a.title)+'</span>'
+            +'<span class="dl">'+esc(a.desc)+'</span></span>'
+            +'<span class="ar">›</span></button>';
+        }).join('')+'</div>'
+      : '<div class="bempty">아직 등록된 항목이 없습니다.</div>')
+    +'<div class="arnote">이 서랍은 홈 화면에 보이지 않습니다. '
+    +'주소나 QR 코드로 바로 들어오실 수 있습니다.</div>'
+    +'</div></div>';
+}
+
+/* ── 헬프데스크 신청 ──
+   받는 것은 **이름과 연락처 두 가지뿐**이다.
+   앱을 못 쓰셔서 도움을 청하시는 분들이므로 로그인도 요구하지 않는다. */
+let hdSending=false, hdDone=null;
+const HD_CALL='<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 16.9v2.6a1.8 1.8 0 01-2 1.8 17.6 17.6 0 01-7.7-2.7 17.3 17.3 0 01-5.3-5.3A17.6 17.6 0 013.8 5.5a1.8 1.8 0 011.8-2h2.6a1.8 1.8 0 011.8 1.6c.1.9.3 1.7.6 2.5a1.8 1.8 0 01-.4 1.9l-1.1 1.1a14.4 14.4 0 005.3 5.3l1.1-1.1a1.8 1.8 0 011.9-.4c.8.3 1.6.5 2.5.6a1.8 1.8 0 011.6 1.9z"/></svg>';
+function openHelpdesk(){ hdSending=false; renderHelpdesk(); }
+function hdHead(){
+  return '<div class="prhd hdhd"><div class="n">영광 커넥트 헬프데스크</div>'
+    +'<div class="m">앱 설치와 사용을 도와드립니다</div></div>';
+}
+function renderHelpdesk(){
+  const box=document.getElementById('hdForm'); if(!box) return;
+  if(hdDone){ renderHelpdeskDone(); return; }
+  box.innerHTML='<div class="prcard">'+hdHead()+'<div class="prbd hdbig">'
+    +'<div class="hdhint">앱 설치나 사용이 어려우시면 이름과 연락처만 남겨 주세요.<br>'
+    +'도우미가 연락드려 도와드립니다.</div>'
+    +'<div id="hdErr"></div>'
+    +'<div class="prfl"><label>이름 <i>*</i></label>'
+    +'<input class="f-in" id="hdName" placeholder="성함을 적어 주세요" autocomplete="name"/></div>'
+    +'<div class="prfl"><label>연락처 <i>*</i></label>'
+    +'<input class="f-in" id="hdTel" type="tel" inputmode="tel" '
+    +'placeholder="010 - 1234 - 5678" autocomplete="tel"/></div>'
+    +'<button class="prbtn hdbtn" id="hdBtn" onclick="submitHelp()">도움 신청하기</button>'
+    +'</div></div>';
+}
+function hdErr(msg){
+  const e=document.getElementById('hdErr');
+  if(e) e.innerHTML=msg?'<div class="prerr">'+esc(msg)+'</div>':'';
+  if(msg){ try{ e.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(x){} }
+}
+function hdVal(id){ const e=document.getElementById(id); return e?String(e.value||'').trim():''; }
+/* 숫자만 9~13자리면 전화번호로 본다 (서버도 같은 기준으로 한 번 더 본다) */
+function hdTelOk(s){ const d=String(s||'').replace(/[^0-9]/g,''); return d.length>=9&&d.length<=13; }
+async function submitHelp(){
+  if(hdSending) return;
+  const name=hdVal('hdName'), tel=hdVal('hdTel');
+  if(!name){ hdErr('성함을 적어 주세요.'); return; }
+  if(!tel){ hdErr('연락처를 적어 주세요.'); return; }
+  if(!hdTelOk(tel)){ hdErr('연락처를 다시 확인해 주세요. (예: 010 - 1234 - 5678)'); return; }
+  hdErr('');
+  hdSending=true;
+  const btn=document.getElementById('hdBtn');
+  if(btn){ btn.disabled=true; btn.innerHTML='<span class="spin"></span> 보내는 중…'; }
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify({action:'saveHelp',
+      record:{'이름':name,'연락처':tel}})});
+    d=await r.json().catch(()=>null);
+  }catch(e){ d=null; }
+  hdSending=false;
+  if(btn){ btn.disabled=false; btn.textContent='도움 신청하기'; }
+  if(!d){ hdErr('전송에 실패했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.'); return; }
+  if(!d.ok){ hdErr(d.message||'접수하지 못했습니다.'); return; }
+  hdDone={name:name};
+  renderHelpdesk();
+  loadAll();
+}
+function renderHelpdeskDone(){
+  const box=document.getElementById('hdForm'); if(!box||!hdDone) return;
+  box.innerHTML='<div class="prcard">'+hdHead()
+    +'<div class="prbd prdone hddone"><div class="ck">'+HD_CALL+'</div>'
+    +'<h3>신청이 접수되었습니다</h3>'
+    +'<p><b>'+esc(hdDone.name)+'</b> 님<br><br>'
+    +'도우미가 연락드려 도와드립니다.<br>조금만 기다려 주세요.</p>'
+    +'<button class="prbtn gray" onclick="hdAgain()">다시 신청하기</button>'
+    +'</div></div>';
+  try{ box.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+}
+function hdAgain(){ hdDone=null; renderHelpdesk(); }
+
+/* ── 대시보드의 신청 명단 ──
+   서버가 담당 한 분에게만 자료를 내려준다. 다른 분은 HELP 가 늘 빈 배열이라
+   아래 칸 자체가 그려지지 않는다. (화면에서 감추는 것이 아니다) */
+let HELP=[];
+function renderHelpDash(){
+  const box=document.getElementById('hdDash'); if(!box) return;
+  const rows=HELP||[];
+  if(!rows.length){ box.innerHTML=''; return; }   /* 담당이 아니거나 신청이 없으면 아예 안 그린다 */
+  const open=rows.filter(function(h){ return String(h.status||'접수')==='접수'; });
+  box.innerHTML='<div class="sect-t">영광 커넥트 헬프데스크</div>'
+    +'<div class="dcard"><p class="dd">앱 설치·사용 도움을 요청하신 분입니다 · '
+    +'연락 전 '+open.length+'명 / 전체 '+rows.length+'명</p>'
+    + rows.map(function(h){
+        const done=String(h.status||'접수')!=='접수';
+        const tel=String(h.tel||'');
+        return '<div class="hdrow'+(done?' done':'')+'">'
+          +'<span class="who"><b>'+esc(h.name||'')+'</b>'
+          +'<span class="tel"><a href="tel:'+esc(tel.replace(/[^0-9+]/g,''))+'">'+esc(tel)+'</a></span>'
+          +'<span class="tm">'+esc(h.ts||'')+(done?' · 연락완료':'')+'</span></span>'
+          +'<button class="btn sec sm" onclick="helpMark(\''+jsq(h.id||'')+'\',\''
+          +(done?'접수':'연락완료')+'\')">'+(done?'되돌리기':'연락완료')+'</button>'
+          +'<button class="btn sm" style="background:#eef2f7;color:#55606d" '
+          +'onclick="helpDrop(\''+jsq(h.id||'')+'\')">삭제</button>'
+          +'</div>';
+      }).join('')
+    +'<div class="dnote">연락을 마치신 뒤 삭제하시면 연락처가 시트에서도 지워집니다.</div>'
+    +'</div>';
+}
+async function helpMark(id,st){
+  if(!id) return;
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify(
+      {action:'setHelp', id:id, status:st, token:TOKEN})});
+    const d=await r.json().catch(()=>null);
+    if(d&&d.ok){ absorbToken(d); await loadAll(); renderHelpDash(); return; }
+    alert((d&&d.message)||'바꾸지 못했습니다.');
+  }catch(e){ alert('전송에 실패했습니다.'); }
+}
+async function helpDrop(id){
+  if(!id) return;
+  if(!confirm('이 신청을 지울까요?\n연락처도 함께 지워집니다.')) return;
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify(
+      {action:'deleteHelp', id:id, token:TOKEN})});
+    const d=await r.json().catch(()=>null);
+    if(d&&d.ok){ absorbToken(d); await loadAll(); renderHelpDash(); return; }
+    alert((d&&d.message)||'지우지 못했습니다.');
+  }catch(e){ alert('전송에 실패했습니다.'); }
+}
 function goReport(){
   const r=(current&&current.role)||'guest';
   if(subOnlyMe()){ openApp('manage'); return; }            /* 「문의만」은 문의 접수 처리부터 */
@@ -2395,7 +2616,7 @@ const ROLE_NAV={
  chair:[['manage','문의 접수 처리']],
  pray:[['pray','중보기도']],
  staff:[['manage','문의 접수 처리']],
- admin:[['dash','대시보드'],['report','구역보고'],['member','성도 조회'],['mroster','명단 관리'],['pray','중보기도'],['edu','교육부','https://visionspeaker.github.io/edu-dashboard/'],['manage','문의 접수 처리']]
+ admin:[['dash','대시보드'],['report','구역보고'],['member','성도 조회'],['mroster','명단 관리'],['pray','중보기도'],['edu','교육부','https://visionspeaker.github.io/edu-dashboard/'],['manage','문의 접수 처리'],['archive','아카이브']]
 };
 const ROLE_LABEL={guest:'교인',member:'일반 교인',leader:'구역장',elder:'장로 · 구역장/위원장',chair:'위원장',staff:'부장',pray:'중보기도팀장',admin:'관리자(교역자·담임목사)'};
 function setRoleLabel(){
@@ -2452,6 +2673,8 @@ function showView(v,back){
   if(v==='grade') openGrade();
   if(v==='place') openPlace();
   if(v==='prayer') openPrayer();
+  if(v==='archive') renderArchive();
+  if(v==='helpdesk') openHelpdesk();
   if(v==='pray') renderIp();
   growAll(document.getElementById(v));
 }
@@ -4880,6 +5103,7 @@ function renderDash(){
     kpi(missing.length+' <small>/'+DIST_NAMES.length+'</small>','미보고 구역','보고 완료 '+reported.size+'구역','amber')+
     kpi(fbOpen,'미처리 문의','접수 '+fbBy('접수')+' · 처리중 '+fbBy('처리중')+' · 보류 '+fbBy('보류'));
   renderGradeDash();
+  renderHelpDash();
   // 예배별 참석
   drawChart('svcChart','bar',{labels:['1부','2부','오후','수요','금요','새벽','월삭'],datasets:[{label:'참석(명)',
     data:[tSum(wkReports,'1부'),tSum(wkReports,'2부'),tSum(wkReports,'오후'),tSum(wkReports,'수요'),tSum(wkReports,'금요'),cSum(wkReports,'새벽'),tSum(wkReports,'월삭')],
@@ -5647,8 +5871,26 @@ try{
 }catch(e){}
 /* 홈 화면에 추가 안내 — 화면이 자리를 잡은 뒤 조용히 올라온다 */
 try{ setTimeout(a2hsPaint,1200); }catch(e){}
+/*  주소로 바로 열기 —  …/stgc/?go=helpdesk
+ *
+ *  벽에 붙인 QR 코드가 이 길로 들어온다.
+ *  아무 화면이나 열리면 안 되므로 **아래 목록에 있는 것만** 연다.
+ *  (?go=dash 처럼 적어 보내도 무시된다. 자료는 어차피 서버가 막지만,
+ *   화면조차 열어 주지 않는 편이 안전하다)
+ *  연 뒤에는 주소에서 ?go= 를 지운다 — 새로고침하거나 홈으로 돌아갔다가
+ *  다시 오실 때 같은 화면이 또 튀어나오지 않게 하기 위해서다. */
+const GO_OK=['helpdesk','archive','intake','myreq','grade','place','prayer','culture'];
+function bootGo(){
+  let want='';
+  try{ want=String(new URLSearchParams(location.search).get('go')||'').trim(); }catch(e){ want=''; }
+  if(!want || GO_OK.indexOf(want)<0) return false;
+  try{ history.replaceState(null,'',location.pathname); }catch(e){}
+  openApp(want);
+  return true;
+}
 /* 방문 카운트를 먼저 보내고(응답이 가벼워 빠름) 이어서 전체 데이터 로드 */
-countVisit(); loadAll();
+countVisit();
+if(!bootGo()) loadAll();   /* openApp 이 이미 loadAll 을 부르므로 두 번 부르지 않는다 */
 </script>
 </body>
 </html>

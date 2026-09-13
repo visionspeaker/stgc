@@ -1884,10 +1884,13 @@ function dataSig(){
 }
 async function loadAll(){
   if(!USE_BACKEND) return;
-  /* 로그인했는데 아직 명단이 없으면 먼저 받아온다 (앱을 껐다 켠 경우 등) */
-  if(TOKEN && !haveRoster()) await fetchRoster();
+  /*  로그인했는데 아직 명단이 없으면 함께 받아온다 (앱을 껐다 켠 경우 등).
+      2026-09-13 — 예전에는 명단을 **다 받은 뒤에** 전체 자료를 불렀다.
+      서버 한 번이 2초 남짓이라 그만큼 더 기다렸다. 이제 둘을 동시에 출발시킨다. */
+  const rosterJob = (TOKEN && !haveRoster()) ? fetchRoster() : null;
   try{
-    const r=await fetch(withTok(API+'?action=all'),{method:'GET'});
+    const [, r] = await Promise.all([ rosterJob,
+                                      fetch(withTok(API+'?action=all'),{method:'GET'}) ]);
     const d=await r.json();
     if(d&&d.error==='AUTH'){ onAuthLost(); return; }
     if(d&&d.ok){
@@ -2194,12 +2197,13 @@ async function loginByName(){
   if(btn){ btn.disabled=true; btn.dataset.t=btn.textContent; btn.textContent='확인 중…'; }
   const done=()=>{ if(btn){ btn.disabled=false; btn.textContent=btn.dataset.t||'로그인'; } };
 
-  let me=null, mustPw=false;
+  let me=null, mustPw=false, rosterIn=null;
   /* 비밀번호 확인은 서버만 한다. 앱은 비밀번호를 가지고 있지 않다. */
   try{
     const r=await fetch(API,{method:'POST',body:JSON.stringify({action:'login',name:nm,pw:pw})});
     const d=await r.json();
-    if(d&&d.ok&&d.token){ setToken(d.token); me=d.me||null; mustPw=!!d.mustChangePw; }
+    if(d&&d.ok&&d.token){ setToken(d.token); me=d.me||null; mustPw=!!d.mustChangePw;
+                          rosterIn=d.roster||null; }
     else { setToken(''); done(); alert((d&&d.message)||'비밀번호가 올바르지 않습니다.'); return; }
   }catch(e){
     setToken(''); done();
@@ -2210,7 +2214,16 @@ async function loginByName(){
       그래서 명단을 받아오지도, 없다고 막지도 않는다. */
   const subOnly = String((me&&me.scope)||'').trim()==='문의만';
   if(!subOnly){
-    await fetchRoster();        /* 구역 명단·전화번호를 받아온 뒤 화면을 연다 */
+    /*  2026-09-13 — 예전에는 로그인 확인과 구역 명단을 **따로** 불렀다.
+        서버를 한 번 부르는 데 2초 남짓 걸려서 화면이 열리기까지 4~5초였다.
+        이제 서버가 로그인 답에 명단을 함께 실어 주므로 한 번이면 끝난다.
+        (옛 서버로 되돌아가면 roster 가 없으니 예전처럼 따로 받는다) */
+    if(rosterIn && rosterIn.districts){
+      const keep={districts:rosterIn.districts, changes:rosterIn.changes, phones:rosterIn.phones,
+                  ids:rosterIn.ids, alias:rosterIn.alias, roles:rosterIn.roles};
+      if(applyRoster(keep)) saveRoster(keep);
+    }
+    if(!haveRoster()) await fetchRoster();
     done();
     if(!haveRoster()){
       alert('구역 명단을 불러오지 못했습니다.\n인터넷 연결을 확인하고 다시 로그인해 주세요.');

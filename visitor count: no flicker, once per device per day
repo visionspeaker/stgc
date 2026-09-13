@@ -1808,12 +1808,20 @@ function rerender(){
 }
 /* 숫자 카운트업. 화면이 보이지 않는 상태에서는 requestAnimationFrame 이 멈추므로,
    같은 시간 뒤에 최종 숫자를 반드시 채워 넣는 보조 타이머를 함께 건다. */
-function animateCount(el,to){
+function animateCount(el,to,quiet){
   if(!el) return;
   const target=Number(to);
   if(!isFinite(target)){ el.textContent='·'; return; }
   const start=(/^\d+$/.test(el.textContent))?Number(el.textContent):0;
   if(el._vt){ clearTimeout(el._vt); el._vt=null; }
+  /*  quiet = 세는 시늉 없이 숫자만 바꾼다.
+      방문자 수는 화면을 열 때 한 번만 올라가는 맛을 보여 주고, 그 뒤에 값이
+      갱신될 때는 조용히 바꾼다. 메뉴를 드나들 때마다 0.85초짜리 카운트업이
+      다시 도는 것이 '숫자가 들쭉날쭉한다'는 느낌을 주기 때문이다. */
+  if(quiet){
+    if(el._va){ cancelAnimationFrame(el._va); el._va=null; }
+    el.textContent=String(target); return;
+  }
   if(start===target){ el.textContent=String(target); return; }
   if(el._va){ cancelAnimationFrame(el._va); el._va=null; }
   const dur=850, t0=(window.performance&&performance.now)?performance.now():Date.now();
@@ -1831,12 +1839,25 @@ function animateCount(el,to){
    마지막 숫자를 기기에 저장해 두고 화면에 들어오는 즉시 그 숫자로 카운트업한 뒤,
    서버 응답이 오면 실제 값으로 다시 맞춘다. */
 const VKEY='sgc_vis_v1';
+/*  방문자 수는 한 화면에서 세 군데서 들어온다.
+ *    ① 기기에 저장해 둔 지난 숫자   ② 방문 기록(hit) 응답   ③ 전체 자료(all) 응답
+ *  이 가운데 ③은 서버가 40초쯤 통째로 담아 두었다가 주는 것이라,
+ *  방금 올라간 방문 기록이 아직 안 담긴 **한 칸 낮은 값**이 뒤늦게 오는 일이 있다.
+ *  그대로 받으면 숫자가 올라갔다 내려갔다 해서 고장난 것처럼 보인다.
+ *
+ *  → 총계는 줄어들 수 없으므로, 이미 본 총계보다 작은 값이 오면 통째로 버린다.
+ *    (날짜가 바뀌어 '오늘'이 1로 돌아가도 총계는 늘기만 하므로 정상 반영된다) */
+let VIS_SEEN=null;
 function setVisitors(v){
   if(!v) return;
   const today=Number(v.today), total=Number(v.total);
   if(!isFinite(today)&&!isFinite(total)) return;
-  animateCount(document.getElementById('visToday'), today);
-  animateCount(document.getElementById('visTotal'), total);
+  if(VIS_SEEN && isFinite(total) && total < VIS_SEEN.total) return;   /* 묵은 값 — 버린다 */
+  const quiet=!!VIS_SEEN;          /* 두 번째부터는 세는 시늉 없이 조용히 */
+  VIS_SEEN={ today: isFinite(today)?today:(VIS_SEEN?VIS_SEEN.today:0),
+             total: isFinite(total)?total:(VIS_SEEN?VIS_SEEN.total:0) };
+  animateCount(document.getElementById('visToday'), today, quiet);
+  animateCount(document.getElementById('visTotal'), total, quiet);
   try{ localStorage.setItem(VKEY, JSON.stringify({today:today, total:total})); }catch(e){}
 }
 /* 저장해 둔 마지막 값으로 즉시 표시 (서버 응답 전) */
@@ -1844,8 +1865,7 @@ function showCachedVisitors(){
   try{
     const v=JSON.parse(localStorage.getItem(VKEY)||'null');
     if(!v) return;
-    animateCount(document.getElementById('visToday'), v.today);
-    animateCount(document.getElementById('visTotal'), v.total);
+    setVisitors(v);
   }catch(e){}
 }
 /* 지금 들고 있는 자료의 지문 — 바뀌었는지 비교하는 데만 쓴다 */
@@ -2049,7 +2069,33 @@ function checkNewSubs(){
 /* 팝업을 닫는 순간 '오늘 확인함'으로 기록 — '나중에'를 눌러도 같은 날 다시 뜨지 않음 */
 function closeNoti(){ document.getElementById('notiGate').style.display='none'; markSubsSeen(); }
 function gotoManage(){ closeNoti(); openApp('manage'); }
-function countVisit(){ if(!USE_BACKEND) return; try{ if(sessionStorage.getItem('sgc_hit')) return; sessionStorage.setItem('sgc_hit','1'); fetch(API,{method:'POST',body:JSON.stringify({action:'hit'})}).then(r=>r.json()).then(v=>setVisitors(v)).catch(()=>{}); }catch(e){} }
+/*  방문 세기 — 2026-09-13 고침
+ *
+ *  예전에는 **창(탭)을 새로 열 때마다** 셌다. 그래서 같은 분이 하루에 여러 번
+ *  들어오시면 그만큼 숫자가 올라가, '다녀가신 분 수'가 아니라 '연 횟수'였다.
+ *  이제는 **기기마다 하루 한 번만** 센다. 날짜가 바뀌면 다시 한 번 센다.
+ *
+ *  기기 표시(cid)는 아무 뜻 없는 임의의 글자다 — 이름·전화번호와 무관하고,
+ *  서버가 같은 기기를 두 번 세지 않으려고 쓰기만 한다. */
+const HITKEY='sgc_hit_day', CIDKEY='sgc_cid_v1';
+function deviceId(){
+  try{
+    let c=localStorage.getItem(CIDKEY);
+    if(!c){ c='d'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+            localStorage.setItem(CIDKEY,c); }
+    return c;
+  }catch(e){ return ''; }
+}
+function countVisit(){
+  if(!USE_BACKEND) return;
+  try{
+    const d=localISO(new Date());
+    if(localStorage.getItem(HITKEY)===d) return;      /* 오늘 이미 셌다 */
+    localStorage.setItem(HITKEY,d);
+  }catch(e){ /* 저장을 못 쓰는 기기는 예전처럼 한 번 센다 */ }
+  fetch(API,{method:'POST',body:JSON.stringify({action:'hit', cid:deviceId()})})
+    .then(r=>r.json()).then(v=>setVisitors(v)).catch(()=>{});
+}
 /* ---- 사진 첨부 ---- */
 let attachedPhoto=null;
 function onPhotoPick(input){ const f=input.files&&input.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=e=>compressImage(e.target.result,640,0.5,url=>{ attachedPhoto=url; document.getElementById('photoThumb').src=url; document.getElementById('photoEmpty').style.display='none'; document.getElementById('photoFilled').style.display='block'; }); rd.readAsDataURL(f); }

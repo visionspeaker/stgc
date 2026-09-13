@@ -2693,6 +2693,12 @@ function setRoleLabel(){
 }
 function enterApp(role,scope){
   current=Object.assign({role},scope||{});
+  /*  헬프데스크 신청 명단(이름·전화번호)은 담당 한 분만 보신다.
+   *  서버가 다른 분께는 빈 배열을 주지만, **한 기기에서 로그아웃하고
+   *  다른 분이 바로 로그인**하면 앞사람 것이 잠깐 남아 있을 수 있다.
+   *  그래서 들어올 때 먼저 비운다. (2026-09-13) */
+  HELP=[];
+  try{ const hd=document.getElementById('hdDash'); if(hd) hd.innerHTML=''; }catch(e){}
   /*  「문의만」으로 바뀐 분은 예전에 받아 둔 구역 명단이 기기에 남아 있을 수 있다.
       그대로 두면 교인 이름이 계속 보이므로 여기서 지운다. */
   if(subOnlyMe()){
@@ -2713,7 +2719,11 @@ function enterApp(role,scope){
   pushAppHist(); paintBackBtn();
   a2hsForce=false; a2hsPaint();
 }
-function logout(){current=null;clearSession();setToken('');notiShown=false;gnotiShown=false;GRADES=[];hideGNoti();closeNoti();['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
+/* 로그아웃하면 받아 둔 자료도 함께 비운다 — 특히 헬프데스크 신청 명단(이름·전화번호)은
+   다음 분이 같은 기기로 들어오실 때 잠깐이라도 남아 있으면 안 된다. */
+function logout(){current=null;clearSession();setToken('');notiShown=false;gnotiShown=false;GRADES=[];HELP=[];
+  try{ const hd=document.getElementById('hdDash'); if(hd) hd.innerHTML=''; }catch(e){}
+  hideGNoti();closeNoti();['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
 /* back=true 이면 뒤로가기로 되돌아온 것이므로 기록하지 않는다 */
 function showView(v,back){
   if(!back && currentView && currentView!==v) pushView(currentView);

@@ -400,6 +400,16 @@ background:#f7f9fc;border-radius:9px;padding:9px 11px}
  text-decoration:underline;cursor:pointer;padding:4px}
 .gate{z-index:60}
 .gatecard{position:relative}
+/* ── 로그인 실패 안내 (2026-09-13) ──────────────────────────
+   예전에는 브라우저 경고창(alert)을 띄웠다. 경고창은 글자 색을 바꿀 수 없고
+   한 번 눌러 닫아야 해서, 어르신들께는 걸림돌이 된다.
+   이제 로그인 카드 안에 빨간 칸으로 바로 보여 드린다. */
+.lgerr{background:#fdf3f3;border:1px solid #f0c9c9;border-radius:11px;
+padding:11px 13px;margin:12px 0 2px}
+.lgerr .l1{color:#b3261e;font-size:13.5px;font-weight:800;line-height:1.6}
+.lgerr .l2{color:var(--red);font-size:12.5px;font-weight:700;margin-top:5px;line-height:1.65}
+/* 틀린 칸은 테두리도 연한 빨강으로 — 어디를 고쳐야 하는지 눈에 들어오게 */
+#loginGate input.bad{border-color:#f0a9a9;background:#fdf6f6}
 .gatecard .gx{position:absolute;right:16px;top:14px;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
 /* ===== app-style form components (match design sample) ===== */
 .applike{max-width:560px;margin:0 auto}
@@ -1109,10 +1119,12 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     <img class="glogo" src="logo.png?v=2" alt="송탄영광교회"/>
     <h1>영광 커넥트 로그인</h1>
     <div class="gsub">이름과 비밀번호로 로그인하세요.</div>
+    <!-- 로그인이 안 될 때 여기에 빨간 안내가 뜬다 (경고창 대신) -->
+    <div id="lgErr" class="lgerr" style="display:none"></div>
     <label style="display:block;font-size:13px;font-weight:600;margin:10px 0 5px">이름</label>
-    <input type="text" id="lgName" placeholder="예: 송영광" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:16px"/>
+    <input type="text" id="lgName" placeholder="예: 송영광" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:16px" oninput="lgClearErr()"/>
     <label style="display:block;font-size:13px;font-weight:600;margin:12px 0 5px">비밀번호</label>
-    <input type="password" id="lgPw2" placeholder="비밀번호" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:16px" onkeydown="if(event.key==='Enter')loginByName()"/>
+    <input type="password" id="lgPw2" placeholder="비밀번호" style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:16px" oninput="lgClearErr()" onkeydown="if(event.key==='Enter')loginByName()"/>
     <div style="margin-top:16px"><button class="btn" id="lgBtn" style="width:100%" onclick="loginByName()">로그인</button></div>
   </div>
 </div>
@@ -2188,7 +2200,8 @@ function initGate(){const el=document.getElementById('lgName');if(el)el.focus();
 async function loginByName(){
   const nm=(document.getElementById('lgName').value||'').trim();
   const pw=(document.getElementById('lgPw2').value||'').trim();
-  if(!nm||!pw){alert('이름과 비밀번호를 모두 입력해 주세요.');return;}
+  lgClearErr();
+  if(!nm||!pw){ lgErr('이름과 비밀번호를 모두 입력해 주세요.', false); return; }
   /*  이름이 등록돼 있는지 앱이 미리 알려 주지 않는다.
    *  미리 알려 주면 「이 이름은 계정이 있다」를 확인해 주는 셈이 된다.
    *  맞고 틀림은 서버가 판단하고, 답도 서버가 정한다. */
@@ -2204,10 +2217,17 @@ async function loginByName(){
     const d=await r.json();
     if(d&&d.ok&&d.token){ setToken(d.token); me=d.me||null; mustPw=!!d.mustChangePw;
                           rosterIn=d.roster||null; }
-    else { setToken(''); done(); alert((d&&d.message)||'비밀번호가 올바르지 않습니다.'); return; }
+    else {
+      setToken(''); done();
+      /*  두 번째 줄(구역장만 로그인)은 **이름·비밀번호가 안 맞을 때만** 붙인다.
+       *  잠금·미설정 같은 다른 사유일 때 붙이면 엉뚱한 안내가 된다. */
+      const msg=(d&&d.message)||'이름 또는 비밀번호가 올바르지 않습니다.';
+      lgErr(msg, !d || d.error==='BAD_LOGIN');
+      return;
+    }
   }catch(e){
     setToken(''); done();
-    alert('로그인 확인을 하지 못했습니다.\n인터넷 연결을 확인하고 다시 시도해 주세요.');
+    lgErr('로그인 확인을 하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.', false);
     return;
   }
   /*  「문의만」으로 묶인 분은 구역 명단이 필요 없다 (서버도 안 내려준다).
@@ -2226,7 +2246,8 @@ async function loginByName(){
     if(!haveRoster()) await fetchRoster();
     done();
     if(!haveRoster()){
-      alert('구역 명단을 불러오지 못했습니다.\n인터넷 연결을 확인하고 다시 로그인해 주세요.');
+      /* 이때도 로그인 창이 그대로 열려 있으므로, 경고창 대신 같은 자리에 보여 드린다 */
+      lgErr('구역 명단을 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 로그인해 주세요.', false);
       return;
     }
   } else { done(); }
@@ -2241,8 +2262,38 @@ async function loginByName(){
 }
 
 // ---------- home / login flow ----------
-function openLogin(){document.getElementById('loginGate').style.display='flex';const el=document.getElementById('lgName');if(el){el.value='';el.focus();}const p=document.getElementById('lgPw2');if(p)p.value='';}
-function closeLogin(){document.getElementById('loginGate').style.display='none';}
+/*  ── 로그인 실패 안내 (2026-09-13) ──
+ *  예전에는 브라우저 경고창(alert)을 띄웠다. 경고창은 글자 색을 바꿀 수 없고
+ *  한 번 눌러 닫아야만 다음으로 넘어간다. 어르신들께는 그 자체가 걸림돌이다.
+ *  이제 로그인 카드 안에 **빨간 칸**으로 바로 보여 드린다.
+ *
+ *  두 번째 줄은 왜 넣나 —
+ *  구역보고를 열어 보려고 아무 이름이나 넣어 보시는 분이 계신다.
+ *  「구역장만 로그인할 수 있다」를 여기서 알려 드려야 헛되이 반복하지 않으신다.
+ *
+ *  ※ 서버는 여전히 **이름이 없을 때와 비밀번호가 틀릴 때 똑같이 답한다.**
+ *    다르게 답하면 「이 이름은 계정이 있다」를 알려 주는 셈이 되기 때문이다.
+ *    여기서 더하는 것은 안내 문구뿐이라 그 원칙은 그대로다. */
+const LG_ONLY_LEADER='구역보고 메뉴는 구역장만 로그인 가능합니다.';
+function lgErr(msg, withHint){
+  const box=document.getElementById('lgErr'); if(!box) return;
+  if(!msg){ lgClearErr(); return; }
+  box.innerHTML='<div class="l1">'+esc(msg)+'</div>'
+    +(withHint? '<div class="l2">'+esc(LG_ONLY_LEADER)+'</div>' : '');
+  box.style.display='block';
+  ['lgName','lgPw2'].forEach(function(id){
+    const e=document.getElementById(id); if(e) e.classList.add('bad'); });
+  try{ box.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(e){}
+}
+/* 다시 입력하기 시작하면 빨간 표시를 거둔다 */
+function lgClearErr(){
+  const box=document.getElementById('lgErr');
+  if(box){ box.style.display='none'; box.innerHTML=''; }
+  ['lgName','lgPw2'].forEach(function(id){
+    const e=document.getElementById(id); if(e) e.classList.remove('bad'); });
+}
+function openLogin(){document.getElementById('loginGate').style.display='flex';lgClearErr();const el=document.getElementById('lgName');if(el){el.value='';el.focus();}const p=document.getElementById('lgPw2');if(p)p.value='';}
+function closeLogin(){document.getElementById('loginGate').style.display='none';lgClearErr();}
 function openL(u){window.open(u,'_blank','noopener,noreferrer');}
 /* ── 홈 화면에 추가 도우미 ────────────────────────────────
    완전 자동 설치는 휴대폰이 막아 두어 만들 수 없다.

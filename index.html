@@ -1720,6 +1720,14 @@ function rosterOf(dist,date){
 }
 function distNum(d){const m=String(d).match(/(\d+)/);return m?parseInt(m[1],10):9999;}
 function sortDist(arr){return [...arr].sort((a,b)=>distNum(a)-distNum(b)||String(a).localeCompare(String(b),'ko'));}
+/*  보고서 목록을 구역 번호 순으로 — 1 · 2 … 9 · 10 · 13 · 25구역
+ *  (이름의 숫자를 견주므로 10구역이 2구역보다 앞에 오는 일이 없다) */
+function sortDistRep(list){
+  return (Array.isArray(list)?[...list]:[]).sort(function(a,b){
+    const x=String((a&&a.district)||''), y=String((b&&b.district)||'');
+    return distNum(x)-distNum(y) || x.localeCompare(y,'ko');
+  });
+}
 applyRoster(loadRosterCache());   /* 지난번에 받아둔 명단이 있으면 바로 적용 */
 const CATEGORIES = {
  "예배 (예배·방송·찬양)": {위원장:"소세영 장로", 교역자:"—"},
@@ -5378,7 +5386,13 @@ function cSum(wkReports,key){return wkReports.reduce((a,r)=>a+Object.values(r.de
 function renderDash(){
   initWeekSel();
   const wk=document.getElementById('weekSel').value;
-  const wkReports=dedupeReports(reports.filter(r=>r.date===wk));
+  /*  ★ 2026-09-14 고침 — 구역 순서 ★
+   *  예전에는 시트에 쌓인 줄 순서(= 구역장이 보고를 낸 순서)를 그대로 썼다.
+   *  그래서 「구역별 출석」 차트가 25 → 14 → 1 → 19구역 처럼 뒤죽박죽이었고,
+   *  보고를 고친 구역이 맨 뒤로 밀렸다.
+   *  sortDist 는 **이름의 숫자로** 세우므로 9구역 다음이 10구역이다
+   *  (글자 정렬이면 10구역이 2구역보다 앞에 온다). */
+  const wkReports=sortDistRep(dedupeReports(reports.filter(r=>r.date===wk)));
   const reported=new Set(wkReports.map(r=>r.district));
   const sunTot=wkReports.reduce((a,r)=>a+r.sundayPresent.length,0);
   const absTot=wkReports.reduce((a,r)=>a+r.sundayAbsent.length,0);
@@ -5905,7 +5919,7 @@ function prayGroups(week,q,onlyIp,showP,showE,onlySelf){
   if(week===undefined){ const wk=document.getElementById('weekSel'); if(!wk) return {wk:'',groups:[]};
     week=wk.value; q=((document.getElementById('praySrch')||{}).value||'').trim();
     onlyIp=prayOnlyIp; showP=prayShowP; showE=prayShowE; onlySelf=prayOnlySelf; }
-  const wkReports=dedupeReports(reports.filter(r=>r.date===week));
+  const wkReports=sortDistRep(dedupeReports(reports.filter(r=>r.date===week)));
   const byDist={}; wkReports.forEach(r=>byDist[r.district]=r);
   /* 교인이 직접 올린 기도제목을 같은 주일 칸에 합친다.
      구역보고를 내지 않은 구역이라도 신청이 있으면 그 구역이 나타난다. */
@@ -6073,7 +6087,7 @@ function setCareMode(m){
 function careItems(){
   const wk=document.getElementById('weekSel');
   const week=wk?wk.value:'';
-  const wkReports=dedupeReports(reports.filter(r=>r.date===week));
+  const wkReports=sortDistRep(dedupeReports(reports.filter(r=>r.date===week)));
   const out=[];
   sortDist(wkReports.map(r=>r.district)).forEach(d=>{
     const r=wkReports.find(x=>x.district===d); if(!r) return;

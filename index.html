@@ -695,13 +695,40 @@ border:1px solid #cfe8e2;border-radius:12px;padding:13px 14px;margin-bottom:15px
 .hddone .ck{background:#eaf7f3;color:#1f7d6d}
 /* 대시보드 신청 명단 (담당 한 사람만 본다) */
 .hdrow{display:flex;align-items:center;gap:10px;border:1px solid var(--inline);
-border-radius:12px;padding:11px 12px;margin-bottom:8px;background:#fff}
+border-radius:12px;padding:11px 12px;margin-bottom:8px;background:#fff;flex-wrap:wrap}
 .hdrow.done{background:#f7f9fc;opacity:.72}
-.hdrow .who{flex:1;min-width:0}
+.hdrow .who{flex:1;min-width:140px}
 .hdrow .who b{font-size:14px}
-.hdrow .who .tel{display:block;font-size:13px;color:#1f7d6d;font-weight:700;margin-top:2px}
+.hdrow .who .tel{display:block;font-size:14px;color:#1f7d6d;font-weight:800;margin-top:2px;
+letter-spacing:.2px}
 .hdrow .who .tm{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
 .hdrow .btn{flex:0 0 auto}
+/* 연락완료 체크칸 — 어르신도 누르기 쉽게 크게 */
+.hdchk{flex:0 0 auto;position:relative;display:inline-flex;align-items:center;
+justify-content:center;width:30px;height:30px;cursor:pointer}
+.hdchk input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.hdchk .bx{width:24px;height:24px;border:2px solid #c3cddb;border-radius:7px;background:#fff;
+display:inline-block;transition:.12s}
+.hdchk .bx:after{content:'';position:absolute;left:11px;top:6px;width:6px;height:12px;
+border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg);opacity:0}
+.hdchk input:checked + .bx{background:#2fa58f;border-color:#2fa58f}
+.hdchk input:checked + .bx:after{opacity:1}
+.hdchk input:disabled + .bx{opacity:.45}
+/* 연락 버튼 */
+.hdbtns{display:flex;gap:6px;flex:0 0 auto;flex-wrap:wrap}
+.hdrow a.btn{text-decoration:none;display:inline-flex;align-items:center}
+.btn.hdcall{background:#e8f2fe;color:#1b4f9c;border:1px solid #c3daf7}
+.btn.hdsms{background:#f3eefe;color:#5b3cad;border:1px solid #d9cdf7}
+.btn.hdcopy{background:#eef2f7;color:#55606d;border:1px solid #dbe3ec}
+.btn.hddrop{background:#f7f1f1;color:#8d5757;border:1px solid #e8d6d6}
+/* 대시보드 제목 옆 숫자 */
+.hdbadge{background:#fee2e2;color:#b3261e;border-radius:20px;padding:1px 9px;
+font-size:11px;font-weight:800;margin-left:4px}
+/* 헬프데스크 탭의 거르개 */
+.hdchips{display:flex;gap:6px;margin:0 0 11px;flex-wrap:wrap}
+.hdchip{font-size:12.5px;font-weight:700;padding:6px 13px;border-radius:20px;
+border:1px solid var(--inline);background:#fff;color:var(--muted);font-family:inherit;cursor:pointer}
+.hdchip.on{background:#eef7f5;border-color:#9ed3c7;color:#1d5e53}
 /* ── 중보기도 기간 고르기 (기한 없음 / 날짜 지정) ── */
 .pergrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .perbtn{border:1.5px solid var(--inline);background:#fff;border-radius:13px;padding:14px 8px;
@@ -1292,6 +1319,11 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
   <div id="hdForm"></div>
 </section>
 
+<!-- 헬프데스크 신청 명단 (담당 네 분만 · 서버가 다른 분께는 자료를 주지 않는다) -->
+<section id="hdlist" class="view">
+  <div id="hdPage"></div>
+</section>
+
 <!-- 명단 관리 (관리자) · 연락처 관리 (구역장·장로) -->
 <section id="mroster" class="view">
   <div class="card">
@@ -1420,6 +1452,11 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 
   <div class="kpis" id="kpis"></div>
 
+  <!-- 헬프데스크 신청 — 담당 네 분에게만. 서버가 다른 분께는 자료를 주지 않는다.
+       ★ 2026-09-14 ★ 늦게 보시면 안 되는 일이라 대시보드 맨 위로 올렸다.
+       신청이 없으면 칸 자체가 그려지지 않는다. -->
+  <div id="hdDash"></div>
+
   <div class="sect-t">출석 현황</div>
   <div class="dgrid g2">
     <div class="dcard"><h3>예배별 참석</h3><p class="dd">1·2부·오후·수요·금요·새벽 참석 인원 (선택 주일)</p><canvas id="svcChart"></canvas></div>
@@ -1468,9 +1505,6 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 
   <!-- 신급 교육 신청 (관리자에게만 · 마감 한 달 뒤 자동으로 사라짐) -->
   <div id="gdDash"></div>
-
-  <!-- 헬프데스크 신청 (담당 한 사람에게만 · 서버가 다른 분께는 자료를 주지 않는다) -->
-  <div id="hdDash"></div>
 
   <div class="sect-t">보고서 출력</div>
   <div class="dcard">
@@ -1934,6 +1968,9 @@ async function loadAll(){
       PRTRACK=Array.isArray(d.praytrack)?d.praytrack:[];
       /* 헬프데스크 — 담당이 아니면 서버가 아예 빈 배열을 준다 */
       HELP=Array.isArray(d.help)?d.help:[];
+      /*  자료는 로그인보다 조금 늦게 온다. 그래서 메뉴를 만들 때는 아직 몰랐다가
+       *  여기서 비로소 「담당자구나」를 알게 된다 — 이때 탭을 하나 더 붙여 드린다. */
+      syncHelpTab();
       if(meChanged || dataSig()!==before) rerender();
       checkNewSubs();
       checkNewGrades();
@@ -2654,43 +2691,152 @@ function renderHelpdeskDone(){
 }
 function hdAgain(){ hdDone=null; renderHelpdesk(); }
 
-/* ── 대시보드의 신청 명단 ──
-   서버가 담당 한 분에게만 자료를 내려준다. 다른 분은 HELP 가 늘 빈 배열이라
+/* ── 신청 명단 (담당 네 분) ──
+   서버가 담당 네 분에게만 자료를 내려준다. 다른 분은 HELP 가 늘 빈 배열이라
    아래 칸 자체가 그려지지 않는다. (화면에서 감추는 것이 아니다) */
 let HELP=[];
+let HDFILTER='all';                     /* all | open | done */
+
+/*  ★ 2026-09-14 ★ 전화번호 보기 좋게 — 세 칸으로 끊어 준다 (010 - 네 자리 - 네 자리)
+ *  서버가 앞의 0 을 되살려 보내 주므로, 여기서는 끊어 주기만 한다. */
+function telFmt(s){
+  const t=String(s==null?'':s).trim();
+  const d=t.replace(/[^0-9]/g,'');
+  if(/^\+/.test(t)) return t;                                   /* 국제번호는 그대로 */
+  if(d.length===11 && /^01/.test(d)) return d.slice(0,3)+'-'+d.slice(3,7)+'-'+d.slice(7);
+  if(d.length===10 && /^01/.test(d)) return d.slice(0,3)+'-'+d.slice(3,6)+'-'+d.slice(6);
+  if(d.length===10 && /^02/.test(d)) return d.slice(0,2)+'-'+d.slice(2,6)+'-'+d.slice(6);
+  if(d.length===9  && /^02/.test(d)) return d.slice(0,2)+'-'+d.slice(2,5)+'-'+d.slice(5);
+  if(d.length===10) return d.slice(0,3)+'-'+d.slice(3,6)+'-'+d.slice(6);
+  return t;
+}
+function telDial(s){ return String(s==null?'':s).replace(/[^0-9+]/g,''); }
+/*  휴대폰인가 — 전화·문자 버튼이 실제로 동작하는 기기인지 본다.
+ *  컴퓨터에서는 전화가 걸리지 않으므로 「번호 복사」로 바꿔 드린다. */
+function hdPhone(){
+  try{ return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent||''); }catch(e){ return false; }
+}
+const HD_SMS='안녕하세요, 송탄영광교회입니다. 영광 커넥트 앱 도움을 요청하셔서 연락드립니다.';
+function hdSmsHref(tel){
+  const n=telDial(tel);
+  /* 아이폰은 & , 안드로이드는 ? 로 문구를 붙인다 */
+  const sep=/iPhone|iPad|iPod/i.test((navigator&&navigator.userAgent)||'')?'&':'?';
+  return 'sms:'+n+sep+'body='+encodeURIComponent(HD_SMS);
+}
+async function helpCopy(tel,btn){
+  const n=telDial(tel);
+  try{ await navigator.clipboard.writeText(n); }
+  catch(e){ try{ const t=document.createElement('textarea'); t.value=n;
+      document.body.appendChild(t); t.select(); document.execCommand('copy');
+      document.body.removeChild(t); }catch(e2){ alert(n); return; } }
+  if(btn){ const o=btn.textContent; btn.textContent='복사됨'; setTimeout(()=>{btn.textContent=o;},1200); }
+}
+/* 연락 수단 버튼 — 휴대폰이면 전화·문자, 컴퓨터면 번호 복사 */
+function hdActions(h){
+  const tel=String(h.tel||'');
+  if(!tel) return '';
+  if(!hdPhone())
+    return '<button class="btn sm hdcopy" onclick="helpCopy(\''+jsq(tel)+'\',this)">📋 번호 복사</button>';
+  return '<a class="btn sm hdcall" href="tel:'+esc(telDial(tel))+'">📞 전화</a>'
+       + '<a class="btn sm hdsms" href="'+esc(hdSmsHref(tel))+'">💬 문자</a>';
+}
+/* 지우기까지 할 수 있는 분인가 — 담당 교역자(관리자)만 */
+function hdCanDrop(){ return !!current && current.role==='admin'; }
+/* 한 사람 줄 — 연락완료는 체크박스로 표시한다 (신청 이력은 지우지 않고 남긴다) */
+function hdRow(h){
+  const done=String(h.status||'접수')!=='접수';
+  const id=jsq(h.id||'');
+  return '<div class="hdrow'+(done?' done':'')+'">'
+    +'<label class="hdchk" title="'+(done?'연락 전으로 되돌리기':'연락을 마치셨으면 체크')+'">'
+    +'<input type="checkbox" '+(done?'checked':'')
+    +' onchange="helpMark(\''+id+'\', this.checked?\'연락완료\':\'접수\', this)"/>'
+    +'<span class="bx"></span></label>'
+    +'<span class="who"><b>'+esc(h.name||'')+'</b>'
+    +'<span class="tel">'+esc(telFmt(h.tel||''))+'</span>'
+    +'<span class="tm">'+esc(h.ts||'')+' · '+esc(h.status||'접수')+'</span></span>'
+    +'<span class="hdbtns">'+hdActions(h)
+    /*  지우기는 담당 교역자(관리자)만. 도우미 세 분은 「연락완료」 표시까지만 한다.
+     *  서버도 같은 기준으로 막는다 — 화면에서 감추는 것이 아니다. */
+    +(hdCanDrop()? '<button class="btn sm hddrop" onclick="helpDrop(\''+id+'\')">삭제</button>' : '')
+    +'</span>'
+    +'</div>';
+}
 function renderHelpDash(){
   const box=document.getElementById('hdDash'); if(!box) return;
   const rows=HELP||[];
   if(!rows.length){ box.innerHTML=''; return; }   /* 담당이 아니거나 신청이 없으면 아예 안 그린다 */
   const open=rows.filter(function(h){ return String(h.status||'접수')==='접수'; });
-  box.innerHTML='<div class="sect-t">영광 커넥트 헬프데스크</div>'
+  box.innerHTML='<div class="sect-t">영광 커넥트 헬프데스크'
+    +(open.length?' <span class="hdbadge">연락 전 '+open.length+'</span>':'')
+    +' <button class="seeall" onclick="goHelpList()">전체 보기 ›</button></div>'
     +'<div class="dcard"><p class="dd">앱 설치·사용 도움을 요청하신 분입니다 · '
     +'연락 전 '+open.length+'명 / 전체 '+rows.length+'명</p>'
-    + rows.map(function(h){
-        const done=String(h.status||'접수')!=='접수';
-        const tel=String(h.tel||'');
-        return '<div class="hdrow'+(done?' done':'')+'">'
-          +'<span class="who"><b>'+esc(h.name||'')+'</b>'
-          +'<span class="tel"><a href="tel:'+esc(tel.replace(/[^0-9+]/g,''))+'">'+esc(tel)+'</a></span>'
-          +'<span class="tm">'+esc(h.ts||'')+(done?' · 연락완료':'')+'</span></span>'
-          +'<button class="btn sec sm" onclick="helpMark(\''+jsq(h.id||'')+'\',\''
-          +(done?'접수':'연락완료')+'\')">'+(done?'되돌리기':'연락완료')+'</button>'
-          +'<button class="btn sm" style="background:#eef2f7;color:#55606d" '
-          +'onclick="helpDrop(\''+jsq(h.id||'')+'\')">삭제</button>'
-          +'</div>';
-      }).join('')
-    +'<div class="dnote">연락을 마치신 뒤 삭제하시면 연락처가 시트에서도 지워집니다.</div>'
+    + rows.slice(0,5).map(hdRow).join('')
+    +(rows.length>5?'<div class="dnote">아래 <b>'+(rows.length-5)+'명</b>은 헬프데스크 탭에서 보실 수 있습니다.</div>':'')
     +'</div>';
 }
-async function helpMark(id,st){
+/* ── 헬프데스크 탭 ── */
+function goHelpList(){ openApp('hdlist'); }
+/*  자료가 늦게 도착해 「담당자였구나」를 나중에 알게 되었을 때,
+ *  보고 계신 화면은 그대로 두고 메뉴에 탭만 하나 더 붙인다. */
+function syncHelpTab(){
+  try{
+    const app=document.getElementById('app'), nav=document.getElementById('nav');
+    if(current && app && app.style.display==='block' && nav){
+      const has=!!nav.querySelector('button[data-v="hdlist"]');
+      if(has !== canSeeHelp()){                       /* 달라졌을 때만 메뉴를 다시 만든다 */
+        const cur=(document.querySelector('.view.active')||{}).id||'';
+        buildNav(cur);
+      }
+    }
+  }catch(e){}
+  renderHelpPage();
+}
+function hdFilter(f){ HDFILTER=f; renderHelpPage(); }
+function renderHelpPage(){
+  const box=document.getElementById('hdPage'); if(!box) return;
+  const rows=HELP||[];
+  const open=rows.filter(h=>String(h.status||'접수')==='접수');
+  const done=rows.filter(h=>String(h.status||'접수')!=='접수');
+  if(!rows.length){
+    box.innerHTML='<div class="card"><h2>영광 커넥트 헬프데스크</h2>'
+      +'<p class="sub">앱 설치·사용 도움을 요청하신 분이 아직 없습니다.</p></div>';
+    return;
+  }
+  const pick = HDFILTER==='open'?open : HDFILTER==='done'?done : rows;
+  const chip=(k,t,n)=>'<button class="hdchip'+(HDFILTER===k?' on':'')
+    +'" onclick="hdFilter(\''+k+'\')">'+t+' '+n+'</button>';
+  box.innerHTML='<div class="card"><h2>영광 커넥트 헬프데스크</h2>'
+    +'<p class="sub">앱 설치·사용 도움을 요청하신 분입니다 · '
+    +'<b>연락 전 '+open.length+'명</b> / 전체 '+rows.length+'명</p>'
+    +'<div class="hdchips">'+chip('all','전체',rows.length)
+    +chip('open','연락 전',open.length)+chip('done','연락완료',done.length)+'</div>'
+    +(pick.length? pick.map(hdRow).join('')
+                 : '<div class="dnote">해당하는 분이 없습니다.</div>')
+    +'<div class="dnote">연락을 마치시면 <b>왼쪽 네모를 체크</b>해 주세요. '
+    +'신청 기록은 지우지 않고 그대로 남습니다.'
+    +(hdCanDrop()? '<br>잘못 들어온 신청은 <b>삭제</b>로 지우실 수 있습니다.' : '')
+    +'</div>'
+    +'</div>';
+}
+async function helpMark(id,st,el){
   if(!id) return;
+  if(el) el.disabled=true;
   try{
     const r=await fetch(API,{method:'POST',body:JSON.stringify(
       {action:'setHelp', id:id, status:st, token:TOKEN})});
     const d=await r.json().catch(()=>null);
-    if(d&&d.ok){ absorbToken(d); await loadAll(); renderHelpDash(); return; }
+    if(d&&d.ok){
+      absorbToken(d);
+      /* 서버 답을 기다리는 동안 화면이 되돌아가 보이지 않게, 먼저 손에 든 자료를 고친다 */
+      (HELP||[]).forEach(function(h){ if(String(h.id)===String(id)) h.status=st; });
+      renderHelpDash(); renderHelpPage();
+      await loadAll(); renderHelpDash(); renderHelpPage(); return;
+    }
     alert((d&&d.message)||'바꾸지 못했습니다.');
   }catch(e){ alert('전송에 실패했습니다.'); }
+  finally{ if(el) el.disabled=false; }
+  renderHelpDash(); renderHelpPage();
 }
 async function helpDrop(id){
   if(!id) return;
@@ -2699,13 +2845,14 @@ async function helpDrop(id){
     const r=await fetch(API,{method:'POST',body:JSON.stringify(
       {action:'deleteHelp', id:id, token:TOKEN})});
     const d=await r.json().catch(()=>null);
-    if(d&&d.ok){ absorbToken(d); await loadAll(); renderHelpDash(); return; }
+    if(d&&d.ok){ absorbToken(d); await loadAll(); renderHelpDash(); renderHelpPage(); return; }
     alert((d&&d.message)||'지우지 못했습니다.');
   }catch(e){ alert('전송에 실패했습니다.'); }
 }
 function goReport(){
   const r=(current&&current.role)||'guest';
   if(subOnlyMe()){ openApp('manage'); return; }            /* 「문의만」은 문의 접수 처리부터 */
+  if(helpOnlyMe()){ openApp('hdlist'); return; }           /* 「헬프데스크만」은 헬프데스크부터 */
   if(r==='admin'){ openApp('dash'); return; }              /* 관리자는 대시보드부터 */
   if(r==='leader'||r==='elder'){ openApp('report'); return; }
   /* 구역보고 대상은 아니지만 이미 로그인한 분(중보기도팀장·위원장·부장 등)은
@@ -2725,10 +2872,11 @@ const ROLE_NAV={
  elder:[['report','구역보고'],['member','성도 조회'],['mroster','연락처 관리'],['manage','문의 접수 처리']],
  chair:[['manage','문의 접수 처리']],
  pray:[['pray','중보기도']],
+ help:[['hdlist','헬프데스크']],
  staff:[['manage','문의 접수 처리']],
  admin:[['dash','대시보드'],['report','구역보고'],['member','성도 조회'],['mroster','명단 관리'],['pray','중보기도'],['edu','교육부','https://visionspeaker.github.io/edu-dashboard/'],['manage','문의 접수 처리'],['archive','아카이브']]
 };
-const ROLE_LABEL={guest:'교인',member:'일반 교인',leader:'구역장',elder:'장로 · 구역장/위원장',chair:'위원장',staff:'부장',pray:'중보기도팀장',admin:'관리자(교역자·담임목사)'};
+const ROLE_LABEL={guest:'교인',member:'일반 교인',leader:'구역장',elder:'장로 · 구역장/위원장',chair:'위원장',staff:'부장',pray:'중보기도팀장',help:'헬프데스크 도우미',admin:'관리자(교역자·담임목사)'};
 function setRoleLabel(){
   const role=current.role;
   let who='<b>'+(ROLE_LABEL[role]||'교인')+'</b>';
@@ -2749,7 +2897,8 @@ function enterApp(role,scope){
    *  다른 분이 바로 로그인**하면 앞사람 것이 잠깐 남아 있을 수 있다.
    *  그래서 들어올 때 먼저 비운다. (2026-09-13) */
   HELP=[];
-  try{ const hd=document.getElementById('hdDash'); if(hd) hd.innerHTML=''; }catch(e){}
+  try{ const hd=document.getElementById('hdDash'); if(hd) hd.innerHTML='';
+        const hp=document.getElementById('hdPage'); if(hp) hp.innerHTML=''; }catch(e){}
   /*  「문의만」으로 바뀐 분은 예전에 받아 둔 구역 명단이 기기에 남아 있을 수 있다.
       그대로 두면 교인 이름이 계속 보이므로 여기서 지운다. */
   if(subOnlyMe()){
@@ -2773,7 +2922,8 @@ function enterApp(role,scope){
 /* 로그아웃하면 받아 둔 자료도 함께 비운다 — 특히 헬프데스크 신청 명단(이름·전화번호)은
    다음 분이 같은 기기로 들어오실 때 잠깐이라도 남아 있으면 안 된다. */
 function logout(){current=null;clearSession();setToken('');notiShown=false;gnotiShown=false;GRADES=[];HELP=[];
-  try{ const hd=document.getElementById('hdDash'); if(hd) hd.innerHTML=''; }catch(e){}
+  try{ const hd=document.getElementById('hdDash'); if(hd) hd.innerHTML='';
+        const hp=document.getElementById('hdPage'); if(hp) hp.innerHTML=''; }catch(e){}
   hideGNoti();closeNoti();['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
 /* back=true 이면 뒤로가기로 되돌아온 것이므로 기록하지 않는다 */
 function showView(v,back){
@@ -2795,6 +2945,7 @@ function showView(v,back){
   if(v==='prayer') openPrayer();
   if(v==='archive') renderArchive();
   if(v==='helpdesk') openHelpdesk();
+  if(v==='hdlist') renderHelpPage();
   if(v==='pray') renderIp();
   growAll(document.getElementById(v));
 }
@@ -2802,9 +2953,22 @@ function showView(v,back){
     (서버도 구역보고·신급·기도·명단 자료를 아예 안 내려보낸다) */
 const SCOPE_SUB_ONLY='문의만';
 function subOnlyMe(){ return !!current && String(current.scope||'').trim()===SCOPE_SUB_ONLY; }
+/*  ★ 2026-09-14 ★ 「헬프데스크만」 — 앱 설치 도우미 세 분.
+    헬프데스크 말고는 메뉴가 없고, 서버도 다른 자료를 한 줄도 안 내려보낸다. */
+const SCOPE_HELP_ONLY='헬프데스크만';
+function helpOnlyMe(){ return !!current
+  && (String(current.scope||'').trim()===SCOPE_HELP_ONLY || current.role==='help'); }
+/*  헬프데스크 탭을 보여 드릴까 — 서버가 자료를 준 분에게만.
+    (이름 명단은 서버에만 있다. 앱은 「자료가 왔는가」로만 판단한다) */
+function canSeeHelp(){ return helpOnlyMe() || (Array.isArray(HELP) && HELP.length>0); }
 function buildNav(view){
   const nav=document.getElementById('nav');
-  const items=subOnlyMe() ? [['manage','문의 접수 처리']] : (ROLE_NAV[current.role]||[]);
+  let items=subOnlyMe() ? [['manage','문의 접수 처리']]
+          : helpOnlyMe() ? [['hdlist','헬프데스크']]
+          : (ROLE_NAV[current.role]||[]).slice();
+  /* 담당자에게만 헬프데스크 탭을 하나 더 붙인다 */
+  if(!subOnlyMe() && !helpOnlyMe() && canSeeHelp()
+     && !items.some(it=>it[0]==='hdlist')) items.splice(1,0,['hdlist','헬프데스크']);
   const first=view||(items[0]&&items[0][0])||'intake';
   if(!items.length){ nav.innerHTML=''; nav.style.display='none'; }
   else { nav.style.display='flex';

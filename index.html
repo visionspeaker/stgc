@@ -936,6 +936,44 @@ border-radius:10px;font-size:11.5px;color:var(--muted);line-height:1.75;word-bre
 color:#b91c1c;border-radius:9px;padding:7px;font-size:11.5px;font-weight:800;font-family:inherit;cursor:pointer}
 .gddet .gddel:hover{background:#fdecec}
 .gdnone{padding:16px 6px;text-align:center;font-size:11.5px;color:#a8b2c0}
+/* ── 신급 교육 탭 (담당 장로·교역자) ── */
+.gdprow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;
+border:1px solid var(--inline);border-radius:10px;padding:7px 9px;margin-bottom:5px;background:#fff}
+.gdprow.on{border-color:#9ed3c7;background:#f6fdfb}
+.gdprow b{font-size:13.5px}
+.gdprow .gpd{font-size:11.5px;color:var(--muted)}
+.gpsex{border-radius:20px;padding:0 7px;font-size:10.5px;font-weight:800;flex:0 0 auto}
+.gpsex.m{background:#e8f2fe;color:#1b4f9c} .gpsex.f{background:#fdeef4;color:#a33b6b}
+.gplv{background:#eef7f5;color:#1d5e53;border-radius:20px;padding:0 7px;font-size:10.5px;font-weight:800}
+.gpkid{background:#fdf0e6;color:#9a5a20;border-radius:20px;padding:0 7px;font-size:10.5px;font-weight:800}
+.gpnone{background:#f4f6f9;color:#98a3b1;border-radius:20px;padding:0 7px;font-size:10.5px;font-weight:800}
+.gdprow .gpr{margin-left:auto;display:flex;gap:4px;align-items:center;flex:0 0 auto}
+/*  단추 이름은 .gmini — 앱 어디에나 있는 안내 글씨용 `.mini` 와 겹치면
+    문의하기 안내 줄이 빈 상자로 보인다 (예전에 한 번 겪었다) */
+.gdprow .gmini{border:0;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:800;
+font-family:inherit;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.gdprow .gmini.call{background:#e8f2fe;color:#1b4f9c;border:1px solid #c3daf7}
+.gdprow .gmini.sms{background:#f3eefe;color:#5b3cad;border:1px solid #d9cdf7}
+.gdprow .gmini.ed{background:#eef7f5;color:#1d5e53;border:1px solid #bfe0d8}
+/* 고치기 칸 */
+.gdpedit{display:grid;grid-template-columns:46px 1fr;gap:6px 8px;align-items:center;
+border:1px solid #9ed3c7;border-top:0;border-radius:0 0 10px 10px;
+padding:10px 10px 11px;margin:-6px 0 7px;background:#f6fdfb}
+.gdpedit .gpl{font-size:11.5px;font-weight:800;color:var(--muted)}
+.gdpedit .gpb{display:flex;gap:4px;align-items:center;flex-wrap:nowrap;overflow-x:auto}
+.gdpedit .gpb.gpwrap{flex-wrap:wrap;overflow:visible}
+.gpick{border:1px solid var(--inline);background:#fff;color:var(--muted);border-radius:8px;
+padding:5px 9px;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer;flex:0 0 auto}
+.gpick.on{border-color:#2fa58f;background:#eef7f5;color:#1d5e53}
+.gpick.save{border-color:#2fa58f;background:#2fa58f;color:#fff}
+.gpsel{flex:1;min-width:0;border:1px solid var(--inline);border-radius:8px;padding:6px 8px;
+font-size:12.5px;font-family:inherit;background:#fff}
+.gpin{flex:1;min-width:0;border:1px solid var(--inline);border-radius:8px;padding:6px 9px;
+font-size:13px;font-family:inherit}
+.gdpedit .gpnote{grid-column:1/-1;font-size:11px;color:var(--muted);margin-top:2px}
+.gpdel{border:0;background:none;color:#b3261e;font-size:11px;font-weight:800;
+font-family:inherit;cursor:pointer;padding:0}
+.gptools{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
 /* ── 신급 교육 신청 ── */
 .gdcard{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:14px}
 .gdhd{background:linear-gradient(135deg,#a97fe6,#7b52c8);color:#fff;padding:16px 17px}
@@ -1295,6 +1333,11 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 <!-- 신급 교육 신청 (로그인 없이 누구나) -->
 <section id="grade" class="view">
   <div id="gdWrap"></div>
+</section>
+
+<!-- 신급 교육 명단·현황 (담당 장로 · 교역자만 · 서버가 다른 분께는 자료를 주지 않는다) -->
+<section id="gdlist" class="view">
+  <div id="gdPage"></div>
 </section>
 
 <!-- 중보기도 신청 (로그인 없이 누구나) -->
@@ -1963,7 +2006,16 @@ async function loadAll(){
             시트에서 고치면 다시 로그인하지 않아도 다음 새로고침에 반영된다. */
         const sc=String(d.me.scope||'').trim();
         if(String(current.scope||'').trim()!==sc){ current.scope=sc; meChanged=true; }
-        if(meChanged){ saveSession(); setRoleLabel(); buildNav(); }
+        /*  신급 담당인지 — 서버가 참·거짓만 알려 준다 (담당자 이름은 서버에만 있다)
+         *  ★ 양쪽을 참·거짓으로 맞춰 견준다 ★ 처음에는 current.gradeAll 이 undefined 인데
+         *  false 와 그냥 비교하면 늘 「바뀌었다」가 되어, 아래에서 메뉴를 다시 만들며
+         *  보고 있던 화면이 첫 칸으로 튕겼다. (?go=helpdesk 가 문의하기로 열리던 원인) */
+        const ga=(d.me.gradeAll===true);
+        if((current.gradeAll===true)!==ga){ current.gradeAll=ga; meChanged=true; }
+        /*  메뉴를 다시 만들 때는 **보고 있던 화면을 그대로 둔다.**
+         *  인자 없이 buildNav() 를 부르면 첫 칸으로 옮겨 가 버린다. */
+        if(meChanged){ saveSession(); setRoleLabel();
+          buildNav((document.querySelector('.view.active')||{}).id||''); }
       }
       const before=dataSig();
       reports=dedupeReports(Array.isArray(d.reports)?d.reports:[]);
@@ -2302,6 +2354,7 @@ async function loginByName(){
            {district:(me&&me.district)||'',
             category:(me&&me.category)||'',
             duty:(me&&me.duty)||'', scope:(me&&me.scope)||'',
+            gradeAll:((me&&me.gradeAll)===true),
             who:(me&&me.name)||nm});
   if(mustPw) setTimeout(function(){
     if(confirm('아직 처음 비밀번호(1234)를 쓰고 계십니다.\n지금 변경하시겠습니까?')) openPwChange();
@@ -2806,14 +2859,17 @@ function syncHelpTab(){
   try{
     const app=document.getElementById('app'), nav=document.getElementById('nav');
     if(current && app && app.style.display==='block' && nav){
-      const has=!!nav.querySelector('button[data-v="hdlist"]');
-      if(has !== canSeeHelp()){                       /* 달라졌을 때만 메뉴를 다시 만든다 */
+      const hasH=!!nav.querySelector('button[data-v="hdlist"]');
+      const hasG=!!nav.querySelector('button[data-v="gdlist"]');
+      const wantG=canSeeGradeAll() && gradeStillShow();
+      if(hasH !== canSeeHelp() || hasG !== wantG){     /* 달라졌을 때만 메뉴를 다시 만든다 */
         const cur=(document.querySelector('.view.active')||{}).id||'';
         buildNav(cur);
       }
     }
   }catch(e){}
   renderHelpPage();
+  renderGradePage();
 }
 function hdFilter(f){ HDFILTER=f; renderHelpPage(); }
 function renderHelpPage(){
@@ -2921,7 +2977,8 @@ function enterApp(role,scope){
    *  그래서 들어올 때 먼저 비운다. (2026-09-13) */
   HELP=[];
   try{ const hd=document.getElementById('hdDash'); if(hd) hd.innerHTML='';
-        const hp=document.getElementById('hdPage'); if(hp) hp.innerHTML=''; }catch(e){}
+        const hp=document.getElementById('hdPage'); if(hp) hp.innerHTML='';
+        const gp=document.getElementById('gdPage'); if(gp) gp.innerHTML=''; }catch(e){}
   /*  「문의만」으로 바뀐 분은 예전에 받아 둔 구역 명단이 기기에 남아 있을 수 있다.
       그대로 두면 교인 이름이 계속 보이므로 여기서 지운다. */
   if(subOnlyMe()||helpOnlyMe()){
@@ -2946,7 +3003,8 @@ function enterApp(role,scope){
    다음 분이 같은 기기로 들어오실 때 잠깐이라도 남아 있으면 안 된다. */
 function logout(){current=null;clearSession();setToken('');notiShown=false;gnotiShown=false;GRADES=[];HELP=[];
   try{ const hd=document.getElementById('hdDash'); if(hd) hd.innerHTML='';
-        const hp=document.getElementById('hdPage'); if(hp) hp.innerHTML=''; }catch(e){}
+        const hp=document.getElementById('hdPage'); if(hp) hp.innerHTML='';
+        const gp=document.getElementById('gdPage'); if(gp) gp.innerHTML=''; }catch(e){}
   hideGNoti();closeNoti();['lgName','lgPw2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});goHome();}
 /* back=true 이면 뒤로가기로 되돌아온 것이므로 기록하지 않는다 */
 function showView(v,back){
@@ -2969,6 +3027,7 @@ function showView(v,back){
   if(v==='archive') renderArchive();
   if(v==='helpdesk') openHelpdesk();
   if(v==='hdlist') renderHelpPage();
+  if(v==='gdlist') openGradeList();
   if(v==='pray') renderIp();
   growAll(document.getElementById(v));
 }
@@ -2997,6 +3056,10 @@ function buildNav(view){
   /* 담당자에게만 헬프데스크 탭을 하나 더 붙인다 */
   if(!subOnlyMe() && !helpOnlyMe() && canSeeHelp()
      && !items.some(it=>it[0]==='hdlist')) items.splice(1,0,['hdlist','헬프데스크']);
+  /*  신급 교육 — 담당 장로·교역자에게만. 마감 30일 뒤에는 저절로 사라진다.
+      (서버가 me.gradeAll 로 알려 준다 — 담당자 이름은 앱에 없다) */
+  if(!subOnlyMe() && !helpOnlyMe() && canSeeGradeAll() && gradeStillShow()
+     && !items.some(it=>it[0]==='gdlist')) items.push(['gdlist','신급 교육']);
   const first=view||(items[0]&&items[0][0])||'intake';
   if(!items.length){ nav.innerHTML=''; nav.style.display='none'; }
   else { nav.style.display='flex';
@@ -4308,6 +4371,249 @@ function renderGradeDash(){
     +'</div>';
 }
 function gdBox(v,l){ return '<div class="gdkpi"><div class="v">'+v+'</div><div class="k">'+esc(l)+'</div></div>'; }
+
+/* ══════════ 신급 교육 탭 (담당 장로 · 교역자) ══════════
+   ★ 2026-09-14 ★
+   교육을 진행하시는 담당 장로님이 **전체 신청 명단**을 보시고,
+   성도님 신청서에는 없는 **성별 · 소속 · 학년 · 연락처**를 여기서 채워 넣는다.
+   (신청서는 짧게 두기로 했다 — 이름·구역·연락처·과정 네 칸)
+
+   · 누가 보나   : 서버가 me.gradeAll 로 참·거짓만 알려 준다.
+                   담당자 이름 명단은 **서버에만** 있다 (공개 저장소에 실명이 들어가면 안 된다)
+   · 누가 고치나 : 보이는 분은 다 고칠 수 있다 (교역자 + 담당 장로)
+   · 지우기      : 교역자만 — 서버도 같은 기준으로 막는다  */
+function canSeeGradeAll(){ return !!current && current.gradeAll===true; }
+function gdSexes(){ const a=(GRADE&&GRADE.sexes); return (Array.isArray(a)&&a.length)?a.map(String):['남','여']; }
+function gdLevels(){ const a=(GRADE&&GRADE.levels);
+  return (Array.isArray(a)&&a.length)?a.map(String)
+    :['초1','초2','초3','초4','초5','초6','중1','중2','중3','고1','고2','고3']; }
+/* 소속 고르개에 넣을 목록 — 신청 화면과 같은 차례 */
+function gdDistList(){
+  const g=GRADE||{};
+  const top=(Array.isArray(g.topDist)?g.topDist:['중고등부','청년부']).map(String);
+  const rest=(Array.isArray(g.districts)?g.districts:DIST_SORTED).map(String);
+  const out=[String(g.noDist||'구역 모름 / 새가족')].concat(top);
+  rest.forEach(function(d){ if(out.indexOf(d)<0) out.push(d); });
+  return out;
+}
+let gdEditId='';
+function goGradeList(){ openApp('gdlist'); }
+/*  화면을 열 때 — 교육 안내(과정·기간·학년 목록)는 서버에서 따로 받아 온다.
+ *  먼저 가진 것으로 그려 드리고, 받아오면 다시 그린다. */
+async function openGradeList(){
+  if(!GRADE) GRADE=loadGradeInfo();
+  renderGradePage();
+  const d=await fetchGradeInfo();
+  if(d) renderGradePage();
+}
+function gdEditOpen(id){ gdEditId=(String(gdEditId||'')===String(id||''))?'':String(id||''); renderGradePage(); }
+
+/*  남은 날 — 마감일까지 며칠인지 */
+function gdDaysLeft(){
+  const to=(GRADE&&GRADE.to)||''; if(!to) return null;
+  const d=new Date(to+'T23:59:59'); if(isNaN(d)) return null;
+  return Math.ceil((d-new Date())/86400000);
+}
+/* 한 사람 줄 */
+function gdpRow(g){
+  const id=jsq(g.id||'');
+  const kid=isKidCourse(g.course);
+  const sx=String(g.sex||''), lv=String(g.level||'');
+  const open=String(gdEditId||'')===String(g.id||'');
+  const tel=String(g.phone||'');
+  let head='<div class="gdprow'+(open?' on':'')+'">'
+    +'<b>'+esc(g.name||'')+'</b>'
+    +(sx? '<span class="gpsex '+(sx==='남'?'m':'f')+'">'+esc(sx)+'</span>'
+        : '<span class="gpnone">성별?</span>')
+    +(kid? '<span class="gpkid">'+esc(gdKidMark(g.course))+'</span>':'')
+    +'<span class="gpd">'+esc(g.district||'-')+'</span>'
+    +(lv? '<span class="gplv">'+esc(lv)+'</span>':'')
+    +'<span class="gpr">'
+      +(tel? '<a class="gmini call" href="'+esc(telHref(tel))+'" title="전화">📞</a>'
+            +'<a class="gmini sms" href="'+esc(smsHref(tel))+'" title="문자">💬</a>'
+           : '<span class="gpnone">번호?</span>')
+      +'<button class="gmini ed" onclick="gdEditOpen(\''+id+'\')">'+(open?'닫기':'고치기')+'</button>'
+    +'</span></div>';
+  if(!open) return head;
+  /* ── 고치기 칸 ── */
+  const pick=(cur,arr,f)=>arr.map(v=>'<button class="gpick'+(cur===v?' on':'')
+      +'" onclick="'+f+'(\''+id+'\',\''+jsq(v)+'\')">'+esc(v)+'</button>').join('');
+  head+='<div class="gdpedit">'
+    +'<div class="gpl">성별</div><div class="gpb">'
+      +pick(sx,gdSexes(),'gdSetSex')
+      +'<button class="gpick'+(sx?'':' on')+'" onclick="gdSetSex(\''+id+'\',\'\')">비움</button></div>'
+    +'<div class="gpl">소속</div><div class="gpb">'
+      +'<select class="gpsel" onchange="gdSetDist(\''+id+'\',this.value)">'
+      +gdDistList().map(d=>'<option'+(String(g.district||'')===d?' selected':'')+'>'+esc(d)+'</option>').join('')
+      +'</select></div>'
+    +'<div class="gpl">학년</div><div class="gpb gpwrap">'
+      +pick(lv,gdLevels(),'gdSetLevel')
+      +'<button class="gpick'+(lv?'':' on')+'" onclick="gdSetLevel(\''+id+'\',\'\')">해당 없음</button></div>'
+    +'<div class="gpl">연락처</div><div class="gpb">'
+      +'<input class="gpin" id="gdph_'+id+'" value="'+esc(fmtPhone(tel))+'" '
+      +'inputmode="numeric" placeholder="숫자만 넣어 주세요"/>'
+      +'<button class="gpick save" onclick="gdSetPhone(\''+id+'\')">저장</button></div>'
+    +'<div class="gpnote" id="gdmsg_'+id+'">'+esc(String(g.ts||'').slice(0,16))+' 신청'
+      +(canDelGrade()?' · <button class="gpdel" onclick="gdDelete(\''+id+'\')">🗑 지우기</button>':'')
+      +'</div>'
+    +'</div>';
+  return head;
+}
+function canDelGrade(){ return !!current && current.role==='admin'; }
+
+function renderGradePage(){
+  const box=document.getElementById('gdPage'); if(!box) return;
+  if(!canSeeGradeAll()){ box.innerHTML=''; return; }
+  const g=GRADE||{};
+  const list=(GRADES||[]).slice();
+  const names=(g.courses||[]).map(c=>c.name);
+  const cs0=names.length?names:['학습','세례','입교'];
+  const base=cs0.filter(c=>!isKidCourse(c));
+  const cols=base.length?base:['학습','세례','입교'];
+  const host=cols.indexOf('세례')>=0 ? '세례' : cols[cols.length-1];
+  const ordOf=c=>{ const i=cs0.indexOf(String(c||'')); return i<0?99:i; };
+  const grp={}; cols.forEach(c=>grp[c]=[]);
+  list.forEach(function(x){
+    const k=isKidCourse(x.course)? host : String(x.course||'');
+    if(!grp[k]) grp[k]=[];
+    grp[k].push(x);
+  });
+  /* 칸 안 차례 — 일반 먼저, 아이 세례는 뒤. 같은 무리에서는 구역 번호 → 가나다 */
+  Object.keys(grp).forEach(function(k){
+    grp[k].sort(function(a,b){
+      return (isKidCourse(a.course)?1:0)-(isKidCourse(b.course)?1:0)
+          || ordOf(a.course)-ordOf(b.course)
+          || distNum(a.district)-distNum(b.district)
+          || String(a.name||'').localeCompare(String(b.name||''),'ko');
+    });
+  });
+  const colKeys=cols.concat(Object.keys(grp).filter(c=>cols.indexOf(c)<0));
+  const COL={'학습':'#3aa66e','세례':'#3f8ed4','입교':'#9b6fe0',
+             '유아세례':'#e0729b','어린이세례':'#e0913c','아동세례':'#e0729b'};
+  const colOf=c=>COL[c]||'#94a3b8';
+  const tot=list.length;
+  const nSex=v=>list.filter(x=>String(x.sex||'')===v).length;
+  const nMid=list.filter(x=>String(x.district||'')==='중고등부').length;
+  const nBlank=list.filter(x=>!String(x.sex||'').trim()).length;
+  const dl=gdDaysLeft();
+  box.innerHTML='<div class="card">'
+    +'<h2>'+esc(g.title||'신급 교육')+'</h2>'
+    +'<p class="sub">'+esc(g.sub||'')
+      +(g.from&&g.to? ' · 신청 '+esc(String(g.from).slice(5))+' ~ '+esc(String(g.to).slice(5))
+        +(dl!==null? (dl>=0? ' <b>('+dl+'일 남음)</b>' : ' <b>(마감)</b>') : '') : '')
+      +'</p>'
+    +(tot?
+      '<div class="gdkpis">'
+        + gdBox(tot+' <small>명</small>','전체 신청')
+        + gdBox(nSex('남'),'남')
+        + gdBox(nSex('여'),'여')
+        + gdBox(nMid,'중고등부')
+      +'</div>'
+      +(nBlank? '<div class="dnote">성별이 비어 있는 분이 <b>'+nBlank+'명</b> 있습니다. '
+                +'이름 옆 <b>고치기</b>를 눌러 채워 주세요.</div>' : '')
+      +'<div class="gdcols" style="grid-template-columns:repeat('+colKeys.length+',1fr)">'
+      +colKeys.map(function(c){
+        const arr=grp[c]||[];
+        return '<div class="gdcol">'
+          +'<div class="gdch" style="background:'+colOf(c)+'1a;color:'+colOf(c)+'">'
+            +esc(c)+' <span class="c">'+arr.length+'</span></div>'
+          +(arr.length? '<div class="gdcb">'+arr.map(gdpRow).join('')+'</div>'
+                      : '<div class="gdnone">없음</div>')
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'<div class="gptools">'
+        +'<button class="btn sec sm" onclick="gdPrint()">🖨 명단 출력</button>'
+        +'<button class="btn sm" style="background:linear-gradient(135deg,#4b9fe0,#2e74b5)" '
+        +'onclick="gdXls()">⬇ 엑셀</button>'
+        +'<button class="btn sec sm" onclick="gdCopyTel(this)">📋 연락처 복사</button>'
+      +'</div>'
+      : '<div class="bempty">아직 신청이 없습니다.</div>')
+    +'</div>';
+}
+
+/*  ── 세부 입력 — 화면을 먼저 고치고 서버로 보낸다 (2~3초 기다리지 않게) ── */
+async function gdSave(id, patch, el){
+  const g=(GRADES||[]).find(x=>String(x.id)===String(id));
+  if(!g) return;
+  const back={};
+  Object.keys(patch).forEach(function(k){
+    const f=(k==='sex')?'sex':(k==='level')?'level':(k==='district')?'district':'phone';
+    back[f]=g[f]; g[f]=patch[k];
+  });
+  renderGradePage(); renderGradeDash();
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify(
+      Object.assign({action:'gradeEdit', id:id, token:TOKEN}, patch))});
+    const d=await r.json().catch(()=>null);
+    if(d&&d.ok){ absorbToken(d); return; }
+    /* 실패하면 화면을 되돌린다 */
+    Object.keys(back).forEach(function(f){ g[f]=back[f]; });
+    renderGradePage(); renderGradeDash();
+    alert((d&&d.message)||'저장하지 못했습니다.');
+  }catch(e){
+    Object.keys(back).forEach(function(f){ g[f]=back[f]; });
+    renderGradePage(); renderGradeDash();
+    alert('전송에 실패했습니다.');
+  }
+}
+function gdSetSex(id,v){ gdSave(id,{sex:v}); }
+function gdSetLevel(id,v){ gdSave(id,{level:v}); }
+function gdSetDist(id,v){ gdSave(id,{district:v}); }
+function gdSetPhone(id){
+  const el=document.getElementById('gdph_'+id); if(!el) return;
+  const v=String(el.value||'').trim();
+  const d=v.replace(/[^0-9]/g,'');
+  if(v && (d.length<9 || d.length>13)){
+    const m=document.getElementById('gdmsg_'+id);
+    if(m) m.innerHTML='<b style="color:#b3261e">연락처를 다시 확인해 주세요. (열한 자리 휴대폰 번호)</b>';
+    return;
+  }
+  gdSave(id,{phone:v});
+}
+/* 출력 · 엑셀 · 연락처 복사 */
+function gdFlat(){
+  return (GRADES||[]).slice().sort(function(a,b){
+    return distNum(a.district)-distNum(b.district)
+        || String(a.course||'').localeCompare(String(b.course||''),'ko')
+        || String(a.name||'').localeCompare(String(b.name||''),'ko');
+  });
+}
+function gdPrint(){
+  const rows=gdFlat().map(function(g,i){
+    return '<tr><td>'+(i+1)+'</td><td>'+esc(g.name||'')+'</td><td>'+esc(g.sex||'')+'</td>'
+      +'<td>'+esc(g.district||'')+'</td><td>'+esc(g.level||'')+'</td>'
+      +'<td>'+esc(g.course||'')+'</td><td>'+esc(fmtPhone(g.phone))+'</td></tr>';
+  }).join('');
+  const w=window.open('','_blank'); if(!w){ alert('창을 열지 못했습니다.'); return; }
+  w.document.write('<!doctype html><meta charset="utf-8"><title>신급 교육 명단</title>'
+    +'<style>body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;padding:18px}'
+    +'h1{font-size:17px}table{width:100%;border-collapse:collapse;font-size:12.5px}'
+    +'th,td{border:1px solid #ccc;padding:5px 7px;text-align:left}th{background:#f2f4f8}</style>'
+    +'<h1>'+esc((GRADE&&GRADE.title)||'신급 교육')+' — 명단 '+gdFlat().length+'명</h1>'
+    +'<table><tr><th>#</th><th>이름</th><th>성별</th><th>소속</th><th>학년</th>'
+    +'<th>과정</th><th>연락처</th></tr>'+rows+'</table>');
+  w.document.close(); try{ w.focus(); w.print(); }catch(e){}
+}
+function gdXls(){
+  const head=['이름','성별','소속','학년','과정','연락처','신청시각'];
+  const body=gdFlat().map(g=>[g.name||'',g.sex||'',g.district||'',g.level||'',
+                              g.course||'',fmtPhone(g.phone),String(g.ts||'')]);
+  const tsv=[head].concat(body).map(r=>r.map(c=>String(c).replace(/\t/g,' ')).join('\t')).join('\n');
+  const bom='﻿';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([bom+tsv],{type:'text/tab-separated-values;charset=utf-8'}));
+  a.download='신급교육_명단.xls';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+async function gdCopyTel(btn){
+  const t=gdFlat().map(g=>String(g.name||'')+' '+telDial(g.phone)).filter(x=>x.trim()).join('\n');
+  try{ await navigator.clipboard.writeText(t); }
+  catch(e){ try{ const x=document.createElement('textarea'); x.value=t;
+      document.body.appendChild(x); x.select(); document.execCommand('copy');
+      document.body.removeChild(x); }catch(e2){ alert('복사하지 못했습니다.'); return; } }
+  if(btn){ const o=btn.textContent; btn.textContent='복사됨'; setTimeout(()=>{btn.textContent=o;},1200); }
+}
 /* 아이를 대신해 신청하는 과정 (서버가 알려 준다 — 예전 서버면 아래 기본값) */
 function gdKidList(){
   const k=(GRADE&&GRADE.kid);

@@ -1933,7 +1933,7 @@ async function loadAll(){
   /*  로그인했는데 아직 명단이 없으면 함께 받아온다 (앱을 껐다 켠 경우 등).
       2026-09-13 — 예전에는 명단을 **다 받은 뒤에** 전체 자료를 불렀다.
       서버 한 번이 2초 남짓이라 그만큼 더 기다렸다. 이제 둘을 동시에 출발시킨다. */
-  const rosterJob = (TOKEN && !haveRoster()) ? fetchRoster() : null;
+  const rosterJob = (TOKEN && !haveRoster() && !helpOnlyMe() && !subOnlyMe()) ? fetchRoster() : null;
   try{
     const [, r] = await Promise.all([ rosterJob,
                                       fetch(withTok(API+'?action=all'),{method:'GET'}) ]);
@@ -2267,10 +2267,12 @@ async function loginByName(){
     lgErr('로그인 확인을 하지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.', false);
     return;
   }
-  /*  「문의만」으로 묶인 분은 구역 명단이 필요 없다 (서버도 안 내려준다).
-      그래서 명단을 받아오지도, 없다고 막지도 않는다. */
-  const subOnly = String((me&&me.scope)||'').trim()==='문의만';
-  if(!subOnly){
+  /*  「문의만」·「헬프데스크만」으로 묶인 분은 구역 명단이 필요 없다 (서버도 안 내려준다).
+      그래서 명단을 받아오지도, 없다고 막지도 않는다.
+      ★ 2026-09-14 ★ 예전에는 「문의만」만 봐서, 헬프데스크 도우미 세 분이
+      「구역 명단을 불러오지 못했습니다」에 걸려 아예 못 들어오셨다. */
+  const noRoster = narrowScope(me);
+  if(!noRoster){
     /*  2026-09-13 — 예전에는 로그인 확인과 구역 명단을 **따로** 불렀다.
         서버를 한 번 부르는 데 2초 남짓 걸려서 화면이 열리기까지 4~5초였다.
         이제 서버가 로그인 답에 명단을 함께 실어 주므로 한 번이면 끝난다.
@@ -2901,7 +2903,7 @@ function enterApp(role,scope){
         const hp=document.getElementById('hdPage'); if(hp) hp.innerHTML=''; }catch(e){}
   /*  「문의만」으로 바뀐 분은 예전에 받아 둔 구역 명단이 기기에 남아 있을 수 있다.
       그대로 두면 교인 이름이 계속 보이므로 여기서 지운다. */
-  if(subOnlyMe()){
+  if(subOnlyMe()||helpOnlyMe()){
     try{ localStorage.removeItem(ROSTER_KEY); }catch(e){}
     DISTRICTS={}; DIST_NAMES=[]; DIST_SORTED=[]; PHONES={}; MEMBER_IDS={};
     NAME_ALIAS={}; MEMBER_ROLE={}; ROSTER_CHANGES=[];
@@ -2952,10 +2954,15 @@ function showView(v,back){
 /*  「문의만」으로 묶인 분 — 문의 접수 처리 말고는 메뉴를 드리지 않는다.
     (서버도 구역보고·신급·기도·명단 자료를 아예 안 내려보낸다) */
 const SCOPE_SUB_ONLY='문의만';
+const SCOPE_HELP_ONLY='헬프데스크만';
+/*  맡은 일 밖의 자료를 한 줄도 받지 않는 분인가 — 구역 명단도 필요 없다 */
+function narrowScope(me){
+  const sc=String((me&&me.scope)||'').trim();
+  return sc===SCOPE_SUB_ONLY || sc===SCOPE_HELP_ONLY || String((me&&me.role)||'')==='help';
+}
 function subOnlyMe(){ return !!current && String(current.scope||'').trim()===SCOPE_SUB_ONLY; }
 /*  ★ 2026-09-14 ★ 「헬프데스크만」 — 앱 설치 도우미 세 분.
     헬프데스크 말고는 메뉴가 없고, 서버도 다른 자료를 한 줄도 안 내려보낸다. */
-const SCOPE_HELP_ONLY='헬프데스크만';
 function helpOnlyMe(){ return !!current
   && (String(current.scope||'').trim()===SCOPE_HELP_ONLY || current.role==='help'); }
 /*  헬프데스크 탭을 보여 드릴까 — 서버가 자료를 준 분에게만.

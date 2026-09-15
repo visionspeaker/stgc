@@ -1615,7 +1615,8 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 </div>
 
 <!-- 보고서 상세 모달 -->
-<div id="repModal" class="rmodal" style="display:none">
+<div id="repModal" class="rmodal" style="display:none"
+     onmousedown="repBackDown(event)" onmouseup="repBackUp(event)">
   <div class="rmcard">
     <div class="rmhead">
       <div style="flex:1">
@@ -5884,6 +5885,19 @@ function openReportDetail(dist,date){
   document.getElementById('repModal').style.display='flex';
 }
 function closeReportDetail(){ document.getElementById('repModal').style.display='none'; }
+/* ── 상자 바깥(어두운 바탕)을 누르면 닫는다 — ✕ 와 「닫기」는 그대로 (2026-09-15) ──
+   누르기 시작한 곳과 손 뗀 곳이 «둘 다» 바탕일 때만 닫는다.
+   · 상자 안에서 끌기 시작해 바깥에서 떼는 경우 (이름을 골라 복사할 때)
+   · 바깥에서 끌기 시작해 상자 안에서 떼는 경우
+   둘 다 실수로 꺼지면 안 되므로 클릭이 아니라 mousedown·mouseup 을 함께 본다 */
+let repDownBack=false;
+function repIsBack(e){ return !!(e && e.target && e.target.id==='repModal'); }
+function repBackDown(e){ repDownBack=repIsBack(e); }
+function repBackUp(e){
+  const go = repDownBack && repIsBack(e);
+  repDownBack=false;
+  if(go) closeReportDetail();
+}
 /*  구역 → 구역장 이름.
  *  예전에는 앱에 박혀 있던 계정 목록에서 뽑았다. 그 목록을 없앴으므로
  *  이제 **로그인한 뒤 서버에서 받은 명단·직책**에서 찾는다. */

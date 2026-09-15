@@ -6513,11 +6513,10 @@ function absPickReason(r){
     }
   }
   if(arr.length){
+    /* 아래 「결석자 관리」 칸도 그 사유로 펼쳐 두되 화면은 움직이지 않는다.
+       전에는 scrollIntoView 로 그 줄까지 쓸어 내렸는데, 정작 보려던
+       그래프 밑 명단이 화면 밖으로 밀려나 앞뒤가 맞지 않았다 (2026-09-15) */
     absMode='r'; absOpen=r; renderAbsentBoard();
-    let row=null;
-    document.querySelectorAll('#absentBoard .abrow').forEach(function(e){
-      if(e.getAttribute('data-k')===r) row=e; });
-    if(row && row.scrollIntoView) row.scrollIntoView({block:'center'});
   }
 }
 /* 옛 longAbsentHtml() 은 chronicMap() 으로 옮겼다 (2026-09-15) — 셈법은 그대로 3주 연속 */

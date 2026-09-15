@@ -1658,7 +1658,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 
 <div id="gnotiGate" class="rmodal" style="display:none;z-index:95">
   <div class="ntcard">
-    <div class="nthead"><span class="ntbell">🎓</span> 우리 구역 신급 교육 신청</div>
+    <div class="nthead"><span class="ntbell">🎓</span> 신급 교육 신청 현황</div>
     <div class="ntbody" id="gntBody"></div>
     <div class="ntfoot">
       <button class="btn sec" style="flex:1" onclick="closeGNoti(true)">나중에</button>
@@ -2059,7 +2059,19 @@ function newGrades(){
   return GRADES.filter(g=>g&&g.id&&seen.indexOf(g.id)<0);
 }
 let gnotiShown=false;
+/*  ★ 2026-09-15 ★ 신급 신청 팝업을 끈다.
+ *
+ *  왜 껐나 —
+ *  이 팝업은 구역장·장로에게 「우리 구역 구역원이 신청했습니다」라고 보여 주던 것인데,
+ *  2026-09-14 에 신급 담당 장로 두 분께 **전체 신청**을 내려보내도록 바꾸면서
+ *  그 두 분 화면에 **다른 구역 신청까지** 「24구역 구역원이」로 잘못 묶여 떴다.
+ *  담당 두 분은 이제 「신급 교육」 탭에서 제대로 보시고, 교역자는 대시보드에서 보신다.
+ *  그 밖 구역장께는 굳이 팝업으로 알릴 일이 아니라고 정했다(2026-09-15 사용자 결정).
+ *
+ *  되살리려면 아래를 true 로만 바꾸면 된다. 화면·문구는 그대로 남겨 두었다. */
+const GRADE_NOTI_ON=false;
 function checkNewGrades(){
+  if(!GRADE_NOTI_ON) return;
   if(gnotiShown) return;
   if(!current) return;
   const r=current.role;
@@ -2074,7 +2086,7 @@ function checkNewGrades(){
   const el=document.getElementById('gntBody');
   if(el) el.innerHTML=
     '<div class="ntbig"><b>'+ns.length+'</b>명</div>'
-    +'<div class="ntsub">'+esc((current&&current.district)||'우리 구역')+' 구역원이 신급 교육을 신청했습니다.</div>'
+    +'<div class="ntsub">신급 교육을 신청하신 분입니다.</div>'
     +'<div class="ntlist">'+list+(ns.length>5?'<div class="ntmore">외 '+(ns.length-5)+'명</div>':'')+'</div>';
   const gt=document.getElementById('gnotiGate'); if(gt) gt.style.display='flex';
 }

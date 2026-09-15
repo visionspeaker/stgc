@@ -184,6 +184,31 @@ canvas{max-height:280px}
 .dtable tr.rowlink:hover td{background:#f2f7ff}
 .seeall{background:none;border:0;color:var(--green);font-size:12px;font-weight:800;cursor:pointer;padding:0 0 0 6px;font-family:inherit}
 .seeall:hover{text-decoration:underline}
+/* ── 결석자 관리 : 사유별/구역별 전환 + 눌러서 펼치기 (2026-09-15) ── */
+.abtgs{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap}
+.abtg{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;
+  padding:5px 13px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.abtg.on{background:var(--greenSoft);border-color:var(--green);color:var(--green)}
+.abrow{border:1px solid var(--line);border-radius:10px;margin:7px 0;overflow:hidden;background:#fff}
+.abhd{display:flex;align-items:center;gap:9px;padding:9px 11px;cursor:pointer}
+.abhd:hover{background:#f8fafc}
+.abcar{color:#94a3b8;font-size:11px;width:12px;text-align:center;display:inline-block;transition:transform .12s}
+.abdot{width:10px;height:10px;border-radius:3px;flex:none;display:inline-block}
+.abnm{font-weight:800;font-size:13px;min-width:62px}
+.abbar{flex:1;height:8px;background:#f1f4f8;border-radius:99px;overflow:hidden;display:block}
+.abbar i{display:block;height:100%;border-radius:99px}
+.abcnt{font-size:12.5px;font-weight:800;color:var(--muted);min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.abbd{border-top:1px solid var(--line);padding:10px 12px;background:#fbfdff;display:none}
+.abrow.open .abbd{display:block}
+.abrow.open .abcar{transform:rotate(90deg)}
+.abgrp{margin:5px 0;font-size:12.5px;display:flex;gap:8px;align-items:flex-start}
+.abgrp b{flex:none;min-width:64px;color:var(--teal)}
+.abp{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:7px;
+  padding:2px 8px;margin:2px 3px 2px 0;font-size:12px}
+.abp.warn{background:#fee2e2;border-color:#fca5a5;color:#991b1b;font-weight:700}
+.abp .memo{color:var(--muted);font-weight:400}
+.abpick{margin-top:10px;border:1px solid var(--green);background:#f0fdf4;border-radius:10px;padding:10px 12px}
+.abpick h4{margin:0 0 6px;font-size:12.5px;color:var(--green)}
 @media(max-width:820px){.kpis{grid-template-columns:repeat(2,1fr)}.dgrid.g2,.dgrid.g3{grid-template-columns:1fr}}
 /* ===== 문화 10계명 ===== */
 .cvhero{background:linear-gradient(135deg,#6f6ad4,#5b54c9);border-radius:16px;padding:18px;color:#fff;position:relative;overflow:hidden;margin-bottom:6px}
@@ -955,6 +980,9 @@ font-family:inherit;cursor:pointer;text-decoration:none;display:inline-flex;alig
 .gdprow .gmini.call{background:#e8f2fe;color:#1b4f9c;border:1px solid #c3daf7}
 .gdprow .gmini.sms{background:#f3eefe;color:#5b3cad;border:1px solid #d9cdf7}
 .gdprow .gmini.ed{background:#eef7f5;color:#1d5e53;border:1px solid #bfe0d8}
+/* 📞 💬 ✏️ 세 단추 크기를 맞춘다 (그림 하나만 들어가므로 좌우 여백을 줄인다) */
+.gdprow .gmini.call,.gdprow .gmini.sms,.gdprow .gmini.ed{padding:4px 7px;font-size:12.5px;line-height:1.2}
+.gdprow .gmini.ed.on{background:#fde8e8;color:#9b2c2c;border-color:#f5c2c2}
 /* 고치기 칸 */
 .gdpedit{display:grid;grid-template-columns:46px 1fr;gap:6px 8px;align-items:center;
 border:1px solid #9ed3c7;border-top:0;border-radius:0 0 10px 10px;
@@ -1507,7 +1535,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
   </div>
   <div class="dgrid g2">
     <div class="dcard"><h3>구역별 출석</h3><p class="dd">구역보고 기준 주일·구역 출석 (제출 구역)</p><canvas id="barChart"></canvas></div>
-    <div class="dcard"><h3>결석 사유 분포</h3><p class="dd">결석자 드롭다운 사유 집계</p><canvas id="reasonChart"></canvas></div>
+    <div class="dcard"><h3>결석 사유 분포</h3><p class="dd">조각을 누르면 누구인지 바로 보입니다</p><canvas id="reasonChart"></canvas><div id="reasonPick"></div></div>
   </div>
 
   <div class="sect-t">신앙활동 · 목양</div>
@@ -1533,7 +1561,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 
   <div class="sect-t">구역예배 · 결석 관리</div>
   <div class="dgrid g3">
-    <div class="dcard"><h3>결석자 관리</h3><p class="dd">선택 주일 결석 사유별 집계</p><div id="absentBoard"></div></div>
+    <div class="dcard"><h3>결석자 관리</h3><p class="dd">사유별·구역별로 바꿔 보고, 줄을 누르면 명단이 펼쳐집니다</p><div id="absentBoard"></div></div>
     <div class="dcard"><h3>구역예배 진행률</h3><p class="dd">제출 구역 중 예배 진행</p><canvas id="cellChart"></canvas></div>
   </div>
 
@@ -4444,7 +4472,10 @@ function gdpRow(g){
       +(tel? '<a class="gmini call" href="'+esc(telHref(tel))+'" title="전화">📞</a>'
             +'<a class="gmini sms" href="'+esc(smsHref(tel))+'" title="문자">💬</a>'
            : '<span class="gpnone">번호?</span>')
-      +'<button class="gmini ed" onclick="gdEditOpen(\''+id+'\')">'+(open?'닫기':'고치기')+'</button>'
+      /* 전화 📞 · 문자 💬 와 모양을 맞춘다 — 글씨 「고치기」는 옆 단추들과 어울리지 않았다 */
+      +'<button class="gmini ed'+(open?' on':'')+'" onclick="gdEditOpen(\''+id+'\')" '
+        +'title="'+(open?'닫기':'세부내용 고치기')+'" aria-label="'+(open?'닫기':'세부내용 고치기')+'">'
+        +(open?'✕':'✏️')+'</button>'
     +'</span></div>';
   if(!open) return head;
   /* ── 고치기 칸 ── */
@@ -4522,7 +4553,7 @@ function renderGradePage(){
         + gdBox(nMid,'중고등부')
       +'</div>'
       +(nBlank? '<div class="dnote">성별이 비어 있는 분이 <b>'+nBlank+'명</b> 있습니다. '
-                +'이름 옆 <b>고치기</b>를 눌러 채워 주세요.</div>' : '')
+                +'이름 옆 <b>✏️</b> 를 눌러 채워 주세요.</div>' : '')
       +'<div class="gdcols" style="grid-template-columns:repeat('+colKeys.length+',1fr)">'
       +colKeys.map(function(c){
         const arr=grp[c]||[];
@@ -5759,7 +5790,11 @@ function renderDash(){
   const allAbsent=[];wkReports.forEach(r=>r.sundayAbsent.forEach(a=>allAbsent.push({d:r.district,...a})));
   const byReason={};allAbsent.forEach(a=>{(byReason[a.reason]=byReason[a.reason]||[]).push(a.d+' '+a.name)});
   const rLabels=Object.keys(byReason);
-  drawChart('reasonChart','doughnut',{labels:rLabels.length?rLabels:['결석 없음'],datasets:[{data:rLabels.length?rLabels.map(k=>byReason[k].length):[1],backgroundColor:['#57b45f','#3f8ed4','#f2b366','#8f90c4','#94a3b8','#e06666','#f59e0b','#a855f7']}]},{});
+  drawChart('reasonChart','doughnut',{labels:rLabels.length?rLabels:['결석 없음'],
+    datasets:[{data:rLabels.length?rLabels.map(k=>byReason[k].length):[1],
+      backgroundColor:rLabels.length?rLabels.map(rColor):['#e2e8f0']}]},
+    {onHover:(e,el)=>{e.native.target.style.cursor=el.length?'pointer':'default';},
+     onClick:(e,el)=>{ if(el.length && rLabels.length) absPickReason(rLabels[el[0].index]); }});
   // 새벽예배
   document.getElementById('faithMini').innerHTML=
     mstat(cSum(wkReports,'새벽'),'새벽예배 참석 (횟수)');
@@ -5767,9 +5802,9 @@ function renderDash(){
   // 목양 우선사항
   renderCare();
   // 결석자 관리
-  document.getElementById('absentBoard').innerHTML = (allAbsent.length?
-    Object.entries(byReason).map(([r,arr])=>`<div style="margin:6px 0;font-size:12.5px"><b>${r}</b> (${arr.length}) : <span class="muted">${arr.join(', ')}</span></div>`).join('')+longAbsentHtml()
-    : '<div class="muted">결석 데이터가 없습니다.</div>');
+  ABS_ALL=allAbsent; ABS_CHRONIC=chronicMap(); absOpen='';
+  const rp=document.getElementById('reasonPick'); if(rp) rp.innerHTML='';
+  renderAbsentBoard();
   // 구역예배 진행률
   const held=wkReports.filter(r=>r.cell&&r.cell.held==='진행').length;
   drawChart('cellChart','doughnut',{labels:['진행','미진행/미보고'],datasets:[{data:[held,DIST_NAMES.length-held],backgroundColor:['#16a34a','#e2e8f0']}]},{});
@@ -6384,12 +6419,108 @@ function printReports(){
   doPrint(wk,dists);
 }
 function printOne(){ if(repDetailCur) doPrint(repDetailCur.date,[repDetailCur.dist]); }
-function longAbsentHtml(){
-  const weeks=[...new Set(reports.map(r=>r.date))].sort().slice(-3);const cnt={};
-  reports.filter(r=>weeks.includes(r.date)).forEach(r=>r.sundayAbsent.forEach(a=>{const k=r.district+' '+a.name;cnt[k]=(cnt[k]||0)+1;}));
-  const chronic=Object.entries(cnt).filter(([k,v])=>v>=3).map(([k])=>k);
-  return chronic.length?`<div class="hl">⚠ 최근 3주 연속 결석(심방 대상 후보): ${chronic.join(', ')}</div>`:'';
+/* ══════════ 결석자 관리 : 사유별/구역별 전환 + 눌러서 펼치기 (2026-09-15) ══════════
+   · 저장 자료는 그대로 쓴다 — 보고서의 sundayAbsent [{name,reason,note}] 뿐이다.
+   · 사유 색은 이름으로 고정한다. 그래야 도넛 그래프와 아래 명단 색이 늘 같다.
+     (전에는 그 주에 나온 사유 순서대로 색을 줘서 주마다 색이 바뀌었다) */
+const REASON_COLOR={'장기결석':'#57b45f','개인사정':'#3f8ed4','건강':'#f2b366','여행':'#22c55e',
+  '직장':'#8f90c4','확인안됨':'#94a3b8','기타':'#e06666','선택':'#cbd5e1'};
+function rColor(r){ return REASON_COLOR[r]||'#a855f7'; }
+let ABS_ALL=[];        /* [{d,name,reason,note}] — 선택 주일 결석자 전체 */
+let ABS_CHRONIC={};    /* '구역 이름' → true (최근 3주 연속) */
+let absMode='r';       /* 'r' 사유별 · 'd' 구역별 */
+let absOpen='';        /* 펼쳐 둔 줄의 열쇠말 */
+
+/* 최근 3주 연속 결석자 — longAbsentHtml 과 같은 셈법을 한 곳에 모았다 */
+function chronicMap(){
+  const weeks=[...new Set(reports.map(r=>r.date))].sort().slice(-3);
+  const cnt={};
+  reports.filter(r=>weeks.includes(r.date)).forEach(r=>(r.sundayAbsent||[])
+    .forEach(a=>{const k=r.district+' '+a.name; cnt[k]=(cnt[k]||0)+1;}));
+  const m={}; Object.keys(cnt).forEach(k=>{ if(cnt[k]>=3) m[k]=true; });
+  return m;
 }
+function absSetMode(m){
+  if(absMode===m) return;
+  absMode=m; absOpen='';
+  renderAbsentBoard();
+}
+/* 줄 펼치기/접기 — 한 번에 하나만 열어 화면을 짧게 유지한다 */
+function absToggle(k){
+  absOpen=(absOpen===k)?'':k;
+  renderAbsentBoard();
+}
+function absChip(d,n,note){
+  const warn=ABS_CHRONIC[d+' '+n]?' warn':'';
+  const nt=String(note||'').trim();
+  return '<span class="abp'+warn+'">'+esc(n)
+    +(nt?' <span class="memo">· '+esc(nt)+'</span>':'')+'</span>';
+}
+function renderAbsentBoard(){
+  const box=document.getElementById('absentBoard'); if(!box) return;
+  if(!ABS_ALL.length){ box.innerHTML='<div class="muted">결석 데이터가 없습니다.</div>'; return; }
+  const byR={}, byD={};
+  ABS_ALL.forEach(a=>{ (byR[a.reason]=byR[a.reason]||[]).push(a);
+                       (byD[a.d]=byD[a.d]||[]).push(a); });
+  const keys = (absMode==='r')
+    ? ABSENT_REASONS.filter(r=>byR[r]).concat(Object.keys(byR).filter(r=>ABSENT_REASONS.indexOf(r)<0))
+    : Object.keys(byD).sort((a,b)=>distNum(a)-distNum(b)||String(a).localeCompare(String(b),'ko'));
+  const src = (absMode==='r')?byR:byD;
+  let max=1; keys.forEach(k=>{ if(src[k].length>max) max=src[k].length; });
+  const rows = keys.map(function(k){
+    const arr=src[k], c=(absMode==='r')?rColor(k):'var(--teal)';
+    const open=(absOpen===k);
+    let inner;
+    if(absMode==='r'){
+      const ds=[...new Set(arr.map(a=>a.d))].sort((x,y)=>distNum(x)-distNum(y)||String(x).localeCompare(String(y),'ko'));
+      inner=ds.map(d=>'<div class="abgrp"><b>'+esc(d)+'</b><div>'
+        +arr.filter(a=>a.d===d).map(a=>absChip(d,a.name,a.note)).join('')+'</div></div>').join('');
+    } else {
+      const rs=ABSENT_REASONS.filter(r=>arr.some(a=>a.reason===r))
+        .concat([...new Set(arr.map(a=>a.reason))].filter(r=>ABSENT_REASONS.indexOf(r)<0));
+      inner=rs.map(r=>'<div class="abgrp"><b style="color:'+rColor(r)+'">'+esc(r)+'</b><div>'
+        +arr.filter(a=>a.reason===r).map(a=>absChip(k,a.name,a.note)).join('')+'</div></div>').join('');
+    }
+    return '<div class="abrow'+(open?' open':'')+'" data-k="'+esc(k)+'">'
+      +'<div class="abhd" onclick="absToggle(\''+jsq(k)+'\')">'
+      +'<span class="abcar">&#9654;</span>'
+      +'<span class="abdot" style="background:'+c+'"></span>'
+      +'<span class="abnm">'+esc(k)+'</span>'
+      +'<span class="abbar"><i style="width:'+Math.round(arr.length/max*100)+'%;background:'+c+'"></i></span>'
+      +'<span class="abcnt">'+arr.length+'명</span></div>'
+      +'<div class="abbd">'+inner+'</div></div>';
+  }).join('');
+  const chN=Object.keys(ABS_CHRONIC).length;
+  box.innerHTML='<div class="abtgs">'
+    +'<button class="abtg'+(absMode==='r'?' on':'')+'" onclick="absSetMode(\'r\')">사유별</button>'
+    +'<button class="abtg'+(absMode==='d'?' on':'')+'" onclick="absSetMode(\'d\')">구역별</button>'
+    +'</div>'+rows
+    +(chN?'<div class="hl" style="margin-top:12px">⚠ 최근 3주 연속 결석(심방 대상 후보) <b>'+chN
+      +'명</b> — 위 명단에서 빨간 칸으로 표시했습니다</div>':'');
+}
+/* 도넛 그래프에서 사유를 고르면 : ① 그래프 밑에 명단 ② 아래 결석자 관리 칸도 그 사유로 펼친다 */
+function absPickReason(r){
+  const pick=document.getElementById('reasonPick');
+  const arr=ABS_ALL.filter(a=>a.reason===r);
+  if(pick){
+    if(!arr.length){ pick.innerHTML=''; }
+    else {
+      const ds=[...new Set(arr.map(a=>a.d))].sort((x,y)=>distNum(x)-distNum(y)||String(x).localeCompare(String(y),'ko'));
+      pick.innerHTML='<div class="abpick"><h4>'+esc(r)+' · '+arr.length+'명</h4>'
+        +ds.map(d=>'<div class="abgrp"><b>'+esc(d)+'</b><div>'
+          +arr.filter(a=>a.d===d).map(a=>absChip(d,a.name,a.note)).join('')+'</div></div>').join('')
+        +'</div>';
+    }
+  }
+  if(arr.length){
+    absMode='r'; absOpen=r; renderAbsentBoard();
+    let row=null;
+    document.querySelectorAll('#absentBoard .abrow').forEach(function(e){
+      if(e.getAttribute('data-k')===r) row=e; });
+    if(row && row.scrollIntoView) row.scrollIntoView({block:'center'});
+  }
+}
+/* 옛 longAbsentHtml() 은 chronicMap() 으로 옮겼다 (2026-09-15) — 셈법은 그대로 3주 연속 */
 // 목양 우선사항: 장기결석 사유 + 특이사항/결석메모의 돌봄 키워드
 const CARE_KW=['수술','입원','병원','연락','건강','암','장기결석','소천','상','골절'];
 /* 보기 모드: 'care' = 목양 필요만(자동 선별), 'all' = 특이사항 전체 */

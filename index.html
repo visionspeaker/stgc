@@ -1512,7 +1512,7 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 
   <div class="sect-t">신앙활동 · 목양</div>
   <div class="dgrid g2">
-    <div class="dcard"><h3>새벽예배 <small>— 자율 항목</small></h3><p class="dd">구역보고에 적힌 새벽예배 참석 합계 (선택 주일)</p><div class="mini1" id="faithMini"></div>
+    <div class="dcard"><h3>새벽예배 <small>— 자율 항목</small></h3><p class="dd">구역보고에 적힌 새벽예배 참석 횟수 합계 (선택 주일)</p><div class="mini1" id="faithMini"></div>
       <div class="fmeta" id="faithMeta"></div>
       <div class="fbars" id="faithBars"></div></div>
     <div class="dcard care-card"><h3 style="color:#b91c1c">🔴 목양 우선사항</h3>
@@ -5678,7 +5678,7 @@ function tSum(wkReports,key){return wkReports.reduce((a,r)=>a+Object.values(r.de
 /* ── 새벽예배 : 적어 낸 구역만 큰 순서로 ── */
 /* 2026-08-27 : 성경읽기·QT 를 빼고 새벽예배만 남겼다.
    구역별 막대는 그대로 두고, 고를 것이 하나뿐이라 고르는 단추만 없앴다. */
-const FAITH=[['새벽','새벽예배(명)']];
+const FAITH=[['새벽','새벽예배(횟수)']];
 function faithRows(wkReports,key){
   return wkReports.map(function(r){
       return {d:r.district, n:Object.values(r.detail||{}).reduce(function(b,p){ return b+((p.c&&p.c[key])||0); },0)};
@@ -5762,7 +5762,7 @@ function renderDash(){
   drawChart('reasonChart','doughnut',{labels:rLabels.length?rLabels:['결석 없음'],datasets:[{data:rLabels.length?rLabels.map(k=>byReason[k].length):[1],backgroundColor:['#57b45f','#3f8ed4','#f2b366','#8f90c4','#94a3b8','#e06666','#f59e0b','#a855f7']}]},{});
   // 새벽예배
   document.getElementById('faithMini').innerHTML=
-    mstat(cSum(wkReports,'새벽'),'새벽예배 참석 (명)');
+    mstat(cSum(wkReports,'새벽'),'새벽예배 참석 (횟수)');
   renderFaith();
   // 목양 우선사항
   renderCare();
@@ -5824,7 +5824,7 @@ function openReportDetail(dist,date){
   document.getElementById('rmSub').textContent=date+' 주일 · '+who+(r.ts?' · 제출 '+String(r.ts).slice(5,16).replace('T',' '):'');
   const roster=rosterOf(dist,date);
   const svc=TG.map(t=>`<span class="rmchip${t==='월삭'?' v':''}">${t} ${svcCount(r,t)}</span>`).join('');
-  const faith=`<span class="rmchip n">새벽 ${cntSum(r,'새벽')}명</span>`;
+  const faith=`<span class="rmchip n">새벽 ${cntSum(r,'새벽')}회</span>`;
   /* 미체크(아무 항목도 없음)는 아래 결석자에만 표시 → 목록에서 제외 */
   const hasNote=n=>{const d=(r.detail||{})[n]||{};return (d.p||'')||(d.e||'');};
   const shown=roster.filter(n=>personLine(r,n)||hasNote(n));

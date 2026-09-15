@@ -1559,10 +1559,11 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     </div>
   </div>
 
-  <div class="sect-t">구역예배 · 결석 관리</div>
-  <div class="dgrid g3">
+  <div class="sect-t">결석 관리</div>
+  <!-- 2026-09-15 : 「구역예배 진행률」 도넛을 없앴다 — 구역예배를 격주로 드리므로
+       「미진행」이 쉬는 주까지 섞여 뜻이 없는 숫자였다. 결석자 관리가 한 칸을 다 쓴다 -->
+  <div class="dgrid">
     <div class="dcard"><h3>결석자 관리</h3><p class="dd">사유별·구역별로 바꿔 보고, 줄을 누르면 명단이 펼쳐집니다</p><div id="absentBoard"></div></div>
-    <div class="dcard"><h3>구역예배 진행률</h3><p class="dd">제출 구역 중 예배 진행</p><canvas id="cellChart"></canvas></div>
   </div>
 
   <div class="sect-t">문의 접수 처리 <button class="seeall" onclick="goManage('전체')">전체 보기 ›</button></div>
@@ -5805,9 +5806,6 @@ function renderDash(){
   ABS_ALL=allAbsent; ABS_CHRONIC=chronicMap(); absOpen='';
   const rp=document.getElementById('reasonPick'); if(rp) rp.innerHTML='';
   renderAbsentBoard();
-  // 구역예배 진행률
-  const held=wkReports.filter(r=>r.cell&&r.cell.held==='진행').length;
-  drawChart('cellChart','doughnut',{labels:['진행','미진행/미보고'],datasets:[{data:[held,DIST_NAMES.length-held],backgroundColor:['#16a34a','#e2e8f0']}]},{});
   // 최근 접수 표
   const recent=[...subs].sort((a,b)=>String(b.ts||'').localeCompare(String(a.ts||''))).slice(0,8);
   document.getElementById('subTable').innerHTML = recent.length?

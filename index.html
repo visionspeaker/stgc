@@ -284,6 +284,24 @@ white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ntfoot{padding:12px 18px 16px;display:flex;gap:8px}
 /* ===== 보고서 상세 모달 ===== */
 .rmodal{position:fixed;inset:0;background:rgba(20,28,45,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:90}
+/* ── 아직 안 낸 구역 화면 (2026-09-16) ── */
+.rmno{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;border-radius:10px;
+  padding:11px 13px;font-size:13px;font-weight:800;margin-bottom:12px}
+.rmno small{display:block;font-weight:400;color:#b45a5a;font-size:12px;margin-top:3px}
+.rmbox.grey b{color:#94a3b8}
+.rmlead{display:flex;align-items:center;gap:9px;background:#f8fafc;border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;flex-wrap:wrap}
+.rmlead .nm{font-weight:800;font-size:14px}
+.rmlead .lbadge{background:var(--greenSoft);color:var(--green);border-radius:20px;padding:2px 9px;
+  font-size:11px;font-weight:800}
+.rmlead .sp{flex:1}
+.rmmem{display:flex;flex-wrap:wrap;gap:5px}
+.rmmem .mchip{background:#fff;border:1px solid var(--line);border-radius:7px;padding:3px 9px;font-size:12px}
+.rmmem .mchip.lead{background:var(--greenSoft);border-color:#86efac;color:#15803d;font-weight:800}
+.rmhist{display:flex;gap:6px;flex-wrap:wrap}
+.rmhist .hchip{border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:800}
+.rmhist .hchip.y{background:#dcfce7;color:#15803d}
+.rmhist .hchip.n{background:#fef2f2;color:#991b1b}
 /* ── 문의 담당 여럿 지정 ── */
 .owners{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .ochip{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:4px 10px;
@@ -5269,7 +5287,10 @@ function paintPrevBar(ab){
 }
 function submissionBoardHtml(dateLabel, doneSet, myDist, clickable){
   const pills=DIST_SORTED.map(d=>{const ok=doneSet.has(d);const me=myDist&&d===myDist;const bg=ok?'background:#dcfce7;color:#15803d':'background:#fef2f2;color:#991b1b';
-    const clk=(ok&&clickable)?` clickable" onclick="openReportDetail('${d.replace(/'/g,"\\'")}','${dateLabel}')`:'"';
+    /*  2026-09-16 : 미제출(빨강)도 누를 수 있게 했다.
+        「2구역이 안 냈네, 누구네 구역이지?」를 그 자리에서 확인하시라고 —
+        열면 구역장·구역원·최근 4주 제출 이력이 나온다 (보고 내용은 비어 있다) */
+    const clk=clickable?` clickable" onclick="openReportDetail('${d.replace(/'/g,"\\'")}','${dateLabel}')`:'"';
     return `<span class="pill${clk}" style="${bg}${me?';outline:2px solid var(--teal)':''}">${ok?'✔ ':''}${d}</span>`;}).join(' ');
   return `<div class="mini" style="margin-bottom:6px">${dateLabel} 기준 · 제출 <b>${doneSet.size}</b> / ${DIST_NAMES.length} 구역</div>${pills}`;
 }
@@ -5804,8 +5825,85 @@ function personLine(r,n){
   return [...parts,...cs].join(' · ');
 }
 let repDetailCur=null;
+/*  date 를 끝으로 하는 주일 n개 (오래된 것 → 최신 차례).
+    보고가 하나도 없는 주도 달력대로 넣는다 — 그래야 「그 주엔 아무도 안 냈다」가 보인다 */
+function sundaysUpTo(date,n){
+  const p=String(date||'').split('-');
+  if(p.length!==3) return [];
+  const d=new Date(+p[0], +p[1]-1, +p[2]);
+  const out=[];
+  for(let i=n-1;i>=0;i--){ const x=new Date(d); x.setDate(d.getDate()-7*i); out.push(localISO(x)); }
+  return out;
+}
+/*  최근 4주 제출 이력 — [[MM-DD, 냈나], …] */
+function subHistory(dist,date,n){
+  return sundaysUpTo(date,n||4).map(function(w){
+    return [w.slice(5), reports.some(r=>r.district===dist && r.date===w)];
+  });
+}
+/*  「이 보고서 출력」 단추 — 미제출이면 눌러도 나올 것이 없으니 막는다 */
+function setPrnBtn(on){
+  const b=document.querySelector('#repModal .rmfoot .btn.sec'); if(!b) return;
+  b.disabled=!on;
+  b.style.opacity=on?'':'.45';
+  b.style.cursor=on?'':'not-allowed';
+  b.textContent=on?'🖨 이 보고서 출력':'🖨 출력할 보고서가 없습니다';
+}
+/*  미제출 구역장께 보내는 독려 문자 — 문자 단추를 누르면 미리 채워진다 (2026-09-16) */
+const REP_SMS='구역장님, 안녕하세요. 아직 구역보고서 제출이 안 되었네요. 가능하시면 확인 부탁드립니다. 감사합니다.';
+function repSmsHref(tel){
+  const n=telDial(tel);
+  /* 아이폰은 & , 안드로이드는 ? 로 문구를 붙인다 (헬프데스크 문자와 같은 방식) */
+  const sep=/iPhone|iPad|iPod/i.test((navigator&&navigator.userAgent)||'')?'&':'?';
+  return 'sms:'+n+sep+'body='+encodeURIComponent(REP_SMS);
+}
+/*  미제출 상자의 구역장 줄 — 생김새는 contactBtns 와 같고, 문자만 문구가 미리 들어간다 */
+function leadContactBtns(name){
+  const p=phoneOf(name);
+  if(!p) return '<span class="pcts"><span class="cbtn off">'+SVG_TEL+'</span>'
+    +'<span class="cbtn off">'+SVG_SMS+'</span></span><span class="pph none">번호 없음</span>';
+  return '<span class="pcts">'
+    +'<a class="cbtn tel" href="'+esc(telHref(p))+'" title="전화걸기" onclick="event.stopPropagation()">'+SVG_TEL+'</a>'
+    +'<a class="cbtn sms" href="'+esc(repSmsHref(p))+'" title="제출 안내 문자" onclick="event.stopPropagation()">'+SVG_SMS+'</a>'
+    +'</span><span class="pph">'+esc(p)+'</span>';
+}
+/*  아직 안 낸 구역 — 누구네 구역인지·연락처·최근 이력을 보여 준다 */
+function openNoReport(dist,date){
+  repDetailCur=null;                       /* 출력할 보고서가 없다 */
+  document.getElementById('rmTitle').textContent=dist+' 보고서';
+  const who=leaderOf(dist);
+  document.getElementById('rmSub').textContent=date+' 주일 · '+(who||'구역장');
+  const roster=rosterOf(dist,date);
+  const lead = who
+    ? '<div class="rmlead"><span class="nm">'+esc(who)+'</span>'
+        +'<span class="lbadge">구역장</span><span class="sp"></span>'+leadContactBtns(who)+'</div>'
+    : '<div class="muted" style="font-size:12.5px">구역장이 지정되어 있지 않습니다.</div>';
+  const mem = roster.length
+    ? '<div class="rmmem">'+roster.map(n=>'<span class="mchip'+(n===who?' lead':'')+'">'
+        +esc(n)+'</span>').join('')+'</div>'
+    : '<div class="muted" style="font-size:12.5px">명단이 없습니다.</div>';
+  const h=subHistory(dist,date,4);
+  const miss=h.filter(x=>!x[1]).length;
+  const hist='<div class="rmhist">'+h.map(x=>'<span class="hchip '+(x[1]?'y':'n')+'">'
+      +esc(x[0])+' '+(x[1]?'제출':'미제출')+'</span>').join('')+'</div>'
+    + (miss>=2?'<div class="dnote" style="margin-top:8px">최근 4주 가운데 <b>'+miss+'주</b> 미제출입니다.</div>':'');
+  document.getElementById('rmBody').innerHTML=
+    '<div class="rmno">아직 제출하지 않았습니다.'
+      +'<small>'+esc(date)+' 주일 구역보고가 아직 들어오지 않았습니다.</small></div>'
+    +'<div class="rmsum">'
+      +'<div class="rmbox grey">주일출석 <b>0</b></div>'
+      +'<div class="rmbox grey">구역예배 <b>0</b></div>'
+      +'<div class="rmbox grey">결석 <b>0</b></div></div>'
+    +'<div class="rmsec">구역장</div>'+lead
+    +'<div class="rmsec">구역원 ('+roster.length+'명)</div>'+mem
+    +'<div class="rmsec">최근 4주 제출</div>'+hist;
+  setPrnBtn(false);
+  document.getElementById('repModal').style.display='flex';
+}
 function openReportDetail(dist,date){
-  const r=repOf(dist,date); if(!r) return;
+  const r=repOf(dist,date);
+  if(!r){ openNoReport(dist,date); return; }
+  setPrnBtn(true);
   repDetailCur={dist:dist,date:date};
   document.getElementById('rmTitle').textContent=dist+' 보고서';
   const who=(leaderOf(dist)||'구역장');
@@ -6385,6 +6483,7 @@ function printReports(){
   doPrint(wk,dists);
 }
 function printOne(){ if(repDetailCur) doPrint(repDetailCur.date,[repDetailCur.dist]); }
+/* (미제출이면 repDetailCur 이 null 이라 아무 일도 하지 않는다 — 단추도 setPrnBtn(false) 로 막아 둔다) */
 /* ══════════ 결석자 관리 : 사유별/구역별 전환 + 눌러서 펼치기 (2026-09-15) ══════════
    · 저장 자료는 그대로 쓴다 — 보고서의 sundayAbsent [{name,reason,note}] 뿐이다.
    · 사유 색은 이름으로 고정한다. 그래야 도넛 그래프와 아래 명단 색이 늘 같다.

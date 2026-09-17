@@ -2065,6 +2065,11 @@ async function loadAll(){
       GRADES=Array.isArray(d.grades)?d.grades:[];
       PRAYERS=Array.isArray(d.prayers)?d.prayers:[];
       PRTRACK=Array.isArray(d.praytrack)?d.praytrack:[];
+      /*  구역 제출 현황 — [주일날짜, 구역이름] 만 온다 (보고 내용은 없다).
+       *  구역장은 본인 구역 보고서만 받기 때문에, 이것이 없으면
+       *  「제출 1 / 26 구역」 처럼 본인 것만 세게 된다 (2026-09-17).
+       *  옛 서버에는 이 값이 없으므로, 그때는 받은 보고서로 세던 대로 둔다. */
+      SUBM=Array.isArray(d.subm)?d.subm:null;
       /* 헬프데스크 — 담당이 아니면 서버가 아예 빈 배열을 준다 */
       HELP=Array.isArray(d.help)?d.help:[];
       /*  자료는 로그인보다 조금 늦게 온다. 그래서 메뉴를 만들 때는 아직 몰랐다가
@@ -2980,7 +2985,7 @@ function enterApp(role,scope){
       그대로 두면 교인 이름이 계속 보이므로 여기서 지운다. */
   if(subOnlyMe()||helpOnlyMe()){
     try{ localStorage.removeItem(ROSTER_KEY); }catch(e){}
-    DISTRICTS={}; DIST_NAMES=[]; DIST_SORTED=[]; PHONES={}; MEMBER_IDS={};
+    DISTRICTS={}; DIST_NAMES=[]; DIST_SORTED=[]; PHONES={}; MEMBER_IDS={}; SUBM=null;
     NAME_ALIAS={}; MEMBER_ROLE={}; ROSTER_CHANGES=[];
   }
   saveSession();
@@ -3511,6 +3516,8 @@ function openMember(name){
 /* 교인이 직접 올리는 기도제목. 로그인 없이 누구나.
    '교역자에게만'을 체크하면 서버가 교역자 외에는 이름도 내용도 내려보내지 않는다. */
 let PRAYERS=[], PRTRACK=[], PRINFO=null, prSecret=false, prSending=false, prDone=null;
+/*  구역 제출 현황 — 서버가 주면 [[주일, 구역], …], 옛 서버면 null (2026-09-17) */
+let SUBM=null;
 let prDue='';        /* 신청자가 고른 종료일. 빈 값 = 기한 없음 (기본) */
 const PRINFO_KEY='sgc_prayer_cfg_v1';
 function goPrayer(){ openApp('prayer'); }
@@ -5294,10 +5301,17 @@ function submissionBoardHtml(dateLabel, doneSet, myDist, clickable){
     return `<span class="pill${clk}" style="${bg}${me?';outline:2px solid var(--teal)':''}">${ok?'✔ ':''}${d}</span>`;}).join(' ');
   return `<div class="mini" style="margin-bottom:6px">${dateLabel} 기준 · 제출 <b>${doneSet.size}</b> / ${DIST_NAMES.length} 구역</div>${pills}`;
 }
+/*  이번 주 구역 제출 현황 — 전 구역을 본다.
+ *  SUBM(서버가 주는 제출 목록)이 있으면 그것으로 세고,
+ *  없으면(옛 서버) 예전처럼 받은 보고서로 센다. */
+function submittedSet(week){
+  if(Array.isArray(SUBM))
+    return new Set(SUBM.filter(x=>x && x[0]===week).map(x=>x[1]));
+  return new Set(reports.filter(r=>r.date===week).map(r=>r.district));
+}
 function renderReportStatus(){
   const box=document.getElementById('reportStatus'); if(!box) return;
-  const done=new Set(reports.filter(r=>r.date===selWeek).map(r=>r.district));
-  box.innerHTML=submissionBoardHtml(selWeek, done, reportDist);
+  box.innerHTML=submissionBoardHtml(selWeek, submittedSet(selWeek), reportDist);
 }
 let repSubmitting=false;
 async function submitReport(){

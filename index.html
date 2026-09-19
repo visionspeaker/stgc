@@ -5071,6 +5071,18 @@ const TG=['1부','2부','오후','수요','금요','구역','월삭'];
 const CT=[['새벽',7]];
 /* 월삭은 매월 첫째 주일(1~7일)에만 선택 가능 */
 function isFirstSunday(d){ const day=parseInt(String(d||'').slice(8,10),10); return day>=1&&day<=7; }
+/*  ★ 2026-09-20 ★ 구역예배는 매월 «첫째·셋째» 주일에만 드린다.
+ *  둘째·넷째(·다섯째) 주에도 「구역」 칸이 눌려 있어 잘못 체크하는 일이 있었다.
+ *  월삭과 같은 방식으로 그 주가 아니면 칸을 잠근다. */
+function weekNoOf(d){ const day=parseInt(String(d||'').slice(8,10),10);
+  return (day>=1) ? Math.floor((day-1)/7)+1 : 0; }
+function isCellWeek(d){ const n=weekNoOf(d); return n===1||n===3; }
+/*  잠긴 칸이면 저장 전에 지워 둔다 — 지난 보고서를 불러와 고칠 때
+    예전에 잘못 찍힌 값이 그대로 남아 다시 저장되는 것을 막는다 */
+function clearLockedTg(){
+  if(isCellWeek(selWeek)) return;
+  reportRoster.forEach(n=>{ if(ATT[n]&&ATT[n].t) delete ATT[n].t['구역']; });
+}
 const ABSENT_REASONS=['선택','개인사정','건강','여행','직장','확인안됨','장기결석','기타'];
 let ATT={}, reportRoster=[], selWeek='', openMonth=0, absNotes={}, absReason={};
 let prevAbs=null, prevAbsUsed=false, preFilled={};
@@ -5112,6 +5124,7 @@ function loadReportInto(){
   reportRoster.forEach(n=>ATT[n]={t:{},c:{'새벽':0},p:'',e:'',ip:false});
   const prev=reports.find(r=>r.district===reportDist && r.date===selWeek);
   if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0},prev.detail[n].c),p:prev.detail[n].p||'',e:prev.detail[n].e||'',ip:!!prev.detail[n].ip}; }); }
+  clearLockedTg();     /* 구역예배가 없는 주라면 예전에 찍힌 「구역」을 지운다 */
   if(prev && prev.sundayAbsent){ prev.sundayAbsent.forEach(a=>{absReason[a.name]=a.reason;absNotes[a.name]=a.note||'';}); }
   const cn=document.getElementById('cellNote'); if(cn){ cn.value=(prev&&prev.cell&&prev.cell.note)||''; bindGrow(cn); autoGrow(cn); }
   /* 해당 주일 보고서가 아직 없으면 직전 보고서의 결석 사유를 '불러오기' 후보로 준비 */
@@ -5210,8 +5223,12 @@ function sunCount(){return reportRoster.filter(n=>ATT[n].t['1부']||ATT[n].t['2�
 function buildRosterCards(){
   const box=document.getElementById('roster');
   box.innerHTML=reportRoster.map(n=>{
-    const tg=TG.map(t=>{const lock=(t==='월삭')&&!isFirstSunday(selWeek);
-      return `<button class="tgl ${ATT[n].t[t]?'on':''} ${lock?'lock':''}" data-n="${n}" data-t="${t}" ${lock?'data-lock="1" title="월삭은 매월 첫째 주일에만 입력합니다"':''}>${t}</button>`;}).join('');
+    const tg=TG.map(t=>{
+      const lock=(t==='월삭' && !isFirstSunday(selWeek))
+              || (t==='구역' && !isCellWeek(selWeek));
+      const tip=(t==='월삭') ? '월삭은 매월 첫째 주일에만 입력합니다'
+                             : '구역예배는 매월 첫째·셋째 주일에만 입력합니다';
+      return `<button class="tgl ${ATT[n].t[t]?'on':''} ${lock?'lock':''}" data-n="${n}" data-t="${t}" ${lock?'data-lock="1" title="'+tip+'"':''}>${t}</button>`;}).join('');
     const ct=CT.map(([k,mx])=>{const v=ATT[n].c[k]||0;
       const lb=(k==='새벽')?'새벽예배 (주 '+mx+'회까지)':k;
       return `<div class="cnt"><span class="cl">${lb}</span><div class="cpick${v>0?' filled':''}" data-n="${n}" data-k="${k}" data-max="${mx}" role="button" tabindex="0">${v}</div></div>`;}).join('');
@@ -5335,7 +5352,8 @@ async function submitReport(){
   /* 이미 제출된 주일이면 덮어쓰기 확인 */
   if(curReport() && !confirm('이미 제출된 보고서입니다.\n새로 입력한 내용으로 덮어쓸까요?')) return;
   const sundayPresent=reportRoster.filter(n=>ATT[n].t['1부']||ATT[n].t['2부']);
-  const cellPresent=reportRoster.filter(n=>ATT[n].t['구역']);
+  clearLockedTg();     /* 마지막 빗장 — 구역예배가 없는 주에는 구역 출석이 저장되지 않는다 */
+  const cellPresent=isCellWeek(selWeek) ? reportRoster.filter(n=>ATT[n].t['구역']) : [];
   const absent=reportRoster.filter(n=>!(ATT[n].t['1부']||ATT[n].t['2부'])).map(n=>({name:n,reason:(absReason[n]&&absReason[n]!=='선택')?absReason[n]:'확인안됨',note:absNotes[n]||''}));
   const note=document.getElementById('cellNote').value;
   const detail={}; reportRoster.forEach(n=>detail[n]={t:ATT[n].t,c:ATT[n].c,p:(ATT[n].p||'').trim(),e:(ATT[n].e||'').trim(),ip:!!ATT[n].ip});

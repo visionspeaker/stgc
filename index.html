@@ -2047,7 +2047,18 @@ function dataSig(){
       +'#'+(HELP||[]).map(h=>(h.id||'')+'|'+(h.status||'')).sort().join(';');
   }catch(e){ return String(Math.random()); }
 }
-async function loadAll(){
+/*  ★ 2026-09-21 ★ 같은 요청이 두 번 나가지 않게 한다.
+ *  앱을 켤 때 한 번(boot), 화면을 열 때 또 한 번(openApp) 불렀기 때문에
+ *  서버(한 번에 3초쯤)를 두 번 기다리며 6초 넘게 화면을 계속 건드렸다.
+ *  이미 받아오는 중이면 **그 약속을 그대로 돌려준다** — 요청은 한 번만 나간다. */
+let allJob=null;
+function loadAll(){
+  if(allJob) return allJob;
+  allJob=loadAllOnce().then(function(v){ allJob=null; return v; },
+                           function(e){ allJob=null; throw e; });
+  return allJob;
+}
+async function loadAllOnce(){
   if(!USE_BACKEND) return;
   /*  로그인했는데 아직 명단이 없으면 함께 받아온다 (앱을 껐다 켠 경우 등).
       2026-09-13 — 예전에는 명단을 **다 받은 뒤에** 전체 자료를 불렀다.
@@ -2083,7 +2094,10 @@ async function loadAll(){
         /*  메뉴를 다시 만들 때는 **보고 있던 화면을 그대로 둔다.**
          *  인자 없이 buildNav() 를 부르면 첫 칸으로 옮겨 가 버린다. */
         if(meChanged){ saveSession(); setRoleLabel();
-          buildNav((document.querySelector('.view.active')||{}).id||''); }
+          /*  ★ keep ★ 메뉴만 갈아 끼운다 — 화면은 아래 rerender() 가 한 번만 그린다.
+           *  (예전에는 여기서 한 번, syncHelpTab 에서 또 한 번, rerender 에서 또 한 번
+           *   그려서 대시보드가 3초 안에 세 번 다시 그려졌다) */
+          buildNav((document.querySelector('.view.active')||{}).id||'',true); }
       }
       const before=dataSig();
       reports=dedupeReports(Array.isArray(d.reports)?d.reports:[]);
@@ -2101,6 +2115,10 @@ async function loadAll(){
       SUBM=Array.isArray(d.subm)?d.subm:null;
       /* 헬프데스크 — 담당이 아니면 서버가 아예 빈 배열을 준다 */
       HELP=Array.isArray(d.help)?d.help:[];
+      /*  이제부터는 「지금 받은 것」이 기준이다 — 기억해 둔 메뉴 구성을 쓰지 않는다. */
+      allLoaded=true;
+      /*  다음에 앱을 열 때 처음부터 같은 메뉴가 나오도록 구성을 적어 둔다. */
+      saveNavFlags();
       /*  자료는 로그인보다 조금 늦게 온다. 그래서 메뉴를 만들 때는 아직 몰랐다가
        *  여기서 비로소 「담당자구나」를 알게 된다 — 이때 탭을 하나 더 붙여 드린다. */
       syncHelpTab();
@@ -2893,9 +2911,11 @@ function syncHelpTab(){
       const hasH=!!nav.querySelector('button[data-v="hdlist"]');
       const hasG=!!nav.querySelector('button[data-v="gdlist"]');
       const wantG=canSeeGradeAll() && gradeStillShow();
-      if(hasH !== canSeeHelp() || hasG !== wantG){     /* 달라졌을 때만 메뉴를 다시 만든다 */
+      if(hasH !== wantHelpTab() || hasG !== wantG){     /* 달라졌을 때만 메뉴를 다시 만든다 */
         const cur=(document.querySelector('.view.active')||{}).id||'';
-        buildNav(cur);
+        /*  ★ keep ★ 메뉴 단추만 갈아 끼우고 보고 있던 화면은 건드리지 않는다.
+         *  (예전에는 여기서 화면을 통째로 다시 그려 대시보드가 깜빡였다) */
+        buildNav(cur,true);
       }
     }
   }catch(e){}
@@ -3079,17 +3099,50 @@ function helpOnlyMe(){ return !!current
 /*  헬프데스크 탭을 보여 드릴까 — 서버가 자료를 준 분에게만.
     (이름 명단은 서버에만 있다. 앱은 「자료가 왔는가」로만 판단한다) */
 function canSeeHelp(){ return helpOnlyMe() || (Array.isArray(HELP) && HELP.length>0); }
-function buildNav(view){
+/*  ═══ 메뉴 구성을 기억해 둔다 ═══  (2026-09-21)
+ *  「헬프데스크」·「신급 교육」 두 탭은 서버 자료가 와야 보여 드릴지 알 수 있는데,
+ *  그 자료는 저장해 두지 않는다. 그래서 화면을 열면 먼저 두 칸 없이 그려졌다가
+ *  3~6초 뒤 두 칸이 «중간에 끼어들며» 뒤 항목이 옆으로 밀렸다 —
+ *  사장님이 「메뉴가 예전 것 보이다가 최신화된다」고 하신 것이 이것이다.
+ *  이제 지난번 구성을 계정별로 기억해 두었다가 **처음부터 그대로 그린다.**
+ *  (참·거짓 두 개만 저장한다 — 이름·연락처 같은 것은 담지 않는다) */
+const NAVF_KEY='sgc_navflags_v1';
+let allLoaded=false;                    /* 이번에 서버 자료를 받았는가 */
+function navFlagKey(){ return NAVF_KEY+'_'+((current&&current.who)||'guest'); }
+function saveNavFlags(){
+  if(!current || !current.who) return;        /* 로그인한 분에게만 적어 둔다 */
+  try{ localStorage.setItem(navFlagKey(),
+        JSON.stringify({h:!!canSeeHelp(), g:!!(canSeeGradeAll()&&gradeStillShow())})); }catch(e){}
+}
+function loadNavFlags(){
+  try{ return JSON.parse(localStorage.getItem(navFlagKey())||'null'); }catch(e){ return null; }
+}
+/*  자료가 왔으면 «지금» 값을, 아직이면 «기억해 둔» 값을 쓴다. */
+function wantHelpTab(){
+  if(allLoaded || helpOnlyMe()) return !!canSeeHelp();
+  const f=loadNavFlags(); return f ? !!f.h : !!canSeeHelp();
+}
+function wantGradeTab(){
+  if(allLoaded) return !!(canSeeGradeAll() && gradeStillShow());
+  if(!canSeeGradeAll()) return false;   /* 담당이 아닌 분께는 기억과 상관없이 안 보인다 */
+  const f=loadNavFlags(); return f ? !!f.g : false;
+}
+/*  view  = 어느 칸을 켜 둘까 (없으면 첫 칸)
+ *  keep  = 메뉴 «단추만» 갈아 끼우고 화면은 그대로 둔다 (2026-09-21)
+ *          예전에는 메뉴를 다시 만들 때마다 showView() 까지 불러
+ *          보고 있던 화면을 통째로 다시 그렸다. 대시보드가 3초 안에
+ *          세 번 그려지던 까닭이다. */
+function buildNav(view,keep){
   const nav=document.getElementById('nav');
   let items=subOnlyMe() ? [['manage','문의 접수 처리']]
           : helpOnlyMe() ? [['hdlist','헬프데스크']]
           : (ROLE_NAV[current.role]||[]).slice();
   /* 담당자에게만 헬프데스크 탭을 하나 더 붙인다 */
-  if(!subOnlyMe() && !helpOnlyMe() && canSeeHelp()
+  if(!subOnlyMe() && !helpOnlyMe() && wantHelpTab()
      && !items.some(it=>it[0]==='hdlist')) items.splice(1,0,['hdlist','헬프데스크']);
   /*  신급 교육 — 담당 장로·교역자에게만. 마감 30일 뒤에는 저절로 사라진다.
       (서버가 me.gradeAll 로 알려 준다 — 담당자 이름은 앱에 없다) */
-  if(!subOnlyMe() && !helpOnlyMe() && canSeeGradeAll() && gradeStillShow()
+  if(!subOnlyMe() && !helpOnlyMe() && wantGradeTab()
      && !items.some(it=>it[0]==='gdlist')) items.push(['gdlist','신급 교육']);
   const first=view||(items[0]&&items[0][0])||'intake';
   if(!items.length){ nav.innerHTML=''; nav.style.display='none'; }
@@ -3102,7 +3155,7 @@ function buildNav(view){
       if(b.dataset.url){ openL(b.dataset.url); return; }   /* 링크는 탭 상태를 바꾸지 않음 */
       nav.querySelectorAll('button').forEach(x=>{if(!x.dataset.url)x.classList.remove('active')});b.classList.add('active');showView(b.dataset.v);});
   }
-  showView(first);
+  if(!keep) showView(first);
   paintSubBadge();
 }
 
@@ -6766,14 +6819,32 @@ function stat(n,l,warn){return `<div class="stat${warn?' warn':''}"><div class="
 /* 차트를 매번 지웠다 다시 만들면 그릴 때마다 애니메이션이 처음부터 재생된다.
    (대시보드는 화면 진입 때 한 번, 서버 자료를 받은 뒤 또 한 번 그려지므로
     같은 애니메이션이 두세 번 반복되어 보였다)
-   → 이미 있는 차트는 데이터만 갈아 끼우고 애니메이션 없이 갱신한다. */
+   → 이미 있는 차트는 데이터만 갈아 끼우고 애니메이션 없이 갱신한다.
+
+   ★ 2026-09-21 고침 ★ 이 「다시 쓰기」가 여태 **한 번도 되지 않았다.**
+   설정을 `c.options = Object.assign(c.options, opts)` 로 «통째로» 갈아 끼웠는데,
+   Chart.js 가 쥐고 있던 설정 꾸러미가 그때 끊어져 버려
+   바로 다음 줄 update() 가 늘 오류를 냈고(`t.startsWith is not a function`),
+   결국 언제나 아래 「부수고 새로 만들기」로 흘러 애니메이션이 반복됐다.
+   → 이제 **있던 설정 안에 값만 끼워 넣는다**(통째로 바꾸지 않는다). */
+function mergeOpts(dst,src){
+  Object.keys(src||{}).forEach(function(k){
+    const v=src[k];
+    if(v && typeof v==='object' && !Array.isArray(v)
+       && dst[k] && typeof dst[k]==='object' && !Array.isArray(dst[k])) mergeOpts(dst[k],v);
+    else dst[k]=v;
+  });
+  return dst;
+}
 function drawChart(id,type,data,opts){
   const el=document.getElementById(id); if(!el) return;
   const c=charts[id];
   if(c && c._type===type && c.canvas===el){
-    c.data=data;
-    if(opts) c.options=Object.assign(c.options||{},opts);
-    try{ c.update('none'); return; }catch(e){ /* 실패하면 아래에서 새로 만든다 */ }
+    try{
+      c.data=data;
+      if(opts && c.options) mergeOpts(c.options,opts);
+      c.update('none'); return;
+    }catch(e){ /* 실패하면 아래에서 새로 만든다 */ }
   }
   if(c){ try{ c.destroy(); }catch(e){} }
   const ch=new Chart(el,{type,data,options:Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}}},opts)});

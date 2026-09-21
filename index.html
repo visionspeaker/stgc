@@ -961,6 +961,18 @@ background:#e6f7f5;color:#0b6f68;margin-bottom:3px}
 padding:5px 9px;font-size:11.5px;font-weight:800;font-family:inherit;cursor:pointer}
 /* ── 신급 교육 신청 · 대시보드 ── */
 .gdcardD{padding:15px 16px 17px}
+/* 교육 일정 — 날짜 알약 한 줄 (지난 일정은 흐리게, 진행 중은 초록) */
+.gdplan{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 2px}
+.gdplan .pl{font-size:11px;font-weight:800;color:var(--muted);margin-right:1px}
+.gdplan .pc{display:inline-flex;align-items:baseline;gap:5px;border:1px solid #e2e8f0;
+background:#fbfcfe;border-radius:999px;padding:4px 11px;font-size:12px;color:var(--ink)}
+.gdplan .pc b{font-weight:800;color:#0f766e}
+.gdplan .pc small{font-size:11px;color:var(--muted)}
+.gdplan .pc.done{background:#f4f6f9;border-color:#e8ecf1;color:#aab2bd}
+.gdplan .pc.done b{color:#aab2bd}
+.gdplan .pc.done small{color:#bcc3cc}
+.gdplan .pc.now{background:#dcfce7;border-color:#86efac}
+.gdplan .pc.now b{color:#16a34a}
 .gdkpis{display:flex;gap:9px;flex-wrap:wrap}
 .gdkpi{flex:1;min-width:92px;border:1px solid var(--line);border-radius:13px;padding:11px 12px;background:#fbfcfe}
 .gdkpi .v{font-size:22px;font-weight:800;color:#7b52c8}
@@ -4429,11 +4441,41 @@ async function openGradeList(){
 }
 function gdEditOpen(id){ gdEditId=(String(gdEditId||'')===String(id||''))?'':String(id||''); renderGradePage(); }
 
-/*  남은 날 — 마감일까지 며칠인지 */
-function gdDaysLeft(){
-  const to=(GRADE&&GRADE.to)||''; if(!to) return null;
-  const d=new Date(to+'T23:59:59'); if(isNaN(d)) return null;
-  return Math.ceil((d-new Date())/86400000);
+/*  신청이 마감됐는지 — 오늘과 마감일을 «글자 그대로» 견준다.
+ *  예전에는 시각을 빼서 셌는데, 마감 다음 날에도 「아직 하루 남았다」로 나오는 일이 있었다. */
+function gdClosed(){
+  const to=String((GRADE&&GRADE.to)||'').trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(to)) return false;
+  return localISO(new Date()) > to;
+}
+/*  교육 일정 ─────────────────────────────────────────────
+ *  서버(GRADE.plan)에 적어 둔 일정을 알약 모양으로 한 줄에 늘어놓는다.
+ *  일정이 없으면 아무것도 그리지 않으므로 화면이 깨지지 않는다. */
+function gdMD(s){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||'').trim());
+  return m? (+m[2])+'/'+(+m[3]) : String(s||'').trim();
+}
+/*  지났으면 'done', 오늘이 그 안이면 'now', 아직이면 '' */
+function gdPlanState(p){
+  const a=String((p&&p.d)||'').trim(); if(!a) return '';
+  const b=String((p&&p.e)||'').trim()||a;
+  const t=localISO(new Date());
+  if(t<a) return '';
+  return (t<=b)? 'now' : 'done';
+}
+function gdPlanHtml(){
+  const ps=(GRADE&&Array.isArray(GRADE.plan))? GRADE.plan : [];
+  const rows=ps.filter(p=>p&&String(p.d||'').trim()&&String(p.n||'').trim());
+  if(!rows.length) return '';
+  return '<div class="gdplan"><span class="pl">교육 일정</span>'
+    +rows.map(function(p){
+      const st=gdPlanState(p);
+      const dt=gdMD(p.d)+(String(p.e||'').trim()? '~'+gdMD(p.e) : '');
+      return '<span class="pc'+(st? ' '+st : '')+'">'
+        +'<b>'+esc(dt)+'</b> '+esc(String(p.n||''))
+        +(String(p.s||'').trim()? ' <small>'+esc(String(p.s))+'</small>' : '')
+        +'</span>';
+    }).join('')+'</div>';
 }
 /* 한 사람 줄 */
 function gdpRow(g){
@@ -4544,13 +4586,13 @@ function renderGradePage(){
   const nSex=v=>list.filter(x=>String(x.sex||'')===v).length;
   const nMid=list.filter(x=>String(x.district||'')==='중고등부').length;
   const nBlank=list.filter(x=>!String(x.sex||'').trim()).length;
-  const dl=gdDaysLeft();
   box.innerHTML='<div class="card">'
     +'<h2>'+esc(g.title||'신급 교육')+'</h2>'
     +'<p class="sub">'+esc(g.sub||'')
       +(g.from&&g.to? ' · 신청 '+esc(String(g.from).slice(5))+' ~ '+esc(String(g.to).slice(5))
-        +(dl!==null? (dl>=0? ' <b>('+dl+'일 남음)</b>' : ' <b>(마감)</b>') : '') : '')
+        +(gdClosed()? ' <b>(마감)</b>' : '') : '')
       +'</p>'
+    +gdPlanHtml()
     +(tot?
       '<div class="gdkpis">'
         + gdBox(tot+' <small>명</small>','전체 신청')

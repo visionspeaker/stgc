@@ -430,7 +430,9 @@ background:#f7f9fc;border-radius:9px;padding:9px 11px}
 .i-rose .mc{background:linear-gradient(160deg,#f096b4,#d9527a)}
 .i-rose .mc svg{width:42px;height:42px}
 .visitor{text-align:center;color:var(--muted);font-size:12.5px;margin:16px 0 0;padding-bottom:24px}
-.visitor b{color:var(--ink)}
+/* 숫자 폭을 고정한다 — 세는 동안 1·8 처럼 폭이 다른 숫자가 지나가며
+   글자가 좌우로 흔들리는 것을 막는다 (2026-09-23) */
+.visitor b{color:var(--ink);font-variant-numeric:tabular-nums}
 .cright{font-size:10.5px;color:#9aa4b2;line-height:1.6;letter-spacing:-.1px}
 /* ── 홈 화면에 추가 도우미 ── */
 #a2hs{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;border-top:2px solid var(--teal);
@@ -1979,17 +1981,23 @@ function animateCount(el,to,quiet){
   if(!isFinite(target)){ el.textContent='·'; return; }
   const start=(/^\d+$/.test(el.textContent))?Number(el.textContent):0;
   if(el._vt){ clearTimeout(el._vt); el._vt=null; }
-  /*  quiet = 세는 시늉 없이 숫자만 바꾼다.
-      방문자 수는 화면을 열 때 한 번만 올라가는 맛을 보여 주고, 그 뒤에 값이
-      갱신될 때는 조용히 바꾼다. 메뉴를 드나들 때마다 0.85초짜리 카운트업이
-      다시 도는 것이 '숫자가 들쭉날쭉한다'는 느낌을 주기 때문이다. */
-  if(quiet){
-    if(el._va){ cancelAnimationFrame(el._va); el._va=null; }
-    el.textContent=String(target); return;
-  }
   if(start===target){ el.textContent=String(target); return; }
   if(el._va){ cancelAnimationFrame(el._va); el._va=null; }
-  const dur=850, t0=(window.performance&&performance.now)?performance.now():Date.now();
+  /*  ★ 2026-09-23 ★ 「조용히 바꾸기」를 없앴다.
+   *  예전에는 quiet 이면 애니메이션 없이 숫자를 «즉시» 갈아 끼웠다.
+   *  방문자 수는 한 화면에서 값이 세 번 들어오기 때문에(저장해 둔 값 →
+   *  방문 기록 +1 → 전체 자료), 두 번째부터 숫자가 「뚝」 하고 바뀌었다.
+   *
+   *  이제 quiet 은 «짧게 올린다»는 뜻이다. 걸리는 시간을 «움직이는 폭»에
+   *  맞추므로, 한두 칸 오를 때는 짧고 가볍게, 크게 뛸 때는 넉넉하게 오른다.
+   *  값이 그대로면 위에서 이미 아무것도 하지 않고 돌아갔으므로,
+   *  화면을 드나든다고 카운트업이 다시 도는 일도 없다.
+   *
+   *  ※ 세는 도중에 값이 또 와도 «지금 보이는 숫자»(start)에서 이어 오른다 —
+   *    0 으로 되돌아가 다시 세지 않는다. */
+  const gap=Math.abs(target-start);
+  const dur=Math.max(560, Math.min(quiet?1100:1800, 520+gap*28));
+  const t0=(window.performance&&performance.now)?performance.now():Date.now();
   const done=()=>{ el.textContent=String(target);
     if(el._va){ cancelAnimationFrame(el._va); el._va=null; }
     if(el._vt){ clearTimeout(el._vt); el._vt=null; } };

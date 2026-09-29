@@ -408,8 +408,12 @@ background:#f7f9fc;border-radius:9px;padding:9px 11px}
 .hbar .htt{cursor:pointer;border-radius:9px;padding:3px 7px;margin:-3px -7px;
  -webkit-tap-highlight-color:transparent;transition:background .12s}
 .hbar .htt:active{background:#f0fdf4}
-.hbar .htt .vtag{font-size:9.5px;color:#c3cad4;font-weight:700;letter-spacing:0;margin-left:5px;
- vertical-align:1px}
+/*  ★ 2026-09-29 ★ 머리글 표시는 «몇 번째 고침»을 알약으로 보여 준다.
+ *  예전에는 날짜(v2026.09.29)를 적었는데, 오늘 날짜로 오해하기 쉬웠다. */
+.hbar .htt .vtag{display:inline-block;font-size:9.5px;font-weight:800;color:#6b7280;
+ background:#eef2f7;border-radius:999px;padding:2px 7px;letter-spacing:0;margin-left:5px;
+ vertical-align:2px;line-height:1.5}
+.hbar .htt .vtag:empty{display:none}
 .rnote{position:fixed;inset:0;z-index:130;background:#fbfcfe;display:flex;flex-direction:column}
 .rnbar{display:flex;align-items:center;gap:9px;padding:13px 15px;background:#fff;
  border-bottom:1px solid var(--line);flex:none}
@@ -420,6 +424,8 @@ background:#f7f9fc;border-radius:9px;padding:9px 11px}
 .rnbd{flex:1;overflow:auto;padding:14px 14px calc(26px + env(safe-area-inset-bottom,0px));
  -webkit-overflow-scrolling:touch}
 .rnin{font-size:12px;color:var(--muted);margin:0 2px 13px;line-height:1.75}
+.rnin .rnlast{color:var(--ink)}
+.rnin .rncnt{color:#9aa4b2}
 .rncard{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px 15px;margin-bottom:11px}
 .rncard h3{font-size:15px;margin:0 0 6px;letter-spacing:-.2px;color:var(--ink)}
 .rncard .rnmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -7055,17 +7061,28 @@ const RELEASES=[{"d": "2026.09.29", "k": "앱＋서버", "v": "서버 v58", "t":
 function rnText(s){
   return esc(String(s||'')).replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>');
 }
+/*  머리글 옆 알약 — «몇 번째 고침»이다. 날짜가 아니다.
+ *  (날짜를 적었더니 「오늘이 아닌데?」 하는 오해가 있었다 · 2026-09-29) */
 function rnPaintVer(){
   const t=document.getElementById('vTag');
-  if(t && RELEASES.length) t.textContent='v'+RELEASES[0].d;
+  if(t) t.textContent = RELEASES.length ? ('v'+RELEASES.length) : '';
+}
+/*  「2026.09.29」 → 「2026년 9월 29일」 */
+function rnDay(d){
+  const m=/^(\d{4})\.(\d{2})\.(\d{2})$/.exec(String(d||''));
+  return m ? (m[1]+'년 '+(+m[2])+'월 '+(+m[3])+'일') : String(d||'');
 }
 function openRnote(){
   const box=document.getElementById('rnote'), bd=document.getElementById('rnBody');
   if(!box||!bd) return;
   const v=document.getElementById('rnVer');
-  if(v) v.textContent=RELEASES.length?('v'+RELEASES[0].d):'';
-  bd.innerHTML='<p class="rnin">영광 커넥트가 그동안 어떻게 바뀌어 왔는지 적어 둔 곳입니다.<br>'
-    +'고쳐 주셨으면 하는 것이 있으면 <b>문의하기</b>로 알려 주세요.</p>'
+  if(v) v.textContent=RELEASES.length?('모두 '+RELEASES.length+'번'):'';
+  /*  머리글 알약이 「v24」 라 날짜가 안 보인다 —
+   *  여기 들어오면 «마지막으로 고친 날»을 분명히 적어 둔다. */
+  bd.innerHTML='<p class="rnin">영광 커넥트가 그동안 어떻게 바뀌어 왔는지 적어 둔 곳입니다.'
+    + (RELEASES.length? '<br><b class="rnlast">마지막으로 고친 날 · '+esc(rnDay(RELEASES[0].d))
+        +'</b> <span class="rncnt">('+RELEASES.length+'번째)</span>' : '')
+    +'<br>고쳐 주셨으면 하는 것이 있으면 <b>문의하기</b>로 알려 주세요.</p>'
     + (RELEASES.length? RELEASES.map(function(r,i){
         return '<div class="rncard'+(i===0?' new':'')+'">'
           +'<h3>'+rnText(r.t)+'</h3>'

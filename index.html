@@ -357,6 +357,8 @@ background:#f7f9fc;border-radius:9px;padding:9px 11px}
 .rmchip{background:var(--greenSoft);color:#15803d;border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700}
 .rmchip.n{background:#f8fafc;border:1px solid var(--line);color:var(--ink);font-weight:600}
 .rmchip.v{background:var(--lavSoft);color:#5b54c9}
+/* 되살린 자율 항목 (성경·QT) — 새벽과 구분해 파랑으로 (2026-09-29) */
+.rmchip.x{background:#dbeafe;border:1px solid #bfdbfe;color:#2563eb;font-weight:700}
 .rmsum{display:flex;gap:8px;flex-wrap:wrap}
 .rmbox{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:11.5px;color:var(--muted)}
 .rmbox b{font-size:15px;display:block;color:var(--green)}
@@ -585,6 +587,25 @@ border:1px solid var(--line);text-decoration:none;flex:none}
 .knum button.on{border-color:var(--teal);background:#e6f7f5;color:#0b6f68}
 .kclose{width:100%;margin-top:11px;height:44px;border:1px solid var(--inline);border-radius:12px;
  background:#fff;color:var(--muted);font-size:13.5px;font-weight:800;font-family:inherit;cursor:pointer}
+/* 큰 수를 치는 숫자판 — 성경 장수처럼 30·100 이 나오는 칸 (2026-09-29) */
+.kview{border:1.5px solid var(--line);border-radius:14px;height:60px;display:flex;align-items:center;
+ justify-content:center;font-size:30px;font-weight:800;margin-bottom:10px;background:#fbfcfe;
+ font-variant-numeric:tabular-nums;color:var(--ink)}
+.knum.kbig button{height:54px;font-size:21px}
+.knum.kbig .kok{background:linear-gradient(135deg,#3fb99f,#2c8f7c);border:0;color:#fff;font-size:16px}
+.knum.kbig .kdel{color:#dc2626;font-size:20px}
+.knum.kbig .kzero{font-size:14px;color:var(--muted)}
+/* 되살린 칸은 살짝 표시해 둔다 */
+.cnt.opt{box-shadow:0 0 0 2px #dbeafe}
+/* 구역보고 — 큐티·성경 칸 켜기 줄 */
+.roptbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:#f4fbf9;
+ border:1px solid #cfeae3;border-radius:12px;padding:11px 13px;margin:10px 0}
+.roptbar .tt{font-size:13px;font-weight:800;color:#1c7a68}
+.roptbar .sub{font-size:11.5px;color:var(--muted);width:100%;margin-top:-3px}
+.roptsw{margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:999px;
+ padding:8px 16px;font-size:12.5px;font-weight:800;font-family:inherit;cursor:pointer;color:var(--ink)}
+.roptsw.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.roptsw:disabled{opacity:.5;cursor:not-allowed}
 /* 지난주 사유 불러오기 */
 .loadbar{display:flex;align-items:center;gap:8px;background:#fffbf2;border:1px solid #f6d9a8;border-radius:12px;padding:10px 12px;margin-top:10px}
 .loadbar .lt{flex:1;font-size:12.5px;color:#8a5a12;line-height:1.5}
@@ -1514,6 +1535,8 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     <div class="sect">
       <h4>예배 출석부</h4>
       <div class="d">이름을 누르면 세부 출석 항목이 펼쳐집니다 · 주일출석 <b id="sunCnt">0</b>명</div>
+      <!-- 큐티·성경 칸 켜기 — 구역장이 우리 구역에만 적용한다 (2026-09-29) -->
+      <div id="roptBar"></div>
       <div id="roster"></div>
     </div>
     <div class="sect">
@@ -1743,6 +1766,19 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     <div class="kt" id="kTitle">숫자 입력</div>
     <div class="ks" id="kSub"></div>
     <div class="knum" id="kNums"></div>
+    <!-- 큰 수(성경 장수)를 칠 때만 나오는 숫자판 (2026-09-29) -->
+    <div id="kBig" style="display:none">
+      <div class="kview" id="kView">0</div>
+      <div class="knum kbig">
+        <button data-d="1">1</button><button data-d="2">2</button><button data-d="3">3</button>
+        <button class="kdel" id="kDel">←</button>
+        <button data-d="4">4</button><button data-d="5">5</button><button data-d="6">6</button>
+        <button class="kzero" id="kZero">0으로</button>
+        <button data-d="7">7</button><button data-d="8">8</button><button data-d="9">9</button>
+        <button class="kok" id="kOk">확인</button>
+        <button data-d="0" style="grid-column:span 3">0</button>
+      </div>
+    </div>
     <button class="kclose" onclick="closeKpad(false)">닫기</button>
   </div>
 </div>
@@ -2121,6 +2157,9 @@ async function loadAllOnce(){
        *  「제출 1 / 26 구역」 처럼 본인 것만 세게 된다 (2026-09-17).
        *  옛 서버에는 이 값이 없으므로, 그때는 받은 보고서로 세던 대로 둔다. */
       SUBM=Array.isArray(d.subm)?d.subm:null;
+      /*  구역보고 「큐티·성경」 칸을 켜 둔 구역 (참·거짓뿐).
+       *  옛 서버에는 없으므로, 없으면 지금 값을 그대로 둔다. */
+      if(d.repopt && typeof d.repopt==='object') REPOPT=d.repopt;
       /* 헬프데스크 — 담당이 아니면 서버가 아예 빈 배열을 준다 */
       HELP=Array.isArray(d.help)?d.help:[];
       /*  이제부터는 「지금 받은 것」이 기준이다 — 기억해 둔 메뉴 구성을 쓰지 않는다. */
@@ -5189,6 +5228,29 @@ const TG=['1부','2부','오후','수요','금요','구역','월삭'];
 /* 2026-08-27 : 성경읽기·QT(가정예배)는 적지 않기로 하여 뺐다.
    지난 보고서에 들어 있던 값은 지우지 않고 그대로 함께 저장된다. */
 const CT=[['새벽',7]];
+/*  ★ 2026-09-29 ★ 「큐티·성경」 칸 — 원하는 구역만 되살린다.
+ *  2026-08-27 에 화면에서 뺐더니, 쓰고 싶은 구역장들이 「기타 사항」에
+ *  손으로 적고 계셨다 (성경(6)목상(1) · 성(30)묵(3) …). 적는 말도 제각각이었다.
+ *  → 담는 이름은 **예전 그대로** 쓴다. 그래야 예전에 저장된 값이 그대로 살아난다.
+ *    새벽(주 7회) · 성경(장, 0~100) · QT(가정)(회, 0~20)
+ *  대시보드는 건드리지 않는다 — 새벽만 센다(FAITH). */
+const CT_OPT=[['성경',100],['QT(가정)',20]];
+const CT_LABEL={'새벽':'새벽예배 (주 7회까지)','성경':'성경읽기 (장)','QT(가정)':'QT·가정예배 (회)'};
+/*  켜 둔 구역 목록 — 서버(all)가 내려 준다. 참·거짓뿐이다. */
+let REPOPT={};
+function repOptOn(d){ return !!(REPOPT && REPOPT[String(d||'').trim()]); }
+/*  이 구역의 숫자 칸 목록 */
+function ctFor(d){ return repOptOn(d) ? CT.concat(CT_OPT) : CT.slice(); }
+/*  지금 적고 있는 구역의 칸 목록 */
+function ctNow(){ return ctFor(reportDist); }
+/*  ATT 의 c 칸 첫 모양 — 켜 둔 구역이면 성경·QT 도 0 으로 깔아 둔다 */
+function ctZero(){ const o={}; ctNow().forEach(function(p){ o[p[0]]=0; }); return o; }
+/*  내가 이 구역의 스위치를 만질 수 있는가 (서버도 같은 잣대로 한 번 더 막는다) */
+function canRepOpt(d){
+  if(!current || current.role==='guest') return false;
+  if(current.role==='admin') return true;
+  return String(d||'').trim()===String(current.district||'').trim();
+}
 /* 월삭은 매월 첫째 주일(1~7일)에만 선택 가능 */
 function isFirstSunday(d){ const day=parseInt(String(d||'').slice(8,10),10); return day>=1&&day<=7; }
 /*  ★ 2026-09-20 ★ 구역예배는 매월 «첫째·셋째» 주일에만 드린다.
@@ -5241,9 +5303,10 @@ function showReport(){
 function loadReportInto(){
   reportRoster=rosterOf(reportDist,selWeek);
   ATT={}; absNotes={}; absReason={};
-  reportRoster.forEach(n=>ATT[n]={t:{},c:{'새벽':0},p:'',e:'',ip:false});
+  reportRoster.forEach(n=>ATT[n]={t:{},c:ctZero(),p:'',e:'',ip:false});
   const prev=reports.find(r=>r.district===reportDist && r.date===selWeek);
-  if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign({'새벽':0},prev.detail[n].c),p:prev.detail[n].p||'',e:prev.detail[n].e||'',ip:!!prev.detail[n].ip}; }); }
+  /*  예전 값은 그대로 이어받는다 — 칸을 껐다 켜도 적어 둔 숫자가 사라지지 않는다. */
+  if(prev && prev.detail){ reportRoster.forEach(n=>{ if(prev.detail[n]) ATT[n]={t:Object.assign({},prev.detail[n].t),c:Object.assign(ctZero(),prev.detail[n].c),p:prev.detail[n].p||'',e:prev.detail[n].e||'',ip:!!prev.detail[n].ip}; }); }
   clearLockedTg();     /* 구역예배가 없는 주라면 예전에 찍힌 「구역」을 지운다 */
   if(prev && prev.sundayAbsent){ prev.sundayAbsent.forEach(a=>{absReason[a.name]=a.reason;absNotes[a.name]=a.note||'';}); }
   const cn=document.getElementById('cellNote'); if(cn){ cn.value=(prev&&prev.cell&&prev.cell.note)||''; bindGrow(cn); autoGrow(cn); }
@@ -5340,6 +5403,39 @@ function repMainBtn(){
 }
 function updWeekNote(){document.getElementById('weekNote').innerHTML=fmtSun(selWeek)+' · '+(repDone(selWeek)?'<b style="color:var(--green)">작성 완료</b> — 기존 내역 불러옴':'<b style="color:var(--red)">미입력</b> — 새로 작성');}
 function sunCount(){return reportRoster.filter(n=>ATT[n].t['1부']||ATT[n].t['2부']).length;}
+/*  ★ 2026-09-29 ★ 「큐티·성경 칸 쓰기」 줄 — 우리 구역에만 적용된다. */
+let roptSending=false;
+function paintRoptBar(){
+  const box=document.getElementById('roptBar'); if(!box) return;
+  if(!reportDist || !canRepOpt(reportDist)){ box.innerHTML=''; return; }
+  const on=repOptOn(reportDist);
+  box.innerHTML='<div class="roptbar"><span class="tt">큐티·성경 칸 쓰기</span>'
+    +'<button type="button" class="roptsw'+(on?' on':'')+'" id="roptSw"'+(roptSending?' disabled':'')+'>'
+    +(roptSending?'바꾸는 중…':(on?'켜짐':'꺼짐'))+'</button>'
+    +'<span class="sub">'+esc(reportDist)+' 보고에만 <b>성경읽기(장)</b> · <b>QT·가정예배(회)</b> 칸이 생깁니다. '
+    +'대시보드에는 집계되지 않습니다.</span></div>';
+  const b=document.getElementById('roptSw');
+  if(b) b.onclick=function(){ toggleRopt(); };
+}
+async function toggleRopt(){
+  if(roptSending || !reportDist) return;
+  const want=!repOptOn(reportDist);
+  roptSending=true; paintRoptBar();
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',body:tokBody({action:'setRepOpt',district:reportDist,on:want})});
+    d=await r.json().catch(()=>null);
+  }catch(e){ d=null; }
+  roptSending=false;
+  if(!d||!d.ok){ paintRoptBar(); alert((d&&d.message)||'바꾸지 못했습니다. 잠시 뒤 다시 해 주세요.'); return; }
+  absorbToken(d);
+  if(d.repopt && typeof d.repopt==='object') REPOPT=d.repopt;
+  else { REPOPT=Object.assign({},REPOPT); if(want) REPOPT[reportDist]=true; else delete REPOPT[reportDist]; }
+  /*  칸이 늘거나 줄어드니 적어 둔 숫자를 지키면서 다시 그린다.
+      («켜기» 로 새로 생긴 칸은 0 부터, 예전에 적힌 값이 있으면 그 값이 그대로 나온다) */
+  reportRoster.forEach(function(n){ if(ATT[n]) ATT[n].c=Object.assign(ctZero(),ATT[n].c); });
+  paintRoptBar(); buildRosterCards();
+}
 function buildRosterCards(){
   const box=document.getElementById('roster');
   box.innerHTML=reportRoster.map(n=>{
@@ -5349,9 +5445,9 @@ function buildRosterCards(){
       const tip=(t==='월삭') ? '월삭은 매월 첫째 주일에만 입력합니다'
                              : '구역예배는 매월 첫째·셋째 주일에만 입력합니다';
       return `<button class="tgl ${ATT[n].t[t]?'on':''} ${lock?'lock':''}" data-n="${n}" data-t="${t}" ${lock?'data-lock="1" title="'+tip+'"':''}>${t}</button>`;}).join('');
-    const ct=CT.map(([k,mx])=>{const v=ATT[n].c[k]||0;
-      const lb=(k==='새벽')?'새벽예배 (주 '+mx+'회까지)':k;
-      return `<div class="cnt"><span class="cl">${lb}</span><div class="cpick${v>0?' filled':''}" data-n="${n}" data-k="${k}" data-max="${mx}" role="button" tabindex="0">${v}</div></div>`;}).join('');
+    const ct=ctNow().map(([k,mx])=>{const v=ATT[n].c[k]||0;
+      const lb=CT_LABEL[k]||k;
+      return `<div class="cnt${k==='새벽'?'':' opt'}"><span class="cl">${lb}</span><div class="cpick${v>0?' filled':''}" data-n="${n}" data-k="${k}" data-max="${mx}" role="button" tabindex="0">${v}</div></div>`;}).join('');
     const pv=(ATT[n].p||'').replace(/"/g,'&quot;');
     const ev=(ATT[n].e||'').replace(/"/g,'&quot;');
     const pray=`<div class="pray"><label class="pl">기도제목 <span>· 선택 입력</span></label><input class="ppick" type="text" data-n="${n}" placeholder="세부내용" value="${pv}"/>`
@@ -5367,12 +5463,13 @@ function buildRosterCards(){
   box.querySelectorAll('.ipick').forEach(i=>i.onchange=()=>{ATT[i.dataset.n].ip=i.checked;updPsum(i.dataset.n);});
   reportRoster.forEach(updPsum);
   document.getElementById('sunCnt').textContent=sunCount();
+  paintRoptBar();
   buildAbsent();
 }
 function updPsum(n){
   const parts=TG.filter(t=>ATT[n].t[t]);
-  const CTK=CT.map(x=>x[0]);
-  const cs=Object.entries(ATT[n].c).filter(([k,v])=>v>0 && CTK.indexOf(k)>=0).map(([k,v])=>k+v);
+  const CTK=ctNow().map(x=>x[0]);
+  const cs=Object.entries(ATT[n].c).filter(([k,v])=>v>0 && CTK.indexOf(k)>=0).map(([k,v])=>k.replace('(가정)','')+v);
   const el=document.querySelector('.prow[data-n="'+n+'"] .psum');
   const pr=(ATT[n].p||'').trim()?[(ATT[n].ip?'🙏 ':'')+'기도제목 ✎']:[];
   const et=(ATT[n].e||'').trim()?['기타 ✎']:[];
@@ -5391,20 +5488,50 @@ function openKpad(el){
   kTarget=el; kMax=parseInt(el.dataset.max,10)||0;
   const k=el.dataset.k;
   const cur=parseInt(el.textContent.trim(),10)||0;
-  document.getElementById('kTitle').textContent=el.dataset.n+' · '+k;
-  document.getElementById('kSub').textContent='숫자를 누르면 바로 저장됩니다';
-  const top=Math.min(kMax,KMAX_BTN);
-  let html='';
-  for(let i=0;i<=top;i++) html+='<button class="'+(i===cur?'on':'')+'" data-v="'+i+'">'+i+'</button>';
-  const box=document.getElementById('kNums');
-  box.innerHTML=html;
-  box.querySelectorAll('button').forEach(function(b){ b.onclick=function(){ kPick(+b.dataset.v); }; });
+  document.getElementById('kTitle').textContent=el.dataset.n+' · '+(CT_LABEL[k]||k);
+  const box=document.getElementById('kNums'), big=document.getElementById('kBig');
+  /*  ★ 2026-09-29 ★ 단추로 늘어놓기엔 너무 큰 칸(성경 0~100장)은 숫자판으로 친다. */
+  if(kMax>KMAX_BTN){
+    document.getElementById('kSub').textContent='0 ~ '+kMax+' 까지 · 다 치고 «확인»';
+    box.style.display='none'; big.style.display='block';
+    kBuf=cur?String(cur):'';
+    kPaint();
+  } else {
+    document.getElementById('kSub').textContent='숫자를 누르면 바로 저장됩니다';
+    big.style.display='none'; box.style.display='grid';
+    let html='';
+    for(let i=0;i<=kMax;i++) html+='<button class="'+(i===cur?'on':'')+'" data-v="'+i+'">'+i+'</button>';
+    box.innerHTML=html;
+    box.querySelectorAll('button').forEach(function(b){ b.onclick=function(){ kPick(+b.dataset.v); }; });
+  }
   const p=document.getElementById('kpad'); p.style.display='flex'; p.classList.add('on');
+}
+/*  숫자판 — 큰 수를 한 자리씩 친다 */
+let kBuf='';
+function kPaint(){ const v=document.getElementById('kView'); if(v) v.textContent=kBuf||'0'; }
+function kDigit(d){
+  if(kBuf.length>=String(kMax).length+1) return;
+  let s=(kBuf+d).replace(/^0+(?=\d)/,'');
+  if(parseInt(s,10)>kMax) s=String(kMax);
+  kBuf=s; kPaint();
+}
+function kBack(){ kBuf=kBuf.slice(0,-1); kPaint(); }
+function kZeroSet(){ kBuf=''; kPaint(); }
+function kOkPick(){ kPick(parseInt(kBuf||'0',10)||0); }
+/*  숫자판 단추 연결 — 화면이 뜰 때 한 번만 건다 */
+function bindKbig(){
+  const wrap=document.getElementById('kBig'); if(!wrap) return;
+  wrap.querySelectorAll('button[data-d]').forEach(function(b){ b.onclick=function(){ kDigit(b.dataset.d); }; });
+  const del=document.getElementById('kDel'); if(del) del.onclick=kBack;
+  const z=document.getElementById('kZero'); if(z) z.onclick=kZeroSet;
+  const ok=document.getElementById('kOk'); if(ok) ok.onclick=kOkPick;
 }
 /* 숫자를 누르면 곧바로 저장하고 닫는다 */
 function kPick(v){
   if(kTarget){
     const n=kTarget.dataset.n, k=kTarget.dataset.k;
+    const mx=parseInt(kTarget.dataset.max,10)||0;
+    v=Math.max(0,Math.min(mx,parseInt(v,10)||0));     /* 한계 밖 숫자는 들이지 않는다 */
     ATT[n].c[k]=v; kTarget.textContent=v; kTarget.classList.toggle('filled',v>0); updPsum(n);
   }
   closeKpad(false);
@@ -6075,7 +6202,12 @@ function openReportDetail(dist,date){
   document.getElementById('rmSub').textContent=date+' 주일 · '+who+(r.ts?' · 제출 '+String(r.ts).slice(5,16).replace('T',' '):'');
   const roster=rosterOf(dist,date);
   const svc=TG.map(t=>`<span class="rmchip${t==='월삭'?' v':''}">${t} ${svcCount(r,t)}</span>`).join('');
-  const faith=`<span class="rmchip n">새벽 ${cntSum(r,'새벽')}회</span>`;
+  /*  신앙활동 — 새벽은 늘, 성경·QT 는 «적어 낸 구역만» 보여 준다 (2026-09-29).
+   *  스위치를 껐다가 다시 켜도, 값이 남아 있으면 그대로 나온다. */
+  const bib=cntSum(r,'성경'), qt=cntSum(r,'QT(가정)');
+  const faith=`<span class="rmchip n">새벽 ${cntSum(r,'새벽')}회</span>`
+    + (bib? `<span class="rmchip x">성경 ${bib}장</span>` : '')
+    + (qt ? `<span class="rmchip x">QT ${qt}회</span>` : '');
   /* 미체크(아무 항목도 없음)는 아래 결석자에만 표시 → 목록에서 제외 */
   const hasNote=n=>{const d=(r.detail||{})[n]||{};return (d.p||'')||(d.e||'');};
   const shown=roster.filter(n=>personLine(r,n)||hasNote(n));
@@ -6870,6 +7002,7 @@ try{
 }catch(e){}
 seedDemo(false);
 initIntake();
+bindKbig();                 /* 큰 수 숫자판 단추 연결 (성경 장수) */
 /* 로그인 유지: 저장된 세션 복원 (로그아웃 전까지 유지) */
 const _sess=loadSession(); if(_sess) current=_sess;
 /* 첫 화면 = 홈 런처 */

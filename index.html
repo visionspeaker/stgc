@@ -410,8 +410,8 @@ background:#f7f9fc;border-radius:9px;padding:9px 11px}
 .hbar .htt:active{background:#f0fdf4}
 /*  ★ 2026-09-29 ★ 머리글 표시는 «몇 번째 고침»을 알약으로 보여 준다.
  *  예전에는 날짜(v2026.09.29)를 적었는데, 오늘 날짜로 오해하기 쉬웠다. */
-.hbar .htt .vtag{display:inline-block;font-size:9.5px;font-weight:800;color:#6b7280;
- background:#eef2f7;border-radius:999px;padding:2px 7px;letter-spacing:0;margin-left:5px;
+.hbar .htt .vtag{display:inline-block;font-size:10.5px;font-weight:800;color:#6b7280;
+ background:#eef2f7;border-radius:999px;padding:2px 8px;letter-spacing:.2px;margin-left:5px;
  vertical-align:2px;line-height:1.5}
 .hbar .htt .vtag:empty{display:none}
 .rnote{position:fixed;inset:0;z-index:130;background:#fbfcfe;display:flex;flex-direction:column}
@@ -430,7 +430,11 @@ background:#f7f9fc;border-radius:9px;padding:9px 11px}
 .rncard h3{font-size:15px;margin:0 0 6px;letter-spacing:-.2px;color:var(--ink)}
 .rncard .rnmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .rncard .rndt{font-size:11.5px;color:#9aa4b2;font-weight:700}
-.rncard .rnv{font-size:11.5px;color:var(--muted);font-weight:700}
+/* 몇 번째 고침 — 머리글 알약과 같은 번호 (2026-09-30) */
+.rncard .rnno{font-size:10.5px;font-weight:800;color:#475569;background:#e2e8f0;
+ border-radius:6px;padding:3px 8px;letter-spacing:.2px}
+/* 서버 번호 — 참고용이라 아주 흐리게, 맨 끝에 */
+.rncard .rnv{font-size:11px;color:#b6c2d2;font-weight:600;margin-left:auto}
 .rnbd2{font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:6px}
 .rnbd2.b1{background:#dcfce7;color:#15803d}     /* 앱 */
 .rnbd2.b2{background:#dbeafe;color:#2563eb}     /* 서버 */
@@ -7065,8 +7069,14 @@ function rnText(s){
  *  (날짜를 적었더니 「오늘이 아닌데?」 하는 오해가 있었다 · 2026-09-29) */
 function rnPaintVer(){
   const t=document.getElementById('vTag');
-  if(t) t.textContent = RELEASES.length ? ('v'+RELEASES.length) : '';
+  if(t) t.textContent = RELEASES.length ? rnNo(0) : '';
 }
+/*  몇 번째 고침인가 — 맨 위(i=0)가 가장 큰 번호다.
+ *  머리글 알약과 카드가 «같은 번호»를 쓴다 (2026-09-30).
+ *  ※ 서버 버전(v59 같은 것)과는 세는 대상이 다르다.
+ *    V번호 = 영광 커넥트를 몇 번 고쳤나 · 서버 버전 = 구글 서버에 몇 번 올렸나
+ *    그래서 두 숫자는 앞으로도 안 맞는다. 서버 번호는 카드 끝에 흐리게만 둔다. */
+function rnNo(i){ return 'V'+(RELEASES.length-i); }
 /*  「2026.09.29」 → 「2026년 9월 29일」 */
 function rnDay(d){
   const m=/^(\d{4})\.(\d{2})\.(\d{2})$/.exec(String(d||''));
@@ -7087,9 +7097,11 @@ function openRnote(){
         return '<div class="rncard'+(i===0?' new':'')+'">'
           +'<h3>'+rnText(r.t)+'</h3>'
           +'<div class="rnmeta">'
+            +'<span class="rnno">'+rnNo(i)+'</span>'
             +(r.k? '<span class="rnbd2 '+(r.k==='앱'?'b1':(r.k==='서버'?'b2':'b3'))+'">'+esc(r.k)+'</span>' : '')
-            +(r.v? '<span class="rnv">'+esc(r.v)+'</span>' : '')
             +'<span class="rndt">'+esc(r.d)+'</span>'
+            /* 서버 번호는 맨 끝에 «아주 흐리게» — 되돌릴 때 찾아보시라고 남겨 둔다 */
+            +(r.v? '<span class="rnv">'+esc(r.v)+'</span>' : '')
           +'</div>'
           +(r.g||[]).map(function(pair,gi){
              const k=pair[0], arr=pair[1]||[];

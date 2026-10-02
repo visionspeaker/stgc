@@ -993,6 +993,63 @@ font-family:inherit;background:linear-gradient(135deg,#3cbcb0,#2a8fb2);color:#ff
 .plerr{background:#fdf3f3;border:1px solid #f0c9c9;border-radius:11px;padding:12px 13px;
 font-size:12.5px;color:#93302f;line-height:1.75;margin-bottom:12px}
 .plerr b{display:block;font-size:13.5px;margin-bottom:3px}
+/* ── 차량 사용 신청 (2026-10-02) ── */
+.carchips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.carchip{border:1.5px solid var(--inline);border-radius:13px;padding:11px 5px 9px;background:#fff;
+text-align:center;cursor:pointer;font-family:inherit;color:var(--ink);min-width:0}
+.carchip .cic{width:40px;height:40px;margin:0 auto 6px;border-radius:12px;display:flex;
+align-items:center;justify-content:center;color:#fff;background:linear-gradient(145deg,#8a96a6,#6a7584)}
+.carchip .cn{display:block;font-size:13px;font-weight:800}
+.carchip .cp{display:block;font-size:11.5px;color:var(--muted)}
+.carchip .only{display:block;font-size:9.5px;font-weight:800;color:#7c3aed;background:#ede9fe;
+border-radius:999px;padding:2px 0;margin-top:5px}
+.carchip.on{border-color:#0f8f86;background:#f1fbf8}
+.carchip.on .cic{background:linear-gradient(145deg,#3fb99f,#2c8f7c)}
+.carchip[disabled]{opacity:.45;cursor:default}
+.carchip[disabled] .only{background:#f1f5f9;color:#94a3b8}
+.carst{font-size:10.5px;font-weight:800;border-radius:6px;padding:2px 8px;flex:none}
+.carst.wait{background:#fef3c7;color:#b45309}
+.carst.ok{background:#dcfce7;color:#15803d}
+.carst.no{background:#fee2e2;color:#dc2626}
+.carno{flex:none;font-size:10.5px;font-weight:800;border-radius:6px;padding:2px 7px}
+.carno.c1{background:#e2e8f0;color:#475569}
+.carno.c2{background:#dbeafe;color:#2563eb}
+.carno.c3{background:#ede9fe;color:#7c3aed}
+.carlist{border:1px solid var(--inline);border-radius:12px;overflow:hidden;background:#fff}
+.carrow{display:flex;gap:9px;align-items:center;padding:10px 11px;border-bottom:1px solid #f1f4f8;
+font-size:12.5px}
+.carrow:last-child{border-bottom:0}
+.carrow .wh{flex:1;min-width:0}
+.carrow .ds{color:#9aa5b4;font-size:11.5px}
+.carmg{border:1px solid var(--inline);border-radius:13px;background:#fff;padding:12px 13px;margin-bottom:10px}
+.carmg .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:7px}
+.carmg .who{font-size:14px;font-weight:800}
+.carmg .line{font-size:12.5px;color:#374151}
+.carmg .tel{display:flex;gap:6px;align-items:center;margin:9px 0 10px;flex-wrap:wrap}
+.carmg .acts{display:flex;gap:7px}
+.carmg .acts button{flex:1;border-radius:10px;padding:10px;font-size:13px;font-weight:800;
+font-family:inherit;cursor:pointer;border:1px solid var(--inline);background:#fff;color:var(--ink)}
+.carmg .acts .yes{background:linear-gradient(135deg,#3fb99f,#2c8f7c);color:#fff;border:0}
+.carmg .acts .no{color:#dc2626;border-color:#fca5a5}
+.carmg .done{font-size:12.5px;font-weight:800}
+.carmg .undo{border:1px solid var(--inline);background:#fff;border-radius:8px;padding:4px 10px;
+font-size:11.5px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--muted);margin-left:6px}
+.carmg .why{font-size:12px;color:#b4242a;background:#fee2e2;border-radius:8px;padding:6px 10px;margin-top:6px}
+.carrej{border:1px solid #fca5a5;background:#fff7f7;border-radius:11px;padding:11px;margin-top:8px}
+.carrej .t{font-size:12.5px;font-weight:800;color:#b4242a;margin-bottom:7px}
+.carrej textarea{width:100%;border:1px solid var(--inline);border-radius:10px;padding:9px 11px;
+font-size:13.5px;font-family:inherit;resize:vertical;min-height:62px;color:var(--ink);box-sizing:border-box}
+.carrej .quick{display:flex;gap:5px;flex-wrap:wrap;margin:7px 0}
+.carrej .quick button{border:1px solid #e9d5d5;background:#fff;border-radius:999px;padding:5px 11px;
+font-size:11.5px;font-weight:700;font-family:inherit;cursor:pointer;color:#8b4a4a}
+.carrej .row{display:flex;gap:7px;margin-top:8px}
+.carrej .row button{flex:1;border-radius:10px;padding:9px;font-size:13px;font-weight:800;
+font-family:inherit;cursor:pointer}
+.carrej .row .send{background:#dc2626;color:#fff;border:0}
+.carrej .row .cancel{background:#fff;border:1px solid var(--inline);color:var(--muted)}
+.carok{background:#e6f7f5;border:1px solid #bfe3db;border-radius:11px;padding:11px 12px;
+font-size:12.5px;color:#0b6f68;line-height:1.7;margin-bottom:13px;font-weight:700}
+.carok span{display:block;font-weight:400;font-size:11.5px;margin-top:3px}
 /* 반복 신청 — 평소에는 이 줄 하나만 보인다 */
 .rpopen{width:100%;border:1px dashed #a9c6d8;background:#f7fbfd;border-radius:12px;height:46px;
 font-size:13.5px;font-weight:800;color:#2a7fa0;font-family:inherit;cursor:pointer;margin-bottom:13px}
@@ -1517,6 +1574,17 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
 <section id="place" class="view">
   <div id="plForm"></div>
   <div id="plList"></div>
+</section>
+
+<!-- 차량 사용 신청 (로그인 없이 누구나) -->
+<section id="car" class="view">
+  <div id="carForm"></div>
+  <div id="carList"></div>
+</section>
+
+<!-- 차량 신청 관리 (차량위원장·차량부장·교역자) -->
+<section id="carmng" class="view">
+  <div id="carMng"></div>
 </section>
 
 <!-- 아카이브 — 홈 화면에는 두지 않는다.
@@ -2834,11 +2902,18 @@ function goMyreq(){openApp('myreq');}
  *
  *  ARCHIVE 에 줄을 하나 더 넣으면 서랍에 항목이 하나 늘어난다.
  *  (view = 화면 이름, on = false 로 두면 목록에서 감춘다) */
+/*  아카이브 「차량 사용 신청」 아이콘 — 홈 타일과 같은 둥근 옆모습 (2026-10-02) */
+const CAR_ICON='<svg width="21" height="21" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 30v-6.2c0-.9.3-1.7.9-2.4l6-6.8A5 5 0 0115.7 13H32c1.5 0 2.9.7 3.8 1.9l5.3 6.8c.6.8.9 1.7.9 2.6V30"/><path d="M5 30h3.5M39.5 30h3.5"/><circle cx="14" cy="31" r="4"/><circle cx="34" cy="31" r="4"/><path d="M10.5 21.5h27"/><path d="M22 14v7.5"/></svg>';
 const ARCHIVE=[
   { view:'helpdesk', on:true,
     title:'영광 커넥트 헬프데스크',
     desc :'앱 설치·사용이 어려우신 분을 도와드립니다',
     icon :'<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13a8 8 0 0116 0"/><path d="M4 13v3.4A1.6 1.6 0 005.6 18h.9a1 1 0 001-1v-3.4a1 1 0 00-1-1h-.9A1.6 1.6 0 004 14.2"/><path d="M20 13v3.4A1.6 1.6 0 0118.4 18h-.9a1 1 0 01-1-1v-3.4a1 1 0 011-1h.9A1.6 1.6 0 0120 14.2"/><path d="M18 18v.8a2.2 2.2 0 01-2.2 2.2H13"/></svg>' }
+,
+  { view:'car', on:true,
+    title:'차량 사용 신청',
+    desc :'교회 차량 3대를 신청하실 수 있습니다',
+    icon :CAR_ICON }
 ];
 function archiveItems(){ return ARCHIVE.filter(function(a){ return a.on; }); }
 function goArchive(){ openApp('archive'); }
@@ -2881,6 +2956,392 @@ function renderArchive(){
     +'주소나 QR 코드로 바로 들어오실 수 있고, <b>교역자 홈 화면 맨 아래</b>에도 한 칸 놓여 있습니다.</div>'
     +'</div></div>';
 }
+
+/* ══════════ 차량 사용 신청 ══════════  (2026-10-02)
+ *
+ *  · 신청은 로그인 없이 누구나 — 장소 사용 신청과 같은 성격이다.
+ *  · 같은 차·같은 날·시간이 겹치면 «신청 단추부터» 잠긴다. (서버에서 한 번 더 막는다)
+ *  · 3호차는 담임목사님 전용이라 주일에만 고를 수 있다.
+ *  · 승인·반려는 차량위원장·차량부장·교역자만. 연락처도 그분들께만 내려온다. */
+const CAR_DURS=[[60,'1시간'],[120,'2시간'],[180,'3시간'],[360,'반나절'],[600,'하루']];
+const CAR_CHIP_SVG='<svg width="21" height="21" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 30v-6.2c0-.9.3-1.7.9-2.4l6-6.8A5 5 0 0115.7 13H32c1.5 0 2.9.7 3.8 1.9l5.3 6.8c.6.8.9 1.7.9 2.6V30"/><circle cx="14" cy="31" r="4"/><circle cx="34" cy="31" r="4"/><path d="M10.5 21.5h27"/></svg>';
+const CAR_CFG_KEY='sgc_car_v1';
+const CAR_QUICK=['이미 다른 일정이 있습니다','차량 점검 중입니다','운전하실 분이 없습니다','사용 목적을 확인해 주세요'];
+const CAR_SMS='안녕하세요, 송탄영광교회입니다. 차량 사용 신청 건으로 연락드립니다.';
+let CARI=null, carPick=1, carDur=120, carSending=false, carDone=null, carRej='', carBusy='';
+
+function goCar(){ openApp('car'); }
+/*  승인·반려를 할 수 있는 분인가 — 로그인할 때 받은 값만으로 판단한다.
+ *  (서버가 다시 한 번 확인하므로 화면만 고쳐서는 아무것도 바뀌지 않는다) */
+function carOnlyMe(){ return !!current
+  && (String(current.scope||'').trim()===SCOPE_CAR_ONLY || current.role==='car'); }
+function canCarMngMe(){
+  if(!current || current.role==='guest') return false;
+  if(current.role==='admin' || current.role==='car') return true;
+  if(String(current.duty||'').trim()==='차량부장') return true;
+  return String(current.category||'').replace(/\(.*$/,'').replace(/\s+/g,'')==='차량';
+}
+function saveCarCfg(d){ try{ localStorage.setItem(CAR_CFG_KEY,JSON.stringify(d)); }catch(e){} }
+function loadCarCfg(){ try{ return JSON.parse(localStorage.getItem(CAR_CFG_KEY)||'null'); }catch(e){ return null; } }
+function carToday(){ return (CARI&&CARI.today)||localISO(new Date()); }
+function carCars(){ return (CARI&&CARI.cars)||[
+  {no:1,nm:'1호차',pl:'2655',sun:false},{no:2,nm:'2호차',pl:'4711',sun:false},
+  {no:3,nm:'3호차',pl:'7777',sun:true}]; }
+function carOf(no){ return carCars().filter(function(c){ return c.no===no; })[0]||null; }
+function carDow(d){ const p=String(d||'').split('-');
+  return p.length===3 ? new Date(p[0],p[1]-1,p[2]).getDay() : -1; }
+function carWhenDefault(){
+  const now=new Date(), t=carToday();
+  if(localISO(now)!==t) return t+'T10:00';
+  let m=Math.ceil((now.getHours()*60+now.getMinutes())/30)*30;
+  if(m>=24*60) return t+'T23:30';
+  return t+'T'+pad2(Math.floor(m/60))+':'+pad2(m%60);
+}
+async function fetchCarInfo(){
+  if(!USE_BACKEND) return CARI;
+  try{
+    const r=await fetch(withTok(API+'?action=carInfo'));
+    const d=await r.json();
+    if(d&&d.ok){ CARI=d; saveCarCfg({cars:d.cars,today:d.today,step:d.step}); return d; }
+  }catch(e){ console.warn('차량 안내 불러오기 실패:',e); }
+  return CARI;
+}
+async function openCar(){
+  carSending=false; carDone=null;
+  if(!CARI){ const c=loadCarCfg(); if(c) CARI=Object.assign({items:[]},c); }
+  renderCar();
+  const d=await fetchCarInfo();
+  if(d && !carDone) keepCarInput(renderCar);
+}
+/* 서버 답이 늦게 와 다시 그릴 때, 적어 두신 것이 지워지지 않게 지켰다가 되돌린다 */
+function keepCarInput(fn){
+  const ids=['carWhen','carWho','carPhone','carDest'];
+  const had=!!document.getElementById('carWho');
+  const keep={};
+  if(had) ids.forEach(function(id){ const e=document.getElementById(id); if(e) keep[id]=e.value; });
+  const focus=(document.activeElement&&document.activeElement.id)||'';
+  fn();
+  if(!had) return;
+  ids.forEach(function(id){
+    const e=document.getElementById(id);
+    if(e && keep[id]!==undefined && keep[id]!=='') e.value=keep[id];
+  });
+  if(focus){ const e=document.getElementById(focus); if(e){ try{ e.focus(); }catch(x){} } }
+  carOnWhen();
+}
+function carVal(id){ const e=document.getElementById(id); return e?String(e.value||'').trim():''; }
+function carErr(html){
+  const e=document.getElementById('carErr');
+  if(e) e.innerHTML=html?('<div class="plerr">'+html+'</div>'):'';
+  if(html){ try{ e.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(x){} }
+}
+/* 화면에서 먼저 걸러 준다 (서버에서 한 번 더 확인한다). 반려된 건은 자리를 안 차지한다. */
+function carLocalClash(no,date,s,e){
+  return ((CARI&&CARI.items)||[])
+    .filter(it=>it.car===no && it.date===date && it.st!=='반려')
+    .filter(it=>{ const a=hm(it.from), b=hm(it.to); return s<b && a<e; })[0]||null;
+}
+function carStCls(st){ return st==='승인'?'ok':(st==='반려'?'no':'wait'); }
+function renderCar(){
+  const box=document.getElementById('carForm'); if(!box) return;
+  if(carDone){ renderCarDone(); return; }
+  const cars=carCars();
+  const w=carVal('carWhen')||carWhenDefault();
+  const dow=carDow(String(w).slice(0,10));
+  const chips=cars.map(function(c){
+    const lock=!!c.sun && dow>=0 && dow!==0;
+    return '<button type="button" class="carchip'+(c.no===carPick?' on':'')+'"'
+      +(lock?' disabled':'')+' onclick="pickCar('+c.no+')">'
+      +'<span class="cic">'+CAR_CHIP_SVG+'</span>'
+      +'<span class="cn">'+esc(c.nm)+'</span><span class="cp">'+esc(c.pl)+'</span>'
+      +(c.sun?'<span class="only">'+(lock?'주일만':'담임목사님')+'</span>':'')
+      +'</button>';
+  }).join('');
+  const durs=CAR_DURS.map(function(d){
+    return '<button type="button" class="durchip'+(d[0]===carDur?' on':'')
+      +'" onclick="pickCarDur('+d[0]+')">'+esc(d[1])+'</button>'; }).join('');
+  box.innerHTML='<div class="plcard">'
+    +'<div class="plhd"><div class="n">차량 사용 신청</div>'
+    +'<div class="m">'+cars.map(c=>esc(c.nm+' '+c.pl)).join(' · ')+'</div></div>'
+    +'<div class="plbd">'
+    +'<div id="carErr"></div>'
+    +'<div class="plfl"><label>차량을 선택해 주세요 <i>*</i></label>'
+    +'<div class="carchips">'+chips+'</div></div>'
+    +'<div class="plfl"><label>사용 시작 <i>*</i></label>'
+    +'<input class="f-in" id="carWhen" type="datetime-local" step="1800"'
+    +' min="'+esc(carToday())+'T00:00" value="'+esc(w)+'"'
+    +' onchange="carOnWhen()" oninput="carOnWhen()"/></div>'
+    +'<div class="plfl"><label>사용 시간 <i>*</i></label><div class="durchips">'+durs+'</div></div>'
+    +'<div id="carCalc" class="plcalc"></div>'
+    +'<div id="carWarn"></div>'
+    +'<div class="plfl"><label>신청자 <i>*</i></label>'
+    +'<input class="f-in" id="carWho" placeholder="이름" autocomplete="name"/></div>'
+    +'<div class="plfl"><label>연락처 <i>*</i></label>'
+    +'<input class="f-in" id="carPhone" type="tel" inputmode="numeric"'
+    +' placeholder="숫자만 넣어 주세요" autocomplete="tel"/></div>'
+    +'<div class="plfl"><label>목적지 <i>*</i></label>'
+    +'<input class="f-in" id="carDest" maxlength="40" placeholder="예) 평택 요양원"/></div>'
+    +'<button class="plbtn" id="carBtn" onclick="submitCar()">신청하기</button>'
+    +'</div></div>';
+  carOnWhen();
+  renderCarList();
+}
+/*  차 단추의 «잠김»만 손본다. 3호차는 주일에만 열린다. */
+function carPaintChips(dow){
+  const box=document.getElementById('carForm'); if(!box) return;
+  const cars=carCars();
+  box.querySelectorAll('.carchip').forEach(function(el,i){
+    const c=cars[i]; if(!c) return;
+    const lock=!!c.sun && dow>=0 && dow!==0;
+    el.disabled=lock;
+    el.classList.toggle('on', c.no===carPick && !lock);
+    const o=el.querySelector('.only');
+    if(o) o.textContent = lock ? '주일만' : '담임목사님';
+  });
+}
+function pickCar(no){
+  const c=carOf(no); if(!c) return;
+  const w=carVal('carWhen'); const dow=carDow(String(w).slice(0,10));
+  if(c.sun && dow>=0 && dow!==0) return;
+  carPick=no;
+  const cars=carCars();
+  const box=document.getElementById('carForm');
+  if(box) box.querySelectorAll('.carchip').forEach(function(el,i){
+    el.classList.toggle('on', !!cars[i] && cars[i].no===no); });
+  carErr(''); carOnWhen();
+}
+function pickCarDur(m){
+  carDur=m;
+  const lab=(CAR_DURS.filter(d=>d[0]===m)[0]||['',''])[1];
+  const box=document.getElementById('carForm');
+  if(box) box.querySelectorAll('.durchip').forEach(function(el){
+    el.classList.toggle('on', el.textContent===lab); });
+  carErr(''); carOnWhen();
+}
+/*  일시·차량이 바뀔 때마다 — 셈해서 보여 주고, 안 되는 경우에는 단추를 잠근다 */
+function carOnWhen(){
+  const calc=document.getElementById('carCalc'), warn=document.getElementById('carWarn');
+  const btn=document.getElementById('carBtn');
+  if(!calc) return;
+  const w=plParseWhen(carVal('carWhen'));
+  const setBtn=function(on,txt){ if(btn){ btn.disabled=!on; btn.textContent=txt||'신청하기'; } };
+  if(!w){ calc.textContent='사용 시작 일시를 골라 주세요';
+          if(warn) warn.innerHTML=''; setBtn(false); renderCarList(); return; }
+  const dow=carDow(w.date);
+  /* 주일이 아닌 날에 3호차가 골라져 있으면 1호차로 돌려놓는다 */
+  let c=carOf(carPick);
+  if(c && c.sun && dow!==0){ carPick=1; renderCar(); return; }
+  /*  날짜를 바꾸면 잠긴 차도 함께 풀리고 잠겨야 한다.
+      (다시 그리지 않고 단추만 갈아 끼운다 — 적어 두신 내용이 지워지지 않게) */
+  carPaintChips(dow);
+  const e=w.min+carDur;
+  calc.innerHTML=esc(plDateLabel(w.date))+' <b>'+esc(ampm(min2hm(w.min)))+'</b> ~ <b>'
+    +esc(ampm(min2hm(e)))+'</b> · '+esc((c&&c.nm)||'')+' '+esc((c&&c.pl)||'');
+  const bad=function(h,m){
+    if(warn) warn.innerHTML='<div class="plwarn"><b>'+h+'</b>'+m+'</div>';
+    setBtn(false,'신청할 수 없습니다'); };
+  if(w.date<carToday()){ bad('지난 날짜입니다','오늘 이후로 골라 주세요.'); renderCarList(); return; }
+  if(e>24*60){ bad('하루를 넘길 수 없습니다','사용 시간을 줄이거나 날짜를 나눠 신청해 주세요.'); renderCarList(); return; }
+  const cl=carLocalClash(carPick,w.date,w.min,e);
+  if(cl){ bad('이미 사용 신청이 있습니다',
+    esc((c&&c.nm)||'')+'는 '+esc(plDateLabel(cl.date))+' '+esc(ampm(cl.from))+' ~ '
+    +esc(ampm(cl.to))+' ('+esc(cl.st)+') 에 잡혀 있습니다.<br>다른 시간이나 다른 차를 골라 주세요.');
+  } else {
+    if(warn) warn.innerHTML='<div class="carok">신청하실 수 있습니다.'
+      +'<span>보내시면 차량 담당자께 전해지고, 승인되면 확정됩니다.</span></div>';
+    setBtn(true);
+  }
+  renderCarList();
+}
+async function submitCar(){
+  if(carSending) return;
+  const w=plParseWhen(carVal('carWhen'));
+  const who=carVal('carWho'), phone=carVal('carPhone'), dest=carVal('carDest');
+  const c=carOf(carPick);
+  if(!c){ carErr('차량을 선택해 주세요.'); return; }
+  if(!w){ carErr('사용 시작 일시를 골라 주세요.'); return; }
+  if(w.date<carToday()){ carErr('지난 날짜는 신청할 수 없습니다.'); return; }
+  if(c.sun && carDow(w.date)!==0){
+    carErr(esc(c.nm)+'는 담임목사님 전용 차량이라 주일에만 신청하실 수 있습니다.'); return; }
+  if(w.min+carDur>24*60){ carErr('하루를 넘겨서 신청할 수 없습니다. 사용 시간을 줄이거나 날짜를 나눠 주세요.'); return; }
+  if(!who){ carErr('신청자 이름을 입력해 주세요.'); return; }
+  if(String(phone).replace(/[^0-9]/g,'').length<9){ carErr('연락처를 정확히 입력해 주세요.'); return; }
+  if(!dest){ carErr('목적지를 입력해 주세요.'); return; }
+  const cl=carLocalClash(carPick,w.date,w.min,w.min+carDur);
+  if(cl){ carErr('<b>이미 사용 신청이 있습니다</b>다른 시간이나 다른 차를 골라 주세요.'); carOnWhen(); return; }
+  carErr('');
+  carSending=true;
+  const btn=document.getElementById('carBtn');
+  if(btn){ btn.disabled=true; btn.innerHTML='<span class="spin"></span> 전송 중…'; }
+  const from=min2hm(w.min), to=min2hm(w.min+carDur);
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',body:JSON.stringify({action:'saveCar',
+      record:{'차량':carPick,'날짜':w.date,'시작':from,'종료':to,
+              '이름':who,'연락처':phone,'목적지':dest}})});
+    d=await r.json().catch(()=>null);
+  }catch(e){ d=null; }
+  carSending=false;
+  if(btn){ btn.disabled=false; btn.textContent='신청하기'; }
+  if(!d){ carErr('전송에 실패했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.'); return; }
+  if(!d.ok){
+    if(d.error==='CLASH'){ await fetchCarInfo(); renderCar();
+      carErr('<b>이미 사용 신청이 있습니다</b>다른 시간이나 다른 차를 골라 주세요.'); }
+    else carErr(esc(d.message||'신청하지 못했습니다.'));
+    return;
+  }
+  carDone={car:carPick,date:w.date,from:from,to:to,who:who,dest:dest};
+  await fetchCarInfo();
+  renderCar();
+}
+function renderCarDone(){
+  const box=document.getElementById('carForm'); if(!box||!carDone) return;
+  const d=carDone, c=carOf(d.car)||{nm:'',pl:''};
+  box.innerHTML='<div class="plcard">'
+    +'<div class="plhd"><div class="n">신청했습니다</div>'
+    +'<div class="m">차량 담당자께서 확인하신 뒤 승인됩니다</div></div>'
+    +'<div class="plbd">'
+    +'<div class="plcalc"><b>'+esc(c.nm)+' '+esc(c.pl)+'</b><br>'
+    +esc(plDateLabel(d.date))+' '+esc(ampm(d.from))+' ~ '+esc(ampm(d.to))+'<br>'
+    +esc(d.who)+' · '+esc(d.dest)+'</div>'
+    +'<div class="carok">아직 «대기» 상태입니다.'
+    +'<span>승인 여부는 아래 「예약 현황」에서 보실 수 있습니다.</span></div>'
+    +'<button class="plbtn" onclick="carAgain()">한 건 더 신청하기</button>'
+    +'<button class="plbtn gray" style="margin-top:8px" onclick="goHome()">홈으로</button>'
+    +'</div></div>';
+  renderCarList();
+}
+function carAgain(){ carDone=null; renderCar(); }
+/* 예약 현황 — 오늘 이후 것만, 날짜 차례로 */
+function renderCarList(){
+  const box=document.getElementById('carList'); if(!box) return;
+  const t=carToday();
+  const its=((CARI&&CARI.items)||[]).filter(it=>it.date>=t && it.st!=='반려');
+  box.innerHTML='<div class="plcard" style="margin-top:12px">'
+    +'<div class="plhd"><div class="n">예약 현황</div>'
+    +'<div class="m">오늘 이후 잡혀 있는 일정입니다</div></div>'
+    +'<div class="plbd">'
+    +(its.length
+      ? '<div class="carlist">'+its.map(function(it){
+          const c=carOf(it.car)||{nm:it.car+'호차'};
+          return '<div class="carrow"><span class="carno c'+(it.car||1)+'">'+esc(c.nm)+'</span>'
+            +'<span class="wh">'+esc(plDateLabel(it.date))+' '+esc(ampm(it.from))+' ~ '
+            +esc(ampm(it.to))+'<br><span class="ds">'+esc(it.dest||'')+'</span></span>'
+            +'<span class="carst '+carStCls(it.st)+'">'+esc(it.st)+'</span></div>';
+        }).join('')+'</div>'
+      : '<div class="bempty">아직 잡힌 일정이 없습니다.</div>')
+    +'</div></div>';
+}
+
+/* ── 차량 신청 관리 (차량위원장·차량부장·교역자) ── */
+async function openCarMng(){
+  carRej=''; carBusy='';
+  renderCarMng();
+  await fetchCarInfo();
+  renderCarMng();
+}
+function carSmsHref(tel){
+  const n=String(tel||'').replace(/[^0-9]/g,'');
+  const sep=/iPhone|iPad|iPod/i.test((navigator&&navigator.userAgent)||'')?'&':'?';
+  return 'sms:'+n+sep+'body='+encodeURIComponent(CAR_SMS);
+}
+function carDash(t){ const d=String(t||'').replace(/[^0-9]/g,'');
+  return d.length===11 ? d.slice(0,3)+'-'+d.slice(3,7)+'-'+d.slice(7) : String(t||''); }
+function renderCarMng(){
+  const box=document.getElementById('carMng'); if(!box) return;
+  if(!canCarMngMe()){
+    box.innerHTML='<div class="card"><div class="bempty">차량 담당자만 보실 수 있습니다.</div></div>';
+    return;
+  }
+  const t=carToday();
+  const its=((CARI&&CARI.items)||[]).filter(it=>it.date>=t)
+    .sort(function(a,b){
+      const aw=(a.st==='대기')?0:1, bw=(b.st==='대기')?0:1;
+      if(aw!==bw) return aw-bw;
+      if(a.date!==b.date) return a.date<b.date?-1:1;
+      return a.from<b.from?-1:1; });
+  const wait=its.filter(it=>it.st==='대기').length;
+  box.innerHTML='<div class="plcard">'
+    +'<div class="plhd"><div class="n">차량 신청 관리</div>'
+    +'<div class="m">오늘 이후 신청 '+its.length+'건 · 대기 '+wait+'건</div></div>'
+    +'<div class="plbd">'
+    +(CARI ? (its.length ? its.map(carMgCard).join('')
+                         : '<div class="bempty">처리할 신청이 없습니다.</div>')
+           : '<div class="bempty">불러오는 중입니다…</div>')
+    +'</div></div>';
+}
+function carMgCard(it){
+  const c=carOf(it.car)||{nm:it.car+'호차',pl:''};
+  const tel=String(it.phone||'');
+  let tail;
+  if(carRej===it.id){
+    tail='<div class="carrej"><div class="t">반려 사유를 적어 주세요</div>'
+      +'<div class="quick">'+CAR_QUICK.map(function(q,i){
+          return '<button type="button" onclick="carQuick('+i+')">'+esc(q)+'</button>'; }).join('')+'</div>'
+      +'<textarea id="carWhy" maxlength="200" placeholder="신청하신 분께 그대로 보입니다"></textarea>'
+      +'<div class="row"><button class="send" onclick="carDo(\'' +jsq(it.id)+ '\',\'반려\')">반려하고 알리기</button>'
+      +'<button class="cancel" onclick="carRejOff()">그만두기</button></div></div>';
+  } else if(it.st==='대기'){
+    tail='<div class="acts"><button class="yes" onclick="carDo(\'' +jsq(it.id)+ '\',\'승인\')">승인</button>'
+      +'<button class="no" onclick="carRejOn(\'' +jsq(it.id)+ '\')">반려</button></div>';
+  } else {
+    tail='<div class="done" style="color:'+(it.st==='승인'?'#15803d':'#dc2626')+'">'
+      +(it.st==='승인'?'✔ 승인했습니다':'✕ 반려했습니다')
+      +'<button class="undo" onclick="carDo(\'' +jsq(it.id)+ '\',\'대기\')">되돌리기</button></div>'
+      +(it.st==='반려'&&it.why?'<div class="why">사유 · '+esc(it.why)+'</div>':'');
+  }
+  return '<div class="carmg">'
+    +'<div class="top"><span class="carno c'+(it.car||1)+'">'+esc(c.nm+' '+c.pl)+'</span>'
+    +'<span class="who">'+esc(it.who||'')+'</span>'
+    +'<span class="carst '+carStCls(it.st)+'" style="margin-left:auto">'+esc(it.st)+'</span></div>'
+    +'<div class="line">'+esc(plDateLabel(it.date))+' '+esc(ampm(it.from))+' ~ '+esc(ampm(it.to))+'</div>'
+    +'<div class="line" style="color:var(--muted)">목적지 · '+esc(it.dest||'')+'</div>'
+    +(tel
+      ? '<div class="tel"><a class="cbtn tel" href="'+esc(telHref(tel))+'" title="전화걸기">'+SVG_TEL+'</a>'
+        +'<a class="cbtn sms" href="'+esc(carSmsHref(tel))+'" title="문자보내기">'+SVG_SMS+'</a>'
+        +'<span class="pph">'+esc(carDash(tel))+'</span></div>'
+      : '')
+    +tail+'</div>';
+}
+function carRejOn(id){ carRej=id; renderCarMng();
+  const e=document.getElementById('carWhy'); if(e){ try{ e.focus(); }catch(x){} } }
+function carRejOff(){ carRej=''; renderCarMng(); }
+function carQuick(i){
+  const e=document.getElementById('carWhy'); if(!e) return;
+  const q=CAR_QUICK[i]||'';
+  e.value = e.value ? (e.value.replace(/\s*$/,'')+' '+q) : q;
+  try{ e.focus(); }catch(x){}
+}
+async function carDo(id,act){
+  if(carBusy) return;
+  let why='';
+  if(act==='반려'){
+    const e=document.getElementById('carWhy');
+    why=e?String(e.value||'').trim():'';
+    if(!why){ alert('반려 사유를 적어 주세요.\n신청하신 분이 왜 안 됐는지 알 수 있습니다.');
+      if(e){ try{ e.focus(); }catch(x){} } return; }
+  }
+  carBusy=id;
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',
+      body:tokBody({action:'carAct', id:id, act:act, why:why})});
+    d=await r.json().catch(()=>null);
+  }catch(e){ d=null; }
+  carBusy='';
+  if(!d){ alert('전송에 실패했습니다. 다시 눌러 주세요.'); return; }
+  if(d.error==='AUTH'){ onAuthLost(); return; }
+  if(!d.ok){ alert(d.message||'처리하지 못했습니다.'); return; }
+  absorbToken(d);
+  /* 서버 답을 기다리는 사이 되돌아가 보이지 않도록 손에 든 자료부터 고친다 */
+  ((CARI&&CARI.items)||[]).forEach(function(it){
+    if(String(it.id)===String(id)){ it.st=act; it.why=(act==='반려')?why:''; } });
+  carRej='';
+  renderCarMng();
+  await fetchCarInfo();
+  renderCarMng();
+}
+
 
 /* ── 헬프데스크 신청 ──
    받는 것은 **이름과 연락처 두 가지뿐**이다.
@@ -3152,6 +3613,7 @@ const ROLE_NAV={
  chair:[['manage','문의 접수 처리']],
  pray:[['pray','중보기도']],
  help:[['hdlist','헬프데스크']],
+ car:[['carmng','차량 신청']],
  staff:[['manage','문의 접수 처리']],
  admin:[['dash','대시보드'],['report','구역보고'],['member','성도 조회'],['mroster','명단 관리'],['pray','중보기도'],['edu','교육부','https://visionspeaker.github.io/edu-dashboard/'],['manage','문의 접수 처리'],['archive','아카이브']]
 };
@@ -3224,6 +3686,8 @@ function showView(v,back){
   if(v==='grade') openGrade();
   if(v==='place') openPlace();
   if(v==='prayer') openPrayer();
+  if(v==='car') openCar();
+  if(v==='carmng') openCarMng();
   if(v==='archive') renderArchive();
   if(v==='helpdesk') openHelpdesk();
   if(v==='hdlist') renderHelpPage();
@@ -3235,10 +3699,13 @@ function showView(v,back){
     (서버도 구역보고·신급·기도·명단 자료를 아예 안 내려보낸다) */
 const SCOPE_SUB_ONLY='문의만';
 const SCOPE_HELP_ONLY='헬프데스크만';
+const SCOPE_CAR_ONLY='차량만';      /* 차량부장 — 차량 신청 말고는 보이지 않는다 */
 /*  맡은 일 밖의 자료를 한 줄도 받지 않는 분인가 — 구역 명단도 필요 없다 */
 function narrowScope(me){
   const sc=String((me&&me.scope)||'').trim();
-  return sc===SCOPE_SUB_ONLY || sc===SCOPE_HELP_ONLY || String((me&&me.role)||'')==='help';
+  const rl=String((me&&me.role)||'');
+  return sc===SCOPE_SUB_ONLY || sc===SCOPE_HELP_ONLY || sc===SCOPE_CAR_ONLY
+      || rl==='help' || rl==='car';
 }
 function subOnlyMe(){ return !!current && String(current.scope||'').trim()===SCOPE_SUB_ONLY; }
 /*  ★ 2026-09-14 ★ 「헬프데스크만」 — 앱 설치 도우미 세 분.
@@ -3285,7 +3752,12 @@ function buildNav(view,keep){
   const nav=document.getElementById('nav');
   let items=subOnlyMe() ? [['manage','문의 접수 처리']]
           : helpOnlyMe() ? [['hdlist','헬프데스크']]
+          : carOnlyMe()  ? [['carmng','차량 신청']]
           : (ROLE_NAV[current.role]||[]).slice();
+  /*  차량 신청 관리 — 차량위원장·차량부장·교역자. (2026-10-02)
+      로그인할 때 받은 값만으로 바로 알 수 있어 메뉴가 뒤늦게 끼어들지 않는다. */
+  if(!subOnlyMe() && !helpOnlyMe() && canCarMngMe()
+     && !items.some(it=>it[0]==='carmng')) items.push(['carmng','차량 신청']);
   /* 담당자에게만 헬프데스크 탭을 하나 더 붙인다 */
   if(!subOnlyMe() && !helpOnlyMe() && wantHelpTab()
      && !items.some(it=>it[0]==='hdlist')) items.splice(1,0,['hdlist','헬프데스크']);
@@ -7100,7 +7572,7 @@ function resetAll(){if(confirm('모든 데이터를 지우고 초기화할까요
  *  「릴리스노트.md」 를 앱을 만들 때 그대로 옮겨 담는다.
  *  여기에 손으로 적는 내용은 없다 — 파일 하나만 고치면 화면이 따라 바뀐다.
  *  누구나(로그인 안 해도) 볼 수 있다. 사람 이름·자료는 한 줄도 들어 있지 않다. */
-const RELEASES=[{"d": "2026.10.01", "k": "앱", "v": "", "t": "릴리스노트 들어가는 자리를 넓힘", "g": [["개선", ["교회 <b>로고</b>를 눌러도 릴리스노트가 열립니다 — 이름만 눌러야 했던 것을 넓혔습니다"]]]}, {"d": "2026.09.30", "k": "앱", "v": "", "t": "릴리스노트 번호를 하나로", "g": [["개선", ["머리글 알약과 카드가 <b>같은 번호</b>를 씁니다 — V25 · V24 · V23 …", "알약 글씨를 <b>V</b>25 처럼 대문자로 키워 읽기 좋게 했습니다"]], ["참고", ["서버 번호(v59 같은 것)는 카드 맨 끝에 흐리게만 둡니다. 세는 대상이 달라 V번호와 안 맞습니다"]]]}, {"d": "2026.09.30", "k": "서버", "v": "서버 v59", "t": "문의 담당자가 확인·회신할 수 있게", "g": [["새로", ["담당으로 지정되면 <b>확인 표시</b>가 남고, <b>회신</b>과 <b>처리 상태 변경</b>도 할 수 있습니다"]], ["수정", ["담당으로 지정된 위원회·담임목사가 문의를 열어도 <b>영영 「미확인」</b>으로만 남던 문제", "담임목사로 지정된 문의는 내용조차 가려져 보이던 문제"]], ["안전", ["담당 목록 자체는 교역자만 바꿉니다 — 담당자가 스스로 빠질 수 없습니다"]], ["참고", ["예전에 쌓인 「미확인」 표시는 그대로 두었습니다. 이제부터 여시면 ✔ 가 붙습니다"]]]}, {"d": "2026.09.29", "k": "앱＋서버", "v": "서버 v58", "t": "구역보고 큐티·성경 칸", "g": [["새로", ["구역보고에 「성경읽기(장)」·「QT·가정예배(회)」 칸을 되살렸습니다", "구역장이 <b>우리 구역만</b> 켜서 쓸 수 있습니다 — 다른 구역은 그대로입니다", "성경 장수는 숫자판으로 칩니다. 30장 같은 큰 수도 들어갑니다"]], ["개선", ["켠 구역의 보고서에만 「성경 N장 · QT N회」가 함께 나옵니다", "예전에 저장돼 있던 값도 그대로 되살아납니다"]], ["참고", ["대시보드에는 집계되지 않습니다 — 원하는 구역만 쓰는 자율 항목이기 때문입니다"]]]}, {"d": "2026.09.23", "k": "앱", "v": "", "t": "홈 화면 방문자 숫자", "g": [["개선", ["숫자가 「뚝」 하고 바뀌지 않고 부드럽게 올라갑니다", "세는 동안 글자가 좌우로 흔들리지 않습니다"]]]}, {"d": "2026.09.21", "k": "앱＋서버", "v": "서버 v56·v57", "t": "신급 교육 일정 + 대시보드 안정화", "g": [["새로", ["신급 교육 화면에 <b>교육 일정</b>이 나옵니다 (OT·교육·문답식·성례식)", "지난 일정은 흐리게, 진행 중인 일정은 초록으로 보입니다", "신청 마감 뒤에도 교역자는 추가로 넣을 수 있습니다"]], ["개선", ["대시보드에 들어갈 때 메뉴가 바뀌며 화면이 튀던 것을 없앴습니다", "같은 자료를 두 번 불러오던 것을 한 번으로 줄여 3초 빨라졌습니다"]], ["수정", ["마감 다음 날에도 「0일 남음」으로 보이던 문제", "화면에 들어올 때마다 그래프가 처음부터 다시 그려지던 문제"]]]}, {"d": "2026.09.20", "k": "서버", "v": "서버 v54", "t": "구역예배 주간 제한 · 비밀번호 잠금", "g": [["개선", ["구역예배 출석은 <b>매월 첫째·셋째 주일</b>에만 체크됩니다 — 잘못 넣는 일을 막습니다", "비밀번호 잠금을 「5회 틀리면 10분」에서 「10회 틀리면 5분」으로 바꿨습니다"]]]}, {"d": "2026.09.18", "k": "앱＋서버", "v": "서버 v53", "t": "미제출 구역 연락", "g": [["새로", ["대시보드에서 미제출 구역을 누르면 구역장에게 <b>전화·문자</b>를 바로 보낼 수 있습니다", "문자를 누르면 보고 요청 문구가 저절로 들어갑니다"]], ["개선", ["문의 열람이 성공했을 때도 기록에 남깁니다"]]]}, {"d": "2026.09.17", "k": "앱＋서버", "v": "서버 v52", "t": "구역 제출 현황 전체 공개", "g": [["새로", ["다른 구역의 <b>제출 여부</b>도 볼 수 있습니다", "한 구역에 부구역장 계정을 더할 수 있습니다"]], ["참고", ["제출 여부만 보입니다 — 다른 구역의 보고 내용은 보이지 않습니다"]]]}, {"d": "2026.09.16", "k": "앱＋서버", "v": "서버 v51", "t": "신급 교육 신청 단순화", "g": [["개선", ["신청서에서 구역 선택을 없앴습니다 — 이름·연락처·교육 과정만 고르면 됩니다", "미제출 구역도 눌러서 확인할 수 있습니다"]], ["수정", ["신청일이 「ep 14」처럼 이상하게 보이던 문제"]]]}, {"d": "2026.09.15", "k": "앱", "v": "", "t": "결석자 관리 새 화면", "g": [["새로", ["결석자를 <b>사유별·구역별</b>로 한눈에 볼 수 있게 새로 만들었습니다", "결석 사유 그래프를 누르면 누구인지 바로 보입니다"]], ["개선", ["신급 명단의 「고치기」를 연필 그림으로 바꿨습니다", "새벽예배 표기를 「(명)」에서 「(횟수)」로 바로잡았습니다", "보고서 상자는 바깥을 눌러도 닫힙니다", "뜻이 없던 「구역예배 진행률」 그래프를 뺐습니다"]], ["수정", ["그래프를 누르면 화면이 아래로 딸려 내려가던 문제"]]]}, {"d": "2026.09.14", "k": "앱＋서버", "v": "서버 v49·v50", "t": "헬프데스크 · 신급 담당 화면", "g": [["새로", ["영광 커넥트 <b>헬프데스크</b>를 손봤습니다 — 앱 설치·사용 도움을 요청하는 곳입니다", "신급 교육 담당 장로님 화면을 따로 만들었습니다"]], ["개선", ["로그인 실패 안내를 경고창 대신 카드 안 빨간 글로 바꿨습니다", "대시보드 구역 차례를 숫자 순으로 세웠습니다 — 9구역 다음이 10구역입니다"]]]}, {"d": "2026.09.13", "k": "앱＋서버", "v": "서버 v48", "t": "로그인 속도 · 방문자 수", "g": [["개선", ["로그인이 빨라졌습니다 — 서버를 세 번 부르던 것을 두 번으로 줄였습니다", "헬프데스크 칸은 담당하시는 분에게만 보입니다"]], ["수정", ["방문자 수가 깜빡이거나 부풀려지던 문제", "비밀번호 앞자리가 0이면 로그인이 안 되던 문제"]]]}, {"d": "2026.09.12", "k": "앱＋서버", "v": "서버 v45", "t": "아카이브 · 헬프데스크 개설", "g": [["새로", ["<b>아카이브 폴더</b>를 열었습니다 — 지난 자료를 모아 둡니다", "<b>영광 커넥트 헬프데스크</b>를 열었습니다"]], ["개선", ["경조사 담당을 지정할 수 있게 했습니다"]]]}, {"d": "2026.09.11", "k": "서버", "v": "서버 v44", "t": "「문의만」 권한", "g": [["새로", ["문의 접수 처리 하나만 보이는 권한을 만들었습니다"]], ["안전", ["이 권한은 구역보고·명단·신급 자료를 서버에서 아예 내려보내지 않습니다"]]]}, {"d": "2026.09.10", "k": "앱＋서버", "v": "서버 v43", "t": "연습 구역", "g": [["새로", ["구역보고 <b>연습 구역</b>을 만들었습니다 — 실제 자료를 건드리지 않고 연습할 수 있습니다"]], ["개선", ["문의 확인은 한 번에 한 건만 펼쳐집니다", "연락처 관리 안내 문구를 넣었습니다"]]]}, {"d": "2026.09.08", "k": "앱＋서버", "v": "서버 v42", "t": "성도님께 공개", "g": [["새로", ["영광 커넥트를 성도님들께 열었습니다"]], ["개선", ["앱 아이콘과 로고를 다시 그려 또렷해졌습니다"]], ["안전", ["공개 전 보안 점검을 하고 발견된 것을 고쳤습니다", "교인 명단·연락처는 앱에 들어 있지 않습니다 — 로그인해야 받아옵니다"]]]}, {"d": "2026.09.07", "k": "앱＋서버", "v": "서버 v41", "t": "신급 명단 · 마감일 연장", "g": [["개선", ["신급 명단을 학습·세례·입교 가로 세 칸으로 바꿨습니다", "신급 교육 신청 마감일을 늘렸습니다"]]]}, {"d": "2026.09.06", "k": "앱＋서버", "v": "서버 v40", "t": "장소 「기타」 · 입력 편의", "g": [["새로", ["장소 사용 신청에 「기타」를 넣어 직접 적을 수 있습니다"]], ["개선", ["새벽 횟수는 숫자를 한 번만 누르면 바로 저장됩니다", "보고가 없어도 대시보드에 이번 주일이 늘 보입니다"]]]}, {"d": "2026.09.05", "k": "서버", "v": "서버 v38·v39", "t": "문의 접수 장애 복구", "g": [["새로", ["성도님이 본인이 올린 문의를 직접 지울 수 있습니다"]], ["수정", ["로그인하지 않고는 문의 접수가 되지 않던 장애를 복구했습니다"]]]}, {"d": "2026.09.03", "k": "앱＋서버", "v": "서버 v37", "t": "유아세례 · 어린이세례", "g": [["새로", ["신급 교육에 <b>유아세례·어린이세례</b>를 더했습니다"]], ["참고", ["아이를 대신해 부모님이 신청하는 과정입니다"]]]}, {"d": "2026.08.31", "k": "앱", "v": "", "t": "홈 화면에 추가 도우미", "g": [["새로", ["휴대폰 <b>홈 화면에 추가</b>하는 방법을 안내해 드립니다", "문의 분류에 「영광 커넥트 앱」을 더했습니다"]]]}, {"d": "2026.08.30", "k": "앱", "v": "", "t": "구역보고 항목 정리", "g": [["새로", ["대시보드에 「새벽예배」 칸을 새로 넣었습니다"]], ["개선", ["구역보고에서 성경읽기·QT 칸을 뺐습니다"]], ["참고", ["이 항목은 2026-09-29 에 원하는 구역만 다시 켤 수 있게 되살렸습니다"]]]}, {"d": "2026.08.27", "k": "앱＋서버", "v": "", "t": "중보기도 · 로그인 필수", "g": [["새로", ["중보기도에 <b>기간</b>과 <b>응답 완료</b> 처리를 넣었습니다"]], ["개선", ["신급 교육에서 구역 고르는 차례를 정리했습니다"]], ["안전", ["로그인한 분만 자료를 볼 수 있게 했습니다"]]]}, {"d": "2026.08.26", "k": "앱＋서버", "v": "", "t": "문의 담당 여럿 지정", "g": [["새로", ["한 분류에 문의 담당을 여러 분 지정할 수 있습니다"]], ["수정", ["신급 교육 신청 연락처 앞자리 0이 사라지던 문제"]]]}, {"d": "2026.08.25", "k": "앱＋서버", "v": "", "t": "장소 반복 신청 · 섬김과약속", "g": [["새로", ["장소 사용 신청에 <b>「매주 같은 요일 반복」</b>을 넣었습니다", "「문화10계명」을 「섬김과약속」으로 바꾸고 <b>섬김 담당 조직도</b>를 넣었습니다", "교역자 계정을 더했습니다"]], ["개선", ["조직도는 휴대폰에서도 한 줄에 두 칸으로 보입니다", "조직도 차례를 주보 순서에 맞췄습니다", "대시보드 「신급 교육 신청」 자리와 「상태별 건수」 차례를 정리했습니다"]]]}, {"d": "2026.08.24", "k": "앱", "v": "", "t": "영광 커넥트 첫 걸음", "g": [["새로", ["문의하기 · 구역보고 · 대시보드로 시작했습니다"]]]}];
+const RELEASES=[{"d": "2026.10.02", "k": "앱＋서버", "v": "서버 v60", "t": "차량 사용 신청", "g": [["새로", ["교회 <b>차량 3대</b>를 앱에서 신청하실 수 있습니다 — 1호차 2655 · 2호차 4711 · 3호차 7777", "신청할 때 <b>이름 · 연락처 · 사용일시 · 목적지</b>를 적습니다. 로그인하지 않으셔도 됩니다", "차량 담당자는 신청자에게 <b>전화 · 문자</b>를 바로 걸 수 있고, <b>승인 · 반려</b>를 정합니다"]], ["안전", ["같은 차 · 같은 시간이 <b>겹치면 신청되지 않습니다</b> — 화면에서 한 번, 서버에서 한 번 더 막습니다", "반려하실 때는 <b>사유</b>를 적어야 합니다. 신청하신 분께 그대로 보입니다", "신청자 연락처는 <b>차량 담당자에게만</b> 보입니다"]], ["참고", ["3호차는 담임목사님 전용이라 <b>주일에만</b> 신청하실 수 있습니다"]]]}, {"d": "2026.10.01", "k": "앱", "v": "", "t": "릴리스노트 들어가는 자리를 넓힘", "g": [["개선", ["교회 <b>로고</b>를 눌러도 릴리스노트가 열립니다 — 이름만 눌러야 했던 것을 넓혔습니다"]]]}, {"d": "2026.09.30", "k": "앱", "v": "", "t": "릴리스노트 번호를 하나로", "g": [["개선", ["머리글 알약과 카드가 <b>같은 번호</b>를 씁니다 — V25 · V24 · V23 …", "알약 글씨를 <b>V</b>25 처럼 대문자로 키워 읽기 좋게 했습니다"]], ["참고", ["서버 번호(v59 같은 것)는 카드 맨 끝에 흐리게만 둡니다. 세는 대상이 달라 V번호와 안 맞습니다"]]]}, {"d": "2026.09.30", "k": "서버", "v": "서버 v59", "t": "문의 담당자가 확인·회신할 수 있게", "g": [["새로", ["담당으로 지정되면 <b>확인 표시</b>가 남고, <b>회신</b>과 <b>처리 상태 변경</b>도 할 수 있습니다"]], ["수정", ["담당으로 지정된 위원회·담임목사가 문의를 열어도 <b>영영 「미확인」</b>으로만 남던 문제", "담임목사로 지정된 문의는 내용조차 가려져 보이던 문제"]], ["안전", ["담당 목록 자체는 교역자만 바꿉니다 — 담당자가 스스로 빠질 수 없습니다"]], ["참고", ["예전에 쌓인 「미확인」 표시는 그대로 두었습니다. 이제부터 여시면 ✔ 가 붙습니다"]]]}, {"d": "2026.09.29", "k": "앱＋서버", "v": "서버 v58", "t": "구역보고 큐티·성경 칸", "g": [["새로", ["구역보고에 「성경읽기(장)」·「QT·가정예배(회)」 칸을 되살렸습니다", "구역장이 <b>우리 구역만</b> 켜서 쓸 수 있습니다 — 다른 구역은 그대로입니다", "성경 장수는 숫자판으로 칩니다. 30장 같은 큰 수도 들어갑니다"]], ["개선", ["켠 구역의 보고서에만 「성경 N장 · QT N회」가 함께 나옵니다", "예전에 저장돼 있던 값도 그대로 되살아납니다"]], ["참고", ["대시보드에는 집계되지 않습니다 — 원하는 구역만 쓰는 자율 항목이기 때문입니다"]]]}, {"d": "2026.09.23", "k": "앱", "v": "", "t": "홈 화면 방문자 숫자", "g": [["개선", ["숫자가 「뚝」 하고 바뀌지 않고 부드럽게 올라갑니다", "세는 동안 글자가 좌우로 흔들리지 않습니다"]]]}, {"d": "2026.09.21", "k": "앱＋서버", "v": "서버 v56·v57", "t": "신급 교육 일정 + 대시보드 안정화", "g": [["새로", ["신급 교육 화면에 <b>교육 일정</b>이 나옵니다 (OT·교육·문답식·성례식)", "지난 일정은 흐리게, 진행 중인 일정은 초록으로 보입니다", "신청 마감 뒤에도 교역자는 추가로 넣을 수 있습니다"]], ["개선", ["대시보드에 들어갈 때 메뉴가 바뀌며 화면이 튀던 것을 없앴습니다", "같은 자료를 두 번 불러오던 것을 한 번으로 줄여 3초 빨라졌습니다"]], ["수정", ["마감 다음 날에도 「0일 남음」으로 보이던 문제", "화면에 들어올 때마다 그래프가 처음부터 다시 그려지던 문제"]]]}, {"d": "2026.09.20", "k": "서버", "v": "서버 v54", "t": "구역예배 주간 제한 · 비밀번호 잠금", "g": [["개선", ["구역예배 출석은 <b>매월 첫째·셋째 주일</b>에만 체크됩니다 — 잘못 넣는 일을 막습니다", "비밀번호 잠금을 「5회 틀리면 10분」에서 「10회 틀리면 5분」으로 바꿨습니다"]]]}, {"d": "2026.09.18", "k": "앱＋서버", "v": "서버 v53", "t": "미제출 구역 연락", "g": [["새로", ["대시보드에서 미제출 구역을 누르면 구역장에게 <b>전화·문자</b>를 바로 보낼 수 있습니다", "문자를 누르면 보고 요청 문구가 저절로 들어갑니다"]], ["개선", ["문의 열람이 성공했을 때도 기록에 남깁니다"]]]}, {"d": "2026.09.17", "k": "앱＋서버", "v": "서버 v52", "t": "구역 제출 현황 전체 공개", "g": [["새로", ["다른 구역의 <b>제출 여부</b>도 볼 수 있습니다", "한 구역에 부구역장 계정을 더할 수 있습니다"]], ["참고", ["제출 여부만 보입니다 — 다른 구역의 보고 내용은 보이지 않습니다"]]]}, {"d": "2026.09.16", "k": "앱＋서버", "v": "서버 v51", "t": "신급 교육 신청 단순화", "g": [["개선", ["신청서에서 구역 선택을 없앴습니다 — 이름·연락처·교육 과정만 고르면 됩니다", "미제출 구역도 눌러서 확인할 수 있습니다"]], ["수정", ["신청일이 「ep 14」처럼 이상하게 보이던 문제"]]]}, {"d": "2026.09.15", "k": "앱", "v": "", "t": "결석자 관리 새 화면", "g": [["새로", ["결석자를 <b>사유별·구역별</b>로 한눈에 볼 수 있게 새로 만들었습니다", "결석 사유 그래프를 누르면 누구인지 바로 보입니다"]], ["개선", ["신급 명단의 「고치기」를 연필 그림으로 바꿨습니다", "새벽예배 표기를 「(명)」에서 「(횟수)」로 바로잡았습니다", "보고서 상자는 바깥을 눌러도 닫힙니다", "뜻이 없던 「구역예배 진행률」 그래프를 뺐습니다"]], ["수정", ["그래프를 누르면 화면이 아래로 딸려 내려가던 문제"]]]}, {"d": "2026.09.14", "k": "앱＋서버", "v": "서버 v49·v50", "t": "헬프데스크 · 신급 담당 화면", "g": [["새로", ["영광 커넥트 <b>헬프데스크</b>를 손봤습니다 — 앱 설치·사용 도움을 요청하는 곳입니다", "신급 교육 담당 장로님 화면을 따로 만들었습니다"]], ["개선", ["로그인 실패 안내를 경고창 대신 카드 안 빨간 글로 바꿨습니다", "대시보드 구역 차례를 숫자 순으로 세웠습니다 — 9구역 다음이 10구역입니다"]]]}, {"d": "2026.09.13", "k": "앱＋서버", "v": "서버 v48", "t": "로그인 속도 · 방문자 수", "g": [["개선", ["로그인이 빨라졌습니다 — 서버를 세 번 부르던 것을 두 번으로 줄였습니다", "헬프데스크 칸은 담당하시는 분에게만 보입니다"]], ["수정", ["방문자 수가 깜빡이거나 부풀려지던 문제", "비밀번호 앞자리가 0이면 로그인이 안 되던 문제"]]]}, {"d": "2026.09.12", "k": "앱＋서버", "v": "서버 v45", "t": "아카이브 · 헬프데스크 개설", "g": [["새로", ["<b>아카이브 폴더</b>를 열었습니다 — 지난 자료를 모아 둡니다", "<b>영광 커넥트 헬프데스크</b>를 열었습니다"]], ["개선", ["경조사 담당을 지정할 수 있게 했습니다"]]]}, {"d": "2026.09.11", "k": "서버", "v": "서버 v44", "t": "「문의만」 권한", "g": [["새로", ["문의 접수 처리 하나만 보이는 권한을 만들었습니다"]], ["안전", ["이 권한은 구역보고·명단·신급 자료를 서버에서 아예 내려보내지 않습니다"]]]}, {"d": "2026.09.10", "k": "앱＋서버", "v": "서버 v43", "t": "연습 구역", "g": [["새로", ["구역보고 <b>연습 구역</b>을 만들었습니다 — 실제 자료를 건드리지 않고 연습할 수 있습니다"]], ["개선", ["문의 확인은 한 번에 한 건만 펼쳐집니다", "연락처 관리 안내 문구를 넣었습니다"]]]}, {"d": "2026.09.08", "k": "앱＋서버", "v": "서버 v42", "t": "성도님께 공개", "g": [["새로", ["영광 커넥트를 성도님들께 열었습니다"]], ["개선", ["앱 아이콘과 로고를 다시 그려 또렷해졌습니다"]], ["안전", ["공개 전 보안 점검을 하고 발견된 것을 고쳤습니다", "교인 명단·연락처는 앱에 들어 있지 않습니다 — 로그인해야 받아옵니다"]]]}, {"d": "2026.09.07", "k": "앱＋서버", "v": "서버 v41", "t": "신급 명단 · 마감일 연장", "g": [["개선", ["신급 명단을 학습·세례·입교 가로 세 칸으로 바꿨습니다", "신급 교육 신청 마감일을 늘렸습니다"]]]}, {"d": "2026.09.06", "k": "앱＋서버", "v": "서버 v40", "t": "장소 「기타」 · 입력 편의", "g": [["새로", ["장소 사용 신청에 「기타」를 넣어 직접 적을 수 있습니다"]], ["개선", ["새벽 횟수는 숫자를 한 번만 누르면 바로 저장됩니다", "보고가 없어도 대시보드에 이번 주일이 늘 보입니다"]]]}, {"d": "2026.09.05", "k": "서버", "v": "서버 v38·v39", "t": "문의 접수 장애 복구", "g": [["새로", ["성도님이 본인이 올린 문의를 직접 지울 수 있습니다"]], ["수정", ["로그인하지 않고는 문의 접수가 되지 않던 장애를 복구했습니다"]]]}, {"d": "2026.09.03", "k": "앱＋서버", "v": "서버 v37", "t": "유아세례 · 어린이세례", "g": [["새로", ["신급 교육에 <b>유아세례·어린이세례</b>를 더했습니다"]], ["참고", ["아이를 대신해 부모님이 신청하는 과정입니다"]]]}, {"d": "2026.08.31", "k": "앱", "v": "", "t": "홈 화면에 추가 도우미", "g": [["새로", ["휴대폰 <b>홈 화면에 추가</b>하는 방법을 안내해 드립니다", "문의 분류에 「영광 커넥트 앱」을 더했습니다"]]]}, {"d": "2026.08.30", "k": "앱", "v": "", "t": "구역보고 항목 정리", "g": [["새로", ["대시보드에 「새벽예배」 칸을 새로 넣었습니다"]], ["개선", ["구역보고에서 성경읽기·QT 칸을 뺐습니다"]], ["참고", ["이 항목은 2026-09-29 에 원하는 구역만 다시 켤 수 있게 되살렸습니다"]]]}, {"d": "2026.08.27", "k": "앱＋서버", "v": "", "t": "중보기도 · 로그인 필수", "g": [["새로", ["중보기도에 <b>기간</b>과 <b>응답 완료</b> 처리를 넣었습니다"]], ["개선", ["신급 교육에서 구역 고르는 차례를 정리했습니다"]], ["안전", ["로그인한 분만 자료를 볼 수 있게 했습니다"]]]}, {"d": "2026.08.26", "k": "앱＋서버", "v": "", "t": "문의 담당 여럿 지정", "g": [["새로", ["한 분류에 문의 담당을 여러 분 지정할 수 있습니다"]], ["수정", ["신급 교육 신청 연락처 앞자리 0이 사라지던 문제"]]]}, {"d": "2026.08.25", "k": "앱＋서버", "v": "", "t": "장소 반복 신청 · 섬김과약속", "g": [["새로", ["장소 사용 신청에 <b>「매주 같은 요일 반복」</b>을 넣었습니다", "「문화10계명」을 「섬김과약속」으로 바꾸고 <b>섬김 담당 조직도</b>를 넣었습니다", "교역자 계정을 더했습니다"]], ["개선", ["조직도는 휴대폰에서도 한 줄에 두 칸으로 보입니다", "조직도 차례를 주보 순서에 맞췄습니다", "대시보드 「신급 교육 신청」 자리와 「상태별 건수」 차례를 정리했습니다"]]]}, {"d": "2026.08.24", "k": "앱", "v": "", "t": "영광 커넥트 첫 걸음", "g": [["새로", ["문의하기 · 구역보고 · 대시보드로 시작했습니다"]]]}];
 /*  굵게(<b>)만 살리고 나머지는 글자 그대로 — 파일에 무엇이 적히든 안전하게 */
 function rnText(s){
   return esc(String(s||'')).replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>');
@@ -7199,7 +7671,7 @@ try{ setTimeout(a2hsPaint,1200); }catch(e){}
  *   화면조차 열어 주지 않는 편이 안전하다)
  *  연 뒤에는 주소에서 ?go= 를 지운다 — 새로고침하거나 홈으로 돌아갔다가
  *  다시 오실 때 같은 화면이 또 튀어나오지 않게 하기 위해서다. */
-const GO_OK=['helpdesk','archive','intake','myreq','grade','place','prayer','culture'];
+const GO_OK=['helpdesk','archive','intake','myreq','grade','place','prayer','culture','car'];
 function bootGo(){
   let want='';
   try{ want=String(new URLSearchParams(location.search).get('go')||'').trim(); }catch(e){ want=''; }

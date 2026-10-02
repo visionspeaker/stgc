@@ -2286,6 +2286,9 @@ async function loadAllOnce(){
          *  보고 있던 화면이 첫 칸으로 튕겼다. (?go=helpdesk 가 문의하기로 열리던 원인) */
         const ga=(d.me.gradeAll===true);
         if((current.gradeAll===true)!==ga){ current.gradeAll=ga; meChanged=true; }
+        /*  아카이브 서랍 — 서버가 참·거짓만 알려 준다 (2026-10-03) */
+        const ar=(d.me.arch===true);
+        if((current.arch===true)!==ar){ current.arch=ar; meChanged=true; paintHomeAdmin(); }
         /*  메뉴를 다시 만들 때는 **보고 있던 화면을 그대로 둔다.**
          *  인자 없이 buildNav() 를 부르면 첫 칸으로 옮겨 가 버린다. */
         if(meChanged){ saveSession(); setRoleLabel();
@@ -2605,6 +2608,7 @@ async function loginByName(){
             category:(me&&me.category)||'',
             duty:(me&&me.duty)||'', scope:(me&&me.scope)||'',
             gradeAll:((me&&me.gradeAll)===true),
+            arch:((me&&me.arch)===true),
             who:(me&&me.name)||nm});
   if(mustPw) setTimeout(function(){
     if(confirm('아직 처음 비밀번호(1234)를 쓰고 계십니다.\n지금 변경하시겠습니까?')) openPwChange();
@@ -2920,7 +2924,9 @@ function goArchive(){ openApp('archive'); }
 /*  ★ 2026-10-02 ★ 홈 화면 맨 아래 «1단 카드» — 관리자에게만 보인다.
  *  아카이브 서랍(헬프데스크 등)은 성도님 홈에는 두지 않기로 했으므로,
  *  교역자만 홈에서 바로 들어갈 수 있게 한 칸 놓는다. */
-function canSeeArchiveCard(){ return !!current && current.role==='admin'; }
+/*  ★ 2026-10-03 ★ 교역자 «전부»가 아니라 서버가 지정한 분께만 보인다.
+ *  (누구인지는 서버에만 적혀 있다 — 앱 파일에는 이름이 들어가지 않는다) */
+function canSeeArchiveCard(){ return !!current && current.arch===true; }
 function paintHomeAdmin(){
   const box=document.getElementById('homeAdmin'); if(!box) return;
   if(!canSeeArchiveCard()){ box.innerHTML=''; return; }
@@ -3296,11 +3302,16 @@ function carMgCard(it){
     +'<span class="carst '+carStCls(it.st)+'" style="margin-left:auto">'+esc(it.st)+'</span></div>'
     +'<div class="line">'+esc(plDateLabel(it.date))+' '+esc(ampm(it.from))+' ~ '+esc(ampm(it.to))+'</div>'
     +'<div class="line" style="color:var(--muted)">목적지 · '+esc(it.dest||'')+'</div>'
+    /*  전화·문자 단추는 «늘» 보여 드린다. 번호가 없으면 흐리게 두고 까닭을 적는다 —
+        예전처럼 통째로 사라지면 왜 안 보이는지 알 길이 없다. (2026-10-03) */
+    +'<div class="tel">'
     +(tel
-      ? '<div class="tel"><a class="cbtn tel" href="'+esc(telHref(tel))+'" title="전화걸기">'+SVG_TEL+'</a>'
+      ? '<a class="cbtn tel" href="'+esc(telHref(tel))+'" title="전화걸기">'+SVG_TEL+'</a>'
         +'<a class="cbtn sms" href="'+esc(carSmsHref(tel))+'" title="문자보내기">'+SVG_SMS+'</a>'
-        +'<span class="pph">'+esc(carDash(tel))+'</span></div>'
-      : '')
+        +'<span class="pph">'+esc(carDash(tel))+'</span>'
+      : '<span class="cbtn off">'+SVG_TEL+'</span><span class="cbtn off">'+SVG_SMS+'</span>'
+        +'<span class="pph none">번호를 받지 못했습니다</span>')
+    +'</div>'
     +tail+'</div>';
 }
 function carRejOn(id){ carRej=id; renderCarMng();
@@ -3754,6 +3765,8 @@ function buildNav(view,keep){
           : helpOnlyMe() ? [['hdlist','헬프데스크']]
           : carOnlyMe()  ? [['carmng','차량 신청']]
           : (ROLE_NAV[current.role]||[]).slice();
+  /*  아카이브 — 교역자 전부가 아니라 서버가 지정한 분께만 (2026-10-03) */
+  if(!canSeeArchiveCard()) items=items.filter(it=>it[0]!=='archive');
   /*  차량 신청 관리 — 차량위원장·차량부장·교역자. (2026-10-02)
       로그인할 때 받은 값만으로 바로 알 수 있어 메뉴가 뒤늦게 끼어들지 않는다. */
   if(!subOnlyMe() && !helpOnlyMe() && canCarMngMe()

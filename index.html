@@ -7173,9 +7173,11 @@ seedDemo(false);
 initIntake();
 bindKbig();                 /* 큰 수 숫자판 단추 연결 (성경 장수) */
 rnPaintVer();               /* 머리글 옆 작은 버전 글씨 (릴리스노트 들어가는 곳) */
-paintHomeAdmin();           /* 관리자면 홈 맨 아래 「아카이브」 카드 (2026-10-02) */
 /* 로그인 유지: 저장된 세션 복원 (로그아웃 전까지 유지) */
 const _sess=loadSession(); if(_sess) current=_sess;
+/*  「아카이브」 카드는 누구인지 알아야 그릴지 말지 정할 수 있다 —
+    반드시 세션을 되살린 «뒤»에 그린다. (2026-10-02) */
+paintHomeAdmin();
 /* 첫 화면 = 홈 런처 */
 document.getElementById('home').style.display='block';
 document.getElementById('app').style.display='none';

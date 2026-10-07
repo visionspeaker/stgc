@@ -64,6 +64,19 @@ nav button.active{background:linear-gradient(135deg,#57b45f,#2fa58f);color:#fff;
 nav button.navlink{background:#eaf1fb;color:var(--blue2)}
 nav button.navlink:hover{background:#dde9f8}
 nav button.navlink .exti{font-size:11px;opacity:.75;margin-left:1px}
+/* ── 교역자 메뉴 접기 (2026-10-07) ── */
+header.navfold>.btn{display:none}
+nav .navpin{display:flex;gap:6px;width:100%;align-items:center}
+nav .navpin button{padding:8px 12px;font-size:13px;white-space:nowrap}
+nav .navpin .navhome{background:#e9f6ee;color:#1f7a4d}
+nav .navpin .navmore{margin-left:auto;background:#26313f;color:#fff}
+nav .navpin .navmore.open{background:#5b6573}
+nav .navdraw{width:100%;margin-top:8px;padding-top:9px;border-top:1px dashed var(--line)}
+nav .navall{display:flex;flex-wrap:wrap;gap:6px}
+nav .navacct{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #eef1f5}
+nav .navacct button{flex:1;background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px;font-size:12.5px;color:#3a4452}
+nav .navacct .out{color:#b91c1c;border-color:#f2c4c4}
+@media(max-width:360px){nav .navpin button{padding:7px 9px;font-size:12px}}
 main{max-width:1080px;margin:0 auto;padding:18px 18px 84px}
 .view{display:none}.view.active{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(60,80,120,.05)}
@@ -864,6 +877,8 @@ background:linear-gradient(135deg,#2fa58f,#1f7d6d)}
 .bstrip .btrack img{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
 .bstrip .btrack.zoomed{z-index:3}
 .bstrip .btrack.fail .bfail{display:flex}
+.bstrip .btrack.bwait{width:60%;height:300px;display:flex;align-items:center;justify-content:center}
+.bstrip .btrack.bwait .bfail{display:flex;position:static;color:var(--muted);font-size:13px}
 .bstrip .bsnap{position:absolute;top:0;bottom:0;scroll-snap-align:center;scroll-snap-stop:always;pointer-events:none}
 .bstrip{position:relative;align-items:flex-start}
 .bpg:not(.fail):not(.bload){display:flex;justify-content:center;align-items:flex-start;aspect-ratio:auto}
@@ -3115,10 +3130,11 @@ function bulDay(d){ const p=String(d||'').split('-'); if(p.length!==3) return St
   return p[0]+'년 '+(+p[1])+'월 '+(+p[2])+'일 '+(w===0?'주일':'('+'일월화수목금토'[w]+')'); }
 function bulShort(d){ const p=String(d||'').split('-'); return p.length===3? (+p[1])+'월 '+(+p[2])+'일' : String(d||''); }
 /*  사진 주소 — 차례대로 시도한다 (0: 드라이브 썸네일, 1: 구글 이미지 서버) */
+/*  ★ 2026-10-07 밤 ★ 구글 이미지 서버(lh3)를 먼저 — 드라이브 썸네일 주소는 한 번 돌아서(리디렉트) 가서 더 느리다 */
 function bulSrc(id,k,w){
   const e=encodeURIComponent(id), W=w||BUL_VIEW_W;
-  return k===0 ? 'https://drive.google.com/thumbnail?id='+e+'&sz=w'+W
-                : 'https://lh3.googleusercontent.com/d/'+e+'=w'+W;
+  return k===0 ? 'https://lh3.googleusercontent.com/d/'+e+'=w'+W
+                : 'https://drive.google.com/thumbnail?id='+e+'&sz=w'+W;
 }
 /*  ★ 2026-10-07 저녁 ★ 「한 면씩」 — 가로로 긴 펼침면(4면)을 4조각으로 잘라
  *  한 면씩 세로로 크게 넘겨 본다. 「펼쳐 보기」를 고르면 사진 통째로.
@@ -3135,6 +3151,49 @@ function bulTry(src){ return new Promise(function(ok){ const im=new Image();
 /*  한 장 받기 — 못 받으면 다음 길로. 받은 것은 기억해 두고 다시 쓴다 */
 /*  화면이 잇달아 두 번 그려져도 같은 사진을 두 번 받지 않게, 받는 중인 것도 기억한다 */
 let BULWAIT={};
+/*  ★ 2026-10-07 밤 — 빠르게 ★
+ *  ① 주보 목록을 폰에 기억 → 열자마자 그리고, 서버 대답은 뒤에서 받아 바뀐 것만 고친다
+ *  ② 사진 크기(가로·세로)를 기억 → 사진이 오기 전에 칸부터 그려 두고 사진은 제자리에서 채워진다
+ *  ③ 처음 보는 사진이면 첫 장이 오는 대로 먼저 그린다
+ *  ④ 홈 화면에서 최신 주보 첫 장을 미리 받아 둔다 (사진은 폰이 하루 저장 — 구글 설정) */
+const BUL_LIST_KEY='sgc_bul_list_v1', BUL_DIM_KEY='sgc_bul_dim_v1';
+let BULDIM=(function(){ try{ return JSON.parse(localStorage.getItem(BUL_DIM_KEY)||'{}')||{}; }catch(e){ return {}; } })();
+function bulDimSave(id,f){
+  if(!f||f.fail||!f.w||!f.h) return;
+  BULDIM[id]=[f.w,f.h,Date.now()];
+  const ks=Object.keys(BULDIM); if(ks.length>40){ ks.sort(function(a,b){ return BULDIM[a][2]-BULDIM[b][2]; }).slice(0,ks.length-40).forEach(function(k){ delete BULDIM[k]; }); }
+  try{ localStorage.setItem(BUL_DIM_KEY,JSON.stringify(BULDIM)); }catch(e){}
+}
+/*  크기를 아는 사진은 기다리지 않고 바로 — 실제 사진은 <img> 가 받아 오고, 못 받으면 bulImgFail 이 다음 길로 */
+function bulKnown(id){
+  if(BULIMG[id] && !BULIMG[id].fail) return BULIMG[id];
+  const d=BULDIM[id]; if(!d) return null;
+  BULIMG[id]={src:bulSrc(id,0), w:d[0], h:d[1], k:0, guess:true};
+  return BULIMG[id];
+}
+async function bulImgFail(img){
+  const id=img.getAttribute('data-id'), f=BULIMG[id]||{k:0};
+  const k=(f.k||0)+1;
+  if(k===1){ f.k=1; f.src=bulSrc(id,1); img.src=f.src; return; }
+  if(k===2 && USE_BACKEND){
+    f.k=2;
+    try{ const d=await (await fetch(API+'?action=bulImg&id='+encodeURIComponent(id))).json();
+         if(d&&d.ok&&d.data){ f.src=d.data; img.src=d.data; return; } }catch(e){}
+  }
+  f.k=3; const t=img.closest('.btrack');
+  if(t){ t.classList.add('fail'); if(!t.querySelector('.bfail')) t.insertAdjacentHTML('beforeend','<div class="bfail">사진을 불러오지 못했습니다.<br>잠시 뒤 다시 열어 주세요.</div>'); }
+}
+function bulListSave(d){ try{ localStorage.setItem(BUL_LIST_KEY,JSON.stringify({weeks:d.weeks||[],keep:d.keep,maxPages:d.maxPages})); }catch(e){} }
+function bulListLoad(){ try{ const d=JSON.parse(localStorage.getItem(BUL_LIST_KEY)||'null'); return d&&Array.isArray(d.weeks)? Object.assign({ok:true,canUp:false,cached:true},d) : null; }catch(e){ return null; } }
+function bulSig(d){ return d? JSON.stringify([d.weeks,!!d.canUp]) : ''; }
+/*  홈에서 최신 주보 첫 장을 미리 — 이 화면을 연 동안 한 번만 */
+let bulPrefDone=false;
+function bulPrefetch(){
+  if(bulPrefDone || !BUL || !BUL.weeks || !BUL.weeks[0]) return;
+  bulPrefDone=true;
+  const id=BUL.weeks[0].pages[0]; if(!id) return;
+  bulTry(bulSrc(id,0)).then(function(r){ if(r){ bulDimSave(id,r); if(!BULIMG[id]||BULIMG[id].guess) BULIMG[id]=Object.assign(r,{k:0}); } else bulFetchPage(id); });
+}
 function bulFetchPage(id){
   if(BULIMG[id] && !BULIMG[id].fail) return Promise.resolve(BULIMG[id]);
   if(!BULWAIT[id]) BULWAIT[id]=bulFetchPage0(id).then(function(r){ delete BULWAIT[id]; return r; });
@@ -3148,6 +3207,7 @@ async function bulFetchPage0(id){
          if(d&&d.ok&&d.data){ r=await bulTry(d.data); k=2; } }catch(e){}
   }
   BULIMG[id]= r? Object.assign(r,{k:k}) : {fail:true};
+  if(r) bulDimSave(id,r);
   return BULIMG[id];
 }
 /*  가로 사진인가 (펼침면) */
@@ -3159,21 +3219,37 @@ function bulIsSpread(f){ return !!f && f.w > f.h*1.2; }
  *  「펼쳐 보기」는 같은 틀에서 멈춤 자리를 1개로 둔 것. */
 function bulCuts(f){ return (bulMode()==='one' && bulIsSpread(f))? BUL_SPLIT : 1; }
 function bulTrackHtml(id,f,pi,d){
+  if(f==='wait') return '<div class="btrack bwait" data-n="1"><div class="bfail">불러오는 중…</div><span class="bsnap" style="left:0;width:100%"></span></div>';
   if(!f||f.fail) return '<div class="btrack fail" data-n="1"><div class="bfail">사진을 불러오지 못했습니다.<br>잠시 뒤 다시 열어 주세요.</div>'
     +'<span class="bsnap" style="left:0;width:100%"></span></div>';
   const n=bulCuts(f);
   let h='<div class="btrack" data-n="'+n+'" data-w="'+f.w+'" data-h="'+f.h+'">'
-    +'<img data-id="'+esc(id)+'" src="'+esc(f.src)+'" alt="'+esc(bulShort(d))+' 주보 '+(pi+1)+'장" draggable="false"/>';
+    +'<img data-id="'+esc(id)+'" src="'+esc(f.src)+'" alt="'+esc(bulShort(d))+' 주보 '+(pi+1)+'장" draggable="false" onerror="bulImgFail(this)"/>';
   for(let k=0;k<n;k++) h+='<span class="bsnap" style="left:'+(k*100/n)+'%;width:'+(100/n)+'%"></span>';
   return h+'</div>';
 }
 async function bulPaintView(w){
   const my=++bulPaintNo;
-  const fs=await Promise.all(w.pages.map(bulFetchPage));
-  if(my!==bulPaintNo) return;                     /* 그사이 다른 주보를 고르셨다 */
+  let fs=w.pages.map(bulKnown);
+  if(fs.some(function(f){ return !f; })){
+    /* 처음 보는 사진이 있다 — 첫 장부터 받아 먼저 그리고, 나머지는 오는 대로 다시 그린다 */
+    if(!fs[0]) fs[0]=await bulFetchPage(w.pages[0]);
+    if(my!==bulPaintNo) return;
+    if(fs.some(function(f){ return !f; })){
+      bulPaintTracks(w, fs.map(function(f){ return f||'wait'; }), true);
+      const all=await Promise.all(w.pages.map(function(id,i){ return fs[i]? Promise.resolve(fs[i]) : bulFetchPage(id); }));
+      if(my!==bulPaintNo) return;
+      const st0=document.getElementById('bulStrip'); const keepL=st0?st0.scrollLeft:0;
+      bulPaintTracks(w, all, false, keepL);
+      return;
+    }
+  }
+  bulPaintTracks(w, fs, true);
+}
+function bulPaintTracks(w, fs, first, keepL){
   const st=document.getElementById('bulStrip'); if(!st) return;
   st.innerHTML=w.pages.map(function(id,pi){ return bulTrackHtml(id,fs[pi],pi,w.d); }).join('');
-  const marks=[]; w.pages.forEach(function(id,pi){ const n=(fs[pi]&&!fs[pi].fail)?bulCuts(fs[pi]):1; for(let k=0;k<n;k++) marks.push(k); });
+  const marks=[]; w.pages.forEach(function(id,pi){ const n=(fs[pi]&&fs[pi]!=='wait'&&!fs[pi].fail)?bulCuts(fs[pi]):1; for(let k=0;k<n;k++) marks.push(k); });
   const no=document.getElementById('bulNo'); if(no) no.textContent='1 / '+marks.length;
   const dots=document.getElementById('bulDots');
   if(dots) dots.innerHTML= marks.length>1 ? marks.map(function(k,i){ return '<i class="'+(i?'':'on')+(i&&k===0?' gap':'')+'"></i>'; }).join('') : '';
@@ -3181,11 +3257,11 @@ async function bulPaintView(w){
   const cut=marks.length>w.pages.length;
   if(sub) sub.textContent=(cut? marks.length+'면' : w.pages.length+'장')+(marks.length>1?' · 옆으로 넘겨 보세요':'');
   const md=document.getElementById('bulModeBox');
-  if(md) md.style.display= fs.some(bulIsSpread) ? 'flex' : 'none';
+  if(md) md.style.display= fs.some(function(f){ return f&&f!=='wait'&&bulIsSpread(f); }) ? 'flex' : 'none';
   bulFitH();
-  st.scrollLeft=0;
+  st.scrollLeft= keepL||0;
   bulBindStrip();
-  if(currentView==='bulletin' && !bulUp) bulScrollTop();
+  if(first && currentView==='bulletin' && !bulUp) bulScrollTop();
 }
 /*  크기 맞추기 — 한 면(또는 사진 통째)이 «화면 높이 안»과 «보기 칸 폭 안»에 모두 들어가게.
  *  이어진 사진의 높이를 정하고, 폭은 비율대로. 첫 면·끝 면도 가운데 올 수 있게 양옆 여백. */
@@ -3204,7 +3280,8 @@ function bulFitH(){
   const ts=[].slice.call(st.querySelectorAll('.btrack'));
   let firstPW=VW, lastPW=VW;
   ts.forEach(function(t,i){
-    if(t.classList.contains('fail')){ t.style.width=VW+'px'; t.style.height='220px'; if(!i) firstPW=VW; lastPW=VW; return; }
+    if(t.classList.contains('fail')||t.classList.contains('bwait')){ const ww=t.classList.contains('bwait')?Math.round(VW*0.6):VW;
+      t.style.width=ww+'px'; t.style.height=(t.classList.contains('bwait')?Math.min(bh,420):220)+'px'; if(!i) firstPW=ww; lastPW=ww; return; }
     const n=+t.getAttribute('data-n')||1, w=+t.getAttribute('data-w'), h=+t.getAttribute('data-h');
     let H=bh; const pw=H*w/h/n; if(pw>VW) H=VW*n*h/w;          /* 한 면이 칸보다 넓으면 폭에 맞춘다 */
     const W=H*w/h;
@@ -3234,7 +3311,7 @@ async function fetchBul(){
   try{
     const r=await fetch(withTok(API+'?action=bulletinInfo'));
     const d=await r.json();
-    if(d&&d.ok){ BUL=d; absorbToken(d); }
+    if(d&&d.ok){ BUL=d; absorbToken(d); bulListSave(d); }
   }catch(e){ console.warn('주보 불러오기 실패:',e); }
   bulLoading=false;
   return BUL;
@@ -3248,9 +3325,11 @@ function bulScrollTop(){
 async function openBulletin(){
   bulCur=0;
   Object.keys(BULIMG).forEach(function(k){ if(BULIMG[k].fail) delete BULIMG[k]; });   /* 못 받았던 것은 다시 시도 */
+  if(!BUL) BUL=bulListLoad();          /* 기억해 둔 목록으로 바로 그린다 */
   renderBul();
+  const before=bulSig(BUL);
   await fetchBul();
-  if(currentView==='bulletin'){ renderBul(); bulScrollTop(); }
+  if(currentView==='bulletin' && bulSig(BUL)!==before && !bulUp){ bulCur=0; renderBul(); }
   paintArchiveNew();
 }
 function renderBul(){
@@ -3550,7 +3629,8 @@ function paintArchiveNew(){
  *  · 3호차는 담임목사님 전용이라 주일에만 고를 수 있다.
  *  · 승인·반려는 차량위원장·차량부장·교역자만. 연락처도 그분들께만 내려온다. */
 const CAR_DURS=[[60,'1시간'],[120,'2시간'],[180,'3시간'],[360,'반나절'],[600,'하루']];
-const CAR_CHIP_SVG='<svg width="21" height="21" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 30v-6.2c0-.9.3-1.7.9-2.4l6-6.8A5 5 0 0115.7 13H32c1.5 0 2.9.7 3.8 1.9l5.3 6.8c.6.8.9 1.7.9 2.6V30"/><circle cx="14" cy="31" r="4"/><circle cx="34" cy="31" r="4"/><path d="M10.5 21.5h27"/></svg>';
+/*  2026-10-07 : 홈 아이콘과 같은 «꽉 찬 옆모습». 창·바퀴 가운데는 뚫어 두어 칸 색이 비친다 */
+const CAR_CHIP_SVG='<svg width="22" height="22" viewBox="0 0 48 48" fill="currentColor"><path fill-rule="evenodd" d="M4.5 31V20.5c0-1.4.6-2.7 1.7-3.6l7.4-6A7 7 0 0118 9.4h17.2c2.1 0 4 1 5.3 2.7l4 5.6c.6.9 1 1.9 1 3V31a2 2 0 01-2 2h-2.3a5.6 5.6 0 00-10.8 0H18.6a5.6 5.6 0 00-10.8 0H6.5a2 2 0 01-2-2zM13.2 18.5l5-4.2c.6-.5 1.3-.8 2-.8H24v5zM26.5 13.5h7.6c1 0 1.9.5 2.5 1.3l2.7 3.7h-12.8z"/><path fill-rule="evenodd" d="M8.9 33.2a4.3 4.3 0 108.6 0a4.3 4.3 0 10-8.6 0zM11.6 33.2a1.6 1.6 0 103.2 0a1.6 1.6 0 10-3.2 0zM30.5 33.2a4.3 4.3 0 108.6 0a4.3 4.3 0 10-8.6 0zM33.2 33.2a1.6 1.6 0 103.2 0a1.6 1.6 0 10-3.2 0z"/></svg>';
 const CAR_CFG_KEY='sgc_car_v1';
 const CAR_QUICK=['이미 다른 일정이 있습니다','차량 점검 중입니다','운전하실 분이 없습니다','사용 목적을 확인해 주세요'];
 const CAR_SMS='안녕하세요, 송탄영광교회입니다. 차량 사용 신청 건으로 연락드립니다.';
@@ -4386,6 +4466,18 @@ function wantGradeTab(){
  *          예전에는 메뉴를 다시 만들 때마다 showView() 까지 불러
  *          보고 있던 화면을 통째로 다시 그렸다. 대시보드가 3초 안에
  *          세 번 그려지던 까닭이다. */
+const NAV_PIN=['dash','manage'];          /* 교역자 상단에 늘 보이는 칸 (HOME 다음) */
+function navFoldMe(){ return !!current && current.role==='admin' && !subOnlyMe() && !helpOnlyMe(); }
+function navToggle(){
+  const d=document.getElementById('navDraw'), m=document.getElementById('navMore'); if(!d) return;
+  const on=d.style.display==='none';
+  d.style.display=on?'block':'none';
+  if(m){ m.textContent=on?'접기 ▴':'전체 ▾'; m.classList.toggle('open',on); }
+}
+function navClose(){
+  const d=document.getElementById('navDraw'), m=document.getElementById('navMore');
+  if(d) d.style.display='none'; if(m){ m.textContent='전체 ▾'; m.classList.remove('open'); }
+}
 function buildNav(view,keep){
   const nav=document.getElementById('nav');
   let items=subOnlyMe() ? [['manage','문의 접수 처리']]
@@ -4413,10 +4505,26 @@ function buildNav(view,keep){
   if(!items.length){ nav.innerHTML=''; nav.style.display='none'; }
   else { nav.style.display='flex';
     /* it[2]가 있으면 외부 링크(새 창) 항목 */
-    nav.innerHTML=items.map(it=>it[2]
+    const bh=it=>it[2]
       ? `<button class="navlink" data-url="${it[2]}" title="새 창으로 열립니다">${it[1]} <span class="exti">↗</span></button>`
-      : `<button data-v="${it[0]}" class="${it[0]===first?'active':''}">${it[1]}</button>`).join('');
-    nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+      : `<button data-v="${it[0]}" class="${it[0]===first?'active':''}">${it[1]}</button>`;
+    /*  ★ 2026-10-07 ★ 교역자만 메뉴를 접는다 — 평소엔 HOME · 대시보드 · 문의 접수 처리 · 전체 ▾ 네 개.
+     *  「전체」를 누르면 나머지 메뉴와 비밀번호 변경 · 로그아웃이 펼쳐진다. 고르면 저절로 접힌다. */
+    const fold=navFoldMe();
+    const hd=nav.closest('header'); if(hd) hd.classList.toggle('navfold',fold);
+    if(fold){
+      const pins=NAV_PIN.map(v=>items.filter(it=>it[0]===v)[0]).filter(Boolean);
+      const rest=items.filter(it=>NAV_PIN.indexOf(it[0])<0);
+      nav.innerHTML='<div class="navpin"><button class="navhome" onclick="navClose();goHome()">HOME</button>'
+        +pins.map(bh).join('')
+        +'<button class="navmore" id="navMore" onclick="navToggle()">전체 ▾</button></div>'
+        +'<div class="navdraw" id="navDraw" style="display:none">'
+        +'<div class="navall">'+rest.map(bh).join('')+'</div>'
+        +'<div class="navacct"><button onclick="navClose();openPwChange()">🔑 비밀번호 변경</button>'
+        +'<button class="out" onclick="navClose();logout()">로그아웃</button></div></div>';
+    } else nav.innerHTML=items.map(bh).join('');
+    nav.querySelectorAll('button[data-v],button[data-url]').forEach(b=>b.onclick=()=>{
+      navClose();
       if(b.dataset.url){ openL(b.dataset.url); return; }   /* 링크는 탭 상태를 바꾸지 않음 */
       nav.querySelectorAll('button').forEach(x=>{if(!x.dataset.url)x.classList.remove('active')});b.classList.add('active');showView(b.dataset.v);});
   }
@@ -8368,7 +8476,7 @@ function resetAll(){if(confirm('모든 데이터를 지우고 초기화할까요
  *  「릴리스노트.md」 를 앱을 만들 때 그대로 옮겨 담는다.
  *  여기에 손으로 적는 내용은 없다 — 파일 하나만 고치면 화면이 따라 바뀐다.
  *  누구나(로그인 안 해도) 볼 수 있다. 사람 이름·자료는 한 줄도 들어 있지 않다. */
-const RELEASES=[{"d": "2026.10.07", "k": "앱", "v": "", "t": "홈 화면에 «주보»", "g": [["새로", ["홈 화면에 <b>주보</b>가 생겼습니다 — 이번 주 주보를 한 면씩 크게, 옆으로 넘겨 보실 수 있습니다", "두 번 누르거나 두 손가락으로 벌리면 최대 8배까지 커지고, 「펼쳐 보기」로 전체 모습도 보실 수 있습니다", "지난 주보는 최근 8주까지 · 새 주보가 올라오면 타일에 <b>N</b> 표시"]], ["참고", ["영광소식(교회 홈페이지 소식)은 홈 화면에서 빠졌습니다"]]]}, {"d": "2026.10.07", "k": "앱＋서버", "v": "서버 v64", "t": "비밀번호 없이 «공개 문의»", "g": [["새로", ["문의하기에서 조회용 비밀번호를 <b>비워 두면 공개 문의</b>로 접수됩니다 — 접수 전에 한 번 더 여쭙니다", "공개 문의는 <b>문의 확인</b>에서 누구나 내용·사진·처리 상태·담당자 회신을 볼 수 있습니다"]], ["안전", ["공개 문의라도 <b>이름·연락처는 공개되지 않습니다</b>. 비밀번호를 넣으면 지금처럼 본인과 담당자만 봅니다", "교역자는 공개 문의를 비공개로 돌릴 수 있습니다"]]]}, {"d": "2026.10.04", "k": "앱＋서버", "v": "서버 v62", "t": "3호차도 아무 날이나 신청", "g": [["개선", ["<b>3호차(7777)</b>를 다른 차와 똑같이 <b>아무 날이나</b> 신청하실 수 있습니다", "차 고르는 칸의 「주일만」·「담임목사님」 표시를 뺐습니다"]], ["수정", ["날이 바뀐 뒤 처음 열면 <b>어제 날짜</b>가 기본으로 잡히던 문제 (장소·차량 둘 다)"]]]}, {"d": "2026.10.03", "k": "앱", "v": "", "t": "신청하신 분께 바로 전화·문자", "g": [["새로", ["<b>문의 확인</b>·<b>문의 접수 처리</b>에서 접수자에게 <b>전화 · 문자</b>를 바로 거실 수 있습니다", "<b>장소 사용 신청</b>의 예약 현황에서도 신청하신 분께 바로 거실 수 있습니다"]], ["수정", ["차량 신청 화면의 전화·문자 단추가 <b>민낯으로 보이던</b> 것을 고쳤습니다"]], ["안전", ["연락처와 이 단추는 <b>담당자와 교역자에게만</b> 보입니다", "쓰시던 기기에서 <b>로그아웃하면</b> 손에 들고 있던 연락처도 함께 지웁니다 — 다음 분께 비치지 않습니다"]], ["참고", ["번호가 아닌 연락처(메일 등)에는 단추 없이 글자만 보여 드립니다"]]]}, {"d": "2026.10.03", "k": "앱", "v": "", "t": "보시던 자리에서 바로 처리", "g": [["새로", ["<b>차량 사용 신청</b> 화면 아래 「예약 현황」에서 차량 담당자가 <b>바로 승인·반려</b>하실 수 있습니다", "신청하신 분께 <b>전화 · 문자</b>도 그 자리에서 바로 거실 수 있습니다", "<b>문의 확인</b> 화면에서 담당자가 <b>바로 확인 · 회신 · 처리 상태 변경</b>을 하실 수 있습니다"]], ["수정", ["차량위원장님께 <b>「차량 신청」 칸이 안 보이던 문제</b> — 이제 보입니다"]], ["참고", ["담당이 아닌 문의는 지금까지와 똑같이 <b>비밀번호 4자리</b>를 넣어야 열립니다", "「차량 신청 관리」·「문의 접수 처리」 메뉴는 <b>그대로</b> 있습니다. 건수가 많을 때는 그쪽이 보기 편합니다"]]]}, {"d": "2026.10.03", "k": "앱", "v": "", "t": "홈 화면에서 차량 사용 신청 바로", "g": [["개선", ["<b>차량 사용 신청</b>을 홈 화면 칸으로 올렸습니다 — 아카이브를 거치지 않으셔도 됩니다", "<b>신급 교육 신청</b>은 아카이브로 옮겼습니다. 신청 기간에만 쓰는 창구라서입니다"]], ["참고", ["신급 교육 신청은 쓰시던 <b>주소·QR 코드로 그대로</b> 들어가실 수 있습니다"]]]}, {"d": "2026.10.02", "k": "앱＋서버", "v": "서버 v60", "t": "차량 사용 신청", "g": [["새로", ["교회 <b>차량 3대</b>를 앱에서 신청하실 수 있습니다 — 1호차 2655 · 2호차 4711 · 3호차 7777", "신청할 때 <b>이름 · 연락처 · 사용일시 · 목적지</b>를 적습니다. 로그인하지 않으셔도 됩니다", "차량 담당자는 신청자에게 <b>전화 · 문자</b>를 바로 걸 수 있고, <b>승인 · 반려</b>를 정합니다"]], ["안전", ["같은 차 · 같은 시간이 <b>겹치면 신청되지 않습니다</b> — 화면에서 한 번, 서버에서 한 번 더 막습니다", "반려하실 때는 <b>사유</b>를 적어야 합니다. 신청하신 분께 그대로 보입니다", "신청자 연락처는 <b>차량 담당자에게만</b> 보입니다"]], ["참고", ["3호차는 담임목사님 전용이라 <b>주일에만</b> 신청하실 수 있습니다"]]]}, {"d": "2026.10.01", "k": "앱", "v": "", "t": "릴리스노트 들어가는 자리를 넓힘", "g": [["개선", ["교회 <b>로고</b>를 눌러도 릴리스노트가 열립니다 — 이름만 눌러야 했던 것을 넓혔습니다"]]]}, {"d": "2026.09.30", "k": "앱", "v": "", "t": "릴리스노트 번호를 하나로", "g": [["개선", ["머리글 알약과 카드가 <b>같은 번호</b>를 씁니다 — V25 · V24 · V23 …", "알약 글씨를 <b>V</b>25 처럼 대문자로 키워 읽기 좋게 했습니다"]], ["참고", ["서버 번호(v59 같은 것)는 카드 맨 끝에 흐리게만 둡니다. 세는 대상이 달라 V번호와 안 맞습니다"]]]}, {"d": "2026.09.30", "k": "서버", "v": "서버 v59", "t": "문의 담당자가 확인·회신할 수 있게", "g": [["새로", ["담당으로 지정되면 <b>확인 표시</b>가 남고, <b>회신</b>과 <b>처리 상태 변경</b>도 할 수 있습니다"]], ["수정", ["담당으로 지정된 위원회·담임목사가 문의를 열어도 <b>영영 「미확인」</b>으로만 남던 문제", "담임목사로 지정된 문의는 내용조차 가려져 보이던 문제"]], ["안전", ["담당 목록 자체는 교역자만 바꿉니다 — 담당자가 스스로 빠질 수 없습니다"]], ["참고", ["예전에 쌓인 「미확인」 표시는 그대로 두었습니다. 이제부터 여시면 ✔ 가 붙습니다"]]]}, {"d": "2026.09.29", "k": "앱＋서버", "v": "서버 v58", "t": "구역보고 큐티·성경 칸", "g": [["새로", ["구역보고에 「성경읽기(장)」·「QT·가정예배(회)」 칸을 되살렸습니다", "구역장이 <b>우리 구역만</b> 켜서 쓸 수 있습니다 — 다른 구역은 그대로입니다", "성경 장수는 숫자판으로 칩니다. 30장 같은 큰 수도 들어갑니다"]], ["개선", ["켠 구역의 보고서에만 「성경 N장 · QT N회」가 함께 나옵니다", "예전에 저장돼 있던 값도 그대로 되살아납니다"]], ["참고", ["대시보드에는 집계되지 않습니다 — 원하는 구역만 쓰는 자율 항목이기 때문입니다"]]]}, {"d": "2026.09.23", "k": "앱", "v": "", "t": "홈 화면 방문자 숫자", "g": [["개선", ["숫자가 「뚝」 하고 바뀌지 않고 부드럽게 올라갑니다", "세는 동안 글자가 좌우로 흔들리지 않습니다"]]]}, {"d": "2026.09.21", "k": "앱＋서버", "v": "서버 v56·v57", "t": "신급 교육 일정 + 대시보드 안정화", "g": [["새로", ["신급 교육 화면에 <b>교육 일정</b>이 나옵니다 (OT·교육·문답식·성례식)", "지난 일정은 흐리게, 진행 중인 일정은 초록으로 보입니다", "신청 마감 뒤에도 교역자는 추가로 넣을 수 있습니다"]], ["개선", ["대시보드에 들어갈 때 메뉴가 바뀌며 화면이 튀던 것을 없앴습니다", "같은 자료를 두 번 불러오던 것을 한 번으로 줄여 3초 빨라졌습니다"]], ["수정", ["마감 다음 날에도 「0일 남음」으로 보이던 문제", "화면에 들어올 때마다 그래프가 처음부터 다시 그려지던 문제"]]]}, {"d": "2026.09.20", "k": "서버", "v": "서버 v54", "t": "구역예배 주간 제한 · 비밀번호 잠금", "g": [["개선", ["구역예배 출석은 <b>매월 첫째·셋째 주일</b>에만 체크됩니다 — 잘못 넣는 일을 막습니다", "비밀번호 잠금을 「5회 틀리면 10분」에서 「10회 틀리면 5분」으로 바꿨습니다"]]]}, {"d": "2026.09.18", "k": "앱＋서버", "v": "서버 v53", "t": "미제출 구역 연락", "g": [["새로", ["대시보드에서 미제출 구역을 누르면 구역장에게 <b>전화·문자</b>를 바로 보낼 수 있습니다", "문자를 누르면 보고 요청 문구가 저절로 들어갑니다"]], ["개선", ["문의 열람이 성공했을 때도 기록에 남깁니다"]]]}, {"d": "2026.09.17", "k": "앱＋서버", "v": "서버 v52", "t": "구역 제출 현황 전체 공개", "g": [["새로", ["다른 구역의 <b>제출 여부</b>도 볼 수 있습니다", "한 구역에 부구역장 계정을 더할 수 있습니다"]], ["참고", ["제출 여부만 보입니다 — 다른 구역의 보고 내용은 보이지 않습니다"]]]}, {"d": "2026.09.16", "k": "앱＋서버", "v": "서버 v51", "t": "신급 교육 신청 단순화", "g": [["개선", ["신청서에서 구역 선택을 없앴습니다 — 이름·연락처·교육 과정만 고르면 됩니다", "미제출 구역도 눌러서 확인할 수 있습니다"]], ["수정", ["신청일이 「ep 14」처럼 이상하게 보이던 문제"]]]}, {"d": "2026.09.15", "k": "앱", "v": "", "t": "결석자 관리 새 화면", "g": [["새로", ["결석자를 <b>사유별·구역별</b>로 한눈에 볼 수 있게 새로 만들었습니다", "결석 사유 그래프를 누르면 누구인지 바로 보입니다"]], ["개선", ["신급 명단의 「고치기」를 연필 그림으로 바꿨습니다", "새벽예배 표기를 「(명)」에서 「(횟수)」로 바로잡았습니다", "보고서 상자는 바깥을 눌러도 닫힙니다", "뜻이 없던 「구역예배 진행률」 그래프를 뺐습니다"]], ["수정", ["그래프를 누르면 화면이 아래로 딸려 내려가던 문제"]]]}, {"d": "2026.09.14", "k": "앱＋서버", "v": "서버 v49·v50", "t": "헬프데스크 · 신급 담당 화면", "g": [["새로", ["영광 커넥트 <b>헬프데스크</b>를 손봤습니다 — 앱 설치·사용 도움을 요청하는 곳입니다", "신급 교육 담당 장로님 화면을 따로 만들었습니다"]], ["개선", ["로그인 실패 안내를 경고창 대신 카드 안 빨간 글로 바꿨습니다", "대시보드 구역 차례를 숫자 순으로 세웠습니다 — 9구역 다음이 10구역입니다"]]]}, {"d": "2026.09.13", "k": "앱＋서버", "v": "서버 v48", "t": "로그인 속도 · 방문자 수", "g": [["개선", ["로그인이 빨라졌습니다 — 서버를 세 번 부르던 것을 두 번으로 줄였습니다", "헬프데스크 칸은 담당하시는 분에게만 보입니다"]], ["수정", ["방문자 수가 깜빡이거나 부풀려지던 문제", "비밀번호 앞자리가 0이면 로그인이 안 되던 문제"]]]}, {"d": "2026.09.12", "k": "앱＋서버", "v": "서버 v45", "t": "아카이브 · 헬프데스크 개설", "g": [["새로", ["<b>아카이브 폴더</b>를 열었습니다 — 지난 자료를 모아 둡니다", "<b>영광 커넥트 헬프데스크</b>를 열었습니다"]], ["개선", ["경조사 담당을 지정할 수 있게 했습니다"]]]}, {"d": "2026.09.11", "k": "서버", "v": "서버 v44", "t": "「문의만」 권한", "g": [["새로", ["문의 접수 처리 하나만 보이는 권한을 만들었습니다"]], ["안전", ["이 권한은 구역보고·명단·신급 자료를 서버에서 아예 내려보내지 않습니다"]]]}, {"d": "2026.09.10", "k": "앱＋서버", "v": "서버 v43", "t": "연습 구역", "g": [["새로", ["구역보고 <b>연습 구역</b>을 만들었습니다 — 실제 자료를 건드리지 않고 연습할 수 있습니다"]], ["개선", ["문의 확인은 한 번에 한 건만 펼쳐집니다", "연락처 관리 안내 문구를 넣었습니다"]]]}, {"d": "2026.09.08", "k": "앱＋서버", "v": "서버 v42", "t": "성도님께 공개", "g": [["새로", ["영광 커넥트를 성도님들께 열었습니다"]], ["개선", ["앱 아이콘과 로고를 다시 그려 또렷해졌습니다"]], ["안전", ["공개 전 보안 점검을 하고 발견된 것을 고쳤습니다", "교인 명단·연락처는 앱에 들어 있지 않습니다 — 로그인해야 받아옵니다"]]]}, {"d": "2026.09.07", "k": "앱＋서버", "v": "서버 v41", "t": "신급 명단 · 마감일 연장", "g": [["개선", ["신급 명단을 학습·세례·입교 가로 세 칸으로 바꿨습니다", "신급 교육 신청 마감일을 늘렸습니다"]]]}, {"d": "2026.09.06", "k": "앱＋서버", "v": "서버 v40", "t": "장소 「기타」 · 입력 편의", "g": [["새로", ["장소 사용 신청에 「기타」를 넣어 직접 적을 수 있습니다"]], ["개선", ["새벽 횟수는 숫자를 한 번만 누르면 바로 저장됩니다", "보고가 없어도 대시보드에 이번 주일이 늘 보입니다"]]]}, {"d": "2026.09.05", "k": "서버", "v": "서버 v38·v39", "t": "문의 접수 장애 복구", "g": [["새로", ["성도님이 본인이 올린 문의를 직접 지울 수 있습니다"]], ["수정", ["로그인하지 않고는 문의 접수가 되지 않던 장애를 복구했습니다"]]]}, {"d": "2026.09.03", "k": "앱＋서버", "v": "서버 v37", "t": "유아세례 · 어린이세례", "g": [["새로", ["신급 교육에 <b>유아세례·어린이세례</b>를 더했습니다"]], ["참고", ["아이를 대신해 부모님이 신청하는 과정입니다"]]]}, {"d": "2026.08.31", "k": "앱", "v": "", "t": "홈 화면에 추가 도우미", "g": [["새로", ["휴대폰 <b>홈 화면에 추가</b>하는 방법을 안내해 드립니다", "문의 분류에 「영광 커넥트 앱」을 더했습니다"]]]}, {"d": "2026.08.30", "k": "앱", "v": "", "t": "구역보고 항목 정리", "g": [["새로", ["대시보드에 「새벽예배」 칸을 새로 넣었습니다"]], ["개선", ["구역보고에서 성경읽기·QT 칸을 뺐습니다"]], ["참고", ["이 항목은 2026-09-29 에 원하는 구역만 다시 켤 수 있게 되살렸습니다"]]]}, {"d": "2026.08.27", "k": "앱＋서버", "v": "", "t": "중보기도 · 로그인 필수", "g": [["새로", ["중보기도에 <b>기간</b>과 <b>응답 완료</b> 처리를 넣었습니다"]], ["개선", ["신급 교육에서 구역 고르는 차례를 정리했습니다"]], ["안전", ["로그인한 분만 자료를 볼 수 있게 했습니다"]]]}, {"d": "2026.08.26", "k": "앱＋서버", "v": "", "t": "문의 담당 여럿 지정", "g": [["새로", ["한 분류에 문의 담당을 여러 분 지정할 수 있습니다"]], ["수정", ["신급 교육 신청 연락처 앞자리 0이 사라지던 문제"]]]}, {"d": "2026.08.25", "k": "앱＋서버", "v": "", "t": "장소 반복 신청 · 섬김과약속", "g": [["새로", ["장소 사용 신청에 <b>「매주 같은 요일 반복」</b>을 넣었습니다", "「문화10계명」을 「섬김과약속」으로 바꾸고 <b>섬김 담당 조직도</b>를 넣었습니다", "교역자 계정을 더했습니다"]], ["개선", ["조직도는 휴대폰에서도 한 줄에 두 칸으로 보입니다", "조직도 차례를 주보 순서에 맞췄습니다", "대시보드 「신급 교육 신청」 자리와 「상태별 건수」 차례를 정리했습니다"]]]}, {"d": "2026.08.24", "k": "앱", "v": "", "t": "영광 커넥트 첫 걸음", "g": [["새로", ["문의하기 · 구역보고 · 대시보드로 시작했습니다"]]]}];
+const RELEASES=[{"d": "2026.10.07", "k": "앱", "v": "", "t": "주보가 빨리 열립니다", "g": [["개선", ["<b>주보</b>가 훨씬 빨리 열립니다 — 한 번 본 주보는 기다리지 않고 바로 뜹니다", "주보를 한 면씩 넘길 때 면과 면이 이어져 보여, 경계에 걸친 글씨가 잘리지 않습니다", "확대하면 주보 칸 전체 폭까지 커지고, 주보 칸이 화면 높이에 맞춰집니다", "공개 문의는 파랑 테두리로 눈에 띄게 표시됩니다", "홈 화면 <b>주보</b>·<b>차량사용신청</b> 아이콘을 새로 바꿨습니다"]]]}, {"d": "2026.10.07", "k": "앱", "v": "", "t": "홈 화면에 «주보»", "g": [["새로", ["홈 화면에 <b>주보</b>가 생겼습니다 — 이번 주 주보를 한 면씩 크게, 옆으로 넘겨 보실 수 있습니다", "두 번 누르거나 두 손가락으로 벌리면 최대 8배까지 커지고, 「펼쳐 보기」로 전체 모습도 보실 수 있습니다", "지난 주보는 최근 8주까지 · 새 주보가 올라오면 타일에 <b>N</b> 표시"]], ["참고", ["영광소식(교회 홈페이지 소식)은 홈 화면에서 빠졌습니다"]]]}, {"d": "2026.10.07", "k": "앱＋서버", "v": "서버 v64", "t": "비밀번호 없이 «공개 문의»", "g": [["새로", ["문의하기에서 조회용 비밀번호를 <b>비워 두면 공개 문의</b>로 접수됩니다 — 접수 전에 한 번 더 여쭙니다", "공개 문의는 <b>문의 확인</b>에서 누구나 내용·사진·처리 상태·담당자 회신을 볼 수 있습니다"]], ["안전", ["공개 문의라도 <b>이름·연락처는 공개되지 않습니다</b>. 비밀번호를 넣으면 지금처럼 본인과 담당자만 봅니다", "교역자는 공개 문의를 비공개로 돌릴 수 있습니다"]]]}, {"d": "2026.10.04", "k": "앱＋서버", "v": "서버 v62", "t": "3호차도 아무 날이나 신청", "g": [["개선", ["<b>3호차(7777)</b>를 다른 차와 똑같이 <b>아무 날이나</b> 신청하실 수 있습니다", "차 고르는 칸의 「주일만」·「담임목사님」 표시를 뺐습니다"]], ["수정", ["날이 바뀐 뒤 처음 열면 <b>어제 날짜</b>가 기본으로 잡히던 문제 (장소·차량 둘 다)"]]]}, {"d": "2026.10.03", "k": "앱", "v": "", "t": "신청하신 분께 바로 전화·문자", "g": [["새로", ["<b>문의 확인</b>·<b>문의 접수 처리</b>에서 접수자에게 <b>전화 · 문자</b>를 바로 거실 수 있습니다", "<b>장소 사용 신청</b>의 예약 현황에서도 신청하신 분께 바로 거실 수 있습니다"]], ["수정", ["차량 신청 화면의 전화·문자 단추가 <b>민낯으로 보이던</b> 것을 고쳤습니다"]], ["안전", ["연락처와 이 단추는 <b>담당자와 교역자에게만</b> 보입니다", "쓰시던 기기에서 <b>로그아웃하면</b> 손에 들고 있던 연락처도 함께 지웁니다 — 다음 분께 비치지 않습니다"]], ["참고", ["번호가 아닌 연락처(메일 등)에는 단추 없이 글자만 보여 드립니다"]]]}, {"d": "2026.10.03", "k": "앱", "v": "", "t": "보시던 자리에서 바로 처리", "g": [["새로", ["<b>차량 사용 신청</b> 화면 아래 「예약 현황」에서 차량 담당자가 <b>바로 승인·반려</b>하실 수 있습니다", "신청하신 분께 <b>전화 · 문자</b>도 그 자리에서 바로 거실 수 있습니다", "<b>문의 확인</b> 화면에서 담당자가 <b>바로 확인 · 회신 · 처리 상태 변경</b>을 하실 수 있습니다"]], ["수정", ["차량위원장님께 <b>「차량 신청」 칸이 안 보이던 문제</b> — 이제 보입니다"]], ["참고", ["담당이 아닌 문의는 지금까지와 똑같이 <b>비밀번호 4자리</b>를 넣어야 열립니다", "「차량 신청 관리」·「문의 접수 처리」 메뉴는 <b>그대로</b> 있습니다. 건수가 많을 때는 그쪽이 보기 편합니다"]]]}, {"d": "2026.10.03", "k": "앱", "v": "", "t": "홈 화면에서 차량 사용 신청 바로", "g": [["개선", ["<b>차량 사용 신청</b>을 홈 화면 칸으로 올렸습니다 — 아카이브를 거치지 않으셔도 됩니다", "<b>신급 교육 신청</b>은 아카이브로 옮겼습니다. 신청 기간에만 쓰는 창구라서입니다"]], ["참고", ["신급 교육 신청은 쓰시던 <b>주소·QR 코드로 그대로</b> 들어가실 수 있습니다"]]]}, {"d": "2026.10.02", "k": "앱＋서버", "v": "서버 v60", "t": "차량 사용 신청", "g": [["새로", ["교회 <b>차량 3대</b>를 앱에서 신청하실 수 있습니다 — 1호차 2655 · 2호차 4711 · 3호차 7777", "신청할 때 <b>이름 · 연락처 · 사용일시 · 목적지</b>를 적습니다. 로그인하지 않으셔도 됩니다", "차량 담당자는 신청자에게 <b>전화 · 문자</b>를 바로 걸 수 있고, <b>승인 · 반려</b>를 정합니다"]], ["안전", ["같은 차 · 같은 시간이 <b>겹치면 신청되지 않습니다</b> — 화면에서 한 번, 서버에서 한 번 더 막습니다", "반려하실 때는 <b>사유</b>를 적어야 합니다. 신청하신 분께 그대로 보입니다", "신청자 연락처는 <b>차량 담당자에게만</b> 보입니다"]], ["참고", ["3호차는 담임목사님 전용이라 <b>주일에만</b> 신청하실 수 있습니다"]]]}, {"d": "2026.10.01", "k": "앱", "v": "", "t": "릴리스노트 들어가는 자리를 넓힘", "g": [["개선", ["교회 <b>로고</b>를 눌러도 릴리스노트가 열립니다 — 이름만 눌러야 했던 것을 넓혔습니다"]]]}, {"d": "2026.09.30", "k": "앱", "v": "", "t": "릴리스노트 번호를 하나로", "g": [["개선", ["머리글 알약과 카드가 <b>같은 번호</b>를 씁니다 — V25 · V24 · V23 …", "알약 글씨를 <b>V</b>25 처럼 대문자로 키워 읽기 좋게 했습니다"]], ["참고", ["서버 번호(v59 같은 것)는 카드 맨 끝에 흐리게만 둡니다. 세는 대상이 달라 V번호와 안 맞습니다"]]]}, {"d": "2026.09.30", "k": "서버", "v": "서버 v59", "t": "문의 담당자가 확인·회신할 수 있게", "g": [["새로", ["담당으로 지정되면 <b>확인 표시</b>가 남고, <b>회신</b>과 <b>처리 상태 변경</b>도 할 수 있습니다"]], ["수정", ["담당으로 지정된 위원회·담임목사가 문의를 열어도 <b>영영 「미확인」</b>으로만 남던 문제", "담임목사로 지정된 문의는 내용조차 가려져 보이던 문제"]], ["안전", ["담당 목록 자체는 교역자만 바꿉니다 — 담당자가 스스로 빠질 수 없습니다"]], ["참고", ["예전에 쌓인 「미확인」 표시는 그대로 두었습니다. 이제부터 여시면 ✔ 가 붙습니다"]]]}, {"d": "2026.09.29", "k": "앱＋서버", "v": "서버 v58", "t": "구역보고 큐티·성경 칸", "g": [["새로", ["구역보고에 「성경읽기(장)」·「QT·가정예배(회)」 칸을 되살렸습니다", "구역장이 <b>우리 구역만</b> 켜서 쓸 수 있습니다 — 다른 구역은 그대로입니다", "성경 장수는 숫자판으로 칩니다. 30장 같은 큰 수도 들어갑니다"]], ["개선", ["켠 구역의 보고서에만 「성경 N장 · QT N회」가 함께 나옵니다", "예전에 저장돼 있던 값도 그대로 되살아납니다"]], ["참고", ["대시보드에는 집계되지 않습니다 — 원하는 구역만 쓰는 자율 항목이기 때문입니다"]]]}, {"d": "2026.09.23", "k": "앱", "v": "", "t": "홈 화면 방문자 숫자", "g": [["개선", ["숫자가 「뚝」 하고 바뀌지 않고 부드럽게 올라갑니다", "세는 동안 글자가 좌우로 흔들리지 않습니다"]]]}, {"d": "2026.09.21", "k": "앱＋서버", "v": "서버 v56·v57", "t": "신급 교육 일정 + 대시보드 안정화", "g": [["새로", ["신급 교육 화면에 <b>교육 일정</b>이 나옵니다 (OT·교육·문답식·성례식)", "지난 일정은 흐리게, 진행 중인 일정은 초록으로 보입니다", "신청 마감 뒤에도 교역자는 추가로 넣을 수 있습니다"]], ["개선", ["대시보드에 들어갈 때 메뉴가 바뀌며 화면이 튀던 것을 없앴습니다", "같은 자료를 두 번 불러오던 것을 한 번으로 줄여 3초 빨라졌습니다"]], ["수정", ["마감 다음 날에도 「0일 남음」으로 보이던 문제", "화면에 들어올 때마다 그래프가 처음부터 다시 그려지던 문제"]]]}, {"d": "2026.09.20", "k": "서버", "v": "서버 v54", "t": "구역예배 주간 제한 · 비밀번호 잠금", "g": [["개선", ["구역예배 출석은 <b>매월 첫째·셋째 주일</b>에만 체크됩니다 — 잘못 넣는 일을 막습니다", "비밀번호 잠금을 「5회 틀리면 10분」에서 「10회 틀리면 5분」으로 바꿨습니다"]]]}, {"d": "2026.09.18", "k": "앱＋서버", "v": "서버 v53", "t": "미제출 구역 연락", "g": [["새로", ["대시보드에서 미제출 구역을 누르면 구역장에게 <b>전화·문자</b>를 바로 보낼 수 있습니다", "문자를 누르면 보고 요청 문구가 저절로 들어갑니다"]], ["개선", ["문의 열람이 성공했을 때도 기록에 남깁니다"]]]}, {"d": "2026.09.17", "k": "앱＋서버", "v": "서버 v52", "t": "구역 제출 현황 전체 공개", "g": [["새로", ["다른 구역의 <b>제출 여부</b>도 볼 수 있습니다", "한 구역에 부구역장 계정을 더할 수 있습니다"]], ["참고", ["제출 여부만 보입니다 — 다른 구역의 보고 내용은 보이지 않습니다"]]]}, {"d": "2026.09.16", "k": "앱＋서버", "v": "서버 v51", "t": "신급 교육 신청 단순화", "g": [["개선", ["신청서에서 구역 선택을 없앴습니다 — 이름·연락처·교육 과정만 고르면 됩니다", "미제출 구역도 눌러서 확인할 수 있습니다"]], ["수정", ["신청일이 「ep 14」처럼 이상하게 보이던 문제"]]]}, {"d": "2026.09.15", "k": "앱", "v": "", "t": "결석자 관리 새 화면", "g": [["새로", ["결석자를 <b>사유별·구역별</b>로 한눈에 볼 수 있게 새로 만들었습니다", "결석 사유 그래프를 누르면 누구인지 바로 보입니다"]], ["개선", ["신급 명단의 「고치기」를 연필 그림으로 바꿨습니다", "새벽예배 표기를 「(명)」에서 「(횟수)」로 바로잡았습니다", "보고서 상자는 바깥을 눌러도 닫힙니다", "뜻이 없던 「구역예배 진행률」 그래프를 뺐습니다"]], ["수정", ["그래프를 누르면 화면이 아래로 딸려 내려가던 문제"]]]}, {"d": "2026.09.14", "k": "앱＋서버", "v": "서버 v49·v50", "t": "헬프데스크 · 신급 담당 화면", "g": [["새로", ["영광 커넥트 <b>헬프데스크</b>를 손봤습니다 — 앱 설치·사용 도움을 요청하는 곳입니다", "신급 교육 담당 장로님 화면을 따로 만들었습니다"]], ["개선", ["로그인 실패 안내를 경고창 대신 카드 안 빨간 글로 바꿨습니다", "대시보드 구역 차례를 숫자 순으로 세웠습니다 — 9구역 다음이 10구역입니다"]]]}, {"d": "2026.09.13", "k": "앱＋서버", "v": "서버 v48", "t": "로그인 속도 · 방문자 수", "g": [["개선", ["로그인이 빨라졌습니다 — 서버를 세 번 부르던 것을 두 번으로 줄였습니다", "헬프데스크 칸은 담당하시는 분에게만 보입니다"]], ["수정", ["방문자 수가 깜빡이거나 부풀려지던 문제", "비밀번호 앞자리가 0이면 로그인이 안 되던 문제"]]]}, {"d": "2026.09.12", "k": "앱＋서버", "v": "서버 v45", "t": "아카이브 · 헬프데스크 개설", "g": [["새로", ["<b>아카이브 폴더</b>를 열었습니다 — 지난 자료를 모아 둡니다", "<b>영광 커넥트 헬프데스크</b>를 열었습니다"]], ["개선", ["경조사 담당을 지정할 수 있게 했습니다"]]]}, {"d": "2026.09.11", "k": "서버", "v": "서버 v44", "t": "「문의만」 권한", "g": [["새로", ["문의 접수 처리 하나만 보이는 권한을 만들었습니다"]], ["안전", ["이 권한은 구역보고·명단·신급 자료를 서버에서 아예 내려보내지 않습니다"]]]}, {"d": "2026.09.10", "k": "앱＋서버", "v": "서버 v43", "t": "연습 구역", "g": [["새로", ["구역보고 <b>연습 구역</b>을 만들었습니다 — 실제 자료를 건드리지 않고 연습할 수 있습니다"]], ["개선", ["문의 확인은 한 번에 한 건만 펼쳐집니다", "연락처 관리 안내 문구를 넣었습니다"]]]}, {"d": "2026.09.08", "k": "앱＋서버", "v": "서버 v42", "t": "성도님께 공개", "g": [["새로", ["영광 커넥트를 성도님들께 열었습니다"]], ["개선", ["앱 아이콘과 로고를 다시 그려 또렷해졌습니다"]], ["안전", ["공개 전 보안 점검을 하고 발견된 것을 고쳤습니다", "교인 명단·연락처는 앱에 들어 있지 않습니다 — 로그인해야 받아옵니다"]]]}, {"d": "2026.09.07", "k": "앱＋서버", "v": "서버 v41", "t": "신급 명단 · 마감일 연장", "g": [["개선", ["신급 명단을 학습·세례·입교 가로 세 칸으로 바꿨습니다", "신급 교육 신청 마감일을 늘렸습니다"]]]}, {"d": "2026.09.06", "k": "앱＋서버", "v": "서버 v40", "t": "장소 「기타」 · 입력 편의", "g": [["새로", ["장소 사용 신청에 「기타」를 넣어 직접 적을 수 있습니다"]], ["개선", ["새벽 횟수는 숫자를 한 번만 누르면 바로 저장됩니다", "보고가 없어도 대시보드에 이번 주일이 늘 보입니다"]]]}, {"d": "2026.09.05", "k": "서버", "v": "서버 v38·v39", "t": "문의 접수 장애 복구", "g": [["새로", ["성도님이 본인이 올린 문의를 직접 지울 수 있습니다"]], ["수정", ["로그인하지 않고는 문의 접수가 되지 않던 장애를 복구했습니다"]]]}, {"d": "2026.09.03", "k": "앱＋서버", "v": "서버 v37", "t": "유아세례 · 어린이세례", "g": [["새로", ["신급 교육에 <b>유아세례·어린이세례</b>를 더했습니다"]], ["참고", ["아이를 대신해 부모님이 신청하는 과정입니다"]]]}, {"d": "2026.08.31", "k": "앱", "v": "", "t": "홈 화면에 추가 도우미", "g": [["새로", ["휴대폰 <b>홈 화면에 추가</b>하는 방법을 안내해 드립니다", "문의 분류에 「영광 커넥트 앱」을 더했습니다"]]]}, {"d": "2026.08.30", "k": "앱", "v": "", "t": "구역보고 항목 정리", "g": [["새로", ["대시보드에 「새벽예배」 칸을 새로 넣었습니다"]], ["개선", ["구역보고에서 성경읽기·QT 칸을 뺐습니다"]], ["참고", ["이 항목은 2026-09-29 에 원하는 구역만 다시 켤 수 있게 되살렸습니다"]]]}, {"d": "2026.08.27", "k": "앱＋서버", "v": "", "t": "중보기도 · 로그인 필수", "g": [["새로", ["중보기도에 <b>기간</b>과 <b>응답 완료</b> 처리를 넣었습니다"]], ["개선", ["신급 교육에서 구역 고르는 차례를 정리했습니다"]], ["안전", ["로그인한 분만 자료를 볼 수 있게 했습니다"]]]}, {"d": "2026.08.26", "k": "앱＋서버", "v": "", "t": "문의 담당 여럿 지정", "g": [["새로", ["한 분류에 문의 담당을 여러 분 지정할 수 있습니다"]], ["수정", ["신급 교육 신청 연락처 앞자리 0이 사라지던 문제"]]]}, {"d": "2026.08.25", "k": "앱＋서버", "v": "", "t": "장소 반복 신청 · 섬김과약속", "g": [["새로", ["장소 사용 신청에 <b>「매주 같은 요일 반복」</b>을 넣었습니다", "「문화10계명」을 「섬김과약속」으로 바꾸고 <b>섬김 담당 조직도</b>를 넣었습니다", "교역자 계정을 더했습니다"]], ["개선", ["조직도는 휴대폰에서도 한 줄에 두 칸으로 보입니다", "조직도 차례를 주보 순서에 맞췄습니다", "대시보드 「신급 교육 신청」 자리와 「상태별 건수」 차례를 정리했습니다"]]]}, {"d": "2026.08.24", "k": "앱", "v": "", "t": "영광 커넥트 첫 걸음", "g": [["새로", ["문의하기 · 구역보고 · 대시보드로 시작했습니다"]]]}];
 /*  굵게(<b>)만 살리고 나머지는 글자 그대로 — 파일에 무엇이 적히든 안전하게 */
 function rnText(s){
   return esc(String(s||'')).replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>');
@@ -8460,7 +8568,10 @@ try{
 /* 홈 화면에 추가 안내 — 화면이 자리를 잡은 뒤 조용히 올라온다 */
 try{ setTimeout(a2hsPaint,1200); }catch(e){}
 /*  홈 「주보」 타일의 N — 화면이 자리 잡은 뒤 조용히 목록만 받아 본다 (목록은 서버가 5분씩 저장) */
-try{ setTimeout(function(){ if(!BUL) fetchBul().then(paintArchiveNew); else paintArchiveNew(); },1800); }catch(e){}
+try{ setTimeout(function(){
+  if(!BUL){ BUL=bulListLoad(); if(BUL){ paintArchiveNew(); bulPrefetch(); } }
+  fetchBul().then(function(){ paintArchiveNew(); bulPrefDone=false; bulPrefetch(); });
+},1800); }catch(e){}
 /*  주소로 바로 열기 —  …/stgc/?go=helpdesk
  *
  *  벽에 붙인 QR 코드가 이 길로 들어온다.

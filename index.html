@@ -488,8 +488,6 @@ background:#f7f9fc;border-radius:9px;padding:9px 11px}
 .i-news .mc{background:linear-gradient(160deg,#5aa2ea,#2e74b5)}
 .i-bul .mc{background:linear-gradient(160deg,#e9b25a,#c47b2a);position:relative}
 .i-bul .mc svg{width:40px;height:40px}
-/* 2026-10-07 : 주보 타일은 글자로 (문의하기 Q · 문의확인 A 와 같은 방식) */
-.mtile .mc .mtxt{display:inline;font-size:25px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1}
 .mtile .mnew{position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;border-radius:10px;background:#ef4444;color:#fff;font-size:11px;font-weight:800;line-height:20px;text-align:center;padding:0 5px;box-shadow:0 0 0 2px #fff}
 .i-orange .mc{background:linear-gradient(160deg,#f2a65a,#e0762f)}
 .i-purple .mc{background:linear-gradient(160deg,#a97fe6,#7b52c8)}
@@ -854,7 +852,7 @@ background:linear-gradient(135deg,#2fa58f,#1f7d6d)}
 .aritem .ar{color:#9aa5b4;font-size:19px}
 /* ── 주보 (2026-10-07) ── */
 .aritem .bnewb{display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:2px 7px;margin-left:6px;vertical-align:2px}
-.bulup{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin:0 0 12px;border:0;border-radius:13px;padding:13px;font-size:14.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,#57b45f,#2fa58f);font-family:inherit;cursor:pointer}
+.bulup{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin:10px 0 4px;border:0;border-radius:13px;padding:13px;font-size:14.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,#57b45f,#2fa58f);font-family:inherit;cursor:pointer}
 .bulhd{padding:4px 4px 8px}.bulhd .d{font-size:17px;font-weight:800}.bulhd .s{font-size:12.5px;color:var(--muted);margin-top:3px}
 .bulv{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .bstrip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -3187,15 +3185,20 @@ async function bulPaintView(w){
   bulFitH();
   st.scrollLeft=0;
   bulBindStrip();
+  if(currentView==='bulletin' && !bulUp) bulScrollTop();
 }
 /*  크기 맞추기 — 한 면(또는 사진 통째)이 «화면 높이 안»과 «보기 칸 폭 안»에 모두 들어가게.
  *  이어진 사진의 높이를 정하고, 폭은 비율대로. 첫 면·끝 면도 가운데 올 수 있게 양옆 여백. */
 function bulFitH(){
   const st=document.getElementById('bulStrip'), wrap=document.getElementById('bulWrap');
   if(!st||!wrap) return;
+  /*  ★ 2026-10-07 밤 ★ 위쪽 메뉴(교역자는 2~3줄)는 빼고 잰다 —
+   *  주보 화면을 열면 제목이 화면 맨 위에 오게 내려 주므로(bulScrollTop),
+   *  쓸 높이 = 화면 높이 − 제목 줄 − 아래 점·안내(44) − 여유(10).
+   *  예전에는 메뉴 줄까지 빼서 교역자 화면에서만 정사각형처럼 낮아졌다. */
   const vh=(window.visualViewport&&window.visualViewport.height)||window.innerHeight||700;
-  const top=st.getBoundingClientRect().top + (window.scrollY||window.pageYOffset||0);
-  const bh=Math.max(300, Math.round(vh - Math.min(top, vh*0.45) - 44));
+  const head=st.getBoundingClientRect().top - wrap.getBoundingClientRect().top;
+  const bh=Math.max(300, Math.round(vh - Math.max(0,head) - 44 - 10));
   wrap.style.setProperty('--bh', bh+'px');
   const VW=st.clientWidth||340;
   const ts=[].slice.call(st.querySelectorAll('.btrack'));
@@ -3236,12 +3239,18 @@ async function fetchBul(){
   bulLoading=false;
   return BUL;
 }
+/*  주보 제목이 화면 맨 위에 오게 — 위쪽 메뉴 줄은 위로 올라간다 (다시 올리면 보인다) */
+function bulScrollTop(){
+  const wrap=document.getElementById('bulWrap'); if(!wrap) return;
+  const y=wrap.getBoundingClientRect().top + (window.scrollY||window.pageYOffset||0) - 8;
+  try{ window.scrollTo({top:Math.max(0,y), behavior:'auto'}); }catch(e){ try{ window.scrollTo(0,Math.max(0,y)); }catch(x){} }
+}
 async function openBulletin(){
   bulCur=0;
   Object.keys(BULIMG).forEach(function(k){ if(BULIMG[k].fail) delete BULIMG[k]; });   /* 못 받았던 것은 다시 시도 */
   renderBul();
   await fetchBul();
-  if(currentView==='bulletin') renderBul();
+  if(currentView==='bulletin'){ renderBul(); bulScrollTop(); }
   paintArchiveNew();
 }
 function renderBul(){
@@ -3249,13 +3258,15 @@ function renderBul(){
   const up=canBulUpMe();
   const ws=(BUL&&BUL.weeks)||[];
   let h='';
-  if(up) h+='<button class="bulup" onclick="bulOpenUp()">＋ 주보 올리기</button>';
+  /*  ★ 2026-10-07 밤 ★ 「주보 올리기」는 보기 칸 «아래»에 둔다.
+   *  위에 두면 교역자 화면에서만 그만큼 주보 칸이 낮아져 정사각형처럼 보였다. */
+  const upBtn= up? '<button class="bulup" onclick="bulOpenUp()">＋ 주보 올리기</button>' : '';
   if(!BUL){
-    h+='<div class="card"><div class="bempty">'+(bulLoading||USE_BACKEND?'주보를 불러오는 중입니다…':'아직 올라온 주보가 없습니다.')+'</div></div>';
+    h+='<div class="card"><div class="bempty">'+(bulLoading||USE_BACKEND?'주보를 불러오는 중입니다…':'아직 올라온 주보가 없습니다.')+'</div></div>'+upBtn;
     box.innerHTML=h; return;
   }
   if(!ws.length){
-    h+='<div class="card"><h2>주보</h2><div class="bempty">아직 올라온 주보가 없습니다.</div></div>';
+    h+='<div class="card"><h2>주보</h2><div class="bempty">아직 올라온 주보가 없습니다.</div></div>'+upBtn;
     box.innerHTML=h; return;
   }
   if(bulCur>=ws.length) bulCur=0;
@@ -3273,6 +3284,7 @@ function renderBul(){
     +'<button onclick="bulZoomBy(1)" aria-label="크게">＋</button></div></div>'
     +'<div class="bdots" id="bulDots"></div>'
     +'<div class="bhint">글씨가 작으면 두 번 누르거나 두 손가락으로 벌려 보세요</div>'
+    +upBtn
     +'<div class="bpast"><div class="ph">'+(up?'올린 주보 <small>· 최근 '+((BUL&&BUL.keep)||8)+'주</small>':'지난 주보')+'</div>'
     +ws.map(function(x,i){
         return '<div class="prow'+(i===bulCur?' cur':'')+'" onclick="bulPick('+i+')">'

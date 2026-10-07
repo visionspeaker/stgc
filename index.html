@@ -851,6 +851,13 @@ background:linear-gradient(135deg,#2fa58f,#1f7d6d)}
 .bstrip::-webkit-scrollbar{display:none}
 .bpg{flex:0 0 100%;scroll-snap-align:center;overflow:hidden;touch-action:pan-x pan-y;position:relative;aspect-ratio:1/1.414;background:#f4f5f7}
 .bpg .bfr{position:relative;width:min(100%, calc(var(--bh,640px) * var(--r,0.7)));margin:0 auto;overflow:hidden;transform-origin:0 0;will-change:transform}
+.bstrip .btrack{position:relative;flex:none;overflow:hidden;background:#f4f5f7;transform-origin:0 0}
+.bstrip .btrack+.btrack{margin-left:10px}
+.bstrip .btrack img{display:block;width:100%;height:100%;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+.bstrip .btrack.zoomed{z-index:3}
+.bstrip .btrack.fail .bfail{display:flex}
+.bstrip .bsnap{position:absolute;top:0;bottom:0;scroll-snap-align:center;scroll-snap-stop:always;pointer-events:none}
+.bstrip{position:relative;align-items:flex-start}
 .bpg:not(.fail):not(.bload){display:flex;justify-content:center;align-items:flex-start;aspect-ratio:auto}
 .bpg .bz{position:absolute;inset:0;transform-origin:0 0}
 .bpg .bz img{position:absolute;top:0;height:100%;max-width:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;display:block}
@@ -3137,58 +3144,65 @@ async function bulFetchPage0(id){
 }
 /*  가로 사진인가 (펼침면) */
 function bulIsSpread(f){ return !!f && f.w > f.h*1.2; }
-/*  넘겨 볼 조각들 — 한 면씩이면 펼침면을 4조각으로 */
-function bulSlides(w,fs){
-  const one=bulMode()==='one', out=[];
-  w.pages.forEach(function(id,pi){
-    const f=fs[pi];
-    if(!f||f.fail){ out.push({id:id,pi:pi,k:0,n:1,fail:true}); return; }
-    const n=(one && bulIsSpread(f))? BUL_SPLIT : 1;
-    for(let k=0;k<n;k++) out.push({id:id,pi:pi,k:k,n:n,f:f});
-  });
-  return out;
-}
-function bulSlideHtml(s,d){
-  if(s.fail) return '<div class="bpg fail"><div class="bfail">사진을 불러오지 못했습니다.<br>잠시 뒤 다시 열어 주세요.</div></div>';
-  const W=s.f.w/s.n, H=s.f.h;
-  /*  ★ 2026-10-07 밤 ★ 한 면이 화면보다 길어 아래가 잘렸다 →
-   *  칸(.bpg)은 폭 100%로 두고, 그 안의 액자(.bfr)를 «화면 높이 안에» 맞춘다.
-   *  액자 폭 = min(칸 폭, 쓸 수 있는 높이 × 사진 비율) — 비율은 그대로 */
-  return '<div class="bpg"><div class="bfr" style="--r:'+(W/H)+';aspect-ratio:'+W+' / '+H+'"><div class="bz">'
-    +'<img data-id="'+esc(s.id)+'" src="'+esc(s.f.src)+'" alt="'+esc(bulShort(d))+' 주보 '+(s.pi+1)+'장'+(s.n>1?(' '+(s.k+1)+'면'):'')+'" draggable="false" '
-    +'style="width:'+(s.n*100)+'%;left:'+(-s.k*100)+'%"/></div></div></div>';
+/*  ★ 2026-10-07 밤(3) ★ 「한 면씩」을 «이어진 한 장»으로.
+ *  예전에는 펼침면을 4조각으로 «잘라» 따로 놓아서, 면 경계에 걸친 글씨가 양쪽에서 잘렸다.
+ *  이제 사진 한 장을 이어진 그대로 길게 두고(.btrack), 옆으로 넘길 때만
+ *  4면 자리마다 멈춘다(.bsnap 표시 4개). 경계 글씨는 옆 면과 이어져 보인다.
+ *  「펼쳐 보기」는 같은 틀에서 멈춤 자리를 1개로 둔 것. */
+function bulCuts(f){ return (bulMode()==='one' && bulIsSpread(f))? BUL_SPLIT : 1; }
+function bulTrackHtml(id,f,pi,d){
+  if(!f||f.fail) return '<div class="btrack fail" data-n="1"><div class="bfail">사진을 불러오지 못했습니다.<br>잠시 뒤 다시 열어 주세요.</div>'
+    +'<span class="bsnap" style="left:0;width:100%"></span></div>';
+  const n=bulCuts(f);
+  let h='<div class="btrack" data-n="'+n+'" data-w="'+f.w+'" data-h="'+f.h+'">'
+    +'<img data-id="'+esc(id)+'" src="'+esc(f.src)+'" alt="'+esc(bulShort(d))+' 주보 '+(pi+1)+'장" draggable="false"/>';
+  for(let k=0;k<n;k++) h+='<span class="bsnap" style="left:'+(k*100/n)+'%;width:'+(100/n)+'%"></span>';
+  return h+'</div>';
 }
 async function bulPaintView(w){
   const my=++bulPaintNo;
   const fs=await Promise.all(w.pages.map(bulFetchPage));
   if(my!==bulPaintNo) return;                     /* 그사이 다른 주보를 고르셨다 */
   const st=document.getElementById('bulStrip'); if(!st) return;
-  const ss=bulSlides(w,fs);
-  st.innerHTML=ss.map(function(s){ return bulSlideHtml(s,w.d); }).join('');
-  st.scrollLeft=0;
-  const no=document.getElementById('bulNo'); if(no) no.textContent='1 / '+ss.length;
+  st.innerHTML=w.pages.map(function(id,pi){ return bulTrackHtml(id,fs[pi],pi,w.d); }).join('');
+  const marks=[]; w.pages.forEach(function(id,pi){ const n=(fs[pi]&&!fs[pi].fail)?bulCuts(fs[pi]):1; for(let k=0;k<n;k++) marks.push(k); });
+  const no=document.getElementById('bulNo'); if(no) no.textContent='1 / '+marks.length;
   const dots=document.getElementById('bulDots');
-  if(dots) dots.innerHTML= ss.length>1 ? ss.map(function(s,i){ return '<i class="'+(i?'':'on')+(i&&s.k===0?' gap':'')+'"></i>'; }).join('') : '';
+  if(dots) dots.innerHTML= marks.length>1 ? marks.map(function(k,i){ return '<i class="'+(i?'':'on')+(i&&k===0?' gap':'')+'"></i>'; }).join('') : '';
   const sub=document.getElementById('bulSub');
-  const cut=ss.length>w.pages.length;
-  if(sub) sub.textContent=(cut? ss.length+'면' : w.pages.length+'장')+(ss.length>1?' · 옆으로 넘겨 보세요':'');
+  const cut=marks.length>w.pages.length;
+  if(sub) sub.textContent=(cut? marks.length+'면' : w.pages.length+'장')+(marks.length>1?' · 옆으로 넘겨 보세요':'');
   const md=document.getElementById('bulModeBox');
   if(md) md.style.display= fs.some(bulIsSpread) ? 'flex' : 'none';
   bulFitH();
+  st.scrollLeft=0;
   bulBindStrip();
 }
-/*  쓸 수 있는 높이 = 화면 높이 − 보기 칸 윗부분까지 − 아래 점·여백.
- *  화면을 돌리거나 주소창이 접히면 다시 잰다. */
+/*  크기 맞추기 — 한 면(또는 사진 통째)이 «화면 높이 안»과 «보기 칸 폭 안»에 모두 들어가게.
+ *  이어진 사진의 높이를 정하고, 폭은 비율대로. 첫 면·끝 면도 가운데 올 수 있게 양옆 여백. */
 function bulFitH(){
   const st=document.getElementById('bulStrip'), wrap=document.getElementById('bulWrap');
   if(!st||!wrap) return;
   const vh=(window.visualViewport&&window.visualViewport.height)||window.innerHeight||700;
   const top=st.getBoundingClientRect().top + (window.scrollY||window.pageYOffset||0);
-  /* 페이지 맨 위에서 볼 때 기준 — 아래 점·안내 한 줄(약 44px)까지 함께 보이게 */
-  const h=Math.max(300, Math.round(vh - Math.min(top, vh*0.45) - 44));
-  wrap.style.setProperty('--bh', h+'px');
+  const bh=Math.max(300, Math.round(vh - Math.min(top, vh*0.45) - 44));
+  wrap.style.setProperty('--bh', bh+'px');
+  const VW=st.clientWidth||340;
+  const ts=[].slice.call(st.querySelectorAll('.btrack'));
+  let firstPW=VW, lastPW=VW;
+  ts.forEach(function(t,i){
+    if(t.classList.contains('fail')){ t.style.width=VW+'px'; t.style.height='220px'; if(!i) firstPW=VW; lastPW=VW; return; }
+    const n=+t.getAttribute('data-n')||1, w=+t.getAttribute('data-w'), h=+t.getAttribute('data-h');
+    let H=bh; const pw=H*w/h/n; if(pw>VW) H=VW*n*h/w;          /* 한 면이 칸보다 넓으면 폭에 맞춘다 */
+    const W=H*w/h;
+    t.style.width=W+'px'; t.style.height=H+'px';
+    if(!i) firstPW=W/n; lastPW=W/n;
+  });
+  st.style.paddingLeft=Math.max(0,(VW-firstPW)/2)+'px';
+  st.style.paddingRight=Math.max(0,(VW-lastPW)/2)+'px';
+  st.style.scrollPaddingLeft='0px';
 }
-try{ window.addEventListener('resize',function(){ if(document.getElementById('bulStrip')) bulFitH(); }); }catch(e){}
+try{ window.addEventListener('resize',function(){ if(document.getElementById('bulStrip')){ bulFitH(); bulZoomReset&&bulZoomReset(); } }); }catch(e){}
 /*  2배 넘게 키우면 한 번만 큰 사진으로 바꿔 받는다 (못 받으면 그대로 둔다)
  *  같은 사진에서 잘라 낸 조각들이 함께 바뀐다 */
 function bulWantHi(pg){
@@ -3271,64 +3285,82 @@ function bulThumbErr(img){ if(img.getAttribute('data-k')==='0'){ img.setAttribut
   img.src='https://lh3.googleusercontent.com/d/'+encodeURIComponent(img.getAttribute('data-id'))+'=w200'; }
   else img.style.visibility='hidden'; }
 function bulPick(i){ bulCur=i; renderBul(); try{ document.getElementById('bulWrap').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} }
+/*  지금 몇 번째 면인가 — 멈춤 자리(.bsnap) 가운데가 화면 가운데에 가장 가까운 것 */
+function bulCurMark(){
+  const st=document.getElementById('bulStrip'); if(!st) return {i:0,el:null,n:0};
+  const ms=[].slice.call(st.querySelectorAll('.bsnap')); if(!ms.length) return {i:0,el:null,n:0};
+  const sr=st.getBoundingClientRect(), mid=sr.left+sr.width/2;
+  let bi=0,bd=1e9;
+  ms.forEach(function(m,i){ const r=m.getBoundingClientRect(); const d=Math.abs(r.left+r.width/2-mid); if(d<bd){bd=d;bi=i;} });
+  return {i:bi, el:ms[bi], n:ms.length};
+}
 function bulBindStrip(){
   const st=document.getElementById('bulStrip'); if(!st) return;
   if(!st._b){ st._b=1;
     st.addEventListener('scroll',function(){
-      const k=Math.round(st.scrollLeft/Math.max(1,st.clientWidth));
-      document.querySelectorAll('#bulDots i').forEach(function(d,j){ d.classList.toggle('on',j===k); });
-      const no=document.getElementById('bulNo'); const n=st.querySelectorAll('.bpg').length;
-      if(no) no.textContent=(Math.min(k,n-1)+1)+' / '+n;
-    }); }
-  st.querySelectorAll('.bpg').forEach(function(pg){ if(pg.querySelector('.bfr')) bulBindZoom(pg); });
+      const c=bulCurMark();
+      document.querySelectorAll('#bulDots i').forEach(function(d,j){ d.classList.toggle('on',j===c.i); });
+      const no=document.getElementById('bulNo'); if(no&&c.n) no.textContent=(c.i+1)+' / '+c.n;
+    });
+    bulBindZoom(st);
+  }
 }
 /*  확대 — 두 번 누르기 · 두 손가락 · 확대한 채 끌어서 이동 · ＋/− 단추
- *  ★ 2026-10-07 밤 ★ 확대하면 «보기 칸 전체 폭»까지 펼쳐진다.
- *  예전에는 가운데 좁은 액자 안에서만 커져서 좌우가 잘렸다.
- *  이제 액자(.bfr, 한 면만 잘라 보이는 틀)를 통째로 키우고, 잘라 내는 것은 바깥 칸(.bpg)이 한다.
- *  손가락 위치도 바깥 칸 기준이라 빈 옆자리에서 집어도 된다. */
-function bulBindZoom(pg){
-  const z=pg.querySelector('.bfr'); if(!z) return;
-  let s=1,x=0,y=0,last=0,pin=null,drag=null,md=null;
-  const st=document.getElementById('bulStrip');
-  function geo(){ return {W:pg.clientWidth, H:pg.clientHeight, fw:z.offsetWidth, fh:z.offsetHeight, ox:z.offsetLeft, oy:z.offsetTop}; }
-  function apply(){ z.style.transform='translate('+x+'px,'+y+'px) scale('+s+')';
-    pg.style.touchAction= s>1?'none':'pan-x pan-y'; if(st) st.style.overflowX= s>1?'hidden':'auto'; }
-  /*  커진 액자가 칸보다 넓으면 칸 끝까지만 움직이고, 좁으면 가운데 둔다 */
+ *  지금 보고 있는 사진(.btrack)을 통째로 키운다 — 보기 칸 전체 폭까지 펼쳐지고,
+ *  이어진 사진이라 옆 면 쪽으로도 끊김 없이 끌어 볼 수 있다.
+ *  확대 중에는 옆으로 넘기기를 잠그고, 다 줄이면 원래 넘기던 자리로 돌아온다. */
+let bulZoomReset=null;
+function bulBindZoom(st){
+  let z=null,s=1,x=0,y=0,last=0,pin=null,drag=null,md=null;
+  function pick(){ const c=bulCurMark(); return c.el? c.el.closest('.btrack') : null; }
+  function geo(){ const sr=st.getBoundingClientRect(), zr0=z.offsetLeft-st.scrollLeft;
+    return {W:st.clientWidth, H:st.clientHeight, fw:z.offsetWidth, fh:z.offsetHeight, ox:zr0, oy:z.offsetTop}; }
+  function apply(){
+    if(!z) return;
+    z.style.transform= s>1? 'translate('+x+'px,'+y+'px) scale('+s+')' : '';
+    z.classList.toggle('zoomed', s>1);
+    st.style.touchAction= s>1?'none':'pan-x pan-y'; st.style.overflowX= s>1?'hidden':'auto';
+    st.style.scrollSnapType= s>1?'none':'';
+  }
   function clamp(){ const g=geo(), cw=g.fw*s, ch=g.fh*s;
     x = cw<=g.W ? (g.W-cw)/2-g.ox : Math.min(-g.ox, Math.max(g.W-g.ox-cw, x));
     y = ch<=g.H ? (g.H-ch)/2-g.oy : Math.min(-g.oy, Math.max(g.H-g.oy-ch, y)); }
-  function zoomAt(ns,cx,cy){ ns=Math.max(1,Math.min(BUL_ZOOM_MAX,ns)); const g=geo();
-    const lx=(cx-g.ox-x)/s, ly=(cy-g.oy-y)/s;     /* 손가락 밑의 점(액자 기준) */
-    s=ns; x=cx-g.ox-lx*s; y=cy-g.oy-ly*s; if(s===1){x=0;y=0;} clamp(); apply();
-    if(s>2) bulWantHi(z); }
-  pg._zoom=function(dir){ zoomAt(dir>0? s*1.6 : s/1.6, pg.clientWidth/2, pg.clientHeight/3); };
-  pg._scale=function(){ return s; };
-  function pt(e){ const r=pg.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; }
-  pg.addEventListener('dblclick',function(e){ const p=pt(e); zoomAt(s>1?1:BUL_ZOOM_TAP,p[0],p[1]); });
-  pg.addEventListener('touchstart',function(e){
+  function zoomAt(ns,cx,cy){
+    if(!z){ z=pick(); if(!z || z.classList.contains('fail')){ z=null; return; } s=1; x=0; y=0; }
+    ns=Math.max(1,Math.min(BUL_ZOOM_MAX,ns)); const g=geo();
+    const lx=(cx-g.ox-x)/s, ly=(cy-g.oy-y)/s;     /* 손가락 밑의 점(사진 기준) */
+    s=ns; x=cx-g.ox-lx*s; y=cy-g.oy-ly*s;
+    if(s===1){ x=0; y=0; apply(); z=null; return; }
+    clamp(); apply();
+    if(s>2) bulWantHi(z);
+  }
+  bulZoomReset=function(){ if(z){ s=1; x=0; y=0; apply(); z=null; } };
+  st._zoom=function(dir){ zoomAt(dir>0? s*1.6 : s/1.6, st.clientWidth/2, st.clientHeight/3); };
+  st._scale=function(){ return s; };
+  function pt(e){ const r=st.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; }
+  st.addEventListener('dblclick',function(e){ const p=pt(e); zoomAt(s>1?1:BUL_ZOOM_TAP,p[0],p[1]); });
+  st.addEventListener('touchstart',function(e){
     if(e.touches.length===2){ const a=pt(e.touches[0]),b=pt(e.touches[1]);
       pin={d:Math.hypot(a[0]-b[0],a[1]-b[1])||1,s:s,cx:(a[0]+b[0])/2,cy:(a[1]+b[1])/2}; drag=null; }
     else if(e.touches.length===1){ const now=Date.now(), p=pt(e.touches[0]);
       if(now-last<300){ zoomAt(s>1?1:BUL_ZOOM_TAP,p[0],p[1]); e.preventDefault(); last=0; } else last=now;
       if(s>1) drag={p:p,x:x,y:y}; }
   },{passive:false});
-  pg.addEventListener('touchmove',function(e){
+  st.addEventListener('touchmove',function(e){
     if(pin&&e.touches.length===2){ const a=pt(e.touches[0]),b=pt(e.touches[1]);
       zoomAt(pin.s*Math.hypot(a[0]-b[0],a[1]-b[1])/pin.d,pin.cx,pin.cy); e.preventDefault(); }
-    else if(drag&&e.touches.length===1){ const p=pt(e.touches[0]); x=drag.x+p[0]-drag.p[0]; y=drag.y+p[1]-drag.p[1]; clamp(); apply(); e.preventDefault(); }
+    else if(drag&&e.touches.length===1&&z){ const p=pt(e.touches[0]); x=drag.x+p[0]-drag.p[0]; y=drag.y+p[1]-drag.p[1]; clamp(); apply(); e.preventDefault(); }
   },{passive:false});
-  pg.addEventListener('touchend',function(){ pin=null; drag=null; });
-  pg.addEventListener('mousedown',function(e){ if(s>1){ md={p:pt(e),x:x,y:y}; e.preventDefault(); } });
-  pg.addEventListener('mousemove',function(e){ if(md){ const p=pt(e); x=md.x+p[0]-md.p[0]; y=md.y+p[1]-md.p[1]; clamp(); apply(); } });
-  pg.addEventListener('mouseup',function(){ md=null; });
-  pg.addEventListener('mouseleave',function(){ md=null; });
+  st.addEventListener('touchend',function(){ pin=null; drag=null; });
+  st.addEventListener('mousedown',function(e){ if(s>1&&z){ md={p:pt(e),x:x,y:y}; e.preventDefault(); } });
+  st.addEventListener('mousemove',function(e){ if(md&&z){ const p=pt(e); x=md.x+p[0]-md.p[0]; y=md.y+p[1]-md.p[1]; clamp(); apply(); } });
+  st.addEventListener('mouseup',function(){ md=null; });
+  st.addEventListener('mouseleave',function(){ md=null; });
 }
 function bulZoomBy(d){
-  const st=document.getElementById('bulStrip'); if(!st) return;
-  const k=Math.round(st.scrollLeft/Math.max(1,st.clientWidth));
-  const pg=st.querySelectorAll('.bpg')[k]; if(pg&&pg._zoom) pg._zoom(d);
+  const st=document.getElementById('bulStrip'); if(st&&st._zoom) st._zoom(d);
 }
+
 
 
 /* ── 올리기 (교역자) ── */

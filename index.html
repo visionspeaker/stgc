@@ -834,7 +834,14 @@ background:linear-gradient(135deg,#2fa58f,#1f7d6d)}
 .bstrip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .bstrip::-webkit-scrollbar{display:none}
 .bpg{flex:0 0 100%;scroll-snap-align:center;overflow:hidden;touch-action:pan-x pan-y;position:relative;aspect-ratio:1/1.414;background:#f4f5f7}
-.bpg img{width:100%;height:100%;object-fit:contain;transform-origin:0 0;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;display:block}
+.bpg .bz{position:absolute;inset:0;transform-origin:0 0}
+.bpg .bz img{position:absolute;top:0;height:100%;max-width:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;display:block}
+.bpg.bload .bfail{display:flex}
+.bulhd{display:flex;align-items:flex-end;gap:8px}.bulhd .bht{min-width:0}
+.bmode{margin-left:auto;display:flex;background:#e6ebf2;border-radius:10px;padding:3px;flex:none}
+.bmode button{border:0;background:none;font-family:inherit;font-size:12px;font-weight:800;color:#56606e;padding:6px 9px;border-radius:8px;cursor:pointer}
+.bmode button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.bdots i.gap{margin-left:8px}
 .bpg .bfail{display:none;position:absolute;inset:0;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:13px;line-height:1.7;padding:20px}
 .bpg.fail .bfail{display:flex}
 .bpgno{position:absolute;top:8px;right:9px;background:rgba(20,30,45,.62);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;z-index:2}
@@ -3075,36 +3082,85 @@ function bulSrc(id,k,w){
   return k===0 ? 'https://drive.google.com/thumbnail?id='+e+'&sz=w'+W
                 : 'https://lh3.googleusercontent.com/d/'+e+'=w'+W;
 }
-/*  사진이 오면 보기 칸을 그 모양(가로·세로)에 맞춘다 */
-function bulImgLoad(img){
-  const pg=img.closest('.bpg'); if(!pg) return;
-  const w=img.naturalWidth, h=img.naturalHeight;
-  if(w>0 && h>0 && !pg._fit){ pg._fit=1; pg.style.aspectRatio=w+' / '+h; }
+/*  ★ 2026-10-07 저녁 ★ 「한 면씩」 — 가로로 긴 펼침면(4면)을 4조각으로 잘라
+ *  한 면씩 세로로 크게 넘겨 본다. 「펼쳐 보기」를 고르면 사진 통째로.
+ *  (고른 것은 기기마다 기억. 세로 사진은 자르지 않는다)
+ *  사진은 먼저 받아 크기를 안 뒤에 조각을 만든다 — 받는 길은 그대로 세 겹
+ *  (드라이브 썸네일 → 구글 이미지 서버 → 서버가 직접). */
+const BUL_MODE_KEY='sgc_bul_mode_v1', BUL_SPLIT=4;
+let BULIMG={}, bulPaintNo=0;
+function bulMode(){ try{ return localStorage.getItem(BUL_MODE_KEY)==='all'?'all':'one'; }catch(e){ return 'one'; } }
+function bulSetMode(m){ try{ localStorage.setItem(BUL_MODE_KEY,m==='all'?'all':'one'); }catch(e){} renderBul(); }
+function bulTry(src){ return new Promise(function(ok){ const im=new Image();
+  im.onload=function(){ ok(im.naturalWidth? {src:src,w:im.naturalWidth,h:im.naturalHeight} : null); };
+  im.onerror=function(){ ok(null); }; im.src=src; }); }
+/*  한 장 받기 — 못 받으면 다음 길로. 받은 것은 기억해 두고 다시 쓴다 */
+/*  화면이 잇달아 두 번 그려져도 같은 사진을 두 번 받지 않게, 받는 중인 것도 기억한다 */
+let BULWAIT={};
+function bulFetchPage(id){
+  if(BULIMG[id] && !BULIMG[id].fail) return Promise.resolve(BULIMG[id]);
+  if(!BULWAIT[id]) BULWAIT[id]=bulFetchPage0(id).then(function(r){ delete BULWAIT[id]; return r; });
+  return BULWAIT[id];
 }
-/*  2배 넘게 키우면 한 번만 큰 사진으로 바꿔 받는다 (못 받으면 그대로 둔다) */
-function bulWantHi(pg){
-  const img=pg&&pg.querySelector('img'); if(!img || pg._hi) return;
-  const id=img.getAttribute('data-id'); const k=Number(img.getAttribute('data-k')||0);
-  if(!id || k>1) return;
-  pg._hi=1;
-  const hi=bulSrc(id,k,BUL_HI_W); const pre=new Image();
-  pre.onload=function(){ img.src=hi; };
-  pre.src=hi;
-}
-/*  사진을 못 받았을 때 — 다음 길로. 마지막에는 서버가 직접 보낸다. */
-async function bulImgErr(img){
-  const id=img.getAttribute('data-id'); const k=Number(img.getAttribute('data-k')||0)+1;
-  img.setAttribute('data-k',String(k));
-  if(k===1){ img.src=bulSrc(id,1); return; }
-  if(k===2 && USE_BACKEND){
-    try{
-      const r=await fetch(API+'?action=bulImg&id='+encodeURIComponent(id));
-      const d=await r.json();
-      if(d&&d.ok&&d.data){ img.src=d.data; return; }
-    }catch(e){}
+async function bulFetchPage0(id){
+  let r=await bulTry(bulSrc(id,0)), k=0;
+  if(!r){ r=await bulTry(bulSrc(id,1)); k=1; }
+  if(!r && USE_BACKEND){
+    try{ const d=await (await fetch(API+'?action=bulImg&id='+encodeURIComponent(id))).json();
+         if(d&&d.ok&&d.data){ r=await bulTry(d.data); k=2; } }catch(e){}
   }
-  img.removeAttribute('src'); img.alt='';
-  const pg=img.closest('.bpg'); if(pg) pg.classList.add('fail');
+  BULIMG[id]= r? Object.assign(r,{k:k}) : {fail:true};
+  return BULIMG[id];
+}
+/*  가로 사진인가 (펼침면) */
+function bulIsSpread(f){ return !!f && f.w > f.h*1.2; }
+/*  넘겨 볼 조각들 — 한 면씩이면 펼침면을 4조각으로 */
+function bulSlides(w,fs){
+  const one=bulMode()==='one', out=[];
+  w.pages.forEach(function(id,pi){
+    const f=fs[pi];
+    if(!f||f.fail){ out.push({id:id,pi:pi,k:0,n:1,fail:true}); return; }
+    const n=(one && bulIsSpread(f))? BUL_SPLIT : 1;
+    for(let k=0;k<n;k++) out.push({id:id,pi:pi,k:k,n:n,f:f});
+  });
+  return out;
+}
+function bulSlideHtml(s,d){
+  if(s.fail) return '<div class="bpg fail"><div class="bfail">사진을 불러오지 못했습니다.<br>잠시 뒤 다시 열어 주세요.</div></div>';
+  const W=s.f.w/s.n, H=s.f.h;
+  return '<div class="bpg" style="aspect-ratio:'+W+' / '+H+'"><div class="bz">'
+    +'<img data-id="'+esc(s.id)+'" src="'+esc(s.f.src)+'" alt="'+esc(bulShort(d))+' 주보 '+(s.pi+1)+'장'+(s.n>1?(' '+(s.k+1)+'면'):'')+'" draggable="false" '
+    +'style="width:'+(s.n*100)+'%;left:'+(-s.k*100)+'%"/></div></div>';
+}
+async function bulPaintView(w){
+  const my=++bulPaintNo;
+  const fs=await Promise.all(w.pages.map(bulFetchPage));
+  if(my!==bulPaintNo) return;                     /* 그사이 다른 주보를 고르셨다 */
+  const st=document.getElementById('bulStrip'); if(!st) return;
+  const ss=bulSlides(w,fs);
+  st.innerHTML=ss.map(function(s){ return bulSlideHtml(s,w.d); }).join('');
+  st.scrollLeft=0;
+  const no=document.getElementById('bulNo'); if(no) no.textContent='1 / '+ss.length;
+  const dots=document.getElementById('bulDots');
+  if(dots) dots.innerHTML= ss.length>1 ? ss.map(function(s,i){ return '<i class="'+(i?'':'on')+(i&&s.k===0?' gap':'')+'"></i>'; }).join('') : '';
+  const sub=document.getElementById('bulSub');
+  const cut=ss.length>w.pages.length;
+  if(sub) sub.textContent=(cut? ss.length+'면' : w.pages.length+'장')+(ss.length>1?' · 옆으로 넘겨 보세요':'');
+  const md=document.getElementById('bulModeBox');
+  if(md) md.style.display= fs.some(bulIsSpread) ? 'flex' : 'none';
+  bulBindStrip();
+}
+/*  2배 넘게 키우면 한 번만 큰 사진으로 바꿔 받는다 (못 받으면 그대로 둔다)
+ *  같은 사진에서 잘라 낸 조각들이 함께 바뀐다 */
+function bulWantHi(pg){
+  const img=pg&&pg.querySelector('img'); if(!img) return;
+  const id=img.getAttribute('data-id'); const f=BULIMG[id];
+  if(!id || !f || f.fail || f.k>1 || f.hi) return;
+  f.hi=1;
+  const hi=bulSrc(id,f.k,BUL_HI_W); const pre=new Image();
+  pre.onload=function(){ f.src=hi;
+    document.querySelectorAll('#bulStrip img').forEach(function(x){ if(x.getAttribute('data-id')===id) x.src=hi; }); };
+  pre.src=hi;
 }
 async function fetchBul(){
   if(!USE_BACKEND) return BUL;
@@ -3118,7 +3174,9 @@ async function fetchBul(){
   return BUL;
 }
 async function openBulletin(){
-  bulCur=0; renderBul();
+  bulCur=0;
+  Object.keys(BULIMG).forEach(function(k){ if(BULIMG[k].fail) delete BULIMG[k]; });   /* 못 받았던 것은 다시 시도 */
+  renderBul();
   await fetchBul();
   if(currentView==='bulletin') renderBul();
   paintArchiveNew();
@@ -3140,18 +3198,17 @@ function renderBul(){
   if(bulCur>=ws.length) bulCur=0;
   const w=ws[bulCur];
   if(bulCur===0) bulMarkSeen(w.d);
-  h+='<div class="bulhd"><div class="d">'+esc(bulDay(w.d))+'</div>'
-    +'<div class="s">'+w.pages.length+'장'+(w.pages.length>1?' · 옆으로 넘겨 보세요':'')+'</div></div>'
-    +'<div class="bulv"><div class="bpgno" id="bulNo">1 / '+w.pages.length+'</div>'
-    +'<div class="bstrip" id="bulStrip">'
-    +w.pages.map(function(id,i){
-        return '<div class="bpg"><img data-id="'+esc(id)+'" data-k="0" src="'+esc(bulSrc(id,0))+'" '
-          +'alt="'+esc(bulShort(w.d))+' 주보 '+(i+1)+'쪽" draggable="false" onload="bulImgLoad(this)" onerror="bulImgErr(this)"/>'
-          +'<div class="bfail">사진을 불러오지 못했습니다.<br>잠시 뒤 다시 열어 주세요.</div></div>';
-      }).join('')
-    +'</div><div class="bzoom"><button onclick="bulZoomBy(-1)" aria-label="작게">−</button>'
+  const one=bulMode()==='one';
+  h+='<div class="bulhd"><div class="bht"><div class="d">'+esc(bulDay(w.d))+'</div>'
+    +'<div class="s" id="bulSub">'+w.pages.length+'장</div></div>'
+    +'<div class="bmode" id="bulModeBox" style="display:none">'
+    +'<button class="'+(one?'on':'')+'" onclick="bulSetMode(\'one\')">한 면씩</button>'
+    +'<button class="'+(one?'':'on')+'" onclick="bulSetMode(\'all\')">펼쳐 보기</button></div></div>'
+    +'<div class="bulv"><div class="bpgno" id="bulNo">·</div>'
+    +'<div class="bstrip" id="bulStrip"><div class="bpg bload"><div class="bfail">주보를 불러오는 중입니다…</div></div></div>'
+    +'<div class="bzoom"><button onclick="bulZoomBy(-1)" aria-label="작게">−</button>'
     +'<button onclick="bulZoomBy(1)" aria-label="크게">＋</button></div></div>'
-    +(w.pages.length>1? '<div class="bdots" id="bulDots">'+w.pages.map(function(_,k){ return '<i class="'+(k?'':'on')+'"></i>'; }).join('')+'</div>' : '')
+    +'<div class="bdots" id="bulDots"></div>'
     +'<div class="bhint">글씨가 작으면 두 번 누르거나 두 손가락으로 벌려 보세요</div>'
     +'<div class="bpast"><div class="ph">'+(up?'올린 주보 <small>· 최근 '+((BUL&&BUL.keep)||8)+'주</small>':'지난 주보')+'</div>'
     +ws.map(function(x,i){
@@ -3168,7 +3225,7 @@ function renderBul(){
         +'파일 이름이 <b>261011_1.jpg</b> 꼴이면 그 날짜로, 아니면 넣은 날의 다가오는 주일로 잡힙니다. '
         +'폴더에 직접 넣은 PDF 는 첫 쪽만 보이니 PDF 는 이 화면에서 올려 주세요.</div>' : '');
   box.innerHTML=h;
-  bulBindStrip();
+  bulPaintView(w);
 }
 function bulThumb(id){ return 'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w200'; }
 function bulThumbErr(img){ if(img.getAttribute('data-k')==='0'){ img.setAttribute('data-k','1');
@@ -3177,24 +3234,27 @@ function bulThumbErr(img){ if(img.getAttribute('data-k')==='0'){ img.setAttribut
 function bulPick(i){ bulCur=i; renderBul(); try{ document.getElementById('bulWrap').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} }
 function bulBindStrip(){
   const st=document.getElementById('bulStrip'); if(!st) return;
-  st.addEventListener('scroll',function(){
-    const k=Math.round(st.scrollLeft/Math.max(1,st.clientWidth));
-    document.querySelectorAll('#bulDots i').forEach(function(d,j){ d.classList.toggle('on',j===k); });
-    const no=document.getElementById('bulNo'); const n=st.querySelectorAll('.bpg').length;
-    if(no) no.textContent=(Math.min(k,n-1)+1)+' / '+n;
-  });
+  if(!st._b){ st._b=1;
+    st.addEventListener('scroll',function(){
+      const k=Math.round(st.scrollLeft/Math.max(1,st.clientWidth));
+      document.querySelectorAll('#bulDots i').forEach(function(d,j){ d.classList.toggle('on',j===k); });
+      const no=document.getElementById('bulNo'); const n=st.querySelectorAll('.bpg').length;
+      if(no) no.textContent=(Math.min(k,n-1)+1)+' / '+n;
+    }); }
   st.querySelectorAll('.bpg').forEach(bulBindZoom);
 }
-/*  확대 — 두 번 누르기 · 두 손가락 · 확대한 채 끌어서 이동 · ＋/− 단추 */
+/*  확대 — 두 번 누르기 · 두 손가락 · 확대한 채 끌어서 이동 · ＋/− 단추
+ *  (사진 대신 사진을 감싼 칸(.bz)을 키운다 — 잘라 낸 조각도 그대로 커진다) */
 function bulBindZoom(pg){
-  const img=pg.querySelector('img'); let s=1,x=0,y=0,last=0,pin=null,drag=null,md=null;
+  const z=pg.querySelector('.bz'); if(!z) return;
+  let s=1,x=0,y=0,last=0,pin=null,drag=null,md=null;
   const st=document.getElementById('bulStrip');
-  function apply(){ img.style.transform='translate('+x+'px,'+y+'px) scale('+s+')';
+  function apply(){ z.style.transform='translate('+x+'px,'+y+'px) scale('+s+')';
     pg.style.touchAction= s>1?'none':'pan-x pan-y'; if(st) st.style.overflowX= s>1?'hidden':'auto'; }
   function clamp(){ const W=pg.clientWidth,H=pg.clientHeight; x=Math.min(0,Math.max(W-W*s,x)); y=Math.min(0,Math.max(H-H*s,y)); }
   function zoomAt(ns,cx,cy){ ns=Math.max(1,Math.min(BUL_ZOOM_MAX,ns)); x=cx-(cx-x)*ns/s; y=cy-(cy-y)*ns/s; s=ns; if(s===1){x=0;y=0;} clamp(); apply();
     if(s>2) bulWantHi(pg); }
-  pg._zoom=function(dir){ zoomAt(dir>0? s*1.6 : s/1.6, pg.clientWidth/2, pg.clientHeight/2); };
+  pg._zoom=function(dir){ zoomAt(dir>0? s*1.6 : s/1.6, pg.clientWidth/2, pg.clientHeight/3); };
   pg._scale=function(){ return s; };
   function pt(e){ const r=pg.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; }
   pg.addEventListener('dblclick',function(e){ const p=pt(e); zoomAt(s>1?1:BUL_ZOOM_TAP,p[0],p[1]); });

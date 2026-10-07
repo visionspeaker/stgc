@@ -850,6 +850,8 @@ background:linear-gradient(135deg,#2fa58f,#1f7d6d)}
 .bstrip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .bstrip::-webkit-scrollbar{display:none}
 .bpg{flex:0 0 100%;scroll-snap-align:center;overflow:hidden;touch-action:pan-x pan-y;position:relative;aspect-ratio:1/1.414;background:#f4f5f7}
+.bpg .bfr{position:relative;width:min(100%, calc(var(--bh,640px) * var(--r,0.7)));margin:0 auto;overflow:hidden;touch-action:pan-x pan-y}
+.bpg:not(.fail):not(.bload){display:flex;justify-content:center;align-items:flex-start;aspect-ratio:auto}
 .bpg .bz{position:absolute;inset:0;transform-origin:0 0}
 .bpg .bz img{position:absolute;top:0;height:100%;max-width:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;display:block}
 .bpg.bload .bfail{display:flex}
@@ -3149,9 +3151,12 @@ function bulSlides(w,fs){
 function bulSlideHtml(s,d){
   if(s.fail) return '<div class="bpg fail"><div class="bfail">사진을 불러오지 못했습니다.<br>잠시 뒤 다시 열어 주세요.</div></div>';
   const W=s.f.w/s.n, H=s.f.h;
-  return '<div class="bpg" style="aspect-ratio:'+W+' / '+H+'"><div class="bz">'
+  /*  ★ 2026-10-07 밤 ★ 한 면이 화면보다 길어 아래가 잘렸다 →
+   *  칸(.bpg)은 폭 100%로 두고, 그 안의 액자(.bfr)를 «화면 높이 안에» 맞춘다.
+   *  액자 폭 = min(칸 폭, 쓸 수 있는 높이 × 사진 비율) — 비율은 그대로 */
+  return '<div class="bpg"><div class="bfr" style="--r:'+(W/H)+';aspect-ratio:'+W+' / '+H+'"><div class="bz">'
     +'<img data-id="'+esc(s.id)+'" src="'+esc(s.f.src)+'" alt="'+esc(bulShort(d))+' 주보 '+(s.pi+1)+'장'+(s.n>1?(' '+(s.k+1)+'면'):'')+'" draggable="false" '
-    +'style="width:'+(s.n*100)+'%;left:'+(-s.k*100)+'%"/></div></div>';
+    +'style="width:'+(s.n*100)+'%;left:'+(-s.k*100)+'%"/></div></div></div>';
 }
 async function bulPaintView(w){
   const my=++bulPaintNo;
@@ -3169,8 +3174,21 @@ async function bulPaintView(w){
   if(sub) sub.textContent=(cut? ss.length+'면' : w.pages.length+'장')+(ss.length>1?' · 옆으로 넘겨 보세요':'');
   const md=document.getElementById('bulModeBox');
   if(md) md.style.display= fs.some(bulIsSpread) ? 'flex' : 'none';
+  bulFitH();
   bulBindStrip();
 }
+/*  쓸 수 있는 높이 = 화면 높이 − 보기 칸 윗부분까지 − 아래 점·여백.
+ *  화면을 돌리거나 주소창이 접히면 다시 잰다. */
+function bulFitH(){
+  const st=document.getElementById('bulStrip'), wrap=document.getElementById('bulWrap');
+  if(!st||!wrap) return;
+  const vh=(window.visualViewport&&window.visualViewport.height)||window.innerHeight||700;
+  const top=st.getBoundingClientRect().top + (window.scrollY||window.pageYOffset||0);
+  /* 페이지 맨 위에서 볼 때 기준 — 아래 점·안내 한 줄(약 44px)까지 함께 보이게 */
+  const h=Math.max(300, Math.round(vh - Math.min(top, vh*0.45) - 44));
+  wrap.style.setProperty('--bh', h+'px');
+}
+try{ window.addEventListener('resize',function(){ if(document.getElementById('bulStrip')) bulFitH(); }); }catch(e){}
 /*  2배 넘게 키우면 한 번만 큰 사진으로 바꿔 받는다 (못 받으면 그대로 둔다)
  *  같은 사진에서 잘라 낸 조각들이 함께 바뀐다 */
 function bulWantHi(pg){
@@ -3262,7 +3280,7 @@ function bulBindStrip(){
       const no=document.getElementById('bulNo'); const n=st.querySelectorAll('.bpg').length;
       if(no) no.textContent=(Math.min(k,n-1)+1)+' / '+n;
     }); }
-  st.querySelectorAll('.bpg').forEach(bulBindZoom);
+  st.querySelectorAll('.bpg .bfr').forEach(bulBindZoom);
 }
 /*  확대 — 두 번 누르기 · 두 손가락 · 확대한 채 끌어서 이동 · ＋/− 단추
  *  (사진 대신 사진을 감싼 칸(.bz)을 키운다 — 잘라 낸 조각도 그대로 커진다) */
@@ -3300,7 +3318,7 @@ function bulBindZoom(pg){
 function bulZoomBy(d){
   const st=document.getElementById('bulStrip'); if(!st) return;
   const k=Math.round(st.scrollLeft/Math.max(1,st.clientWidth));
-  const pg=st.querySelectorAll('.bpg')[k]; if(pg&&pg._zoom) pg._zoom(d);
+  const pg=st.querySelectorAll('.bpg')[k]; const fr=pg&&pg.querySelector('.bfr'); if(fr&&fr._zoom) fr._zoom(d);
 }
 
 /* ── 올리기 (교역자) ── */

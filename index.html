@@ -850,7 +850,7 @@ background:linear-gradient(135deg,#2fa58f,#1f7d6d)}
 .bstrip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .bstrip::-webkit-scrollbar{display:none}
 .bpg{flex:0 0 100%;scroll-snap-align:center;overflow:hidden;touch-action:pan-x pan-y;position:relative;aspect-ratio:1/1.414;background:#f4f5f7}
-.bpg .bfr{position:relative;width:min(100%, calc(var(--bh,640px) * var(--r,0.7)));margin:0 auto;overflow:hidden;touch-action:pan-x pan-y}
+.bpg .bfr{position:relative;width:min(100%, calc(var(--bh,640px) * var(--r,0.7)));margin:0 auto;overflow:hidden;transform-origin:0 0;will-change:transform}
 .bpg:not(.fail):not(.bload){display:flex;justify-content:center;align-items:flex-start;aspect-ratio:auto}
 .bpg .bz{position:absolute;inset:0;transform-origin:0 0}
 .bpg .bz img{position:absolute;top:0;height:100%;max-width:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;display:block}
@@ -3280,19 +3280,28 @@ function bulBindStrip(){
       const no=document.getElementById('bulNo'); const n=st.querySelectorAll('.bpg').length;
       if(no) no.textContent=(Math.min(k,n-1)+1)+' / '+n;
     }); }
-  st.querySelectorAll('.bpg .bfr').forEach(bulBindZoom);
+  st.querySelectorAll('.bpg').forEach(function(pg){ if(pg.querySelector('.bfr')) bulBindZoom(pg); });
 }
 /*  확대 — 두 번 누르기 · 두 손가락 · 확대한 채 끌어서 이동 · ＋/− 단추
- *  (사진 대신 사진을 감싼 칸(.bz)을 키운다 — 잘라 낸 조각도 그대로 커진다) */
+ *  ★ 2026-10-07 밤 ★ 확대하면 «보기 칸 전체 폭»까지 펼쳐진다.
+ *  예전에는 가운데 좁은 액자 안에서만 커져서 좌우가 잘렸다.
+ *  이제 액자(.bfr, 한 면만 잘라 보이는 틀)를 통째로 키우고, 잘라 내는 것은 바깥 칸(.bpg)이 한다.
+ *  손가락 위치도 바깥 칸 기준이라 빈 옆자리에서 집어도 된다. */
 function bulBindZoom(pg){
-  const z=pg.querySelector('.bz'); if(!z) return;
+  const z=pg.querySelector('.bfr'); if(!z) return;
   let s=1,x=0,y=0,last=0,pin=null,drag=null,md=null;
   const st=document.getElementById('bulStrip');
+  function geo(){ return {W:pg.clientWidth, H:pg.clientHeight, fw:z.offsetWidth, fh:z.offsetHeight, ox:z.offsetLeft, oy:z.offsetTop}; }
   function apply(){ z.style.transform='translate('+x+'px,'+y+'px) scale('+s+')';
     pg.style.touchAction= s>1?'none':'pan-x pan-y'; if(st) st.style.overflowX= s>1?'hidden':'auto'; }
-  function clamp(){ const W=pg.clientWidth,H=pg.clientHeight; x=Math.min(0,Math.max(W-W*s,x)); y=Math.min(0,Math.max(H-H*s,y)); }
-  function zoomAt(ns,cx,cy){ ns=Math.max(1,Math.min(BUL_ZOOM_MAX,ns)); x=cx-(cx-x)*ns/s; y=cy-(cy-y)*ns/s; s=ns; if(s===1){x=0;y=0;} clamp(); apply();
-    if(s>2) bulWantHi(pg); }
+  /*  커진 액자가 칸보다 넓으면 칸 끝까지만 움직이고, 좁으면 가운데 둔다 */
+  function clamp(){ const g=geo(), cw=g.fw*s, ch=g.fh*s;
+    x = cw<=g.W ? (g.W-cw)/2-g.ox : Math.min(-g.ox, Math.max(g.W-g.ox-cw, x));
+    y = ch<=g.H ? (g.H-ch)/2-g.oy : Math.min(-g.oy, Math.max(g.H-g.oy-ch, y)); }
+  function zoomAt(ns,cx,cy){ ns=Math.max(1,Math.min(BUL_ZOOM_MAX,ns)); const g=geo();
+    const lx=(cx-g.ox-x)/s, ly=(cy-g.oy-y)/s;     /* 손가락 밑의 점(액자 기준) */
+    s=ns; x=cx-g.ox-lx*s; y=cy-g.oy-ly*s; if(s===1){x=0;y=0;} clamp(); apply();
+    if(s>2) bulWantHi(z); }
   pg._zoom=function(dir){ zoomAt(dir>0? s*1.6 : s/1.6, pg.clientWidth/2, pg.clientHeight/3); };
   pg._scale=function(){ return s; };
   function pt(e){ const r=pg.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; }
@@ -3318,8 +3327,9 @@ function bulBindZoom(pg){
 function bulZoomBy(d){
   const st=document.getElementById('bulStrip'); if(!st) return;
   const k=Math.round(st.scrollLeft/Math.max(1,st.clientWidth));
-  const pg=st.querySelectorAll('.bpg')[k]; const fr=pg&&pg.querySelector('.bfr'); if(fr&&fr._zoom) fr._zoom(d);
+  const pg=st.querySelectorAll('.bpg')[k]; if(pg&&pg._zoom) pg._zoom(d);
 }
+
 
 /* ── 올리기 (교역자) ── */
 function bulNextSun(){ const d=new Date(); d.setDate(d.getDate()+((7-d.getDay())%7)); return localISO(d); }

@@ -3048,7 +3048,13 @@ function renderArchive(){
  *  · 최근 8주 · 같은 주일 다시 올리면 새 것만 · 내리기 = 앱에서만 숨김.
  *  · 오프라인 저장은 하지 않는다 (sw.js 는 손대지 않음). */
 const BUL_SEEN_KEY='sgc_bul_seen_v1';
-const BUL_MAX_SIDE=2000, BUL_Q=.85;
+/*  ★ 2026-10-07 오후 ★ 펼침면(가로로 긴 주보 한 장)이 확대해도 작다고 하셔서
+ *   · 올릴 때 긴 쪽 2000 → 3200px  (서버 한도 장당 약 3MB 안에서 화질을 자동으로 맞춘다)
+ *   · 보기 칸을 사진 모양(가로/세로)에 맞춘다
+ *   · 최대 확대 4 → 8배, 두 번 누르면 3배
+ *   · 평소에는 가벼운 사진(폭 1600), 2배 넘게 키우면 그때만 큰 사진(폭 3200)으로 바꿔 받는다 */
+const BUL_MAX_SIDE=3200, BUL_Q=.85, BUL_B64_MAX=3800000;
+const BUL_VIEW_W=1600, BUL_HI_W=3200, BUL_ZOOM_MAX=8, BUL_ZOOM_TAP=3;
 const PDFJS_VER='3.11.174';
 let BUL=null, bulCur=0, bulUp=null, bulBusy=false, bulLoading=false;
 
@@ -3064,10 +3070,26 @@ function bulDay(d){ const p=String(d||'').split('-'); if(p.length!==3) return St
   return p[0]+'년 '+(+p[1])+'월 '+(+p[2])+'일 '+(w===0?'주일':'('+'일월화수목금토'[w]+')'); }
 function bulShort(d){ const p=String(d||'').split('-'); return p.length===3? (+p[1])+'월 '+(+p[2])+'일' : String(d||''); }
 /*  사진 주소 — 차례대로 시도한다 (0: 드라이브 썸네일, 1: 구글 이미지 서버) */
-function bulSrc(id,k){
-  const e=encodeURIComponent(id);
-  return k===0 ? 'https://drive.google.com/thumbnail?id='+e+'&sz=w'+BUL_MAX_SIDE
-                : 'https://lh3.googleusercontent.com/d/'+e+'=w'+BUL_MAX_SIDE;
+function bulSrc(id,k,w){
+  const e=encodeURIComponent(id), W=w||BUL_VIEW_W;
+  return k===0 ? 'https://drive.google.com/thumbnail?id='+e+'&sz=w'+W
+                : 'https://lh3.googleusercontent.com/d/'+e+'=w'+W;
+}
+/*  사진이 오면 보기 칸을 그 모양(가로·세로)에 맞춘다 */
+function bulImgLoad(img){
+  const pg=img.closest('.bpg'); if(!pg) return;
+  const w=img.naturalWidth, h=img.naturalHeight;
+  if(w>0 && h>0 && !pg._fit){ pg._fit=1; pg.style.aspectRatio=w+' / '+h; }
+}
+/*  2배 넘게 키우면 한 번만 큰 사진으로 바꿔 받는다 (못 받으면 그대로 둔다) */
+function bulWantHi(pg){
+  const img=pg&&pg.querySelector('img'); if(!img || pg._hi) return;
+  const id=img.getAttribute('data-id'); const k=Number(img.getAttribute('data-k')||0);
+  if(!id || k>1) return;
+  pg._hi=1;
+  const hi=bulSrc(id,k,BUL_HI_W); const pre=new Image();
+  pre.onload=function(){ img.src=hi; };
+  pre.src=hi;
 }
 /*  사진을 못 받았을 때 — 다음 길로. 마지막에는 서버가 직접 보낸다. */
 async function bulImgErr(img){
@@ -3124,7 +3146,7 @@ function renderBul(){
     +'<div class="bstrip" id="bulStrip">'
     +w.pages.map(function(id,i){
         return '<div class="bpg"><img data-id="'+esc(id)+'" data-k="0" src="'+esc(bulSrc(id,0))+'" '
-          +'alt="'+esc(bulShort(w.d))+' 주보 '+(i+1)+'쪽" draggable="false" onerror="bulImgErr(this)"/>'
+          +'alt="'+esc(bulShort(w.d))+' 주보 '+(i+1)+'쪽" draggable="false" onload="bulImgLoad(this)" onerror="bulImgErr(this)"/>'
           +'<div class="bfail">사진을 불러오지 못했습니다.<br>잠시 뒤 다시 열어 주세요.</div></div>';
       }).join('')
     +'</div><div class="bzoom"><button onclick="bulZoomBy(-1)" aria-label="작게">−</button>'
@@ -3170,16 +3192,17 @@ function bulBindZoom(pg){
   function apply(){ img.style.transform='translate('+x+'px,'+y+'px) scale('+s+')';
     pg.style.touchAction= s>1?'none':'pan-x pan-y'; if(st) st.style.overflowX= s>1?'hidden':'auto'; }
   function clamp(){ const W=pg.clientWidth,H=pg.clientHeight; x=Math.min(0,Math.max(W-W*s,x)); y=Math.min(0,Math.max(H-H*s,y)); }
-  function zoomAt(ns,cx,cy){ ns=Math.max(1,Math.min(4,ns)); x=cx-(cx-x)*ns/s; y=cy-(cy-y)*ns/s; s=ns; if(s===1){x=0;y=0;} clamp(); apply(); }
+  function zoomAt(ns,cx,cy){ ns=Math.max(1,Math.min(BUL_ZOOM_MAX,ns)); x=cx-(cx-x)*ns/s; y=cy-(cy-y)*ns/s; s=ns; if(s===1){x=0;y=0;} clamp(); apply();
+    if(s>2) bulWantHi(pg); }
   pg._zoom=function(dir){ zoomAt(dir>0? s*1.6 : s/1.6, pg.clientWidth/2, pg.clientHeight/2); };
   pg._scale=function(){ return s; };
   function pt(e){ const r=pg.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; }
-  pg.addEventListener('dblclick',function(e){ const p=pt(e); zoomAt(s>1?1:2.5,p[0],p[1]); });
+  pg.addEventListener('dblclick',function(e){ const p=pt(e); zoomAt(s>1?1:BUL_ZOOM_TAP,p[0],p[1]); });
   pg.addEventListener('touchstart',function(e){
     if(e.touches.length===2){ const a=pt(e.touches[0]),b=pt(e.touches[1]);
       pin={d:Math.hypot(a[0]-b[0],a[1]-b[1])||1,s:s,cx:(a[0]+b[0])/2,cy:(a[1]+b[1])/2}; drag=null; }
     else if(e.touches.length===1){ const now=Date.now(), p=pt(e.touches[0]);
-      if(now-last<300){ zoomAt(s>1?1:2.5,p[0],p[1]); e.preventDefault(); last=0; } else last=now;
+      if(now-last<300){ zoomAt(s>1?1:BUL_ZOOM_TAP,p[0],p[1]); e.preventDefault(); last=0; } else last=now;
       if(s>1) drag={p:p,x:x,y:y}; }
   },{passive:false});
   pg.addEventListener('touchmove',function(e){
@@ -3246,7 +3269,13 @@ function bulCanvasJpeg(src,w,h){
   if(W>BUL_MAX_SIDE||H>BUL_MAX_SIDE){ if(W>=H){ H=Math.round(H*BUL_MAX_SIDE/W); W=BUL_MAX_SIDE; } else { W=Math.round(W*BUL_MAX_SIDE/H); H=BUL_MAX_SIDE; } }
   const c=document.createElement('canvas'); c.width=W; c.height=H;
   const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,W,H); g.drawImage(src,0,0,W,H);
-  return c.toDataURL('image/jpeg',BUL_Q);
+  return bulJpeg(c);
+}
+/*  서버 한도(장당 약 3MB) 안에 들도록 — 넘으면 화질을 조금씩 낮춘다 */
+function bulJpeg(c){
+  let u='';
+  for(const q of [BUL_Q,.78,.7,.6,.5]){ u=c.toDataURL('image/jpeg',q); if(u.length<=BUL_B64_MAX) return u; }
+  return u;
 }
 function bulReadUrl(f){ return new Promise(function(ok,no){ const rd=new FileReader();
   rd.onload=function(e){ ok(e.target.result); }; rd.onerror=no; rd.readAsDataURL(f); }); }
@@ -3288,7 +3317,7 @@ async function bulAddFiles(inp){
           const c=document.createElement('canvas'); c.width=Math.round(vp.width); c.height=Math.round(vp.height);
           const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height);
           await pg.render({canvasContext:g,viewport:vp}).promise;
-          const u=c.toDataURL('image/jpeg',BUL_Q);
+          const u=bulJpeg(c);
           bulUp.pages.push({u:u,n:bulDataSize(u),src:'PDF '+p+'쪽'}); n++;
         }
         bulMsg(pdf.numPages>n? 'PDF '+pdf.numPages+'쪽 가운데 '+n+'쪽만 담았습니다 (최대 '+max+'장).' : 'PDF '+n+'쪽을 사진으로 바꿨습니다.');

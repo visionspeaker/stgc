@@ -698,7 +698,15 @@ border:1px solid var(--line);text-decoration:none;flex:none}
 .pinrow{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
 /* ── 공개 문의 (2026-10-07) ── */
 .pubnote{font-size:12px;margin-top:6px;line-height:1.6;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:8px 10px}
-.pubflag{display:inline-block;font-size:10.5px;font-weight:800;border-radius:999px;padding:1px 7px;margin-left:5px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;vertical-align:1px}
+.pubflag{display:inline-block;font-size:10.5px;font-weight:800;border-radius:999px;padding:1px 7px;margin-left:5px;background:#e0efff;color:#1d5fbf;border:1px solid #9cc7f5;vertical-align:1px}
+/*  공개 문의 줄 — 파랑 테두리 + 옅은 파랑 바탕 (2026-10-07 ㉮). 표가 border-collapse 라 테두리는 안쪽 그림자로 그린다 */
+.btable tr.pubrow td{background:#f3f8ff;box-shadow:inset 0 1.5px #7fb3ef,inset 0 -1.5px #7fb3ef}
+.btable tr.pubrow td:first-child{box-shadow:inset 0 1.5px #7fb3ef,inset 0 -1.5px #7fb3ef,inset 1.5px 0 #7fb3ef}
+.btable tr.pubrow td:last-child{box-shadow:inset 0 1.5px #7fb3ef,inset 0 -1.5px #7fb3ef,inset -1.5px 0 #7fb3ef}
+.btable tr.pubrow.open td{box-shadow:inset 0 1.5px #7fb3ef}
+.btable tr.pubrow.open td:first-child{box-shadow:inset 0 1.5px #7fb3ef,inset 1.5px 0 #7fb3ef}
+.btable tr.pubrow.open td:last-child{box-shadow:inset 0 1.5px #7fb3ef,inset -1.5px 0 #7fb3ef}
+.btable tr.pubdet td.bdet{background:#f3f8ff;box-shadow:inset 1.5px 0 #7fb3ef,inset -1.5px 0 #7fb3ef,inset 0 -1.5px #7fb3ef}
 .pubmg{font-size:12px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:9px;padding:7px 10px;margin:8px 0;line-height:1.6}
 .pubmodal{position:fixed;inset:0;background:rgba(15,23,35,.5);display:flex;align-items:center;justify-content:center;padding:22px;z-index:9500}
 .pubbox{background:#fff;border-radius:18px;padding:20px 18px 16px;width:100%;max-width:380px}
@@ -4618,14 +4626,14 @@ function renderMyReq(){
       s.pub ? (pubSubDetail(s, idx) + delRow) :
       `<div id="lk${idx}"><div class="pinrow"><input class="f-in" type="password" maxlength="4" inputmode="numeric" id="pin${idx}" placeholder="비밀번호 4자리" onkeydown="if(event.key==='Enter')openMine(${idx})"/><button class="btnsm" onclick="openMine(${idx})">내용 보기</button>${del?`<button class="btnsm gray" onclick="adminOpen(${idx})">관리자 열람</button>`:''}</div></div>
        ${del?`<div class="delrow"><button class="btnsm danger" onclick="deleteSub('${sid}')">🗑 삭제</button></div>`:''}`;
-    return `<tr class="brow" data-sid="${sid}" onclick="toggleBrow(this,event)">
+    return `<tr class="brow${s.pub?' pubrow':''}" data-sid="${sid}" onclick="toggleBrow(this,event)">
       <td class="c-no">${no}</td>
       <td class="c-st"><span class="fbadge s-${esc(s.status)}">${esc(s.status)}</span></td>
       <td class="b-tt"><span class="car">›</span>${esc(s.title)}${s.pub?'<span class="pubflag">공개</span>':''}${mg?' <span class="mineflag">담당</span>':''}</td>
       <td class="c-cat">${catName(s.category)}</td>
       <td class="c-dt">${s.ts.slice(5,10)}</td>
     </tr>
-    <tr class="bdetrow" style="display:none"><td class="bdet" colspan="5">${detail}</td></tr>`;}).join('');
+    <tr class="bdetrow${s.pub?' pubdet':''}" style="display:none"><td class="bdet" colspan="5">${detail}</td></tr>`;}).join('');
   box.innerHTML=
     `<table class="btable"><thead><tr>
        <th class="c-no">번호</th><th class="c-st">상태</th><th>제목</th>
@@ -7031,7 +7039,7 @@ function renderSubs(){
       `${off?`<div class="b-warn">지금 보고 계신 ‘${esc(mgF)}’ 목록에는 포함되지 않는 상태입니다. 목록을 새로 고르면 정리됩니다.</div>`:''}`
       + subMgDetail(s, idx);
     const del=canDelete();
-    return `<tr class="brow ${od?'over':''} ${off?'offfilter':''}" data-sid="${sid}" onclick="toggleBrow(this,event)">
+    return `<tr class="brow ${od?'over':''} ${off?'offfilter':''}${s.pub?' pubrow':''}" data-sid="${sid}" onclick="toggleBrow(this,event)">
       <td class="c-no">${no}</td>
       <td class="c-st"><span class="fbadge s-${esc(s.status)}">${esc(s.status)}</span></td>
       <td class="b-tt"><span class="car">›</span>${esc(s.title)}${s.pub?'<span class="pubflag">공개</span>':''}${od?' <span class="fbadge s-보류">48h 초과</span>':''}${ownsMe(s)?' <span class="mineflag">담당 지정</span>':''}</td>
@@ -7040,7 +7048,7 @@ function renderSubs(){
       <td class="c-dt">${fmtDT(s.ts).slice(5,10)}</td>
       ${del?`<td class="c-del"><button class="trash" title="이 문의 삭제" onclick="deleteSub('${sid}')">🗑</button></td>`:''}
     </tr>
-    <tr class="bdetrow" style="display:none"><td class="bdet" colspan="${del?7:6}">${detail}</td></tr>`;
+    <tr class="bdetrow${s.pub?' pubdet':''}" style="display:none"><td class="bdet" colspan="${del?7:6}">${detail}</td></tr>`;
   }).join('');
   box.innerHTML=
     `<table class="btable"><thead><tr>

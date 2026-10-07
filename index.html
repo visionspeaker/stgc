@@ -826,6 +826,53 @@ background:linear-gradient(135deg,#2fa58f,#1f7d6d)}
 .aritem .tt{display:block;font-size:14.5px;font-weight:800}
 .aritem .dl{display:block;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.6}
 .aritem .ar{color:#9aa5b4;font-size:19px}
+/* ── 주보 (2026-10-07) ── */
+.aritem .bnewb{display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:800;border-radius:999px;padding:2px 7px;margin-left:6px;vertical-align:2px}
+.bulup{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin:0 0 12px;border:0;border-radius:13px;padding:13px;font-size:14.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,#57b45f,#2fa58f);font-family:inherit;cursor:pointer}
+.bulhd{padding:4px 4px 8px}.bulhd .d{font-size:17px;font-weight:800}.bulhd .s{font-size:12.5px;color:var(--muted);margin-top:3px}
+.bulv{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.bstrip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.bstrip::-webkit-scrollbar{display:none}
+.bpg{flex:0 0 100%;scroll-snap-align:center;overflow:hidden;touch-action:pan-x pan-y;position:relative;aspect-ratio:1/1.414;background:#f4f5f7}
+.bpg img{width:100%;height:100%;object-fit:contain;transform-origin:0 0;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;display:block}
+.bpg .bfail{display:none;position:absolute;inset:0;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:13px;line-height:1.7;padding:20px}
+.bpg.fail .bfail{display:flex}
+.bpgno{position:absolute;top:8px;right:9px;background:rgba(20,30,45,.62);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:3px 9px;z-index:2}
+.bzoom{position:absolute;bottom:8px;right:9px;display:flex;gap:6px;z-index:2}
+.bzoom button{border:0;background:rgba(20,30,45,.62);color:#fff;font-weight:800;border-radius:9px;width:34px;height:34px;font-size:17px;cursor:pointer;font-family:inherit}
+.bdots{display:flex;justify-content:center;gap:6px;padding:9px 0 3px}
+.bdots i{width:7px;height:7px;border-radius:50%;background:#cfd6e0}.bdots i.on{background:var(--teal);width:18px;border-radius:4px}
+.bhint{font-size:11.5px;color:var(--muted);text-align:center;padding:5px 0 4px}
+.bpast{margin:12px 0 10px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.bpast .ph{font-size:13.5px;font-weight:800;padding:12px 14px;border-bottom:1px solid var(--line)}
+.bpast .ph small{font-weight:400;color:var(--muted);font-size:11.5px}
+.bpast .prow{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #eef1f5;cursor:pointer}
+.bpast .prow:last-child{border-bottom:0}.bpast .prow.cur{background:#f0faf6}
+.bpast .th{width:38px;height:52px;border-radius:5px;background:#f1f3f6;border:1px solid var(--line);overflow:hidden;flex:none}
+.bpast .th img{width:100%;height:100%;object-fit:cover}
+.bpast .tx{flex:1;min-width:0}.bpast .a{font-size:13.5px;font-weight:800}.bpast .b{font-size:11.5px;color:var(--muted);margin-top:2px}
+.bpast .ar{color:#9aa5b4;font-size:18px}
+.bnew{display:inline-block;background:#e9f6ee;color:#15803d;font-size:10px;font-weight:800;border-radius:999px;padding:2px 7px;margin-left:4px;vertical-align:1px}
+.bdel{border:1px solid #f2c4c4;background:#fff;color:var(--red);font-size:11.5px;font-weight:800;border-radius:8px;padding:5px 9px;cursor:pointer;font-family:inherit;flex:none}
+.bnote{font-size:11.5px;color:var(--muted);line-height:1.75;padding:2px 4px 12px}
+.bulmodal{position:fixed;inset:0;background:rgba(15,23,35,.45);display:flex;align-items:flex-end;justify-content:center;z-index:9000}
+.bulsheet{background:#fff;width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:18px 16px 22px;max-height:92vh;overflow-y:auto}
+.bulsheet h3{margin:0 0 4px;font-size:16px}.bulsheet .m{font-size:12.5px;color:var(--muted);margin-bottom:10px;line-height:1.6}
+.bulsheet .lbl{font-size:12.5px;font-weight:800;margin:12px 0 6px}
+.bwarn{font-size:12px;color:var(--warn);margin-top:6px;font-weight:700}
+.bpick{display:flex;gap:8px}
+.bpick label{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;border:1.5px dashed var(--inline);border-radius:12px;padding:12px 4px;font-size:12.5px;font-weight:800;cursor:pointer;color:#445;text-align:center}
+.bpick label small{font-weight:400;color:var(--muted);font-size:10.5px}
+.bpick input{display:none}
+.bbusy{font-size:12.5px;color:var(--blue);margin-top:8px;font-weight:700;min-height:18px}
+.bthumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.btb{width:92px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fafafa;position:relative}
+.btb img{width:100%;height:120px;object-fit:cover;display:block}
+.btb .cap{font-size:10.5px;padding:4px 5px;color:#445}
+.btb .x,.btb .mv{position:absolute;top:4px;border:0;background:rgba(0,0,0,.55);color:#fff;border-radius:50%;width:24px;height:24px;font-size:11px;cursor:pointer}
+.btb .x{right:4px}.btb .mv{right:32px}
+.btb .no{position:absolute;top:4px;left:4px;background:var(--teal);color:#fff;font-size:10px;font-weight:800;border-radius:6px;padding:2px 6px}
+.bclose{width:100%;margin-top:8px;background:#f0f3f7;border:0;border-radius:13px;padding:12px;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;color:#445}
 .arnote{font-size:12px;color:var(--muted);line-height:1.75;background:#f7f9fc;
 border-radius:10px;padding:11px 12px;margin-top:12px}
 /* 신청 화면 — 어르신도 편하시도록 크게 */
@@ -1607,6 +1654,11 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
      QR·주소(?go=archive)로 오시거나 교역자 메뉴에서 들어온다. -->
 <section id="archive" class="view">
   <div id="arWrap"></div>
+</section>
+
+<!-- 주보 (로그인 없이 누구나 · 올리기는 교역자) — 2026-10-07 아카이브에서 시험 중 -->
+<section id="bulletin" class="view">
+  <div id="bulWrap"></div>
 </section>
 
 <!-- 영광 커넥트 헬프데스크 신청 (로그인 없이 누구나) -->
@@ -2932,6 +2984,11 @@ const ARCHIVE=[
     title:'신급 교육 신청',
     desc :'학습 · 세례 · 입교 · 유아세례 · 어린이세례',
     icon :'<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 4.6-9 4.6-9-4.6z"/><path d="M6.5 10.2v4.6c0 1.6 2.5 2.9 5.5 2.9s5.5-1.3 5.5-2.9v-4.6"/><path d="M21 7.6v5.4"/></svg>' }
+,
+  { view:'bulletin', on:true,
+    title:'주보',
+    desc :'이번 주 주보 · 지난 주보',
+    icon :'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5h10l4 4V20a.5.5 0 01-.5.5h-13A.5.5 0 015 20z"/><path d="M15 3.5V7.5h4"/><path d="M8.5 11h7M8.5 14h7M8.5 17h4.5"/></svg>' }
 ];
 function archiveItems(){ return ARCHIVE.filter(function(a){ return a.on; }); }
 function goArchive(){ openApp('archive'); }
@@ -2967,14 +3024,330 @@ function renderArchive(){
       ? '<div class="arlist">'+its.map(function(a){
           return '<button class="aritem" onclick="openApp(\''+jsq(a.view)+'\')">'
             +'<span class="ic">'+a.icon+'</span>'
-            +'<span class="tx"><span class="tt">'+esc(a.title)+'</span>'
-            +'<span class="dl">'+esc(a.desc)+'</span></span>'
+            +'<span class="tx"><span class="tt">'+esc(a.title)
+            +(a.view==='bulletin'?'<span class="bnewb" id="arBulNew">NEW</span>':'')+'</span>'
+            +'<span class="dl"'+(a.view==='bulletin'?' id="arBulDl"':'')+'>'+esc(a.desc)+'</span></span>'
             +'<span class="ar">›</span></button>';
         }).join('')+'</div>'
       : '<div class="bempty">아직 등록된 항목이 없습니다.</div>')
     +'<div class="arnote">성도님 홈 화면에는 보이지 않는 서랍입니다. '
     +'주소나 QR 코드로 바로 들어오실 수 있고, <b>교역자 홈 화면 맨 아래</b>에도 한 칸 놓여 있습니다.</div>'
     +'</div></div>';
+  /* 주보 NEW — 목록을 받아 와서 조용히 붙인다 */
+  paintArchiveNew();
+  if(its.some(function(a){ return a.view==='bulletin'; })) fetchBul().then(paintArchiveNew);
+}
+
+/* ══════════ 주보 ══════════  (2026-10-07 · 아카이브에서 시험 중)
+ *
+ *  · 보기는 로그인 없이 누구나. 사진은 성도님 폰이 «드라이브에서 직접» 받는다.
+ *    서버는 「주일 날짜 + 파일 번호」만 보낸다 (서버 동시 실행 30칸을 아끼려고).
+ *  · 사진을 못 받으면 ① 드라이브 썸네일 → ② 구글 이미지 서버 → ③ 서버가 직접, 순서로 다시 받는다.
+ *  · 올리기·내리기는 교역자만 (서버가 다시 확인한다).
+ *    PDF 는 올리는 순간 폰에서 쪽마다 사진으로 바꾼다 → 보는 분은 늘 사진으로 본다.
+ *  · 최근 8주 · 같은 주일 다시 올리면 새 것만 · 내리기 = 앱에서만 숨김.
+ *  · 오프라인 저장은 하지 않는다 (sw.js 는 손대지 않음). */
+const BUL_SEEN_KEY='sgc_bul_seen_v1';
+const BUL_MAX_SIDE=2000, BUL_Q=.85;
+const PDFJS_VER='3.11.174';
+let BUL=null, bulCur=0, bulUp=null, bulBusy=false, bulLoading=false;
+
+function goBulletin(){ openApp('bulletin'); }
+function bulSeen(){ try{ return localStorage.getItem(BUL_SEEN_KEY)||''; }catch(e){ return ''; } }
+function bulMarkSeen(d){ try{ if(d) localStorage.setItem(BUL_SEEN_KEY,d); }catch(e){} }
+/*  NEW — 가장 최근 주보를 이 기기에서 아직 안 열어 봤으면 */
+function bulIsNew(){ const w=BUL&&BUL.weeks&&BUL.weeks[0]; return !!w && w.d>bulSeen(); }
+/*  올리기 단추 — 서버가 canUp 을 준 교역자에게만. 로그아웃하면 바로 사라진다. */
+function canBulUpMe(){ return !!(BUL&&BUL.canUp) && !!current && current.role==='admin'; }
+function bulDay(d){ const p=String(d||'').split('-'); if(p.length!==3) return String(d||'');
+  const w=new Date(+p[0],+p[1]-1,+p[2]).getDay();
+  return p[0]+'년 '+(+p[1])+'월 '+(+p[2])+'일 '+(w===0?'주일':'('+'일월화수목금토'[w]+')'); }
+function bulShort(d){ const p=String(d||'').split('-'); return p.length===3? (+p[1])+'월 '+(+p[2])+'일' : String(d||''); }
+/*  사진 주소 — 차례대로 시도한다 (0: 드라이브 썸네일, 1: 구글 이미지 서버) */
+function bulSrc(id,k){
+  const e=encodeURIComponent(id);
+  return k===0 ? 'https://drive.google.com/thumbnail?id='+e+'&sz=w'+BUL_MAX_SIDE
+                : 'https://lh3.googleusercontent.com/d/'+e+'=w'+BUL_MAX_SIDE;
+}
+/*  사진을 못 받았을 때 — 다음 길로. 마지막에는 서버가 직접 보낸다. */
+async function bulImgErr(img){
+  const id=img.getAttribute('data-id'); const k=Number(img.getAttribute('data-k')||0)+1;
+  img.setAttribute('data-k',String(k));
+  if(k===1){ img.src=bulSrc(id,1); return; }
+  if(k===2 && USE_BACKEND){
+    try{
+      const r=await fetch(API+'?action=bulImg&id='+encodeURIComponent(id));
+      const d=await r.json();
+      if(d&&d.ok&&d.data){ img.src=d.data; return; }
+    }catch(e){}
+  }
+  img.removeAttribute('src'); img.alt='';
+  const pg=img.closest('.bpg'); if(pg) pg.classList.add('fail');
+}
+async function fetchBul(){
+  if(!USE_BACKEND) return BUL;
+  bulLoading=true;
+  try{
+    const r=await fetch(withTok(API+'?action=bulletinInfo'));
+    const d=await r.json();
+    if(d&&d.ok){ BUL=d; absorbToken(d); }
+  }catch(e){ console.warn('주보 불러오기 실패:',e); }
+  bulLoading=false;
+  return BUL;
+}
+async function openBulletin(){
+  bulCur=0; renderBul();
+  await fetchBul();
+  if(currentView==='bulletin') renderBul();
+  paintArchiveNew();
+}
+function renderBul(){
+  const box=document.getElementById('bulWrap'); if(!box) return;
+  const up=canBulUpMe();
+  const ws=(BUL&&BUL.weeks)||[];
+  let h='';
+  if(up) h+='<button class="bulup" onclick="bulOpenUp()">＋ 주보 올리기</button>';
+  if(!BUL){
+    h+='<div class="card"><div class="bempty">'+(bulLoading||USE_BACKEND?'주보를 불러오는 중입니다…':'아직 올라온 주보가 없습니다.')+'</div></div>';
+    box.innerHTML=h; return;
+  }
+  if(!ws.length){
+    h+='<div class="card"><h2>주보</h2><div class="bempty">아직 올라온 주보가 없습니다.</div></div>';
+    box.innerHTML=h; return;
+  }
+  if(bulCur>=ws.length) bulCur=0;
+  const w=ws[bulCur];
+  if(bulCur===0) bulMarkSeen(w.d);
+  h+='<div class="bulhd"><div class="d">'+esc(bulDay(w.d))+'</div>'
+    +'<div class="s">'+w.pages.length+'장'+(w.pages.length>1?' · 옆으로 넘겨 보세요':'')+'</div></div>'
+    +'<div class="bulv"><div class="bpgno" id="bulNo">1 / '+w.pages.length+'</div>'
+    +'<div class="bstrip" id="bulStrip">'
+    +w.pages.map(function(id,i){
+        return '<div class="bpg"><img data-id="'+esc(id)+'" data-k="0" src="'+esc(bulSrc(id,0))+'" '
+          +'alt="'+esc(bulShort(w.d))+' 주보 '+(i+1)+'쪽" draggable="false" onerror="bulImgErr(this)"/>'
+          +'<div class="bfail">사진을 불러오지 못했습니다.<br>잠시 뒤 다시 열어 주세요.</div></div>';
+      }).join('')
+    +'</div><div class="bzoom"><button onclick="bulZoomBy(-1)" aria-label="작게">−</button>'
+    +'<button onclick="bulZoomBy(1)" aria-label="크게">＋</button></div></div>'
+    +(w.pages.length>1? '<div class="bdots" id="bulDots">'+w.pages.map(function(_,k){ return '<i class="'+(k?'':'on')+'"></i>'; }).join('')+'</div>' : '')
+    +'<div class="bhint">글씨가 작으면 두 번 누르거나 두 손가락으로 벌려 보세요</div>'
+    +'<div class="bpast"><div class="ph">'+(up?'올린 주보 <small>· 최근 '+((BUL&&BUL.keep)||8)+'주</small>':'지난 주보')+'</div>'
+    +ws.map(function(x,i){
+        return '<div class="prow'+(i===bulCur?' cur':'')+'" onclick="bulPick('+i+')">'
+          +'<div class="th"><img data-id="'+esc(x.pages[0])+'" data-k="0" src="'+esc(bulThumb(x.pages[0]))+'" alt="" onerror="bulThumbErr(this)"/></div>'
+          +'<div class="tx"><div class="a">'+esc(bulDay(x.d))+(i===0?' <span class="bnew">최근</span>':'')+'</div>'
+          +'<div class="b">'+x.pages.length+'장</div></div>'
+          +(up? '<button class="bdel" onclick="event.stopPropagation();bulHide(\''+jsq(x.d)+'\')">내리기</button>'
+              : '<span class="ar">›</span>')
+          +'</div>';
+      }).join('')
+    +'</div>'
+    +(up? '<div class="bnote">드라이브 「영광커넥트 주보」 폴더에 사진을 직접 넣어도 5분 안에 여기 나타납니다. '
+        +'파일 이름이 <b>261011_1.jpg</b> 꼴이면 그 날짜로, 아니면 넣은 날의 다가오는 주일로 잡힙니다. '
+        +'폴더에 직접 넣은 PDF 는 첫 쪽만 보이니 PDF 는 이 화면에서 올려 주세요.</div>' : '');
+  box.innerHTML=h;
+  bulBindStrip();
+}
+function bulThumb(id){ return 'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w200'; }
+function bulThumbErr(img){ if(img.getAttribute('data-k')==='0'){ img.setAttribute('data-k','1');
+  img.src='https://lh3.googleusercontent.com/d/'+encodeURIComponent(img.getAttribute('data-id'))+'=w200'; }
+  else img.style.visibility='hidden'; }
+function bulPick(i){ bulCur=i; renderBul(); try{ document.getElementById('bulWrap').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} }
+function bulBindStrip(){
+  const st=document.getElementById('bulStrip'); if(!st) return;
+  st.addEventListener('scroll',function(){
+    const k=Math.round(st.scrollLeft/Math.max(1,st.clientWidth));
+    document.querySelectorAll('#bulDots i').forEach(function(d,j){ d.classList.toggle('on',j===k); });
+    const no=document.getElementById('bulNo'); const n=st.querySelectorAll('.bpg').length;
+    if(no) no.textContent=(Math.min(k,n-1)+1)+' / '+n;
+  });
+  st.querySelectorAll('.bpg').forEach(bulBindZoom);
+}
+/*  확대 — 두 번 누르기 · 두 손가락 · 확대한 채 끌어서 이동 · ＋/− 단추 */
+function bulBindZoom(pg){
+  const img=pg.querySelector('img'); let s=1,x=0,y=0,last=0,pin=null,drag=null,md=null;
+  const st=document.getElementById('bulStrip');
+  function apply(){ img.style.transform='translate('+x+'px,'+y+'px) scale('+s+')';
+    pg.style.touchAction= s>1?'none':'pan-x pan-y'; if(st) st.style.overflowX= s>1?'hidden':'auto'; }
+  function clamp(){ const W=pg.clientWidth,H=pg.clientHeight; x=Math.min(0,Math.max(W-W*s,x)); y=Math.min(0,Math.max(H-H*s,y)); }
+  function zoomAt(ns,cx,cy){ ns=Math.max(1,Math.min(4,ns)); x=cx-(cx-x)*ns/s; y=cy-(cy-y)*ns/s; s=ns; if(s===1){x=0;y=0;} clamp(); apply(); }
+  pg._zoom=function(dir){ zoomAt(dir>0? s*1.6 : s/1.6, pg.clientWidth/2, pg.clientHeight/2); };
+  pg._scale=function(){ return s; };
+  function pt(e){ const r=pg.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; }
+  pg.addEventListener('dblclick',function(e){ const p=pt(e); zoomAt(s>1?1:2.5,p[0],p[1]); });
+  pg.addEventListener('touchstart',function(e){
+    if(e.touches.length===2){ const a=pt(e.touches[0]),b=pt(e.touches[1]);
+      pin={d:Math.hypot(a[0]-b[0],a[1]-b[1])||1,s:s,cx:(a[0]+b[0])/2,cy:(a[1]+b[1])/2}; drag=null; }
+    else if(e.touches.length===1){ const now=Date.now(), p=pt(e.touches[0]);
+      if(now-last<300){ zoomAt(s>1?1:2.5,p[0],p[1]); e.preventDefault(); last=0; } else last=now;
+      if(s>1) drag={p:p,x:x,y:y}; }
+  },{passive:false});
+  pg.addEventListener('touchmove',function(e){
+    if(pin&&e.touches.length===2){ const a=pt(e.touches[0]),b=pt(e.touches[1]);
+      zoomAt(pin.s*Math.hypot(a[0]-b[0],a[1]-b[1])/pin.d,pin.cx,pin.cy); e.preventDefault(); }
+    else if(drag&&e.touches.length===1){ const p=pt(e.touches[0]); x=drag.x+p[0]-drag.p[0]; y=drag.y+p[1]-drag.p[1]; clamp(); apply(); e.preventDefault(); }
+  },{passive:false});
+  pg.addEventListener('touchend',function(){ pin=null; drag=null; });
+  pg.addEventListener('mousedown',function(e){ if(s>1){ md={p:pt(e),x:x,y:y}; e.preventDefault(); } });
+  pg.addEventListener('mousemove',function(e){ if(md){ const p=pt(e); x=md.x+p[0]-md.p[0]; y=md.y+p[1]-md.p[1]; clamp(); apply(); } });
+  pg.addEventListener('mouseup',function(){ md=null; });
+  pg.addEventListener('mouseleave',function(){ md=null; });
+}
+function bulZoomBy(d){
+  const st=document.getElementById('bulStrip'); if(!st) return;
+  const k=Math.round(st.scrollLeft/Math.max(1,st.clientWidth));
+  const pg=st.querySelectorAll('.bpg')[k]; if(pg&&pg._zoom) pg._zoom(d);
+}
+
+/* ── 올리기 (교역자) ── */
+function bulNextSun(){ const d=new Date(); d.setDate(d.getDate()+((7-d.getDay())%7)); return localISO(d); }
+function bulOpenUp(){
+  if(!canBulUpMe()) return;
+  bulUp={d:bulNextSun(), pages:[], msg:''};
+  bulPaintUp();
+}
+function bulCloseUp(){ if(bulBusy) return; bulUp=null; const m=document.getElementById('bulModal'); if(m) m.remove(); }
+function bulPaintUp(){
+  let m=document.getElementById('bulModal');
+  if(!bulUp){ if(m) m.remove(); return; }
+  if(!m){ m=document.createElement('div'); m.id='bulModal'; m.className='bulmodal';
+    m.onclick=function(e){ if(e.target===m) bulCloseUp(); }; document.body.appendChild(m); }
+  const max=(BUL&&BUL.maxPages)||4, sun=carDow(bulUp.d)===0;
+  m.innerHTML='<div class="bulsheet">'
+    +'<h3>주보 올리기</h3><div class="m">찍거나 고른 뒤 주일 날짜만 확인하고 「올리기」를 누르세요.</div>'
+    +'<div class="lbl">주일 날짜</div>'
+    +'<input class="f-in" type="date" id="bulDate" value="'+esc(bulUp.d)+'" onchange="bulUp.d=this.value;bulPaintUp()"/>'
+    +(bulUp.d&&!sun? '<div class="bwarn">주일이 아닌 날입니다. 맞으면 그대로 올리셔도 됩니다.</div>' : '')
+    +'<div class="lbl">주보 (최대 '+max+'장 · 앞면부터 차례대로)</div>'
+    +'<div class="bpick">'
+    +'<label>📷 사진 찍기<small>카메라</small><input type="file" accept="image/*" capture="environment" onchange="bulAddFiles(this)"/></label>'
+    +'<label>🖼 사진첩<small>여러 장</small><input type="file" accept="image/*" multiple onchange="bulAddFiles(this)"/></label>'
+    +'<label>📄 PDF<small>쪽마다 사진으로</small><input type="file" accept="application/pdf,.pdf" onchange="bulAddFiles(this)"/></label>'
+    +'</div>'
+    +'<div class="bbusy" id="bulMsg">'+esc(bulUp.msg||'')+'</div>'
+    +'<div class="bthumbs">'+bulUp.pages.map(function(p,i){
+        return '<div class="btb"><span class="no">'+(i+1)+'</span>'
+          +'<button class="x" onclick="bulDelPage('+i+')" aria-label="빼기">✕</button>'
+          +(i>0?'<button class="mv" onclick="bulMovePage('+i+')" aria-label="앞으로">◀</button>':'')
+          +'<img src="'+p.u+'" alt=""/><div class="cap">'+esc(p.src)+' · '+bulKb(p.n)+'</div></div>';
+      }).join('')+'</div>'
+    +'<button class="f-primary" id="bulGo" '+((bulUp.pages.length&&!bulBusy)?'':'disabled ')+'onclick="bulSend()">'
+      +(bulBusy?'올리는 중…':'올리기')+'</button>'
+    +'<button class="bclose" onclick="bulCloseUp()">닫기</button></div>';
+}
+function bulKb(n){ return n>1048576? (n/1048576).toFixed(1)+'MB' : Math.max(1,Math.round(n/1024))+'KB'; }
+function bulMsg(t){ if(bulUp) bulUp.msg=t; const e=document.getElementById('bulMsg'); if(e) e.textContent=t; }
+function bulDelPage(i){ if(!bulUp||bulBusy) return; bulUp.pages.splice(i,1); bulPaintUp(); }
+function bulMovePage(i){ if(!bulUp||bulBusy||i<1) return; const p=bulUp.pages; const t=p[i]; p[i]=p[i-1]; p[i-1]=t; bulPaintUp(); }
+function bulDataSize(u){ return Math.round((u.length-u.indexOf(',')-1)*3/4); }
+/* 캔버스 → jpeg (긴 쪽 2000px · 화질 85%) */
+function bulCanvasJpeg(src,w,h){
+  let W=w,H=h;
+  if(W>BUL_MAX_SIDE||H>BUL_MAX_SIDE){ if(W>=H){ H=Math.round(H*BUL_MAX_SIDE/W); W=BUL_MAX_SIDE; } else { W=Math.round(W*BUL_MAX_SIDE/H); H=BUL_MAX_SIDE; } }
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,W,H); g.drawImage(src,0,0,W,H);
+  return c.toDataURL('image/jpeg',BUL_Q);
+}
+function bulReadUrl(f){ return new Promise(function(ok,no){ const rd=new FileReader();
+  rd.onload=function(e){ ok(e.target.result); }; rd.onerror=no; rd.readAsDataURL(f); }); }
+function bulLoadImg(u){ return new Promise(function(ok,no){ const im=new Image();
+  im.onload=function(){ ok(im); }; im.onerror=no; im.src=u; }); }
+/* PDF 도구는 PDF 를 고를 때만 불러온다 (평소 앱은 가볍게) */
+let _pdfjs=null;
+function bulPdfjs(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(_pdfjs) return _pdfjs;
+  _pdfjs=new Promise(function(ok,no){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/'+PDFJS_VER+'/pdf.min.js';
+    s.onload=function(){ try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc=
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/'+PDFJS_VER+'/pdf.worker.min.js'; ok(window.pdfjsLib); }catch(e){ no(e); } };
+    s.onerror=function(e){ _pdfjs=null; no(e); };
+    document.head.appendChild(s);
+  });
+  return _pdfjs;
+}
+async function bulAddFiles(inp){
+  const fs=[].slice.call(inp.files||[]); inp.value='';
+  if(!bulUp||bulBusy) return;
+  const max=(BUL&&BUL.maxPages)||4;
+  for(const f of fs){
+    if(!bulUp) return;
+    if(bulUp.pages.length>=max){ bulMsg('한 번에 '+max+'장까지 올릴 수 있습니다.'); break; }
+    const isPdf=f.type==='application/pdf' || /\.pdf$/i.test(f.name||'');
+    if(isPdf){
+      bulMsg('PDF 를 사진으로 바꾸는 중입니다…');
+      try{
+        const lib=await bulPdfjs();
+        const pdf=await lib.getDocument({data:await f.arrayBuffer()}).promise;
+        let n=0;
+        for(let p=1;p<=pdf.numPages;p++){
+          if(!bulUp||bulUp.pages.length>=max) break;
+          const pg=await pdf.getPage(p); const v0=pg.getViewport({scale:1});
+          const vp=pg.getViewport({scale:BUL_MAX_SIDE/Math.max(v0.width,v0.height)});
+          const c=document.createElement('canvas'); c.width=Math.round(vp.width); c.height=Math.round(vp.height);
+          const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height);
+          await pg.render({canvasContext:g,viewport:vp}).promise;
+          const u=c.toDataURL('image/jpeg',BUL_Q);
+          bulUp.pages.push({u:u,n:bulDataSize(u),src:'PDF '+p+'쪽'}); n++;
+        }
+        bulMsg(pdf.numPages>n? 'PDF '+pdf.numPages+'쪽 가운데 '+n+'쪽만 담았습니다 (최대 '+max+'장).' : 'PDF '+n+'쪽을 사진으로 바꿨습니다.');
+      }catch(e){ bulMsg('PDF 를 읽지 못했습니다. 인터넷 연결을 확인해 주세요.'); }
+    } else {
+      bulMsg('사진을 줄이는 중입니다…');
+      try{
+        const im=await bulLoadImg(await bulReadUrl(f));
+        const u=bulCanvasJpeg(im,im.naturalWidth||im.width,im.naturalHeight||im.height);
+        bulUp.pages.push({u:u,n:bulDataSize(u),src:'사진'});
+        bulMsg('');
+      }catch(e){ bulMsg('이 사진은 열 수 없습니다. 다른 사진으로 해 주세요.'); }
+    }
+    bulPaintUp();
+  }
+  bulPaintUp();
+}
+async function bulSend(){
+  if(!bulUp||bulBusy||!bulUp.pages.length) return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(bulUp.d||'')){ bulMsg('주일 날짜를 골라 주세요.'); return; }
+  const has=((BUL&&BUL.weeks)||[]).some(function(w){ return w.d===bulUp.d; });
+  if(has && !confirm(bulShort(bulUp.d)+' 주보가 이미 있습니다. 새 것으로 바꿀까요?\n(예전 것은 드라이브에 그대로 남습니다)')) return;
+  bulBusy=true; bulMsg('올리는 중입니다… 화면을 닫지 마세요.'); bulPaintUp();
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',body:tokBody({action:'saveBulletin', d:bulUp.d,
+      pages:bulUp.pages.map(function(p){ return p.u; })})});
+    d=await r.json().catch(()=>null);
+  }catch(e){ d=null; }
+  bulBusy=false;
+  if(!d){ bulMsg('보내지 못했습니다. 인터넷을 확인하고 다시 눌러 주세요.'); bulPaintUp(); return; }
+  if(d.error==='AUTH'){ bulUp=null; bulPaintUp(); onAuthLost(); return; }
+  if(!d.ok){ bulMsg(d.message||'올리지 못했습니다.'); bulPaintUp(); return; }
+  absorbToken(d);
+  BUL=d; bulCur=0; bulUp=null; bulPaintUp();
+  renderBul(); paintArchiveNew();
+  alert('주보를 올렸습니다.');
+}
+async function bulHide(dd){
+  if(!canBulUpMe()||bulBusy) return;
+  if(!confirm(bulShort(dd)+' 주보를 앱에서 내릴까요?\n(드라이브 파일은 지우지 않습니다)')) return;
+  bulBusy=true;
+  let d=null;
+  try{
+    const r=await fetch(API,{method:'POST',body:tokBody({action:'hideBulletin', d:dd})});
+    d=await r.json().catch(()=>null);
+  }catch(e){ d=null; }
+  bulBusy=false;
+  if(!d){ alert('전송에 실패했습니다. 다시 눌러 주세요.'); return; }
+  if(d.error==='AUTH'){ onAuthLost(); return; }
+  if(!d.ok){ alert(d.message||'처리하지 못했습니다.'); return; }
+  absorbToken(d);
+  BUL=d; bulCur=0; renderBul(); paintArchiveNew();
+}
+/*  아카이브 목록의 「주보」 줄에 NEW 를 붙인다 (목록을 그린 뒤 조용히) */
+function paintArchiveNew(){
+  const b=document.getElementById('arBulNew'); if(b) b.style.display=bulIsNew()?'inline-block':'none';
+  const t=document.getElementById('arBulDl');
+  if(t && BUL && BUL.weeks && BUL.weeks[0]) t.textContent=bulShort(BUL.weeks[0].d)+' 주보가 올라와 있습니다';
 }
 
 /* ══════════ 차량 사용 신청 ══════════  (2026-10-02)
@@ -3730,7 +4103,7 @@ function enterApp(role,scope){
 }
 /* 로그아웃하면 받아 둔 자료도 함께 비운다 — 특히 헬프데스크 신청 명단(이름·전화번호)은
    다음 분이 같은 기기로 들어오실 때 잠깐이라도 남아 있으면 안 된다. */
-function logout(){current=null;clearSession();setToken('');notiShown=false;GRADES=[];HELP=[];
+function logout(){current=null;BUL=null;bulUp=null;clearSession();setToken('');notiShown=false;GRADES=[];HELP=[];
   /*  ★ 2026-10-03 ★ 장소·차량 현황에는 «신청자 연락처»가 섞여 있다.
    *  로그아웃해도 손에 들고 있으면 다음 분 화면에 잠깐 비칠 수 있으므로 여기서 버린다.
    *  (다음에 그 화면을 열면 서버에서 새로 받아 온다) */
@@ -3760,6 +4133,7 @@ function showView(v,back){
   if(v==='car') openCar();
   if(v==='carmng') openCarMng();
   if(v==='archive') renderArchive();
+  if(v==='bulletin') openBulletin();
   if(v==='helpdesk') openHelpdesk();
   if(v==='hdlist') renderHelpPage();
   if(v==='gdlist') openGradeList();
@@ -7828,7 +8202,7 @@ try{ setTimeout(a2hsPaint,1200); }catch(e){}
  *   화면조차 열어 주지 않는 편이 안전하다)
  *  연 뒤에는 주소에서 ?go= 를 지운다 — 새로고침하거나 홈으로 돌아갔다가
  *  다시 오실 때 같은 화면이 또 튀어나오지 않게 하기 위해서다. */
-const GO_OK=['helpdesk','archive','intake','myreq','grade','place','prayer','culture','car'];
+const GO_OK=['helpdesk','archive','intake','myreq','grade','place','prayer','culture','car','bulletin'];
 function bootGo(){
   let want='';
   try{ want=String(new URLSearchParams(location.search).get('go')||'').trim(); }catch(e){ want=''; }

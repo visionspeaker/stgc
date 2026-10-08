@@ -901,7 +901,7 @@ background:linear-gradient(135deg,#2fa58f,#1f7d6d)}
 .bstrip .btrack.bwait{width:60%;height:300px;display:flex;align-items:center;justify-content:center}
 .bstrip .btrack.bwait .bfail{display:flex;position:static;color:var(--muted);font-size:13px}
 .bstrip .bsnap{position:absolute;top:0;bottom:0;scroll-snap-align:center;scroll-snap-stop:always;pointer-events:none}
-.bstrip{position:relative;align-items:flex-start}
+.bstrip{position:relative;align-items:flex-start;overflow-x:hidden!important;scroll-snap-type:none!important;touch-action:pan-y}
 .bpg:not(.fail):not(.bload){display:flex;justify-content:center;align-items:flex-start;aspect-ratio:auto}
 .bpg .bz{position:absolute;inset:0;transform-origin:0 0}
 .bpg .bz img{position:absolute;top:0;height:100%;max-width:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;display:block}
@@ -3425,14 +3425,28 @@ function bulCurMark(){
   ms.forEach(function(m,i){ const r=m.getBoundingClientRect(); const d=Math.abs(r.left+r.width/2-mid); if(d<bd){bd=d;bi=i;} });
   return {i:bi, el:ms[bi], n:ms.length};
 }
+/*  ★ 2026-10-08 ★ 한 번 밀면 «한 면씩»만 — 휙 밀어도 끝까지 날아가지 않는다.
+ *  가로 넘기기는 브라우저에 맡기지 않고 앱이 직접 한다: 손가락을 따라 움직이다가
+ *  떼면 다음(또는 이전) 면 자리에 걸리듯 멈춘다. */
+function bulGoMark(i, smooth){
+  const st=document.getElementById('bulStrip'); if(!st) return;
+  const ms=st.querySelectorAll('.bsnap'); if(!ms.length) return;
+  i=Math.max(0,Math.min(ms.length-1,i));
+  const sr=st.getBoundingClientRect(), mr=ms[i].getBoundingClientRect();
+  const left=st.scrollLeft + (mr.left+mr.width/2) - (sr.left+sr.width/2);
+  try{ st.scrollTo({left:left, behavior: smooth===false?'auto':'smooth'}); }catch(e){ st.scrollLeft=left; }
+  bulPaintPos(i); setTimeout(function(){ bulPaintPos(); },450);
+}
+/* 몇 번째 면인지 표시 (점 · 「3 / 8」) */
+function bulPaintPos(i){
+  const c=bulCurMark(); const k=(i===undefined)? c.i : i;
+  document.querySelectorAll('#bulDots i').forEach(function(d,j){ d.classList.toggle('on',j===k); });
+  const no=document.getElementById('bulNo'); if(no&&c.n) no.textContent=(k+1)+' / '+c.n;
+}
 function bulBindStrip(){
   const st=document.getElementById('bulStrip'); if(!st) return;
   if(!st._b){ st._b=1;
-    st.addEventListener('scroll',function(){
-      const c=bulCurMark();
-      document.querySelectorAll('#bulDots i').forEach(function(d,j){ d.classList.toggle('on',j===c.i); });
-      const no=document.getElementById('bulNo'); if(no&&c.n) no.textContent=(c.i+1)+' / '+c.n;
-    });
+    st.addEventListener('scroll',function(){ bulPaintPos(); });
     bulBindZoom(st);
   }
 }
@@ -3455,12 +3469,12 @@ function bulBindZoom(st){
     if(!z) return;
     z.style.transform= s>1? 'translate3d('+x+'px,'+y+'px,0) scale('+s+')' : '';
     z.classList.toggle('zoomed', s>1);
-    st.style.touchAction= s>1?'none':'pan-x pan-y'; st.style.overflowX= s>1?'hidden':'auto';
-    st.style.scrollSnapType= s>1?'none':'';
+    st.style.touchAction= s>1?'none':'pan-y';
   }
   function clamp(){ const g=geo(), cw=g.fw*s, ch=g.fh*s;
     x = cw<=g.W ? (g.W-cw)/2-g.ox : Math.min(-g.ox, Math.max(g.W-g.ox-cw, x));
     y = ch<=g.H ? (g.H-ch)/2-g.oy : Math.min(-g.oy, Math.max(g.H-g.oy-ch, y)); }
+  let sw=null;   /* 한 손가락 가로 넘기기 (확대 안 했을 때) */
   function done1(){   /* 다 줄였을 때 — 원래대로, 미뤄 둔 칸 크기 다시 재기 */
     x=0; y=0; s=1; apply(); z=null;
     if(st._needFit){ st._needFit=false; bulFitH(); }
@@ -3483,6 +3497,7 @@ function bulBindZoom(st){
   function mid(e){ const a=pt(e.touches[0]),b=pt(e.touches[1]); return {cx:(a[0]+b[0])/2, cy:(a[1]+b[1])/2, d:Math.hypot(a[0]-b[0],a[1]-b[1])||1}; }
   /* 두 손가락 시작 — 손가락 가운데 밑의 점을 기억해 두고, 그 점이 늘 손가락 가운데에 오게 한다 */
   function pinStart(e){
+    if(sw){ if(sw.dir==='h') bulGoMark(sw.i); sw=null; }
     if(!ensureZ()) return;
     const m=mid(e), g=geo();
     pin={d:m.d, s:s, lx:(m.cx-g.ox-x)/s, ly:(m.cy-g.oy-y)/s}; drag=null;
@@ -3491,8 +3506,9 @@ function bulBindZoom(st){
   st.addEventListener('touchstart',function(e){
     if(e.touches.length===2){ pinStart(e); e.preventDefault(); }
     else if(e.touches.length===1){ const now=Date.now(), p=pt(e.touches[0]);
-      if(now-last<300){ zoomAt(s>1?1:BUL_ZOOM_TAP,p[0],p[1]); e.preventDefault(); last=0; } else last=now;
-      if(s>1) drag={p:p,x:x,y:y}; }
+      if(now-last<300){ zoomAt(s>1?1:BUL_ZOOM_TAP,p[0],p[1]); e.preventDefault(); last=0; sw=null; } else last=now;
+      if(s>1) drag={p:p,x:x,y:y};
+      else sw={x:p[0], y:p[1], t:now, sl:st.scrollLeft, i:bulCurMark().i, dir:null, dx:0}; }
   },{passive:false});
   st.addEventListener('touchmove',function(e){
     if(e.touches.length===2){
@@ -3508,15 +3524,36 @@ function bulBindZoom(st){
       e.preventDefault();
     }
     else if(drag&&e.touches.length===1&&z){ const p=pt(e.touches[0]); x=drag.x+p[0]-drag.p[0]; y=drag.y+p[1]-drag.p[1]; clamp(); apply(); e.preventDefault(); }
+    else if(sw&&e.touches.length===1&&s<=1){
+      const p=pt(e.touches[0]), dx=p[0]-sw.x, dy=p[1]-sw.y;
+      if(!sw.dir && (Math.abs(dx)>8||Math.abs(dy)>8)) sw.dir= Math.abs(dx)>Math.abs(dy)? 'h':'v';
+      if(sw.dir==='h'){ sw.dx=dx; st.scrollLeft=sw.sl-dx; e.preventDefault(); }   /* 손가락을 따라간다 */
+    }
   },{passive:false});
   st.addEventListener('touchend',function(e){
+    if(sw && sw.dir==='h' && !(e.touches&&e.touches.length)){
+      /* 떼는 순간: 충분히 밀었거나 빠르게 휙 밀었으면 «한 면»만 넘긴다 */
+      const v=sw.dx/Math.max(1,Date.now()-sw.t), W=st.clientWidth||300;
+      const step = (sw.dx< -W*0.12 || v< -0.3) ? 1 : (sw.dx> W*0.12 || v> 0.3) ? -1 : 0;
+      bulGoMark(sw.i+step);
+    }
+    if(!(e.touches&&e.touches.length)) sw=null;
     pin=null;
     if(z && s<=1){ done1(); drag=null; return; }
     /* 두 손가락 중 하나만 뗐다 — 남은 손가락으로 바로 끈다 */
     if(e.touches && e.touches.length===1 && s>1){ drag={p:pt(e.touches[0]),x:x,y:y}; last=0; }
     else drag=null;
   });
-  st.addEventListener('touchcancel',function(){ pin=null; drag=null; });
+  st.addEventListener('touchcancel',function(){ if(sw&&sw.dir==='h') bulGoMark(sw.i); sw=null; pin=null; drag=null; });
+  /* 컴퓨터 — 트랙패드·휠로 옆으로 밀어도 한 면씩 */
+  let wAcc=0, wLock=0;
+  st.addEventListener('wheel',function(e){
+    if(s>1 || Math.abs(e.deltaX)<=Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    const now=Date.now(); if(now<wLock) return;
+    wAcc+=e.deltaX;
+    if(Math.abs(wAcc)>40){ bulGoMark(bulCurMark().i+(wAcc>0?1:-1)); wAcc=0; wLock=now+450; }
+  },{passive:false});
   /* 아이폰 사파리의 자체 확대(페이지 전체) — 주보 칸 위에서는 막는다 */
   ['gesturestart','gesturechange','gestureend'].forEach(function(ev){
     st.addEventListener(ev,function(e){ e.preventDefault(); },{passive:false}); });

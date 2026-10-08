@@ -2115,7 +2115,11 @@ function allNamesOf(name){
   return out;
 }
 function memberIdOf(name){ return MEMBER_IDS[canonName(name)] || ''; }
-function saveRoster(d){ try{ localStorage.setItem(ROSTER_KEY,JSON.stringify(d)); }catch(e){} }
+function saveRoster(d){ try{ localStorage.setItem(ROSTER_KEY,JSON.stringify(Object.assign({},d,{at:Date.now()}))); }catch(e){} }
+/*  ★ 2026-10-08 ★ 명단을 로그인할 때만 받아서, 시트에서 번호·직책·구역을 고쳐도
+ *  다시 로그인하기 전까지 앱에 안 들어왔다. 받아 둔 지 30분이 넘으면 앱을 열 때 뒤에서 새로 받는다. */
+const ROSTER_FRESH_MS=30*60*1000;
+function rosterStale(){ const c=loadRosterCache(); return !c || !c.at || (Date.now()-c.at)>ROSTER_FRESH_MS; }
 function loadRosterCache(){ try{ return JSON.parse(localStorage.getItem(ROSTER_KEY)||'null'); }catch(e){ return null; } }
 function haveRoster(){ return DIST_NAMES.length>0; }
 /* 로그인 직후·앱 진입 시 명단을 받아온다. 실패하면 직전에 받아둔 것을 그대로 쓴다. */
@@ -2133,6 +2137,11 @@ async function fetchRoster(){
     }
   }catch(e){ console.warn('명단 불러오기 실패(직전 명단 사용):',e); }
   return haveRoster();
+}
+/* 명단을 새로 받은 뒤 — 보고 있던 문의 화면의 담당 칩(전화·문자)만 다시 그린다 */
+function rerenderAfterRoster(){
+  if(currentView==='myreq' && typeof renderMyReq==='function') renderMyReq();
+  else if(currentView==='manage' && typeof renderSubs==='function') renderSubs();
 }
 /* 전화번호 (없으면 빈 문자열) */
 function phoneOf(name){ return String(PHONES[name]||'').trim(); }
@@ -2402,7 +2411,10 @@ async function loadAllOnce(){
   /*  로그인했는데 아직 명단이 없으면 함께 받아온다 (앱을 껐다 켠 경우 등).
       2026-09-13 — 예전에는 명단을 **다 받은 뒤에** 전체 자료를 불렀다.
       서버 한 번이 2초 남짓이라 그만큼 더 기다렸다. 이제 둘을 동시에 출발시킨다. */
-  const rosterJob = (TOKEN && !haveRoster() && !helpOnlyMe() && !subOnlyMe()) ? fetchRoster() : null;
+  const needR = TOKEN && !helpOnlyMe() && !subOnlyMe();
+  const rosterJob = (needR && !haveRoster()) ? fetchRoster() : null;
+  /* 명단은 있는데 오래됐으면 — 기다리지 않고 뒤에서 새로 받는다 (받는 동안 화면은 그대로) */
+  if(needR && haveRoster() && rosterStale()) fetchRoster().then(function(ok){ if(ok) try{ rerenderAfterRoster(); }catch(e){} });
   try{
     const [, r] = await Promise.all([ rosterJob,
                                       fetch(withTok(API+'?action=all'),{method:'GET'}) ]);

@@ -790,6 +790,14 @@ border:1px solid var(--line);text-decoration:none;flex:none}
 .ochip .omini svg{width:13px;height:13px}
 .ochip .omini.t{background:#dcfce7;color:#15803d}.ochip .omini.s{background:#dbeafe;color:#1d4ed8}
 .ochip .omini:active{transform:scale(.92)}
+.ochip .opick{margin-left:4px;height:24px;border-radius:999px;padding:0 9px;background:#fff;border:1px solid #c7d2fe;color:#4338ca;font-size:11px;font-weight:800;font-family:inherit;cursor:pointer}
+.ownpop{margin-top:8px;background:#fff;border:1px solid #c7d2fe;border-radius:12px;padding:6px 12px;box-shadow:0 6px 18px rgba(30,40,80,.10)}
+.ownpop .oph{font-size:11.5px;font-weight:800;color:#4338ca;margin:4px 0}
+.ownpop .oprow{display:flex;align-items:center;gap:6px;padding:7px 0;border-top:1px dashed #e5e9f2;font-size:13px}
+.ownpop .oprow b{flex:1}.ownpop .oprow b span{font-weight:400;color:var(--muted);font-size:11.5px}
+.ownpop .omini{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;text-decoration:none}
+.ownpop .omini svg{width:15px;height:15px}
+.ownpop .omini.t{background:#dcfce7;color:#15803d}.ownpop .omini.s{background:#dbeafe;color:#1d4ed8}
 @media(max-width:400px){.addrow{gap:6px}.addrow .rbtn{padding:0 7px;font-size:12px}}
 @media(max-width:350px){.addrow .rbtn{font-size:11.5px;padding:0 6px}.addrow .rbtn .ri{display:none}}
 .btnsm.gray{background:#fff;color:#3a4452;border:1px solid #b9c6d8}
@@ -7297,26 +7305,53 @@ function ownSmsHref(tel, title, read){
     : '안녕하세요, 송탄영광교회 영광 커넥트입니다.\n담당하신 문의 「'+t+'」가 아직 확인되지 않았습니다.\n영광 커넥트 › 문의 접수 처리에서 확인 부탁드립니다. 감사합니다.';
   return 'sms:'+n+sep+'body='+encodeURIComponent(body);
 }
-function ownerCallHtml(s,k,rd){
-  if(!current || current.role!=='admin') return '';
-  const who=ownerPerson(k); if(!who) return '';
-  const p=phoneOf(who); if(!p) return '';
-  return '<a class="omini t" href="'+esc(telHref(p))+'" title="'+esc(who)+'에게 전화" onclick="event.stopPropagation()">'+SVG_TEL+'</a>'
-    +'<a class="omini s" href="'+esc(ownSmsHref(p, s.title, !!rd))+'" title="'+esc(who)+'에게 문자" onclick="event.stopPropagation()">'+SVG_SMS+'</a>';
+/*  ★ 2026-10-08 ★ 직분 담당은 교인 연락처 시트의 「직책」 칸으로 찾는다 (앱 파일에 이름을 두지 않는다)
+ *   · 담임목사 = 직책 「담임목사」 · 부교역자 = 직책 「부목사·협동목사·전도사·부교역자」
+ *   (구역이 없는 교역자분들의 번호·직책은 서버가 교역자에게만 보내 준다) */
+const DUTY_JOB_RANK=['부목사','협동목사','전임전도사','전도사','교육전도사','부교역자'];
+function ownerPeople(k){
+  if(k===DUTY_PASTOR) return Object.keys(MEMBER_ROLE).filter(n=>String(MEMBER_ROLE[n]).trim()==='담임목사');
+  if(k===DUTY_STAFF){
+    const rk=n=>{ const j=String(MEMBER_ROLE[n]||'').trim(); const i=DUTY_JOB_RANK.indexOf(j); return i<0?99:i; };
+    return Object.keys(MEMBER_ROLE).filter(n=>/부목사|협동목사|전도사|부교역자/.test(String(MEMBER_ROLE[n]||'')))
+      .sort((a,b)=>(rk(a)-rk(b))||a.localeCompare(b,'ko'));
+  }
+  const w=ownerPerson(k); return w? [w] : [];
 }
+function ownMiniHtml(name,p,s,rd){
+  return '<a class="omini t" href="'+esc(telHref(p))+'" title="'+esc(name)+'에게 전화" onclick="event.stopPropagation()">'+SVG_TEL+'</a>'
+    +'<a class="omini s" href="'+esc(ownSmsHref(p, s.title, !!rd))+'" title="'+esc(name)+'에게 문자" onclick="event.stopPropagation()">'+SVG_SMS+'</a>';
+}
+function ownerCallHtml(s,k,rd,pid){
+  if(!current || current.role!=='admin') return '';
+  const ps=ownerPeople(k).filter(n=>phoneOf(n));
+  if(!ps.length) return '';
+  if(ps.length===1) return ownMiniHtml(ps[0],phoneOf(ps[0]),s,rd);
+  /* 여러 분(부교역자) — 「연락 ▾」를 누르면 아래에 이름 목록 */
+  return '<button class="opick" onclick="event.stopPropagation();ownPopToggle(\''+pid+'\')">연락 ▾</button>';
+}
+function ownPopHtml(s,k,rd,pid){
+  if(!current || current.role!=='admin') return '';
+  const ps=ownerPeople(k).filter(n=>phoneOf(n)); if(ps.length<2) return '';
+  return '<div class="ownpop" id="'+pid+'" style="display:none"><div class="oph">'+esc(ownerLabel(k))+' — 누구에게 연락할까요?</div>'
+    +ps.map(n=>'<div class="oprow"><b>'+esc(n)+' <span>'+esc(MEMBER_ROLE[n]||'')+'</span></b>'+ownMiniHtml(n,phoneOf(n),s,rd)+'</div>').join('')+'</div>';
+}
+function ownPopToggle(pid){ const e=document.getElementById(pid); if(e) e.style.display= e.style.display==='none'?'block':'none'; }
 function ownersHtml(s,idx){
   const ks=subOwners(s), mine=myOwnerKeys();
-  const chips=ks.map(function(k){
-    const rd=ownerRead(s,k);
+  const pops=[];
+  const chips=ks.map(function(k,i){
+    const rd=ownerRead(s,k), pid='op_'+String(s.id||'').replace(/[^A-Za-z0-9_]/g,'')+'_'+i;
+    const pop=ownPopHtml(s,k,rd,pid); if(pop) pops.push(pop);
     return '<span class="ochip '+ownerChipClass(k)+(mine.indexOf(k)>=0?' mine':'')+'">'
       + esc(ownerLabel(k))
-      + '<span class="ck">'+(rd? '✔ 확인 '+esc(rd.by||'') : '· 미확인')+'</span>'+ownerCallHtml(s,k,rd)+'</span>';
+      + '<span class="ck">'+(rd? '✔ 확인 '+esc(rd.by||'') : '· 미확인')+'</span>'+ownerCallHtml(s,k,rd,pid)+'</span>';
   }).join('');
   const btn = (current&&current.role==='admin')
     ? '<button class="addown" onclick="openOwnPick(\''+jsq(s.id||'')+'\')">'
       + (ks.length? '담당 고치기' : '＋ 담당 추가') + '</button>' : '';
   const none = (!ks.length && !btn) ? '<span class="ck" style="color:var(--muted);font-size:11.5px">따로 지정된 담당이 없습니다</span>' : '';
-  return '<div class="owners">'+chips+none+btn+'</div>';
+  return '<div class="owners">'+chips+none+btn+'</div>'+pops.join('');
 }
 /* ── 담당 지정 팝업 ── */
 let ownPickId=null, ownPickSel=[];

@@ -780,6 +780,9 @@ border:1px solid var(--line);text-decoration:none;flex:none}
 .seg button:active{background:#f1f4f9}
 .seg button.on{background:var(--green);color:#fff;border-color:var(--green)}
 .addrow{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.addrow .rsp{flex:1}
+.addrow .rbtn{height:40px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;line-height:1}
+.btnsm.gray{background:#fff;color:#3a4452;border:1px solid #b9c6d8}
 /* 목록 줄의 문의 삭제 */
 .btable .c-del{width:36px;text-align:center}
 .trash{border:0;background:none;cursor:pointer;font-size:14px;color:#c3ccd8;padding:3px 5px;font-family:inherit}
@@ -4744,7 +4747,7 @@ function renderMyReq(){
     const mg=canMgSub(s);
     /*  교역자에게 원래 있던 삭제 단추는 그대로 둔다 (새로 늘리지는 않는다) */
     const delRow = del ? `<div class="delrow"><button class="btnsm danger" onclick="deleteSub('${sid}')">🗑 삭제</button></div>` : '';
-    const detail = mg ? (subMgDetail(s, idx) + delRow) :
+    const detail = mg ? subMgDetail(s, idx) :
       s.pub ? (pubSubDetail(s, idx) + delRow) :
       `<div id="lk${idx}"><div class="pinrow"><input class="f-in" type="password" maxlength="4" inputmode="numeric" id="pin${idx}" placeholder="비밀번호 4자리" onkeydown="if(event.key==='Enter')openMine(${idx})"/><button class="btnsm" onclick="openMine(${idx})">내용 보기</button>${del?`<button class="btnsm gray" onclick="adminOpen(${idx})">관리자 열람</button>`:''}</div></div>
        ${del?`<div class="delrow"><button class="btnsm danger" onclick="deleteSub('${sid}')">🗑 삭제</button></div>`:''}`;
@@ -7101,9 +7104,11 @@ function subCallHtml(contact, s){
 function subMgDetail(s, idx){
   const sid=esc(s.id||'');
   const nRep=replyList(s).length;
-  return (s.pub? `<div class="pubmg">🔓 <b>공개 문의</b>입니다. 내용과 회신이 모든 분께 보입니다. 회신에 개인 정보는 적지 마세요.`
-      +(canDelete()? `<br><button class="btnsm" style="margin-top:6px" onclick="subMakePrivate(${idx})">🔒 비공개로 돌리기</button>` : '')+`</div>` : '')
-    +`<div class="dsec">
+  /*  ★ 2026-10-08 ★ 공개 안내 문구는 뺐다. 회신 저장 · 비공개로 돌리기 · 삭제를 회신 칸 아래 한 줄에 모은다.
+   *  저장은 왼쪽, 비공개·삭제는 오른쪽 끝 (실수로 누르지 않게). 세 단추 높이는 같게. */
+  const tail=(s.pub&&canDelete()? `<button class="btnsm gray rbtn" onclick="subMakePrivate(${idx})">🔒 비공개로 돌리기</button>` : '')
+    +(canDelete()? `<button class="btnsm danger rbtn" onclick="deleteSub('${jsq(s.id||'')}')">🗑 삭제</button>` : '');
+  return `<div class="dsec">
          <div class="dl">문의 내용</div>
          <div class="qbody">${esc(s.body||'(내용 없음)')}</div>
          ${s.hasPhoto?`<div class="sc-photo" id="ph_${sid}"><button class="btnsm" onclick="loadPhoto('${jsq(s.id||'')}')">📷 첨부 사진 보기</button></div>`:''}
@@ -7121,8 +7126,8 @@ function subMgDetail(s, idx){
          <div class="dl">회신${nRep?' '+nRep+'건':''}</div>
          <div class="thread" id="thr${idx}">${replyThreadHtml(s,true,idx)}</div>
          <textarea class="f-in" style="margin-top:9px" id="rp${idx}" data-sid="${sid}" oninput="onReplyInput(${idx})" placeholder="회신을 추가로 적어주세요">${esc(replyDrafts[sid]||'')}</textarea>
-         <div class="addrow"><button class="btn sm" id="rpbtn${idx}" onclick="saveReply(${idx})">회신 추가 저장</button>
-           <span class="rpdraft" id="rpmeta${idx}" style="${(replyDrafts[sid]||'').trim()?'':'display:none'}">✎ 작성 중 · 아직 저장되지 않았습니다</span></div>
+         <div class="addrow"><button class="btnsm rbtn" id="rpbtn${idx}" onclick="saveReply(${idx})">회신 추가 저장</button>
+           <span class="rpdraft" id="rpmeta${idx}" style="${(replyDrafts[sid]||'').trim()?'':'display:none'}">✎ 작성 중 · 아직 저장되지 않았습니다</span>${tail?`<span class="rsp"></span>${tail}`:''}</div>
        </div>`;
 }
 function renderSubs(){

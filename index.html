@@ -780,8 +780,13 @@ border:1px solid var(--line);text-decoration:none;flex:none}
 .seg button:active{background:#f1f4f9}
 .seg button.on{background:var(--green);color:#fff;border-color:var(--green)}
 .addrow{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
-.addrow .rsp{flex:1}
-.addrow .rbtn{height:40px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;line-height:1}
+/*  2026-10-08 : 세 단추를 나란히 한 줄에 — 아이폰 폭에서도 넘어가지 않게 내용만큼 나눠 채운다.
+ *  「작성 중」 표시는 맨 아랫줄로 따로 */
+.addrow{flex-wrap:wrap}
+.addrow .rbtn{height:40px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;line-height:1;flex:1 1 auto;min-width:0;white-space:nowrap;font-size:12.5px}
+.addrow .rpdraft{order:9;flex-basis:100%;text-align:center}
+@media(max-width:400px){.addrow{gap:6px}.addrow .rbtn{padding:0 7px;font-size:12px}}
+@media(max-width:350px){.addrow .rbtn{font-size:11.5px;padding:0 6px}.addrow .rbtn .ri{display:none}}
 .btnsm.gray{background:#fff;color:#3a4452;border:1px solid #b9c6d8}
 /* 목록 줄의 문의 삭제 */
 .btable .c-del{width:36px;text-align:center}
@@ -7106,8 +7111,8 @@ function subMgDetail(s, idx){
   const nRep=replyList(s).length;
   /*  ★ 2026-10-08 ★ 공개 안내 문구는 뺐다. 회신 저장 · 비공개로 돌리기 · 삭제를 회신 칸 아래 한 줄에 모은다.
    *  저장은 왼쪽, 비공개·삭제는 오른쪽 끝 (실수로 누르지 않게). 세 단추 높이는 같게. */
-  const tail=(s.pub&&canDelete()? `<button class="btnsm gray rbtn" onclick="subMakePrivate(${idx})">🔒 비공개로 돌리기</button>` : '')
-    +(canDelete()? `<button class="btnsm danger rbtn" onclick="deleteSub('${jsq(s.id||'')}')">🗑 삭제</button>` : '');
+  const tail=(s.pub&&canDelete()? `<button class="btnsm gray rbtn" onclick="subMakePrivate(${idx})"><span class="ri">🔒 </span>비공개로 돌리기</button>` : '')
+    +(canDelete()? `<button class="btnsm danger rbtn" onclick="deleteSub('${jsq(s.id||'')}')"><span class="ri">🗑 </span>삭제</button>` : '');
   return `<div class="dsec">
          <div class="dl">문의 내용</div>
          <div class="qbody">${esc(s.body||'(내용 없음)')}</div>
@@ -7127,7 +7132,7 @@ function subMgDetail(s, idx){
          <div class="thread" id="thr${idx}">${replyThreadHtml(s,true,idx)}</div>
          <textarea class="f-in" style="margin-top:9px" id="rp${idx}" data-sid="${sid}" oninput="onReplyInput(${idx})" placeholder="회신을 추가로 적어주세요">${esc(replyDrafts[sid]||'')}</textarea>
          <div class="addrow"><button class="btnsm rbtn" id="rpbtn${idx}" onclick="saveReply(${idx})">회신 추가 저장</button>
-           <span class="rpdraft" id="rpmeta${idx}" style="${(replyDrafts[sid]||'').trim()?'':'display:none'}">✎ 작성 중 · 아직 저장되지 않았습니다</span>${tail?`<span class="rsp"></span>${tail}`:''}</div>
+           <span class="rpdraft" id="rpmeta${idx}" style="${(replyDrafts[sid]||'').trim()?'':'display:none'}">✎ 작성 중 · 아직 저장되지 않았습니다</span>${tail}</div>
        </div>`;
 }
 function renderSubs(){

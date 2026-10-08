@@ -3300,7 +3300,14 @@ function bulFitH(){
   st.style.paddingRight=Math.max(0,(VW-lastPW)/2)+'px';
   st.style.scrollPaddingLeft='0px';
 }
-try{ window.addEventListener('resize',function(){ if(document.getElementById('bulStrip')){ bulFitH(); bulZoomReset&&bulZoomReset(); } }); }catch(e){}
+/*  ★ 2026-10-08 ★ 아이폰은 끌거나 확대하는 도중에 주소창이 접히고 펴지며 이 신호가 자주 난다.
+ *  예전에는 여기서 확대를 «풀어» 보던 자리가 튀었다. 이제 확대 중이면 자리만 다시 맞추고,
+ *  칸 크기 다시 재기는 확대를 다 줄였을 때 한 번 한다. */
+try{ window.addEventListener('resize',function(){
+  const st=document.getElementById('bulStrip'); if(!st) return;
+  if(st._zoomed && st._zoomed()){ st._needFit=true; st._reclamp&&st._reclamp(); }
+  else bulFitH();
+}); }catch(e){}
 /*  2배 넘게 키우면 한 번만 큰 사진으로 바꿔 받는다 (못 받으면 그대로 둔다)
  *  같은 사진에서 잘라 낸 조각들이 함께 바뀐다 */
 function bulWantHi(pg){
@@ -3309,8 +3316,10 @@ function bulWantHi(pg){
   if(!id || !f || f.fail || f.k>1 || f.hi) return;
   f.hi=1;
   const hi=bulSrc(id,f.k,BUL_HI_W); const pre=new Image();
-  pre.onload=function(){ f.src=hi;
+  /*  ★ 2026-10-08 ★ 큰 사진은 «다 풀어 둔 뒤» 바꿔 끼운다 — 바꾸는 순간 멈칫하지 않게 */
+  pre.onload=function(){ const sw=function(){ f.src=hi;
     document.querySelectorAll('#bulStrip img').forEach(function(x){ if(x.getAttribute('data-id')===id) x.src=hi; }); };
+    try{ if(pre.decode) pre.decode().then(sw,sw); else sw(); }catch(e){ sw(); } };
   pre.src=hi;
 }
 async function fetchBul(){
@@ -3419,14 +3428,19 @@ function bulBindStrip(){
  *  이어진 사진이라 옆 면 쪽으로도 끊김 없이 끌어 볼 수 있다.
  *  확대 중에는 옆으로 넘기기를 잠그고, 다 줄이면 원래 넘기던 자리로 돌아온다. */
 let bulZoomReset=null;
+/*  ★ 2026-10-08 ★ 확대가 뚝뚝 끊기고 자리가 튀던 것 고침
+ *   · 두 손가락 가운데를 «따라» 확대·이동이 함께 된다 (예전엔 처음 댄 자리에 고정)
+ *   · 손가락 하나를 떼면 남은 손가락으로 바로 끌 수 있다
+ *   · 주보 칸 위에서는 아이폰 자체 화면 확대를 막는다 (두 확대가 다투던 것)
+ *   · 주소창이 접히고 펴져도 확대를 풀지 않는다 (위 resize 처리) */
 function bulBindZoom(st){
   let z=null,s=1,x=0,y=0,last=0,pin=null,drag=null,md=null;
   function pick(){ const c=bulCurMark(); return c.el? c.el.closest('.btrack') : null; }
-  function geo(){ const sr=st.getBoundingClientRect(), zr0=z.offsetLeft-st.scrollLeft;
-    return {W:st.clientWidth, H:st.clientHeight, fw:z.offsetWidth, fh:z.offsetHeight, ox:zr0, oy:z.offsetTop}; }
+  function ensureZ(){ if(z) return true; z=pick(); if(!z || z.classList.contains('fail') || z.classList.contains('bwait')){ z=null; return false; } s=1; x=0; y=0; return true; }
+  function geo(){ return {W:st.clientWidth, H:st.clientHeight, fw:z.offsetWidth, fh:z.offsetHeight, ox:z.offsetLeft-st.scrollLeft, oy:z.offsetTop}; }
   function apply(){
     if(!z) return;
-    z.style.transform= s>1? 'translate('+x+'px,'+y+'px) scale('+s+')' : '';
+    z.style.transform= s>1? 'translate3d('+x+'px,'+y+'px,0) scale('+s+')' : '';
     z.classList.toggle('zoomed', s>1);
     st.style.touchAction= s>1?'none':'pan-x pan-y'; st.style.overflowX= s>1?'hidden':'auto';
     st.style.scrollSnapType= s>1?'none':'';
@@ -3434,33 +3448,65 @@ function bulBindZoom(st){
   function clamp(){ const g=geo(), cw=g.fw*s, ch=g.fh*s;
     x = cw<=g.W ? (g.W-cw)/2-g.ox : Math.min(-g.ox, Math.max(g.W-g.ox-cw, x));
     y = ch<=g.H ? (g.H-ch)/2-g.oy : Math.min(-g.oy, Math.max(g.H-g.oy-ch, y)); }
+  function done1(){   /* 다 줄였을 때 — 원래대로, 미뤄 둔 칸 크기 다시 재기 */
+    x=0; y=0; s=1; apply(); z=null;
+    if(st._needFit){ st._needFit=false; bulFitH(); }
+  }
   function zoomAt(ns,cx,cy){
-    if(!z){ z=pick(); if(!z || z.classList.contains('fail')){ z=null; return; } s=1; x=0; y=0; }
+    if(!ensureZ()) return;
     ns=Math.max(1,Math.min(BUL_ZOOM_MAX,ns)); const g=geo();
     const lx=(cx-g.ox-x)/s, ly=(cy-g.oy-y)/s;     /* 손가락 밑의 점(사진 기준) */
     s=ns; x=cx-g.ox-lx*s; y=cy-g.oy-ly*s;
-    if(s===1){ x=0; y=0; apply(); z=null; return; }
+    if(s===1){ done1(); return; }
     clamp(); apply();
     if(s>2) bulWantHi(z);
   }
-  bulZoomReset=function(){ if(z){ s=1; x=0; y=0; apply(); z=null; } };
+  bulZoomReset=function(){ if(z) done1(); };
   st._zoom=function(dir){ zoomAt(dir>0? s*1.6 : s/1.6, st.clientWidth/2, st.clientHeight/3); };
   st._scale=function(){ return s; };
+  st._zoomed=function(){ return !!z && s>1; };
+  st._reclamp=function(){ if(z && s>1){ clamp(); apply(); } };
   function pt(e){ const r=st.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; }
+  function mid(e){ const a=pt(e.touches[0]),b=pt(e.touches[1]); return {cx:(a[0]+b[0])/2, cy:(a[1]+b[1])/2, d:Math.hypot(a[0]-b[0],a[1]-b[1])||1}; }
+  /* 두 손가락 시작 — 손가락 가운데 밑의 점을 기억해 두고, 그 점이 늘 손가락 가운데에 오게 한다 */
+  function pinStart(e){
+    if(!ensureZ()) return;
+    const m=mid(e), g=geo();
+    pin={d:m.d, s:s, lx:(m.cx-g.ox-x)/s, ly:(m.cy-g.oy-y)/s}; drag=null;
+  }
   st.addEventListener('dblclick',function(e){ const p=pt(e); zoomAt(s>1?1:BUL_ZOOM_TAP,p[0],p[1]); });
   st.addEventListener('touchstart',function(e){
-    if(e.touches.length===2){ const a=pt(e.touches[0]),b=pt(e.touches[1]);
-      pin={d:Math.hypot(a[0]-b[0],a[1]-b[1])||1,s:s,cx:(a[0]+b[0])/2,cy:(a[1]+b[1])/2}; drag=null; }
+    if(e.touches.length===2){ pinStart(e); e.preventDefault(); }
     else if(e.touches.length===1){ const now=Date.now(), p=pt(e.touches[0]);
       if(now-last<300){ zoomAt(s>1?1:BUL_ZOOM_TAP,p[0],p[1]); e.preventDefault(); last=0; } else last=now;
       if(s>1) drag={p:p,x:x,y:y}; }
   },{passive:false});
   st.addEventListener('touchmove',function(e){
-    if(pin&&e.touches.length===2){ const a=pt(e.touches[0]),b=pt(e.touches[1]);
-      zoomAt(pin.s*Math.hypot(a[0]-b[0],a[1]-b[1])/pin.d,pin.cx,pin.cy); e.preventDefault(); }
+    if(e.touches.length===2){
+      if(!pin) pinStart(e);
+      if(pin && z){
+        const m=mid(e), g=geo();
+        s=Math.max(1,Math.min(BUL_ZOOM_MAX, pin.s*m.d/pin.d));
+        x=m.cx-g.ox-pin.lx*s; y=m.cy-g.oy-pin.ly*s;
+        if(s===1){ x=0; y=0; } else clamp();
+        apply();
+        if(s>2) bulWantHi(z);
+      }
+      e.preventDefault();
+    }
     else if(drag&&e.touches.length===1&&z){ const p=pt(e.touches[0]); x=drag.x+p[0]-drag.p[0]; y=drag.y+p[1]-drag.p[1]; clamp(); apply(); e.preventDefault(); }
   },{passive:false});
-  st.addEventListener('touchend',function(){ pin=null; drag=null; });
+  st.addEventListener('touchend',function(e){
+    pin=null;
+    if(z && s<=1){ done1(); drag=null; return; }
+    /* 두 손가락 중 하나만 뗐다 — 남은 손가락으로 바로 끈다 */
+    if(e.touches && e.touches.length===1 && s>1){ drag={p:pt(e.touches[0]),x:x,y:y}; last=0; }
+    else drag=null;
+  });
+  st.addEventListener('touchcancel',function(){ pin=null; drag=null; });
+  /* 아이폰 사파리의 자체 확대(페이지 전체) — 주보 칸 위에서는 막는다 */
+  ['gesturestart','gesturechange','gestureend'].forEach(function(ev){
+    st.addEventListener(ev,function(e){ e.preventDefault(); },{passive:false}); });
   st.addEventListener('mousedown',function(e){ if(s>1&&z){ md={p:pt(e),x:x,y:y}; e.preventDefault(); } });
   st.addEventListener('mousemove',function(e){ if(md&&z){ const p=pt(e); x=md.x+p[0]-md.p[0]; y=md.y+p[1]-md.p[1]; clamp(); apply(); } });
   st.addEventListener('mouseup',function(){ md=null; });

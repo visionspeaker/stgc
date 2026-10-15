@@ -161,6 +161,8 @@ canvas{max-height:280px}
 .dgrid.g2{grid-template-columns:1fr 1fr}
 .dgrid.g3{grid-template-columns:2fr 1fr}
 /* ── 앱 접속 통계 (2026-10-15) ── */
+.stat-at{font-size:11px;font-weight:600;color:#98a2b3;margin-left:6px}
+.seeall:disabled{color:#98a2b3;cursor:default;text-decoration:none}
 .stlock{font-size:10.5px;font-weight:800;background:#26313f;color:#fff;border-radius:999px;padding:2px 8px;margin-left:4px;vertical-align:middle}
 .stpills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .stpills button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer;color:var(--ink)}
@@ -9238,12 +9240,16 @@ async function statLoad(force){
   if(!canStatMe()){ box.innerHTML=''; return; }
   if(!force && STAT && Date.now()-statAt<120000){ renderStat(); return; }
   if(statBusy) return; statBusy=true;
+  /* 누른 것이 보이게 — 받는 동안 단추를 「불러오는 중…」으로 (2026-10-15) */
+  const rb=document.getElementById('statRef'); if(rb){ rb.disabled=true; rb.textContent='불러오는 중…'; }
   if(!STAT) box.innerHTML='<div class="sect-t">📊 앱 접속 통계 <span class="stlock">나만 보기</span></div><div class="dcard"><div class="bempty">불러오는 중…</div></div>';
   let d=null;
   try{ const r=await fetch(API,{method:'POST',body:tokBody({action:'trackStats'})}); d=await r.json().catch(()=>null); }catch(e){ d=null; }
   statBusy=false;
   if(!canStatMe()){ box.innerHTML=''; return; }
   if(d && d.ok){ absorbToken(d); STAT=d; statAt=Date.now(); renderStat(); return; }
+  /* 실패 — 받아 둔 숫자가 있으면 그대로 두고 단추만 되돌린다 */
+  if(STAT){ renderStat(); const r2=document.getElementById('statRef'); if(r2) r2.textContent='새로 고침 (실패 — 다시 눌러 주세요)'; return; }
   box.innerHTML='<div class="sect-t">📊 앱 접속 통계 <span class="stlock">나만 보기</span></div><div class="dcard"><div class="bempty">불러오지 못했습니다. 잠시 후 다시 열어 주세요.</div></div>';
 }
 function statSet(k,v){ if(k==='per') statPer=v; else if(k==='who') statWho=v; else statSort=v; renderStat(); }
@@ -9274,7 +9280,8 @@ function statSessions(rows){
 }
 function statHead(){
   return '<div class="sect-t">📊 앱 접속 통계 <span class="stlock">나만 보기</span>'
-    +' <button class="seeall" onclick="statLoad(true)">새로 고침</button></div>'
+    +' <button class="seeall" id="statRef" onclick="statLoad(true)">새로 고침</button>'
+    +(statAt? '<span class="stat-at">'+String(new Date(statAt).getHours()).padStart(2,'0')+':'+String(new Date(statAt).getMinutes()).padStart(2,'0')+' 기준</span>' : '')+'</div>'
     +'<div class="stseg"><button class="'+(statWho==='login'?'on':'')+'" onclick="statSet(\'who\',\'login\')">로그인 사용자</button>'
     +'<button class="'+(statWho==='guest'?'on':'')+'" onclick="statSet(\'who\',\'guest\')">성도 (비로그인)</button></div>';
 }

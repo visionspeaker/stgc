@@ -160,6 +160,35 @@ canvas{max-height:280px}
 .dgrid{display:grid;gap:14px;margin-bottom:2px}
 .dgrid.g2{grid-template-columns:1fr 1fr}
 .dgrid.g3{grid-template-columns:2fr 1fr}
+/* ── 앱 접속 통계 (2026-10-15) ── */
+.stlock{font-size:10.5px;font-weight:800;background:#26313f;color:#fff;border-radius:999px;padding:2px 8px;margin-left:4px;vertical-align:middle}
+.stpills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.stpills button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:800;font-family:inherit;cursor:pointer;color:var(--ink)}
+.stpills button.on{background:#2fa58f;color:#fff;border-color:#2fa58f}
+.stkpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stk{background:#f6f9fc;border-radius:12px;padding:10px}
+.stk b{display:block;font-size:21px}.stk b em{font-style:normal;font-size:12.5px;color:var(--muted);font-weight:600}
+.stk span{font-size:11.5px;color:var(--muted)}.stk small{display:block;font-size:11px;color:#15803d;font-weight:800;margin-top:2px}.stk small.dn{color:#b91c1c}
+.sth{font-size:13px;font-weight:800;margin:14px 0 8px}.sth small{font-weight:400;color:var(--muted);font-size:11.5px}
+.stbars{display:flex;align-items:flex-end;gap:4px;height:80px}
+.stbars i{flex:1;background:linear-gradient(180deg,#57b45f,#2fa58f);border-radius:4px 4px 0 0;min-height:3px}
+.stbars i.sun{background:linear-gradient(180deg,#4b9fe0,#2e74b5)}
+.stbx{display:flex;justify-content:space-between;font-size:10.5px;color:#98a2b3;margin-top:4px}
+.stm{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:4px 0}
+.stm .n{width:96px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stm .t{flex:1;height:10px;background:#eef2f7;border-radius:6px;overflow:hidden}
+.stm .t i{display:block;height:100%;background:#2fa58f}.stm .c{width:62px;text-align:right;color:var(--muted);font-size:11.5px}
+.sttb{width:100%;border-collapse:collapse;font-size:12px}.sttb td,.sttb th{padding:6px 4px;border-bottom:1px solid #eef1f5;text-align:left;vertical-align:top}
+.sttb th{color:var(--muted);font-weight:700;font-size:11px}.sttb .r{text-align:right;white-space:nowrap}
+.stidle{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:8px 10px;font-size:12px;color:#9a3412;margin-top:8px}
+.stidle summary{cursor:pointer}.stidle div{display:flex;flex-direction:column;gap:3px;margin-top:6px}.stidle small{color:#b45309}
+.stok{background:#ecf9f1;border-radius:10px;padding:8px 10px;font-size:12px;color:#15803d;margin-top:8px}
+.stfoot{font-size:11px;color:#98a2b3;line-height:1.6;margin-top:10px}
+.stseg{display:flex;background:#e7ecf3;border-radius:12px;padding:3px;margin:0 0 10px;max-width:420px}
+.stseg button{flex:1;border:0;background:none;padding:8px;border-radius:10px;font-size:12.5px;font-weight:800;color:#5b6573;font-family:inherit;cursor:pointer}
+.stseg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.stsplit{height:14px;border-radius:7px;overflow:hidden;background:#cbd5e1;margin:4px 0}.stsplit i{display:block;height:100%;background:#2fa58f}
+.stleg{font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between}
+@media(max-width:760px){.dgrid.g2.stgrid{grid-template-columns:1fr}}
 .dcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
 .dcard h3{margin:0 0 3px;font-size:15px;color:var(--ink)}
 .dcard h3 small{font-weight:400;color:var(--muted);font-size:12px}
@@ -2009,6 +2038,8 @@ font-size:12.5px;color:#8a5a12;line-height:1.8;margin-top:13px}
     </div>
     <span class="prok" id="prayOk"></span>
   </div>
+  <!-- 앱 접속 통계 — 서버가 허락한 분에게만 그린다 (2026-10-15) -->
+  <div id="statCard"></div>
 </section>
 
 <div class="footer">송탄영광교회 영광 커넥트<br><span class="cright">© 2026 songtanglorychurch. All rights reserved. · 무단 복제·배포 금지</span></div>
@@ -2503,6 +2534,8 @@ async function loadAllOnce(){
         /*  아카이브 서랍 — 서버가 참·거짓만 알려 준다 (2026-10-03) */
         const ar=(d.me.arch===true);
         if((current.arch===true)!==ar){ current.arch=ar; meChanged=true; paintHomeAdmin(); }
+        const sa=(d.me.stat===true);
+        if((current.stat===true)!==sa){ current.stat=sa; meChanged=true; statLoad(); }
         /*  메뉴를 다시 만들 때는 **보고 있던 화면을 그대로 둔다.**
          *  인자 없이 buildNav() 를 부르면 첫 칸으로 옮겨 가 버린다. */
         if(meChanged){ saveSession(); setRoleLabel();
@@ -2835,7 +2868,9 @@ async function loginByName(){
             duty:(me&&me.duty)||'', scope:(me&&me.scope)||'',
             gradeAll:((me&&me.gradeAll)===true),
             arch:((me&&me.arch)===true),
+            stat:((me&&me.stat)===true),
             who:(me&&me.name)||nm});
+  try{ window.__trkBegin && window.__trkBegin(); }catch(e){}   /* 접속 통계 — 로그인한 때부터 */
   if(mustPw) setTimeout(function(){
     if(confirm('아직 처음 비밀번호(1234)를 쓰고 계십니다.\n지금 변경하시겠습니까?')) openPwChange();
   },500);
@@ -4570,7 +4605,7 @@ function enterApp(role,scope){
 }
 /* 로그아웃하면 받아 둔 자료도 함께 비운다 — 특히 헬프데스크 신청 명단(이름·전화번호)은
    다음 분이 같은 기기로 들어오실 때 잠깐이라도 남아 있으면 안 된다. */
-function logout(){current=null;BUL=null;bulUp=null;clearSession();setToken('');notiShown=false;GRADES=[];HELP=[];PEOPLE=[];NOTI=[];menShown=false;menToastOff();
+function logout(){try{ window.__trkEnd && window.__trkEnd(); }catch(e){} STAT=null;current=null;BUL=null;bulUp=null;clearSession();setToken('');notiShown=false;GRADES=[];HELP=[];PEOPLE=[];NOTI=[];menShown=false;menToastOff();
   /*  ★ 2026-10-03 ★ 장소·차량 현황에는 «신청자 연락처»가 섞여 있다.
    *  로그아웃해도 손에 들고 있으면 다음 분 화면에 잠깐 비칠 수 있으므로 여기서 버린다.
    *  (다음에 그 화면을 열면 서버에서 새로 받아 온다) */
@@ -4591,7 +4626,7 @@ function showView(v,back){
   if(v==='report') showReport();
   if(v==='manage'){ renderSubs(); markSubsSeen(); }
   if(v==='myreq') renderMyReq();
-  if(v==='dash') renderDash();
+  if(v==='dash'){ renderDash(); statLoad(); }
   if(v==='member') renderMemberSearch();
   if(v==='mroster') openRoster();
   if(v==='grade') openGrade();
@@ -9126,6 +9161,232 @@ function bootGo(){
   openApp(want);
   return true;
 }
+/* ══════════ 앱 접속 통계 (2026-10-15) — 접속통계_적용가이드.md ══════════
+ *  · 로그인한 분은 출입증으로, 로그인 안 한 성도님은 이름 없는 기기 번호로 따로 모은다.
+ *    (성도님 쪽은 서버의 다른 탭에 쌓이고, 누구인지는 알 수 없다 — 2026-10-15)
+ *  · 앱이 화면에 떠 있는 시간을 15초마다 폰에 쌓고,
+ *    앱을 내리거나 닫을 때 한 번 보낸다(sendBeacon). 30분 넘게 쉬면 새 접속.
+ *  · 누구인지는 서버가 출입증으로 확인한다 — 앱은 이름을 보내지 않는다.
+ *  · 메뉴 = 홈 타일 · 상단 메뉴 · 아카이브 항목 · 아카이브 카드. 통계 카드 자체는 세지 않는다.
+ *  · 보기는 대시보드 맨 아래 카드 — 서버가 참(stat)을 준 분에게만 그린다. 알리지 않는다. */
+(function(){
+  const TK='sgc_trk_v1', GAP=30*60000;
+  const LOCAL=/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  let st={}; try{ st=JSON.parse(localStorage.getItem(TK)||'{}')||{}; }catch(e){ st={}; }
+  let visT=0;
+  function logged(){ return !!current && !!current.who && current.role!=='guest' && !!TOKEN; }
+  /* 지금 누구로 셀까 — 로그인했으면 출입증, 아니면 기기 번호 */
+  function idNow(){ return logged()? {tok:TOKEN} : {dev:deviceId(), app:a2hsInstalled()?1:0}; }
+  function same(ch){ const i=idNow(); return !!ch && (i.tok? ch.tok===i.tok : (!ch.tok && ch.dev===i.dev)); }
+  function save(){ try{ localStorage.setItem(TK,JSON.stringify(st)); }catch(e){} }
+  function newSid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+  function send(ch){
+    if(!ch || !(ch.tok||ch.dev) || (ch.sec<1 && !(ch.m||[]).length)) return;
+    const o={action:'track', sid:ch.sid, s:ch.s, e:ch.e, sec:Math.round(ch.sec), m:ch.m||[]};
+    if(ch.tok) o.token=ch.tok; else { o.dev=ch.dev; o.app=ch.app?1:0; }
+    const body=JSON.stringify(o);
+    if(LOCAL && !window.__TRK_TEST){ window.__TRK_SENT=(window.__TRK_SENT||[]).concat([JSON.parse(body)]); return; }
+    let ok=false;
+    try{ ok=navigator.sendBeacon && navigator.sendBeacon(API, new Blob([body],{type:'text/plain;charset=utf-8'})); }catch(e){}
+    if(!ok){ try{ fetch(API,{method:'POST',keepalive:true,headers:{'Content-Type':'text/plain;charset=utf-8'},body:body}); }catch(e){} }
+  }
+  function tick(){ if(!visT || !st.ch) return; const n=Date.now(); st.ch.sec+=(n-visT)/1000; st.ch.e=n; st.last=n; visT=n; save(); }
+  function begin(){
+    const n=Date.now();
+    if(st.ch){ send(st.ch); st.ch=null; }               /* 강제 종료로 못 보낸 조각 */
+    const i=idNow(); if(!i.tok && !i.dev){ visT=0; save(); return; }
+    if(!st.sid || !st.last || n-st.last>GAP) st.sid=newSid();
+    st.ch=Object.assign({sid:st.sid, s:n, e:n, sec:0, m:[]}, i); st.last=n; visT=n; save();
+  }
+  function end(){ if(!st.ch) return; tick(); const ch=st.ch; st.ch=null; visT=0; save(); send(ch); }
+  function menu(name){
+    name=String(name||'').replace(/\s+/g,' ').trim().slice(0,30); if(!name) return;
+    if(st.ch && !same(st.ch)) end();                    /* 로그인·로그아웃으로 사람이 바뀌면 조각을 나눈다 */
+    if(!st.ch) begin();
+    if(!st.ch) return;
+    const m=st.ch.m; if(m.length<60 && m[m.length-1]!==name) m.push(name); tick(); save();
+  }
+  function txt(el){ if(!el) return ''; let t=''; for(let i=0;i<el.childNodes.length;i++){ const c=el.childNodes[i]; if(c.nodeType===3) t+=c.nodeValue; } return (t.trim()||el.textContent||'').trim(); }
+  function menuOf(t){
+    let el;
+    if(t.closest('#statCard')) return '';
+    if((el=t.closest('.mtile'))){ const s=el.querySelector(':scope > span'); return s? s.textContent.trim() : ''; }
+    if((el=t.closest('#nav button'))){
+      if(el.classList.contains('navmore')) return '';
+      if(el.classList.contains('navhome')) return '';
+      return txt(el).replace(/\s*↗$/,'')+(el.dataset.url?' ↗':'');
+    }
+    if((el=t.closest('.aritem'))){ const s=el.querySelector('.tt'); return s? txt(s) : ''; }
+    if((el=t.closest('.homecard'))){ const s=el.querySelector('.tt'); return s? txt(s) : ''; }
+    return '';
+  }
+  window.__trkMenu=menu;
+  window.__trkBegin=function(){ if(st.ch && !same(st.ch)) end(); if(!st.ch && document.visibilityState!=='hidden') begin(); };
+  window.__trkEnd=function(){ end(); setTimeout(window.__trkBegin,0); };   /* 로그아웃 → 다음부터는 성도(기기)로 */
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') end(); else begin(); });
+  window.addEventListener('pagehide',end);
+  setInterval(function(){ if(document.visibilityState!=='hidden') tick(); },15000);
+  document.addEventListener('click',function(e){ if(e.target && e.target.closest) menu(menuOf(e.target)); },true);
+  setTimeout(function(){ if(document.visibilityState!=='hidden') begin(); },0);
+})();
+
+/* ── 대시보드 「앱 접속 통계」 카드 (서버가 stat 참을 준 분만) ── */
+let STAT=null, statBusy=false, statAt=0, statPer='week', statSort='cnt', statWho='login';
+function canStatMe(){ return !!current && current.stat===true; }
+async function statLoad(force){
+  const box=document.getElementById('statCard'); if(!box) return;
+  if(!canStatMe()){ box.innerHTML=''; return; }
+  if(!force && STAT && Date.now()-statAt<120000){ renderStat(); return; }
+  if(statBusy) return; statBusy=true;
+  if(!STAT) box.innerHTML='<div class="sect-t">📊 앱 접속 통계 <span class="stlock">나만 보기</span></div><div class="dcard"><div class="bempty">불러오는 중…</div></div>';
+  let d=null;
+  try{ const r=await fetch(API,{method:'POST',body:tokBody({action:'trackStats'})}); d=await r.json().catch(()=>null); }catch(e){ d=null; }
+  statBusy=false;
+  if(!canStatMe()){ box.innerHTML=''; return; }
+  if(d && d.ok){ absorbToken(d); STAT=d; statAt=Date.now(); renderStat(); return; }
+  box.innerHTML='<div class="sect-t">📊 앱 접속 통계 <span class="stlock">나만 보기</span></div><div class="dcard"><div class="bempty">불러오지 못했습니다. 잠시 후 다시 열어 주세요.</div></div>';
+}
+function statSet(k,v){ if(k==='per') statPer=v; else if(k==='who') statWho=v; else statSort=v; renderStat(); }
+function statDur(s){ s=Math.round(s||0); if(s<60) return s+'초'; const m=Math.floor(s/60); if(m<60) return m+'분'+(s%60?' '+(s%60)+'초':''); return Math.floor(m/60)+'시간 '+(m%60)+'분'; }
+function statDay(t){ const d=new Date(t); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function statWhen(t){ const d=new Date(t), n=new Date(); const k=statDay(t);
+  if(k===statDay(n)) return '오늘'; const y=new Date(n); y.setDate(y.getDate()-1); if(k===statDay(y)) return '어제';
+  return (d.getMonth()+1)+'/'+d.getDate(); }
+/* 기간 [시작, 끝) */
+function statRange(per, back){
+  const n=new Date(); const d0=new Date(n.getFullYear(),n.getMonth(),n.getDate());
+  let a,b;
+  if(per==='today'){ a=d0; b=new Date(+d0+864e5); }
+  else if(per==='yday'){ a=new Date(+d0-864e5); b=d0; }
+  else if(per==='week'){ a=new Date(+d0-d0.getDay()*864e5); b=new Date(+a+7*864e5); }
+  else if(per==='month'){ a=new Date(n.getFullYear(),n.getMonth(),1); b=new Date(n.getFullYear(),n.getMonth()+1,1); }
+  else { a=new Date(+d0-182*864e5); b=new Date(+d0+864e5); }
+  if(back){ if(per==='month'){ b=a; a=new Date(a.getFullYear(),a.getMonth()-1,1); } else { const L=b-a; b=a; a=new Date(+a-L); } }
+  return [+a,+b];
+}
+/* 조각 → 접속(세션) 묶음 */
+function statSessions(rows){
+  const m={};
+  rows.forEach(function(r){ const k=r[0]+'|'+r[1]; const s=m[k]||(m[k]={sid:r[0],who:r[1],s:r[2],e:r[3],sec:0,menus:[]});
+    s.s=Math.min(s.s,r[2]); s.e=Math.max(s.e,r[3]); s.sec+=r[4];
+    String(r[5]||'').split('|').filter(Boolean).forEach(function(x){ if(s.menus[s.menus.length-1]!==x) s.menus.push(x); }); });
+  return Object.keys(m).map(k=>m[k]);
+}
+function statHead(){
+  return '<div class="sect-t">📊 앱 접속 통계 <span class="stlock">나만 보기</span>'
+    +' <button class="seeall" onclick="statLoad(true)">새로 고침</button></div>'
+    +'<div class="stseg"><button class="'+(statWho==='login'?'on':'')+'" onclick="statSet(\'who\',\'login\')">로그인 사용자</button>'
+    +'<button class="'+(statWho==='guest'?'on':'')+'" onclick="statSet(\'who\',\'guest\')">성도 (비로그인)</button></div>';
+}
+function statPills(){
+  return '<div class="stpills">'+[['today','오늘'],['yday','어제'],['week','이번 주'],['month','이번 달'],['all','6개월']]
+    .map(p=>'<button class="'+(statPer===p[0]?'on':'')+'" onclick="statSet(\'per\',\''+p[0]+'\')">'+p[1]+'</button>').join('')+'</div>';
+}
+function statBars(times){
+  const days=[]; const t0=new Date(); t0.setHours(0,0,0,0);
+  for(let i=13;i>=0;i--){ const d=new Date(+t0-i*864e5); days.push({k:statDay(d), d:d, n:0}); }
+  const dk={}; days.forEach(x=>{ dk[x.k]=x; }); times.forEach(t=>{ const x=dk[statDay(t)]; if(x) x.n++; });
+  const mx=Math.max(1,...days.map(x=>x.n));
+  return '<div class="sth">최근 2주 일별 접속</div>'
+    +'<div class="stbars">'+days.map(x=>'<i title="'+esc(x.k)+' · '+x.n+'회" class="'+(x.d.getDay()===0?'sun':'')+'" style="height:'+Math.max(4,Math.round(x.n/mx*100))+'%"></i>').join('')+'</div>'
+    +'<div class="stbx"><span>'+(days[0].d.getMonth()+1)+'/'+days[0].d.getDate()+'</span><span>■ 주일</span><span>오늘</span></div>';
+}
+function statDelta(c,p){ if(!p) return ''; const d=Math.round((c-p)/p*100);
+  return '<small class="'+(d<0?'dn':'')+'">'+(d===0?'지난 기간과 같음':(d>0?'▲ ':'▼ ')+Math.abs(d)+'%')+'</small>'; }
+/* 성도(비로그인) — 서버가 접속 단위로 합친 요약 [시작(분), 기기번호, 체류초, [메뉴번호], 홈화면앱] */
+function renderStatGuest(box){
+  const G=STAT.guest||{menus:[],sess:[]}; const MN=G.menus||[];
+  const all=(G.sess||[]).map(x=>({s:x[0]*60000, dev:x[1], sec:x[2]||0, m:x[3]||[], app:x[4]===1}));
+  const [a,b]=statRange(statPer,false), [pa,pb]=statRange(statPer,true);
+  const cur=all.filter(x=>x.s>=a&&x.s<b), prev=all.filter(x=>x.s>=pa&&x.s<pb);
+  const first={}; all.forEach(x=>{ if(first[x.dev]===undefined || x.s<first[x.dev]) first[x.dev]=x.s; });
+  const devs={}; cur.forEach(x=>{ devs[x.dev]=1; });
+  const fresh=Object.keys(devs).filter(d=>first[d]>=a && first[d]<b).length;
+  const tot=cur.reduce((t,x)=>t+x.sec,0);
+  const mm={}; let homeOnly=0, app=0;
+  cur.forEach(x=>{ if(!x.m.length) homeOnly++; if(x.app) app++; x.m.forEach(i=>{ const n=MN[i]||'?'; const o=mm[n]||(mm[n]={n:n,c:0,u:{}}); o.c++; o.u[x.dev]=1; }); });
+  const ms=Object.keys(mm).map(k=>mm[k]).sort((p,q)=>q.c-p.c); const mmx=ms.length? ms[0].c : 1;
+  const ap=cur.length? Math.round(app/cur.length*100) : 0;
+  const firstAll=all.length? Math.min(...all.map(x=>x.s)) : 0;
+  box.innerHTML=statHead()
+    +'<div class="dgrid g2 stgrid"><div class="dcard">'+statPills()
+    +'<div class="stkpis">'
+    +'<div class="stk"><b>'+cur.length+'</b><span>접속</span>'+statDelta(cur.length,prev.length)+'</div>'
+    +'<div class="stk"><b>'+Object.keys(devs).length+'<em>대</em></b><span>접속한 폰</span></div>'
+    +'<div class="stk"><b>'+fresh+'<em>대</em></b><span>처음 온 폰</span></div>'
+    +'<div class="stk"><b>'+statDur(cur.length? tot/cur.length : 0)+'</b><span>평균 체류</span></div>'
+    +'</div>'+statBars(all.map(x=>x.s))
+    +'</div><div class="dcard">'
+    +'<div class="sth" style="margin-top:0">많이 쓴 메뉴 <small>· 횟수 · 폰 수</small></div>'
+    +(ms.length? ms.slice(0,12).map(o=>'<div class="stm"><span class="n">'+esc(o.n)+'</span><span class="t"><i style="width:'+Math.round(o.c/mmx*100)+'%"></i></span><span class="c">'+o.c+' · '+Object.keys(o.u).length+'</span></div>').join('')
+               : '<div class="bempty">이 기간에는 기록이 없어요</div>')
+    +(homeOnly?'<div class="stfoot">홈만 보고 나간 접속 '+homeOnly+'회</div>':'')
+    +'<div class="sth">어떻게 열었나</div>'
+    +(cur.length? '<div class="stsplit"><i style="width:'+ap+'%"></i></div>'
+        +'<div class="stleg"><span>■ 홈 화면 앱 '+ap+'%</span><span>브라우저·카톡 '+(100-ap)+'% ■</span></div>'
+      : '<div class="bempty">이 기간에는 기록이 없어요</div>')
+    +'<div class="stfoot">로그인하지 않고 쓰는 분만 셉니다 · 이름·번호는 모으지 않고 폰마다 무작위 번호 하나로만 셉니다 · '
+    +(firstAll? '기록은 '+statWhen(firstAll)+'부터 · ':'')+'6개월이 지나면 자동으로 지워집니다</div>'
+    +'</div></div>';
+}
+function renderStat(){
+  const box=document.getElementById('statCard'); if(!box) return;
+  if(!canStatMe() || !STAT){ box.innerHTML=''; return; }
+  if(statWho==='guest'){ renderStatGuest(box); return; }
+  const all=statSessions(STAT.rows||[]);
+  const [a,b]=statRange(statPer,false), [pa,pb]=statRange(statPer,true);
+  const cur=all.filter(s=>s.s>=a && s.s<b), prev=all.filter(s=>s.s>=pa && s.s<pb);
+  const users=(STAT.users||[]); const nU=users.length;
+  const who={}; cur.forEach(s=>{ const w=who[s.who]||(who[s.who]={n:s.who,cnt:0,sec:0,last:0}); w.cnt++; w.sec+=s.sec; w.last=Math.max(w.last,s.e); });
+  const totSec=cur.reduce((x,s)=>x+s.sec,0);
+  /* 메뉴 */
+  const mm={}; let homeOnly=0;
+  cur.forEach(s=>{ if(!s.menus.length) homeOnly++; s.menus.forEach(x=>{ const o=mm[x]||(mm[x]={n:x,c:0,u:{}}); o.c++; o.u[s.who]=1; }); });
+  const ms=Object.keys(mm).map(k=>mm[k]).sort((x,y)=>y.c-x.c); const mmx=ms.length? ms[0].c : 1;
+  /* 사용자별 */
+  const desc={}; users.forEach(u=>{ desc[u.n]=u.d||''; });
+  let ul=Object.keys(who).map(k=>who[k]);
+  ul.sort(statSort==='sec'? (x,y)=>y.sec-x.sec : statSort==='last'? (x,y)=>y.last-x.last : (x,y)=>y.cnt-x.cnt);
+  /* 2주 이상 미접속 — 전체 기록 기준, 로그인 계정 전체 */
+  const lastAll={}; all.forEach(s=>{ lastAll[s.who]=Math.max(lastAll[s.who]||0,s.e); });
+  const cut=Date.now()-14*864e5;
+  const idle=users.filter(u=>!lastAll[u.n] || lastAll[u.n]<cut).map(u=>({n:u.n,d:u.d,last:lastAll[u.n]||0}))
+    .sort((x,y)=>x.last-y.last);
+  const recent=all.slice().sort((x,y)=>y.e-x.e).slice(0,10);
+  const pill=(k,v,t,on)=>'<button class="'+(on?'on':'')+'" onclick="statSet(\''+k+'\',\''+v+'\')">'+t+'</button>';
+  const first=all.length? Math.min(...all.map(s=>s.s)) : 0;
+  box.innerHTML=statHead()
+    +'<div class="dgrid g2 stgrid"><div class="dcard">'
+    +statPills()
+    +'<div class="stkpis">'
+    +'<div class="stk"><b>'+cur.length+'</b><span>총 접속</span>'+statDelta(cur.length,prev.length)+'</div>'
+    +'<div class="stk"><b>'+Object.keys(who).length+'<em> / '+nU+'명</em></b><span>접속한 로그인 사용자</span></div>'
+    +'<div class="stk"><b>'+statDur(cur.length? totSec/cur.length : 0)+'</b><span>평균 체류</span></div>'
+    +'<div class="stk"><b>'+statDur(totSec)+'</b><span>총 체류</span></div>'
+    +'</div>'
+    +statBars(all.map(x=>x.s))
+    +'<div class="sth">많이 쓴 메뉴 <small>· 횟수 · 사용자</small></div>'
+    +(ms.length? ms.slice(0,10).map(o=>'<div class="stm"><span class="n">'+esc(o.n)+'</span><span class="t"><i style="width:'+Math.round(o.c/mmx*100)+'%"></i></span><span class="c">'+o.c+' · '+Object.keys(o.u).length+'</span></div>').join('')
+               : '<div class="bempty">이 기간에는 기록이 없어요</div>')
+    +(homeOnly?'<div class="stfoot">홈만 보고 나간 접속 '+homeOnly+'회</div>':'')
+    +'</div><div class="dcard">'
+    +'<div class="sth" style="margin-top:0">로그인 사용자별</div>'
+    +'<div class="stpills">'+[['cnt','접속순'],['sec','체류순'],['last','최근순']].map(p=>pill('sort',p[0],p[1],statSort===p[0])).join('')+'</div>'
+    +(ul.length? '<table class="sttb"><tr><th>이름</th><th>역할</th><th class="r">접속</th><th class="r">체류</th><th class="r">마지막</th></tr>'
+        +ul.map(w=>'<tr><td>'+esc(w.n)+'</td><td>'+esc(desc[w.n]||'')+'</td><td class="r">'+w.cnt+'</td><td class="r">'+statDur(w.sec)+'</td><td class="r">'+statWhen(w.last)+'</td></tr>').join('')+'</table>'
+      : '<div class="bempty">이 기간에는 기록이 없어요</div>')
+    +(idle.length? '<details class="stidle"><summary><b>2주 이상 미접속 '+idle.length+'명</b> · '+idle.slice(0,3).map(x=>esc(x.n)).join(' · ')+(idle.length>3?' …':'')+'</summary>'
+        +'<div>'+idle.map(x=>'<span>'+esc(x.n)+(x.d?' <small>'+esc(x.d)+'</small>':'')+' · '+(x.last? statWhen(x.last):'기록 없음')+'</span>').join('')+'</div></details>'
+      : '<div class="stok">모든 계정이 2주 안에 접속했어요</div>')
+    +'<div class="sth">최근 접속 기록</div>'
+    +(recent.length? '<table class="sttb"><tr><th>언제</th><th>누구</th><th>본 메뉴</th></tr>'
+        +recent.map(s=>{ const d=new Date(s.s); return '<tr><td>'+statWhen(s.s)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'</td><td>'+esc(s.who)+'</td><td>'+(s.menus.length? esc(s.menus.slice(0,4).join(' › '))+(s.menus.length>4?' …':'') : '<span style="color:var(--muted)">홈만 봄</span>')+'</td></tr>'; }).join('')+'</table>'
+      : '<div class="bempty">아직 기록이 없어요</div>')
+    +'<div class="stfoot">로그인한 분만 셉니다 · 앱이 화면에 떠 있던 시간만 체류로 셉니다 · 30분 넘게 쉬었다 들어오면 새 접속 · '
+    +(first? '기록은 '+statWhen(first)+'부터 · ':'')+((STAT.keep||183)>=180?'6개월':STAT.keep+'일')+'이 지나면 자동으로 지워집니다</div>'
+    +'</div></div>';
+}
+
 /* 방문 카운트를 먼저 보내고(응답이 가벼워 빠름) 이어서 전체 데이터 로드 */
 countVisit();
 if(!bootGo()) loadAll();   /* openApp 이 이미 loadAll 을 부르므로 두 번 부르지 않는다 */

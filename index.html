@@ -177,7 +177,7 @@ body.signmode > *:not(#signage):not(#signHint){display:none!important}
 #signage .snow{margin-top:1.2em;flex:1;border-radius:1em;padding:1.4em 1.6em;display:flex;flex-direction:column;justify-content:center}
 #signage .snow.busy{background:#e5484d}#signage .snow.free{background:#2fa58f}#signage .snow.wait{background:rgba(255,255,255,.1)}
 #signage .snow .k{font-size:1.6em;font-weight:800}
-#signage .snow .t{font-size:4.2em;font-weight:900;margin:.2em 0;line-height:1.1}
+#signage .snow .t{font-size:4.2em;font-weight:900;margin:.2em 0;line-height:1.1;white-space:nowrap}
 #signage .snow .d{font-size:1.9em}
 #signage .sr{background:rgba(255,255,255,.07);border-radius:1em;padding:1.2em 1.4em;display:flex;flex-direction:column;min-height:0;overflow:hidden}
 #signage .sr h3{margin:0 0 .5em;font-size:1.45em}
@@ -9211,6 +9211,8 @@ const SIGN_MODE=(function(){ try{ return String(new URLSearchParams(location.sea
 const SIGN_QR='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 37" class="segno"><path fill="#fff" d="M0 0h37v37h-37z"/><path class="qrline" stroke="#000" d="M2 2.5h7m4 0h1m2 0h1m2 0h2m1 0h1m1 0h1m3 0h7m-33 1h1m5 0h1m1 0h1m1 0h1m2 0h3m1 0h6m3 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m2 0h1m2 0h3m1 0h1m4 0h1m1 0h1m2 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m3 0h1m3 0h2m2 0h5m1 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h2m3 0h1m2 0h2m2 0h1m1 0h1m1 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m2 0h5m6 0h2m1 0h1m2 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-25 1h1m2 0h4m3 0h3m2 0h2m-24 1h1m1 0h4m1 0h3m5 0h2m1 0h2m3 0h3m1 0h2m1 0h1m-32 1h2m3 0h1m1 0h3m1 0h6m1 0h2m1 0h1m1 0h1m4 0h3m-31 1h8m1 0h1m1 0h3m3 0h1m4 0h2m1 0h1m2 0h5m-30 1h1m1 0h1m1 0h1m6 0h2m1 0h1m2 0h1m2 0h5m2 0h1m-30 1h1m2 0h3m1 0h3m1 0h9m3 0h4m4 0h1m-32 1h5m1 0h2m5 0h5m4 0h1m1 0h1m1 0h1m-26 1h3m1 0h1m2 0h1m4 0h1m1 0h1m2 0h1m2 0h1m3 0h1m1 0h1m1 0h1m-31 1h2m7 0h1m2 0h3m1 0h3m4 0h1m1 0h1m3 0h2m1 0h1m-32 1h1m3 0h3m1 0h2m3 0h1m1 0h1m1 0h3m1 0h7m-29 1h2m3 0h1m2 0h1m1 0h6m2 0h3m4 0h2m1 0h1m1 0h3m-33 1h1m1 0h2m2 0h4m7 0h3m3 0h1m3 0h1m1 0h2m1 0h1m-32 1h1m1 0h1m1 0h1m2 0h4m3 0h3m2 0h1m1 0h3m3 0h3m1 0h1m-32 1h3m2 0h2m2 0h1m1 0h5m7 0h1m2 0h1m1 0h1m1 0h2m-33 1h1m1 0h1m2 0h1m1 0h2m1 0h1m2 0h2m4 0h1m2 0h2m1 0h1m1 0h4m-31 1h1m1 0h1m2 0h2m3 0h1m2 0h2m1 0h3m1 0h2m1 0h6m1 0h3m-33 1h1m2 0h3m1 0h4m2 0h1m2 0h2m4 0h2m2 0h2m2 0h1m1 0h1m-33 1h8m1 0h5m1 0h1m2 0h3m2 0h7m-22 1h3m2 0h1m1 0h1m1 0h1m3 0h1m1 0h2m3 0h1m1 0h2m-32 1h7m4 0h1m4 0h1m1 0h3m2 0h2m1 0h1m1 0h1m1 0h1m-31 1h1m5 0h1m1 0h1m1 0h2m4 0h1m1 0h1m1 0h1m2 0h2m3 0h4m-32 1h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m1 0h2m1 0h1m4 0h6m2 0h2m-33 1h1m1 0h3m1 0h1m1 0h2m2 0h1m1 0h2m3 0h2m3 0h2m1 0h1m1 0h2m1 0h1m-33 1h1m1 0h3m1 0h1m2 0h1m2 0h1m2 0h2m1 0h2m1 0h1m1 0h1m1 0h1m1 0h3m1 0h2m-33 1h1m5 0h1m1 0h3m3 0h2m1 0h1m1 0h1m2 0h2m1 0h4m1 0h3m-33 1h7m5 0h2m1 0h2m1 0h1m4 0h2m1 0h3"/></svg>';
 let SIGN={name:'', data:null, at:0, fail:0};
 function signTodayISO(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+/* 「오후 5:30~7:30」 — 오전·오후가 같으면 뒤쪽은 숫자만 (2026-10-16) */
+function signSpan(it){ const a=ampm(it.from), b=ampm(it.to); return a.slice(0,2)===b.slice(0,2)? a+'~'+b.slice(3) : a+'~'+b; }
 function signMin(t){ const p=String(t||'').split(':'); return p.length===2? (+p[0])*60+(+p[1]) : -1; }
 function signPlace(){ const ps=(SIGN.data&&SIGN.data.places)||[]; const q=SIGN.name.replace(/\s/g,'');
   return ps.filter(p=>String(p).replace(/\s/g,'').indexOf(q)>=0)[0] || SIGN.name; }
@@ -9238,7 +9240,7 @@ function signPaint(){
   const clock=(now.getMonth()+1)+'월 '+now.getDate()+'일 '+DW[now.getDay()]+'요일 · '+ampm(String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0'));
   let st;
   if(!SIGN.data) st='<div class="snow wait"><div class="k">불러오는 중…</div></div>';
-  else if(cur) st='<div class="snow busy"><div class="k">● 지금 사용 중</div><div class="t">'+esc(ampm(cur.from))+' ~ '+esc(ampm(cur.to))+'</div><div class="d">'+what(cur)+'</div></div>';
+  else if(cur) st='<div class="snow busy"><div class="k">● 지금 사용 중</div><div class="t">'+esc(signSpan(cur))+'</div><div class="d">'+what(cur)+'</div></div>';
   else st='<div class="snow free"><div class="k">● 지금 비어 있음</div>'
     +(next? '<div class="t">다음 '+esc(ampm(next.from))+'</div><div class="d">'+what(next)+'</div>' : '<div class="t">오늘 남은 일정 없음</div>')+'</div>';
   box.innerHTML='<div class="sl">'
@@ -9252,7 +9254,7 @@ function signPaint(){
         const show=done.slice(Math.max(0,done.length-Math.max(0,SIGN_ROWS-up.length))).concat(up.slice(0,SIGN_ROWS));
         const rest=tod.length-show.length;
         return show.map(it=>{ const on=cur&&it===cur, dn=signMin(it.to)<=nm;
-          return '<div class="srow'+(on?' cur':'')+(dn?' done':'')+'"><span class="tm">'+esc(ampm(it.from))+'~'+esc(ampm(it.to).replace(/^오[전후] /,''))+'</span><span>'+what(it)+'</span></div>'; }).join('')
+          return '<div class="srow'+(on?' cur':'')+(dn?' done':'')+'"><span class="tm">'+esc(signSpan(it))+'</span><span>'+what(it)+'</span></div>'; }).join('')
           +(rest>0? '<div class="smore">외 '+rest+'건</div>' : '');
       })()
       : '<div class="snone">오늘은 사용 신청이 없습니다</div>')
@@ -9263,7 +9265,7 @@ function signPaint(){
     +(SIGN.fail>=2? '<div class="soff">인터넷 연결을 확인하는 중 · '+(SIGN.at? new Date(SIGN.at).getHours()+':'+String(new Date(SIGN.at).getMinutes()).padStart(2,'0')+' 기준 화면':'')+'</div>' : '')
     +'</div>';
   const h=now.getHours(); box.classList.toggle('night', h>=22 || h<6);
-  signFitQr();
+  signFitQr(); signFitNow();
   /* 번인 방지 — 3분마다 화면을 몇 픽셀씩 돌아가며 옮기고, 30분마다 배경색을 바꾼다 (상태 칸 색은 그대로) */
   const sh=SIGN_SHIFT[Math.floor(Date.now()/180000)%SIGN_SHIFT.length];
   box.style.setProperty('--sx', sh[0]+'px'); box.style.setProperty('--sy', sh[1]+'px');
@@ -9273,6 +9275,13 @@ function signPaint(){
 const SIGN_ROWS=4;
 const SIGN_SHIFT=[[0,0],[10,6],[-8,12],[6,-10],[-12,-4],[4,10]];
 /* QR 옆 두 줄 — 줄바꿈 없이, 한 줄에 들어가는 가장 큰 글씨 (QR 높이의 1/3 이하) */
+/* 상태 칸 큰 글씨 — 한 줄에 다 들어가게 (넘치면 글씨만 줄인다) */
+function signFitNow(){
+  const t=document.querySelector('#signage .snow .t'); if(!t) return;
+  t.style.fontSize=''; const W=t.parentNode.clientWidth - 2; if(!W) return;
+  let f=parseFloat(getComputedStyle(t).fontSize);
+  while(f>10 && t.scrollWidth>W){ f-=2; t.style.fontSize=f+'px'; }
+}
 function signFitQr(){
   const t=document.querySelector('#signage .qt'), q=document.querySelector('#signage .qi'); if(!t||!q) return;
   const a=t.querySelector('.sqa'), b=t.querySelector('.sqb'), W=t.clientWidth; if(!W) return;
@@ -9280,7 +9289,7 @@ function signFitQr(){
   for(; f>8; f--){ a.style.fontSize=f+'px'; b.style.fontSize=Math.round(f*.9)+'px';
     if(a.scrollWidth<=W && b.scrollWidth<=W) break; }
 }
-window.addEventListener('resize', function(){ if(SIGN_MODE) signFitQr(); });
+window.addEventListener('resize', function(){ if(SIGN_MODE){ signFitQr(); signFitNow(); } });
 let signLock=null;
 async function signWake(){ try{ if(navigator.wakeLock && document.visibilityState==='visible') signLock=await navigator.wakeLock.request('screen'); }catch(e){} }
 function signBoot(name){

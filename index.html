@@ -189,9 +189,13 @@ body.signmode > *:not(#signage):not(#signHint){display:none!important}
 #signage .sm{opacity:.75;font-size:.85em}
 #signage .snone{font-size:1.3em;opacity:.7;padding:.6em 0}
 #signage .swk{margin-top:auto;padding-top:.7em;border-top:1px dashed rgba(255,255,255,.2);font-size:1.1em;opacity:.88;line-height:1.7}
-#signage .sqr{display:flex;align-items:center;gap:.9em;margin-top:.9em;font-size:1em;opacity:.92}
+#signage .sqr{display:flex;align-items:center;gap:.9em;margin-top:.9em;font-size:1em}
 #signage .sqr .qi{display:block;width:5.5em;height:5.5em;background:#fff;border-radius:.3em;padding:.2em;flex:none}
 #signage .sqr .qi svg{width:100%;height:100%;display:block}
+#signage .sqr .qt{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:.35em}
+#signage .sqr .qt span{display:block;white-space:nowrap;line-height:1.25}
+#signage .sqr .sqa{font-weight:800}#signage .sqr .sqa b{color:#9be7c4}
+#signage .sqr .sqb{opacity:.9}
 #signage .soff{margin-top:.6em;font-size:.95em;color:#fde68a}
 #signHint{position:fixed;left:50%;bottom:2vh;transform:translateX(-50%);z-index:10000;background:rgba(0,0,0,.6);color:#fff;border-radius:999px;padding:8px 16px;font-size:14px}
 @media (orientation:portrait){#signage{grid-template-columns:1fr;grid-template-rows:1fr auto;font-size:2.3vw;gap:3vw}#signage .snow{min-height:38vh}}
@@ -9253,10 +9257,13 @@ function signPaint(){
       })()
       : '<div class="snone">오늘은 사용 신청이 없습니다</div>')
     +'<div class="swk"><b>이번 주 다음 일정</b><br>'+(week.length? week.slice(0,4).map(it=>esc(dlab(it.date))+' '+esc(ampm(it.from))+' '+esc(it.dept||'사용')).join(' · ')+(week.length>4?' 외 '+(week.length-4)+'건':'') : '없음')+'</div>'
-    +'<div class="sqr"><span class="qi">'+SIGN_QR+'</span><span>사용 신청은 영광 커넥트 › 장소사용신청<br>QR을 찍으면 바로 열립니다</span></div>'
+    +'<div class="sqr"><span class="qi">'+SIGN_QR+'</span><span class="qt">'
+    +'<span class="sqa">사용 신청은 <b>영광 커넥트 › 장소사용신청</b>에서 해 주세요.</span>'
+    +'<span class="sqb">QR 코드를 찍으면 바로 신청 페이지로 연결됩니다.</span></span></div>'
     +(SIGN.fail>=2? '<div class="soff">인터넷 연결을 확인하는 중 · '+(SIGN.at? new Date(SIGN.at).getHours()+':'+String(new Date(SIGN.at).getMinutes()).padStart(2,'0')+' 기준 화면':'')+'</div>' : '')
     +'</div>';
   const h=now.getHours(); box.classList.toggle('night', h>=22 || h<6);
+  signFitQr();
   /* 번인 방지 — 3분마다 화면을 몇 픽셀씩 돌아가며 옮기고, 30분마다 배경색을 바꾼다 (상태 칸 색은 그대로) */
   const sh=SIGN_SHIFT[Math.floor(Date.now()/180000)%SIGN_SHIFT.length];
   box.style.setProperty('--sx', sh[0]+'px'); box.style.setProperty('--sy', sh[1]+'px');
@@ -9265,6 +9272,15 @@ function signPaint(){
 }
 const SIGN_ROWS=4;
 const SIGN_SHIFT=[[0,0],[10,6],[-8,12],[6,-10],[-12,-4],[4,10]];
+/* QR 옆 두 줄 — 줄바꿈 없이, 한 줄에 들어가는 가장 큰 글씨 (QR 높이의 1/3 이하) */
+function signFitQr(){
+  const t=document.querySelector('#signage .qt'), q=document.querySelector('#signage .qi'); if(!t||!q) return;
+  const a=t.querySelector('.sqa'), b=t.querySelector('.sqb'), W=t.clientWidth; if(!W) return;
+  let f=Math.floor(q.clientHeight/3.2);
+  for(; f>8; f--){ a.style.fontSize=f+'px'; b.style.fontSize=Math.round(f*.9)+'px';
+    if(a.scrollWidth<=W && b.scrollWidth<=W) break; }
+}
+window.addEventListener('resize', function(){ if(SIGN_MODE) signFitQr(); });
 let signLock=null;
 async function signWake(){ try{ if(navigator.wakeLock && document.visibilityState==='visible') signLock=await navigator.wakeLock.request('screen'); }catch(e){} }
 function signBoot(name){

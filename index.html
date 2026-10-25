@@ -9528,9 +9528,15 @@ function renderStat(){
   ul.sort(statSort==='sec'? (x,y)=>y.sec-x.sec : statSort==='last'? (x,y)=>y.last-x.last : (x,y)=>y.cnt-x.cnt);
   /* 2주 이상 미접속 — 전체 기록 기준, 로그인 계정 전체 */
   const lastAll={}; all.forEach(s=>{ lastAll[s.who]=Math.max(lastAll[s.who]||0,s.e); });
+  /* 서버가 직접 적은 마지막 접속(옛 버전 앱도 잡힘)도 함께 본다 (2026-10-25) */
+  const seen=STAT.seen||{}, lastAny={};
+  users.forEach(u=>{ lastAny[u.n]=Math.max(lastAll[u.n]||0, Number(seen[u.n])||0); });
   const cut=Date.now()-14*864e5;
-  const idle=users.filter(u=>!lastAll[u.n] || lastAll[u.n]<cut).map(u=>({n:u.n,d:u.d,last:lastAll[u.n]||0}))
+  const idle=users.filter(u=>!lastAny[u.n] || lastAny[u.n]<cut).map(u=>({n:u.n,d:u.d,last:lastAny[u.n]||0}))
     .sort((x,y)=>x.last-y.last);
+  /* 서버엔 2주 안에 접속했는데 통계엔 없음 → 앱을 완전히 닫았다 열어야 새 버전이 됨 */
+  const stale=users.filter(u=>(Number(seen[u.n])||0)>=cut && !((lastAll[u.n]||0)>=cut)).map(u=>({n:u.n,d:u.d,last:Number(seen[u.n])}))
+    .sort((x,y)=>y.last-x.last);
   const recent=all.slice().sort((x,y)=>y.e-x.e).slice(0,10);
   const pill=(k,v,t,on)=>'<button class="'+(on?'on':'')+'" onclick="statSet(\''+k+'\',\''+v+'\')">'+t+'</button>';
   const first=all.length? Math.min(...all.map(s=>s.s)) : 0;
@@ -9557,6 +9563,9 @@ function renderStat(){
     +(idle.length? '<details class="stidle"><summary><b>2주 이상 미접속 '+idle.length+'명</b> · '+idle.slice(0,3).map(x=>esc(x.n)).join(' · ')+(idle.length>3?' …':'')+'</summary>'
         +'<div>'+idle.map(x=>'<span>'+esc(x.n)+(x.d?' <small>'+esc(x.d)+'</small>':'')+' · '+(x.last? statWhen(x.last):'기록 없음')+'</span>').join('')+'</div></details>'
       : '<div class="stok">모든 계정이 2주 안에 접속했어요</div>')
+    +(stale.length? '<details class="stidle"><summary><b>통계에 안 잡히는 분 '+stale.length+'명</b> · 앱은 쓰는데 옛 화면일 수 있음</summary>'
+        +'<div>'+stale.map(x=>'<span>'+esc(x.n)+(x.d?' <small>'+esc(x.d)+'</small>':'')+' · 마지막 '+statWhen(x.last)+'</span>').join('')
+        +'<span style="color:var(--muted)">앱을 위로 밀어 완전히 닫았다가 다시 열면 기록됩니다</span></div></details>' : '')
     +'<div class="sth">최근 접속 기록</div>'
     +(recent.length? '<table class="sttb"><tr><th>언제</th><th>누구</th><th>본 메뉴</th></tr>'
         +recent.map(s=>{ const d=new Date(s.s); return '<tr><td>'+statWhen(s.s)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'</td><td>'+esc(s.who)+'</td><td>'+(s.menus.length? esc(s.menus.slice(0,4).join(' › '))+(s.menus.length>4?' …':'') : '<span style="color:var(--muted)">홈만 봄</span>')+'</td></tr>'; }).join('')+'</table>'

@@ -162,6 +162,19 @@ canvas{max-height:280px}
 .dgrid.g3{grid-template-columns:2fr 1fr}
 /* ── 첨부 사진 크게 보기 (2026-10-25) ── */
 .phzoom{cursor:zoom-in}
+/* 공지 팝업 — 기부금 영수증 사전 신청 (2026-10-30 ~ 12-23) */
+#ntPop{position:fixed;inset:0;z-index:9800;background:rgba(15,23,35,.55);display:flex;align-items:center;justify-content:center;padding:14px}
+#ntPop .nbox{position:relative;background:#fff;border-radius:16px;width:100%;max-width:440px;max-height:100%;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+#ntPop .nx{position:absolute;right:8px;top:8px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:0;font-size:16px;cursor:pointer;z-index:2}
+#ntPop .nimg{overflow:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
+#ntPop .nimg img{width:100%;display:block;cursor:zoom-in}
+#ntPop .nhow{padding:10px 14px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.6;background:#f2faf7}
+#ntPop .nhow b{color:#1f7a6d}
+#ntPop .nhow span{display:inline-block;background:#fff;border:1px solid #bfe3cd;border-radius:7px;padding:0 6px;margin:1px 0;font-weight:700}
+#ntPop .nbtns{display:flex;gap:8px;padding:10px 14px 6px}
+#ntPop .ngo{flex:1;background:#1f7a6d;color:#fff;border:0;border-radius:10px;padding:11px;font-weight:800;font-size:14px;cursor:pointer}
+#ntPop .ncl{background:#eef1f5;border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer}
+#ntPop .nnv{display:flex;align-items:center;gap:6px;padding:4px 14px 12px;font-size:13px;color:var(--muted)}
 #phView{position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:56px 10px 20px}
 #phView img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px;touch-action:pinch-zoom}
 #phView .phx{position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:20px;font-weight:800;cursor:pointer;font-family:inherit}
@@ -9247,6 +9260,30 @@ try{
 }catch(e){}
 /* 홈 화면에 추가 안내 — 화면이 자리를 잡은 뒤 조용히 올라온다 */
 try{ if(!new URLSearchParams(location.search).get('sign')) setTimeout(a2hsPaint,1200); }catch(e){}
+/*  ★ 2026-10-30 ★ 공지 팝업 — 기부금 영수증 온라인 사전 신청 (마감 12/23 이 지나면 저절로 안 뜸)
+ *  앱을 열 때마다 · 「다시 보지 않기」를 체크하고 닫으면 이 폰에서는 끝. 사이니지 화면에는 안 뜸.
+ *  이미지는 저장소의 donation_2026.jpg (앱 파일에 넣지 않고 따로 — 팝업이 뜰 때만 받는다) */
+const NT_KEY='sgc_nt_donation26', NT_END='2026-12-23';
+function ntShow(){
+  try{ if(SIGN_MODE || localStorage.getItem(NT_KEY)==='1') return; }catch(e){}
+  const d=new Date(), t=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  if(t>NT_END || document.getElementById('ntPop')) return;
+  const m=document.createElement('div'); m.id='ntPop';
+  m.innerHTML='<div class="nbox"><button class="nx" aria-label="닫기" onclick="ntClose()">✕</button>'
+    +'<div class="nimg"><img src="donation_2026.jpg" alt="기부금 영수증 온라인 사전 신청 안내" onclick="phView(this.src)"/></div>'
+    +'<div class="nhow">📝 <b>신청 방법</b> : <span>오직</span> → <span>전자기부금영수증 사전신청 바로가기</span> → <span>정보입력</span></div>'
+    +'<div class="nbtns"><button class="ngo" onclick="ntGo()">오직 바로가기 ›</button><button class="ncl" onclick="ntClose()">닫기</button></div>'
+    +'<label class="nnv"><input type="checkbox" id="ntNever"/> 다시 보지 않기</label></div>';
+  m.addEventListener('click',function(e){ if(e.target===m) ntClose(); });
+  document.body.appendChild(m);
+}
+function ntClose(){
+  const nv=document.getElementById('ntNever');
+  if(nv && nv.checked){ try{ localStorage.setItem(NT_KEY,'1'); }catch(e){} }
+  const m=document.getElementById('ntPop'); if(m) m.remove();
+}
+function ntGo(){ openL('https://mas3.ohjic.com/member/home/igloria1'); ntClose(); }
+try{ if(!new URLSearchParams(location.search).get('sign')) setTimeout(ntShow,700); }catch(e){}
 /*  홈 「주보」 타일의 N — 화면이 자리 잡은 뒤 조용히 목록만 받아 본다 (목록은 서버가 5분씩 저장) */
 try{ if(!new URLSearchParams(location.search).get('sign')) setTimeout(function(){   /* 사이니지 화면에서는 받지 않는다 */
   if(!BUL){ BUL=bulListLoad(); if(BUL){ paintArchiveNew(); bulPrefetch(); } }

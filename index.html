@@ -3746,14 +3746,21 @@ function bulBindZoom(st){
     else drag=null;
   });
   st.addEventListener('touchcancel',function(){ if(sw&&sw.dir==='h') bulGoMark(sw.i); sw=null; pin=null; drag=null; });
-  /* 컴퓨터 — 트랙패드·휠로 옆으로 밀어도 한 면씩 */
-  let wAcc=0, wLock=0;
+  /* 컴퓨터 — 트랙패드·휠로 옆으로 밀어도 한 면씩
+   *  ★ 2026-11-02 ★ 트랙패드는 손을 뗀 뒤에도 관성 신호가 1초 넘게 들어와
+   *  잠금(0.45초)이 풀린 뒤 한 면이 더 넘어갔다 → 한 번 민 동작(신호가 0.2초 이상
+   *  끊길 때까지)은 한 면만 넘긴다. 연달아 밀면 그만큼 넘어간다. */
+  let wAcc=0, wDone=false, wLast=0, wTo=null;
   st.addEventListener('wheel',function(e){
     if(s>1 || Math.abs(e.deltaX)<=Math.abs(e.deltaY)) return;
     e.preventDefault();
-    const now=Date.now(); if(now<wLock) return;
+    const now=Date.now();
+    if(now-wLast>200){ wAcc=0; wDone=false; }   /* 새로 민 동작 */
+    wLast=now;
+    clearTimeout(wTo); wTo=setTimeout(function(){ wAcc=0; wDone=false; },200);
+    if(wDone) return;                            /* 이번 동작은 이미 넘겼다 — 관성 무시 */
     wAcc+=e.deltaX;
-    if(Math.abs(wAcc)>40){ bulGoMark(bulCurMark().i+(wAcc>0?1:-1)); wAcc=0; wLock=now+450; }
+    if(Math.abs(wAcc)>40){ bulGoMark(bulCurMark().i+(wAcc>0?1:-1)); wAcc=0; wDone=true; }
   },{passive:false});
   /* 아이폰 사파리의 자체 확대(페이지 전체) — 주보 칸 위에서는 막는다 */
   ['gesturestart','gesturechange','gestureend'].forEach(function(ev){

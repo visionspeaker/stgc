@@ -3750,17 +3750,21 @@ function bulBindZoom(st){
    *  ★ 2026-11-02 ★ 트랙패드는 손을 뗀 뒤에도 관성 신호가 1초 넘게 들어와
    *  잠금(0.45초)이 풀린 뒤 한 면이 더 넘어갔다 → 한 번 민 동작(신호가 0.2초 이상
    *  끊길 때까지)은 한 면만 넘긴다. 연달아 밀면 그만큼 넘어간다. */
-  let wAcc=0, wDone=false, wLast=0, wTo=null;
+  /*  ★ 2026-11-02 오후 ★ 관성이 끝나기 전에 다시 밀면 «같은 동작»으로 보여 안 넘어갔다
+   *  (화면을 한 번 눌러 관성을 끊어야 넘어갔음) → 관성은 점점 약해지기만 하므로,
+   *  넘긴 뒤 신호가 다시 «세지면» 새로 민 것으로 본다. */
+  let wAcc=0, wDone=false, wLast=0, wTo=null, wMin=0, wAt=0;
   st.addEventListener('wheel',function(e){
     if(s>1 || Math.abs(e.deltaX)<=Math.abs(e.deltaY)) return;
     e.preventDefault();
-    const now=Date.now();
+    const now=Date.now(), ad=Math.abs(e.deltaX);
     if(now-wLast>200){ wAcc=0; wDone=false; }   /* 새로 민 동작 */
+    else if(wDone && now-wAt>200 && ad>=8 && ad>Math.max(wMin*2, wMin+6)){ wAcc=0; wDone=false; }   /* 관성 중에 다시 밀었다 */
     wLast=now;
     clearTimeout(wTo); wTo=setTimeout(function(){ wAcc=0; wDone=false; },200);
-    if(wDone) return;                            /* 이번 동작은 이미 넘겼다 — 관성 무시 */
+    if(wDone){ wMin=Math.min(wMin,ad); return; }  /* 이번 동작은 이미 넘겼다 — 관성 무시 */
     wAcc+=e.deltaX;
-    if(Math.abs(wAcc)>40){ bulGoMark(bulCurMark().i+(wAcc>0?1:-1)); wAcc=0; wDone=true; }
+    if(Math.abs(wAcc)>40){ bulGoMark(bulCurMark().i+(wAcc>0?1:-1)); wAcc=0; wDone=true; wMin=ad; wAt=now; }
   },{passive:false});
   /* 아이폰 사파리의 자체 확대(페이지 전체) — 주보 칸 위에서는 막는다 */
   ['gesturestart','gesturechange','gestureend'].forEach(function(ev){

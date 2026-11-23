@@ -186,7 +186,8 @@ html,body{overscroll-behavior-y:contain}
 @keyframes ptrspin{to{transform:rotate(360deg)}}
 #ptr .tx{position:absolute;top:48px;white-space:nowrap;font-size:12px;font-weight:700;color:#1f7a6d;background:rgba(255,255,255,.92);border-radius:10px;padding:2px 8px}
 .tcband{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#f59e0b,#ef7d3c);color:#fff;border-radius:14px;padding:12px 14px;cursor:pointer;box-shadow:0 4px 14px rgba(239,125,60,.25)}
-.tcband .ic{font-size:26px;line-height:1}.tcband b{display:block;font-size:15px}.tcband small{font-size:12px;opacity:.95}.tcband .ar{margin-left:auto;font-size:22px;opacity:.9}
+.tcband .ic{font-size:30px;line-height:1;display:inline-flex}
+.tcsh{width:1em;height:1em;display:inline-block;vertical-align:-.15em;filter:drop-shadow(0 1px 2px rgba(0,0,0,.18))}.tcband b{display:block;font-size:15px}.tcband small{font-size:12px;opacity:.95}.tcband .ar{margin-left:auto;font-size:22px;opacity:.9}
 .tcform h2{margin:0;font-size:18px;color:var(--green)}
 .tcform .sub{font-size:13px;color:var(--muted);margin:5px 0 4px;line-height:1.6}
 .tcform .lb{font-size:13.5px;font-weight:700;margin:14px 0 6px}.tcform .lb .req{color:#e5484d}.tcform .lb small{color:var(--muted);font-weight:400}
@@ -197,7 +198,7 @@ html,body{overscroll-behavior-y:contain}
 .tcform textarea{width:100%;box-sizing:border-box;min-height:70px}
 .tcproxy{font-size:12.5px;color:var(--muted);text-align:center;margin-top:12px}
 .tcproxy button{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:12.5px;cursor:pointer;font-family:inherit}
-.tcdone{text-align:center;padding:26px 10px}.tcdone .ic{font-size:40px}.tcdone b{display:block;font-size:16px;margin:8px 0 6px}.tcdone p{font-size:13.5px;color:var(--muted);line-height:1.7;margin:0}
+.tcdone{text-align:center;padding:26px 10px}.tcdone .ic{font-size:44px;line-height:1}.tcdone b{display:block;font-size:16px;margin:8px 0 6px}.tcdone p{font-size:13.5px;color:var(--muted);line-height:1.7;margin:0}
 .tcdash{margin-top:14px}
 .tcdash .kp{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
 .tcdash .kp div{background:#f4f7fb;border-radius:10px;padding:8px 4px;text-align:center}.tcdash .kp b{display:block;font-size:18px}.tcdash .kp span{font-size:11.5px;color:var(--muted)}
@@ -5559,6 +5560,8 @@ let TEACH=(function(){ try{ const t=JSON.parse(localStorage.getItem(TC_KEY)||'nu
     t.open = td>=t.from && td<=t.to; }
   return t; }catch(e){ return null; } })();
 let TC={dept:'',exp:'',more:false,proxyOn:false,busy:false,done:false};
+/* (2026-11-23) 교사 지원 아이콘 — 사과 대신 «믿음의 방패»(남색 방패 + 흰 십자가, 중고등부 교사앱 아이콘과 같은 모양) */
+const TC_ICON='<svg class="tcsh" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.8 20.4 4.9V11c0 5.6-3.6 9.7-8.4 11.2C7.2 20.7 3.6 16.6 3.6 11V4.9Z" fill="#2b3d97" stroke="#fff" stroke-width="1.1" stroke-linejoin="round"/><rect x="10.9" y="6" width="2.2" height="12" rx=".3" fill="#fff"/><rect x="7.6" y="9.2" width="8.8" height="2.2" rx=".3" fill="#fff"/></svg>';
 /* (2026-11-21) 사이니지 주소인지 — SIGN_MODE(const)는 파일 뒤쪽에서 만들어져서, 앱이 처음 열릴 때 띠를 그리는 코드가
    그것을 읽으면 «아직 없음» 오류로 조용히 멈췄다(띠가 서버 답이 온 뒤에야 보이던 원인). 그래서 여기서 직접 본다 */
 function signQ(){ try{ return String(new URLSearchParams(location.search).get('sign')||'').trim(); }catch(e){ return ''; } }
@@ -5575,7 +5578,7 @@ function tcSetInfo(t){
 function tcBandPaint(){
   const b=document.getElementById('tcBand'); if(!b) return;
   if(signQ() || !TEACH || !TEACH.open){ b.innerHTML=''; return; }
-  b.innerHTML='<div class="tcband" role="button" tabindex="0" onclick="goTeach()"><span class="ic">🍎</span>'
+  b.innerHTML='<div class="tcband" role="button" tabindex="0" onclick="goTeach()"><span class="ic">'+TC_ICON+'</span>'
     +'<span><b>2027 교회학교 교사 지원</b><small>'+esc(tcMdw(TEACH.to))+'까지 · 눌러서 신청</small></span><span class="ar">›</span></div>';
 }
 function goTeach(){ openApp('teach'); }
@@ -5589,7 +5592,7 @@ function renderTeach(keep){
   const box=document.getElementById('tcWrap'); if(!box) return;
   keep=keep||{};
   if(TC.done){
-    box.innerHTML='<div class="card"><div class="tcdone"><div class="ic">🍎</div><b>신청해 주셔서 감사합니다.</b>'
+    box.innerHTML='<div class="card"><div class="tcdone"><div class="ic">'+TC_ICON+'</div><b>신청해 주셔서 감사합니다.</b>'
       +'<p>담당 교역자가 연락드리겠습니다.</p></div>'
       +'<button class="f-primary" onclick="goHome()">처음으로</button></div>';
     return;
@@ -5670,7 +5673,7 @@ function renderTcDash(){
   const cnt={}; TC_DEPTS.forEach(k=>cnt[k]=0); rows.forEach(r=>{ if(cnt[r.dept]!==undefined) cnt[r.dept]++; });
   const shown=tcDept==='전체'?rows:rows.filter(r=>r.dept===tcDept);
   const fd=t=>{ const d=new Date(t); return isNaN(d)?'':(d.getMonth()+1)+'/'+d.getDate(); };
-  box.innerHTML='<div class="dcard tcdash"><h3 style="margin:0">🍎 2027 교사 지원'+(nNew?' <span class="tctag n">새 '+nNew+'</span>':'')+'</h3>'
+  box.innerHTML='<div class="dcard tcdash"><h3 style="margin:0">'+TC_ICON+' 2027 교사 지원'+(nNew?' <span class="tctag n">새 '+nNew+'</span>':'')+'</h3>'
     +'<div class="dd">'+(TCL.from&&TCL.to?esc(tcMd(TCL.from))+' ~ '+esc(tcMd(TCL.to))+' · ':'')+'총 '+rows.length+'명 · 교역자만 보입니다</div>'
     +'<div class="kp">'+TC_DEPTS.map(k=>'<div><b>'+cnt[k]+'</b><span>'+k+'</span></div>').join('')+'</div>'
     +'<div class="tcfl">'+['전체'].concat(TC_DEPTS).map(k=>'<button class="'+(tcDept===k?'on':'')+'" onclick="tcSet(\''+k+'\')">'+k+'</button>').join('')+'</div>'

@@ -9642,9 +9642,9 @@ try{ if(!new URLSearchParams(location.search).get('sign')) setTimeout(a2hsPaint,
 /*  ★ 2026-10-30 ★ 공지 팝업 — 기부금 영수증 온라인 사전 신청 (마감 12/23 이 지나면 저절로 안 뜸)
  *  앱을 열 때마다 · 「다시 보지 않기」를 체크하고 닫으면 이 폰에서는 끝. 사이니지 화면에는 안 뜸.
  *  이미지는 저장소의 donation_2026.jpg (앱 파일에 넣지 않고 따로 — 팝업이 뜰 때만 받는다) */
-const NT_KEY='sgc_nt_donation26', NT_END='2026-12-23';
-/*  ★ 2026-11-12 ★ 사용자 지시로 끔 — 「다시 보지 않기」와 상관없이 모두에게 안 뜬다. 다시 켜려면 true */
-const NT_ON=false;
+const NT_KEY='sgc_nt_donation26b', NT_END='2026-12-23';
+/*  ★ 2026-11-12 ★ 사용자 지시로 끔 — 2026-11-28 다시 켬(키 갱신). 끄려면 false */
+const NT_ON=true;
 function ntShow(){
   if(!NT_ON) return;
   try{ if(SIGN_MODE || localStorage.getItem(NT_KEY)==='1') return; }catch(e){}
